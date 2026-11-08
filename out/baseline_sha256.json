@@ -1,0 +1,34 @@
+{
+  "generated_at": "2026-11-08T17:00:23",
+  "git_commit": "0e9e13c6774408bf98088bd1b6c56290b5aebc75",
+  "files": {
+    "data/layout.json": {
+      "sha256": "e4ab101f0e39fddc4b5ec325b6b547fa7fceab04949d7cdec343d0f267af322d",
+      "bytes": 253973
+    },
+    "data/events.jsonl": {
+      "sha256": "ecd60168bcacf2062aba19742d48df148f2f2ff5ea2ea33e5eba1c7dddefc3d8",
+      "bytes": 7743
+    },
+    "data/tasks.json": {
+      "sha256": "742be7900fafe39dd2ffcf649fc957dc713b7c959ae2439bf8c31fead75503c1",
+      "bytes": 15639
+    },
+    "data/paths.jsonl": {
+      "sha256": "9c9edd37b36d4e4f4d5931eb9ec43e4cc96f329d46980f5a4a921c464bf50ea0",
+      "bytes": 742761
+    },
+    "out/CURRENT_STATUS.md": {
+      "sha256": "9d9a0869fcab9658445222bf43c84f8252fbc61fa66eea95ada39081022b1086",
+      "bytes": 2950
+    },
+    "scripts/gen_data.py": {
+      "sha256": "cc79fb927600c5c84ad052573ade732f79e2f12640fa9a63bceb2657102f25b9",
+      "bytes": 20964
+    },
+    "scripts/plan_paths.py": {
+      "sha256": "93981ff302ed2b491849229a20077ab297437692addf0ff9ef0846f05f67006c",
+      "bytes": 17371
+    }
+  }
+}
