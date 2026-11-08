@@ -1,0 +1,15 @@
+{
+  "layout": "data/layout.json",
+  "warehouses": 4,
+  "thresholds": {
+    "ap_clearance_m": 0.5,
+    "dock_ap_to_rack_m": 1.0,
+    "spawn_sep_m": 1.5
+  },
+  "issue_kinds": {},
+  "issues": [],
+  "count": 0,
+  "warnings": 0,
+  "warning_sample": [],
+  "verdict": "PASS"
+}

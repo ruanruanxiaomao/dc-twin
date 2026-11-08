@@ -1,0 +1,139 @@
+{
+  "glb": {
+    "valid": true,
+    "bytes": 583176,
+    "version": 2,
+    "generator": "Khronos glTF Blender I/O v5.2.41",
+    "nodes": 882,
+    "meshes": 59,
+    "materials": 35,
+    "animations": 0,
+    "scene_roots": 1,
+    "has_DC_ROOT": true,
+    "forbidden_nodes": []
+  },
+  "pngs": {
+    "01_overview.png": {
+      "valid": true,
+      "width": 1920,
+      "height": 1080,
+      "bytes": 2248867,
+      "expected": [
+        1920,
+        1080
+      ],
+      "size_ok": true
+    },
+    "02_interior.png": {
+      "valid": true,
+      "width": 1920,
+      "height": 1080,
+      "bytes": 2684460,
+      "expected": [
+        1920,
+        1080
+      ],
+      "size_ok": true
+    },
+    "03_dock.png": {
+      "valid": true,
+      "width": 1920,
+      "height": 1080,
+      "bytes": 2154797,
+      "expected": [
+        1920,
+        1080
+      ],
+      "size_ok": true
+    },
+    "04_agv_route.png": {
+      "valid": true,
+      "width": 1920,
+      "height": 1080,
+      "bytes": 2535145,
+      "expected": [
+        1920,
+        1080
+      ],
+      "size_ok": true
+    },
+    "05_slotting_heatmap.png": {
+      "valid": true,
+      "width": 1920,
+      "height": 1080,
+      "bytes": 1578860,
+      "expected": [
+        1920,
+        1080
+      ],
+      "size_ok": true
+    },
+    "06_corridor_check.png": {
+      "valid": true,
+      "width": 1920,
+      "height": 1080,
+      "bytes": 2526045,
+      "expected": [
+        1920,
+        1080
+      ],
+      "size_ok": true
+    },
+    "07_nav_plan.png": {
+      "valid": true,
+      "width": 1032,
+      "height": 1104,
+      "bytes": 38479,
+      "expected": [
+        1032,
+        1104
+      ],
+      "size_ok": true
+    },
+    "08_corridor_plan_zoom.png": {
+      "valid": true,
+      "width": 1464,
+      "height": 858,
+      "bytes": 27551,
+      "expected": [
+        1464,
+        858
+      ],
+      "size_ok": true
+    },
+    "09_time_space.png": {
+      "valid": true,
+      "width": 1400,
+      "height": 900,
+      "bytes": 48071,
+      "expected": [
+        1400,
+        900
+      ],
+      "size_ok": true
+    },
+    "10_snapshot_sequence.png": {
+      "valid": true,
+      "width": 1680,
+      "height": 900,
+      "bytes": 39677,
+      "expected": [
+        1680,
+        900
+      ],
+      "size_ok": true
+    }
+  },
+  "mp4": {
+    "valid": true,
+    "bytes": 940071,
+    "timescale": 1000,
+    "duration_units": 117750,
+    "duration_s": 117.75,
+    "expected_frames": 942,
+    "frames_rendered": 942,
+    "frame_count_ok": true
+  },
+  "all_png_sizes_ok": true,
+  "verdict": "PASS"
+}

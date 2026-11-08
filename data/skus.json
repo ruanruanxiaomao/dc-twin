@@ -1,0 +1,1927 @@
+{
+  "units": "m3/kg",
+  "velocity_source": "zipf s=0.85, normalized (synthetic)",
+  "count": 240,
+  "skus": [
+    {
+      "sku": "SKU-0001",
+      "name": "ITEM-0001",
+      "velocity": 0.110221,
+      "abc": "A",
+      "cube_m3": 0.14,
+      "weight_kg": 15.54
+    },
+    {
+      "sku": "SKU-0002",
+      "name": "ITEM-0002",
+      "velocity": 0.061149,
+      "abc": "A",
+      "cube_m3": 0.102,
+      "weight_kg": 20.63
+    },
+    {
+      "sku": "SKU-0003",
+      "name": "ITEM-0003",
+      "velocity": 0.043322,
+      "abc": "A",
+      "cube_m3": 0.153,
+      "weight_kg": 25.09
+    },
+    {
+      "sku": "SKU-0004",
+      "name": "ITEM-0004",
+      "velocity": 0.033925,
+      "abc": "A",
+      "cube_m3": 0.126,
+      "weight_kg": 17.09
+    },
+    {
+      "sku": "SKU-0005",
+      "name": "ITEM-0005",
+      "velocity": 0.028063,
+      "abc": "A",
+      "cube_m3": 0.128,
+      "weight_kg": 7.81
+    },
+    {
+      "sku": "SKU-0006",
+      "name": "ITEM-0006",
+      "velocity": 0.024035,
+      "abc": "A",
+      "cube_m3": 0.134,
+      "weight_kg": 6.15
+    },
+    {
+      "sku": "SKU-0007",
+      "name": "ITEM-0007",
+      "velocity": 0.021083,
+      "abc": "A",
+      "cube_m3": 0.074,
+      "weight_kg": 8.2
+    },
+    {
+      "sku": "SKU-0008",
+      "name": "ITEM-0008",
+      "velocity": 0.018821,
+      "abc": "A",
+      "cube_m3": 0.087,
+      "weight_kg": 14.45
+    },
+    {
+      "sku": "SKU-0009",
+      "name": "ITEM-0009",
+      "velocity": 0.017028,
+      "abc": "A",
+      "cube_m3": 0.094,
+      "weight_kg": 11.61
+    },
+    {
+      "sku": "SKU-0010",
+      "name": "ITEM-0010",
+      "velocity": 0.015569,
+      "abc": "A",
+      "cube_m3": 0.047,
+      "weight_kg": 4.77
+    },
+    {
+      "sku": "SKU-0011",
+      "name": "ITEM-0011",
+      "velocity": 0.014358,
+      "abc": "A",
+      "cube_m3": 0.125,
+      "weight_kg": 18.92
+    },
+    {
+      "sku": "SKU-0012",
+      "name": "ITEM-0012",
+      "velocity": 0.013334,
+      "abc": "A",
+      "cube_m3": 0.12,
+      "weight_kg": 8.66
+    },
+    {
+      "sku": "SKU-0013",
+      "name": "ITEM-0013",
+      "velocity": 0.012457,
+      "abc": "A",
+      "cube_m3": 0.115,
+      "weight_kg": 6.62
+    },
+    {
+      "sku": "SKU-0014",
+      "name": "ITEM-0014",
+      "velocity": 0.011696,
+      "abc": "A",
+      "cube_m3": 0.075,
+      "weight_kg": 16.83
+    },
+    {
+      "sku": "SKU-0015",
+      "name": "ITEM-0015",
+      "velocity": 0.01103,
+      "abc": "A",
+      "cube_m3": 0.088,
+      "weight_kg": 5.98
+    },
+    {
+      "sku": "SKU-0016",
+      "name": "ITEM-0016",
+      "velocity": 0.010441,
+      "abc": "A",
+      "cube_m3": 0.095,
+      "weight_kg": 4.58
+    },
+    {
+      "sku": "SKU-0017",
+      "name": "ITEM-0017",
+      "velocity": 0.009917,
+      "abc": "A",
+      "cube_m3": 0.048,
+      "weight_kg": 15.38
+    },
+    {
+      "sku": "SKU-0018",
+      "name": "ITEM-0018",
+      "velocity": 0.009447,
+      "abc": "A",
+      "cube_m3": 0.077,
+      "weight_kg": 15.47
+    },
+    {
+      "sku": "SKU-0019",
+      "name": "ITEM-0019",
+      "velocity": 0.009022,
+      "abc": "A",
+      "cube_m3": 0.138,
+      "weight_kg": 10.72
+    },
+    {
+      "sku": "SKU-0020",
+      "name": "ITEM-0020",
+      "velocity": 0.008638,
+      "abc": "A",
+      "cube_m3": 0.081,
+      "weight_kg": 17.8
+    },
+    {
+      "sku": "SKU-0021",
+      "name": "ITEM-0021",
+      "velocity": 0.008287,
+      "abc": "A",
+      "cube_m3": 0.081,
+      "weight_kg": 10.93
+    },
+    {
+      "sku": "SKU-0022",
+      "name": "ITEM-0022",
+      "velocity": 0.007965,
+      "abc": "A",
+      "cube_m3": 0.043,
+      "weight_kg": 26.22
+    },
+    {
+      "sku": "SKU-0023",
+      "name": "ITEM-0023",
+      "velocity": 0.00767,
+      "abc": "A",
+      "cube_m3": 0.093,
+      "weight_kg": 27.16
+    },
+    {
+      "sku": "SKU-0024",
+      "name": "ITEM-0024",
+      "velocity": 0.007397,
+      "abc": "A",
+      "cube_m3": 0.1,
+      "weight_kg": 18.65
+    },
+    {
+      "sku": "SKU-0025",
+      "name": "ITEM-0025",
+      "velocity": 0.007145,
+      "abc": "A",
+      "cube_m3": 0.13,
+      "weight_kg": 10.92
+    },
+    {
+      "sku": "SKU-0026",
+      "name": "ITEM-0026",
+      "velocity": 0.006911,
+      "abc": "A",
+      "cube_m3": 0.126,
+      "weight_kg": 15.42
+    },
+    {
+      "sku": "SKU-0027",
+      "name": "ITEM-0027",
+      "velocity": 0.006693,
+      "abc": "A",
+      "cube_m3": 0.121,
+      "weight_kg": 23.53
+    },
+    {
+      "sku": "SKU-0028",
+      "name": "ITEM-0028",
+      "velocity": 0.006489,
+      "abc": "A",
+      "cube_m3": 0.155,
+      "weight_kg": 4.68
+    },
+    {
+      "sku": "SKU-0029",
+      "name": "ITEM-0029",
+      "velocity": 0.006298,
+      "abc": "A",
+      "cube_m3": 0.103,
+      "weight_kg": 13.3
+    },
+    {
+      "sku": "SKU-0030",
+      "name": "ITEM-0030",
+      "velocity": 0.006119,
+      "abc": "A",
+      "cube_m3": 0.085,
+      "weight_kg": 20.97
+    },
+    {
+      "sku": "SKU-0031",
+      "name": "ITEM-0031",
+      "velocity": 0.005951,
+      "abc": "A",
+      "cube_m3": 0.084,
+      "weight_kg": 12.63
+    },
+    {
+      "sku": "SKU-0032",
+      "name": "ITEM-0032",
+      "velocity": 0.005793,
+      "abc": "A",
+      "cube_m3": 0.044,
+      "weight_kg": 12.73
+    },
+    {
+      "sku": "SKU-0033",
+      "name": "ITEM-0033",
+      "velocity": 0.005643,
+      "abc": "A",
+      "cube_m3": 0.095,
+      "weight_kg": 27.99
+    },
+    {
+      "sku": "SKU-0034",
+      "name": "ITEM-0034",
+      "velocity": 0.005502,
+      "abc": "A",
+      "cube_m3": 0.124,
+      "weight_kg": 15.5
+    },
+    {
+      "sku": "SKU-0035",
+      "name": "ITEM-0035",
+      "velocity": 0.005368,
+      "abc": "A",
+      "cube_m3": 0.093,
+      "weight_kg": 13.71
+    },
+    {
+      "sku": "SKU-0036",
+      "name": "ITEM-0036",
+      "velocity": 0.005241,
+      "abc": "A",
+      "cube_m3": 0.127,
+      "weight_kg": 9.67
+    },
+    {
+      "sku": "SKU-0037",
+      "name": "ITEM-0037",
+      "velocity": 0.00512,
+      "abc": "A",
+      "cube_m3": 0.064,
+      "weight_kg": 17.56
+    },
+    {
+      "sku": "SKU-0038",
+      "name": "ITEM-0038",
+      "velocity": 0.005006,
+      "abc": "A",
+      "cube_m3": 0.128,
+      "weight_kg": 17.23
+    },
+    {
+      "sku": "SKU-0039",
+      "name": "ITEM-0039",
+      "velocity": 0.004896,
+      "abc": "A",
+      "cube_m3": 0.09,
+      "weight_kg": 7.97
+    },
+    {
+      "sku": "SKU-0040",
+      "name": "ITEM-0040",
+      "velocity": 0.004792,
+      "abc": "A",
+      "cube_m3": 0.078,
+      "weight_kg": 19.72
+    },
+    {
+      "sku": "SKU-0041",
+      "name": "ITEM-0041",
+      "velocity": 0.004692,
+      "abc": "A",
+      "cube_m3": 0.133,
+      "weight_kg": 22.43
+    },
+    {
+      "sku": "SKU-0042",
+      "name": "ITEM-0042",
+      "velocity": 0.004597,
+      "abc": "A",
+      "cube_m3": 0.051,
+      "weight_kg": 23.44
+    },
+    {
+      "sku": "SKU-0043",
+      "name": "ITEM-0043",
+      "velocity": 0.004506,
+      "abc": "A",
+      "cube_m3": 0.067,
+      "weight_kg": 19.95
+    },
+    {
+      "sku": "SKU-0044",
+      "name": "ITEM-0044",
+      "velocity": 0.004419,
+      "abc": "A",
+      "cube_m3": 0.067,
+      "weight_kg": 19.94
+    },
+    {
+      "sku": "SKU-0045",
+      "name": "ITEM-0045",
+      "velocity": 0.004335,
+      "abc": "A",
+      "cube_m3": 0.128,
+      "weight_kg": 21.41
+    },
+    {
+      "sku": "SKU-0046",
+      "name": "ITEM-0046",
+      "velocity": 0.004255,
+      "abc": "A",
+      "cube_m3": 0.157,
+      "weight_kg": 21.68
+    },
+    {
+      "sku": "SKU-0047",
+      "name": "ITEM-0047",
+      "velocity": 0.004178,
+      "abc": "A",
+      "cube_m3": 0.101,
+      "weight_kg": 22.52
+    },
+    {
+      "sku": "SKU-0048",
+      "name": "ITEM-0048",
+      "velocity": 0.004104,
+      "abc": "A",
+      "cube_m3": 0.055,
+      "weight_kg": 23.65
+    },
+    {
+      "sku": "SKU-0049",
+      "name": "ITEM-0049",
+      "velocity": 0.004033,
+      "abc": "A",
+      "cube_m3": 0.042,
+      "weight_kg": 12.87
+    },
+    {
+      "sku": "SKU-0050",
+      "name": "ITEM-0050",
+      "velocity": 0.003964,
+      "abc": "A",
+      "cube_m3": 0.15,
+      "weight_kg": 26.18
+    },
+    {
+      "sku": "SKU-0051",
+      "name": "ITEM-0051",
+      "velocity": 0.003898,
+      "abc": "A",
+      "cube_m3": 0.156,
+      "weight_kg": 20.23
+    },
+    {
+      "sku": "SKU-0052",
+      "name": "ITEM-0052",
+      "velocity": 0.003834,
+      "abc": "A",
+      "cube_m3": 0.076,
+      "weight_kg": 11.05
+    },
+    {
+      "sku": "SKU-0053",
+      "name": "ITEM-0053",
+      "velocity": 0.003773,
+      "abc": "A",
+      "cube_m3": 0.122,
+      "weight_kg": 22.67
+    },
+    {
+      "sku": "SKU-0054",
+      "name": "ITEM-0054",
+      "velocity": 0.003713,
+      "abc": "A",
+      "cube_m3": 0.098,
+      "weight_kg": 25.94
+    },
+    {
+      "sku": "SKU-0055",
+      "name": "ITEM-0055",
+      "velocity": 0.003656,
+      "abc": "A",
+      "cube_m3": 0.071,
+      "weight_kg": 13.98
+    },
+    {
+      "sku": "SKU-0056",
+      "name": "ITEM-0056",
+      "velocity": 0.0036,
+      "abc": "A",
+      "cube_m3": 0.107,
+      "weight_kg": 7.31
+    },
+    {
+      "sku": "SKU-0057",
+      "name": "ITEM-0057",
+      "velocity": 0.003546,
+      "abc": "A",
+      "cube_m3": 0.074,
+      "weight_kg": 23.14
+    },
+    {
+      "sku": "SKU-0058",
+      "name": "ITEM-0058",
+      "velocity": 0.003494,
+      "abc": "A",
+      "cube_m3": 0.078,
+      "weight_kg": 9.11
+    },
+    {
+      "sku": "SKU-0059",
+      "name": "ITEM-0059",
+      "velocity": 0.003444,
+      "abc": "A",
+      "cube_m3": 0.09,
+      "weight_kg": 7.75
+    },
+    {
+      "sku": "SKU-0060",
+      "name": "ITEM-0060",
+      "velocity": 0.003395,
+      "abc": "A",
+      "cube_m3": 0.136,
+      "weight_kg": 18.99
+    },
+    {
+      "sku": "SKU-0061",
+      "name": "ITEM-0061",
+      "velocity": 0.003348,
+      "abc": "A",
+      "cube_m3": 0.148,
+      "weight_kg": 16.79
+    },
+    {
+      "sku": "SKU-0062",
+      "name": "ITEM-0062",
+      "velocity": 0.003302,
+      "abc": "A",
+      "cube_m3": 0.106,
+      "weight_kg": 10.7
+    },
+    {
+      "sku": "SKU-0063",
+      "name": "ITEM-0063",
+      "velocity": 0.003257,
+      "abc": "A",
+      "cube_m3": 0.096,
+      "weight_kg": 6.55
+    },
+    {
+      "sku": "SKU-0064",
+      "name": "ITEM-0064",
+      "velocity": 0.003214,
+      "abc": "A",
+      "cube_m3": 0.08,
+      "weight_kg": 12.83
+    },
+    {
+      "sku": "SKU-0065",
+      "name": "ITEM-0065",
+      "velocity": 0.003172,
+      "abc": "A",
+      "cube_m3": 0.118,
+      "weight_kg": 11.51
+    },
+    {
+      "sku": "SKU-0066",
+      "name": "ITEM-0066",
+      "velocity": 0.003131,
+      "abc": "A",
+      "cube_m3": 0.146,
+      "weight_kg": 24.1
+    },
+    {
+      "sku": "SKU-0067",
+      "name": "ITEM-0067",
+      "velocity": 0.003091,
+      "abc": "A",
+      "cube_m3": 0.137,
+      "weight_kg": 10.79
+    },
+    {
+      "sku": "SKU-0068",
+      "name": "ITEM-0068",
+      "velocity": 0.003052,
+      "abc": "A",
+      "cube_m3": 0.054,
+      "weight_kg": 24.08
+    },
+    {
+      "sku": "SKU-0069",
+      "name": "ITEM-0069",
+      "velocity": 0.003015,
+      "abc": "A",
+      "cube_m3": 0.137,
+      "weight_kg": 16.53
+    },
+    {
+      "sku": "SKU-0070",
+      "name": "ITEM-0070",
+      "velocity": 0.002978,
+      "abc": "A",
+      "cube_m3": 0.058,
+      "weight_kg": 5.97
+    },
+    {
+      "sku": "SKU-0071",
+      "name": "ITEM-0071",
+      "velocity": 0.002942,
+      "abc": "A",
+      "cube_m3": 0.084,
+      "weight_kg": 21.85
+    },
+    {
+      "sku": "SKU-0072",
+      "name": "ITEM-0072",
+      "velocity": 0.002908,
+      "abc": "A",
+      "cube_m3": 0.058,
+      "weight_kg": 19.57
+    },
+    {
+      "sku": "SKU-0073",
+      "name": "ITEM-0073",
+      "velocity": 0.002874,
+      "abc": "A",
+      "cube_m3": 0.052,
+      "weight_kg": 24.29
+    },
+    {
+      "sku": "SKU-0074",
+      "name": "ITEM-0074",
+      "velocity": 0.002841,
+      "abc": "A",
+      "cube_m3": 0.048,
+      "weight_kg": 10.89
+    },
+    {
+      "sku": "SKU-0075",
+      "name": "ITEM-0075",
+      "velocity": 0.002808,
+      "abc": "A",
+      "cube_m3": 0.152,
+      "weight_kg": 27.55
+    },
+    {
+      "sku": "SKU-0076",
+      "name": "ITEM-0076",
+      "velocity": 0.002777,
+      "abc": "A",
+      "cube_m3": 0.084,
+      "weight_kg": 12.05
+    },
+    {
+      "sku": "SKU-0077",
+      "name": "ITEM-0077",
+      "velocity": 0.002746,
+      "abc": "A",
+      "cube_m3": 0.113,
+      "weight_kg": 5.26
+    },
+    {
+      "sku": "SKU-0078",
+      "name": "ITEM-0078",
+      "velocity": 0.002716,
+      "abc": "A",
+      "cube_m3": 0.07,
+      "weight_kg": 20.73
+    },
+    {
+      "sku": "SKU-0079",
+      "name": "ITEM-0079",
+      "velocity": 0.002687,
+      "abc": "A",
+      "cube_m3": 0.053,
+      "weight_kg": 6.82
+    },
+    {
+      "sku": "SKU-0080",
+      "name": "ITEM-0080",
+      "velocity": 0.002659,
+      "abc": "A",
+      "cube_m3": 0.097,
+      "weight_kg": 20.94
+    },
+    {
+      "sku": "SKU-0081",
+      "name": "ITEM-0081",
+      "velocity": 0.002631,
+      "abc": "A",
+      "cube_m3": 0.133,
+      "weight_kg": 9.96
+    },
+    {
+      "sku": "SKU-0082",
+      "name": "ITEM-0082",
+      "velocity": 0.002603,
+      "abc": "A",
+      "cube_m3": 0.152,
+      "weight_kg": 18.42
+    },
+    {
+      "sku": "SKU-0083",
+      "name": "ITEM-0083",
+      "velocity": 0.002577,
+      "abc": "A",
+      "cube_m3": 0.083,
+      "weight_kg": 14.96
+    },
+    {
+      "sku": "SKU-0084",
+      "name": "ITEM-0084",
+      "velocity": 0.002551,
+      "abc": "A",
+      "cube_m3": 0.094,
+      "weight_kg": 26.06
+    },
+    {
+      "sku": "SKU-0085",
+      "name": "ITEM-0085",
+      "velocity": 0.002525,
+      "abc": "A",
+      "cube_m3": 0.123,
+      "weight_kg": 26.22
+    },
+    {
+      "sku": "SKU-0086",
+      "name": "ITEM-0086",
+      "velocity": 0.0025,
+      "abc": "A",
+      "cube_m3": 0.077,
+      "weight_kg": 13.34
+    },
+    {
+      "sku": "SKU-0087",
+      "name": "ITEM-0087",
+      "velocity": 0.002476,
+      "abc": "A",
+      "cube_m3": 0.087,
+      "weight_kg": 22.91
+    },
+    {
+      "sku": "SKU-0088",
+      "name": "ITEM-0088",
+      "velocity": 0.002452,
+      "abc": "A",
+      "cube_m3": 0.088,
+      "weight_kg": 26.56
+    },
+    {
+      "sku": "SKU-0089",
+      "name": "ITEM-0089",
+      "velocity": 0.002428,
+      "abc": "A",
+      "cube_m3": 0.14,
+      "weight_kg": 7.73
+    },
+    {
+      "sku": "SKU-0090",
+      "name": "ITEM-0090",
+      "velocity": 0.002405,
+      "abc": "A",
+      "cube_m3": 0.116,
+      "weight_kg": 14.29
+    },
+    {
+      "sku": "SKU-0091",
+      "name": "ITEM-0091",
+      "velocity": 0.002383,
+      "abc": "A",
+      "cube_m3": 0.132,
+      "weight_kg": 21.51
+    },
+    {
+      "sku": "SKU-0092",
+      "name": "ITEM-0092",
+      "velocity": 0.002361,
+      "abc": "A",
+      "cube_m3": 0.084,
+      "weight_kg": 21.94
+    },
+    {
+      "sku": "SKU-0093",
+      "name": "ITEM-0093",
+      "velocity": 0.002339,
+      "abc": "A",
+      "cube_m3": 0.11,
+      "weight_kg": 10.57
+    },
+    {
+      "sku": "SKU-0094",
+      "name": "ITEM-0094",
+      "velocity": 0.002318,
+      "abc": "A",
+      "cube_m3": 0.096,
+      "weight_kg": 20.01
+    },
+    {
+      "sku": "SKU-0095",
+      "name": "ITEM-0095",
+      "velocity": 0.002297,
+      "abc": "A",
+      "cube_m3": 0.128,
+      "weight_kg": 12.95
+    },
+    {
+      "sku": "SKU-0096",
+      "name": "ITEM-0096",
+      "velocity": 0.002277,
+      "abc": "A",
+      "cube_m3": 0.058,
+      "weight_kg": 20.56
+    },
+    {
+      "sku": "SKU-0097",
+      "name": "ITEM-0097",
+      "velocity": 0.002257,
+      "abc": "B",
+      "cube_m3": 0.087,
+      "weight_kg": 22.52
+    },
+    {
+      "sku": "SKU-0098",
+      "name": "ITEM-0098",
+      "velocity": 0.002237,
+      "abc": "B",
+      "cube_m3": 0.135,
+      "weight_kg": 4.15
+    },
+    {
+      "sku": "SKU-0099",
+      "name": "ITEM-0099",
+      "velocity": 0.002218,
+      "abc": "B",
+      "cube_m3": 0.123,
+      "weight_kg": 8.52
+    },
+    {
+      "sku": "SKU-0100",
+      "name": "ITEM-0100",
+      "velocity": 0.002199,
+      "abc": "B",
+      "cube_m3": 0.135,
+      "weight_kg": 13.98
+    },
+    {
+      "sku": "SKU-0101",
+      "name": "ITEM-0101",
+      "velocity": 0.002181,
+      "abc": "B",
+      "cube_m3": 0.121,
+      "weight_kg": 18.9
+    },
+    {
+      "sku": "SKU-0102",
+      "name": "ITEM-0102",
+      "velocity": 0.002162,
+      "abc": "B",
+      "cube_m3": 0.052,
+      "weight_kg": 10.48
+    },
+    {
+      "sku": "SKU-0103",
+      "name": "ITEM-0103",
+      "velocity": 0.002145,
+      "abc": "B",
+      "cube_m3": 0.044,
+      "weight_kg": 22.54
+    },
+    {
+      "sku": "SKU-0104",
+      "name": "ITEM-0104",
+      "velocity": 0.002127,
+      "abc": "B",
+      "cube_m3": 0.123,
+      "weight_kg": 7.83
+    },
+    {
+      "sku": "SKU-0105",
+      "name": "ITEM-0105",
+      "velocity": 0.00211,
+      "abc": "B",
+      "cube_m3": 0.052,
+      "weight_kg": 16.17
+    },
+    {
+      "sku": "SKU-0106",
+      "name": "ITEM-0106",
+      "velocity": 0.002093,
+      "abc": "B",
+      "cube_m3": 0.08,
+      "weight_kg": 24.52
+    },
+    {
+      "sku": "SKU-0107",
+      "name": "ITEM-0107",
+      "velocity": 0.002076,
+      "abc": "B",
+      "cube_m3": 0.062,
+      "weight_kg": 12.72
+    },
+    {
+      "sku": "SKU-0108",
+      "name": "ITEM-0108",
+      "velocity": 0.00206,
+      "abc": "B",
+      "cube_m3": 0.081,
+      "weight_kg": 27.1
+    },
+    {
+      "sku": "SKU-0109",
+      "name": "ITEM-0109",
+      "velocity": 0.002044,
+      "abc": "B",
+      "cube_m3": 0.095,
+      "weight_kg": 7.48
+    },
+    {
+      "sku": "SKU-0110",
+      "name": "ITEM-0110",
+      "velocity": 0.002028,
+      "abc": "B",
+      "cube_m3": 0.098,
+      "weight_kg": 25.88
+    },
+    {
+      "sku": "SKU-0111",
+      "name": "ITEM-0111",
+      "velocity": 0.002013,
+      "abc": "B",
+      "cube_m3": 0.044,
+      "weight_kg": 27.97
+    },
+    {
+      "sku": "SKU-0112",
+      "name": "ITEM-0112",
+      "velocity": 0.001997,
+      "abc": "B",
+      "cube_m3": 0.089,
+      "weight_kg": 22.3
+    },
+    {
+      "sku": "SKU-0113",
+      "name": "ITEM-0113",
+      "velocity": 0.001982,
+      "abc": "B",
+      "cube_m3": 0.072,
+      "weight_kg": 13.93
+    },
+    {
+      "sku": "SKU-0114",
+      "name": "ITEM-0114",
+      "velocity": 0.001967,
+      "abc": "B",
+      "cube_m3": 0.112,
+      "weight_kg": 18.92
+    },
+    {
+      "sku": "SKU-0115",
+      "name": "ITEM-0115",
+      "velocity": 0.001953,
+      "abc": "B",
+      "cube_m3": 0.091,
+      "weight_kg": 25.51
+    },
+    {
+      "sku": "SKU-0116",
+      "name": "ITEM-0116",
+      "velocity": 0.001939,
+      "abc": "B",
+      "cube_m3": 0.07,
+      "weight_kg": 24.49
+    },
+    {
+      "sku": "SKU-0117",
+      "name": "ITEM-0117",
+      "velocity": 0.001924,
+      "abc": "B",
+      "cube_m3": 0.061,
+      "weight_kg": 6.1
+    },
+    {
+      "sku": "SKU-0118",
+      "name": "ITEM-0118",
+      "velocity": 0.001911,
+      "abc": "B",
+      "cube_m3": 0.042,
+      "weight_kg": 6.66
+    },
+    {
+      "sku": "SKU-0119",
+      "name": "ITEM-0119",
+      "velocity": 0.001897,
+      "abc": "B",
+      "cube_m3": 0.083,
+      "weight_kg": 12.79
+    },
+    {
+      "sku": "SKU-0120",
+      "name": "ITEM-0120",
+      "velocity": 0.001883,
+      "abc": "B",
+      "cube_m3": 0.075,
+      "weight_kg": 15.09
+    },
+    {
+      "sku": "SKU-0121",
+      "name": "ITEM-0121",
+      "velocity": 0.00187,
+      "abc": "B",
+      "cube_m3": 0.089,
+      "weight_kg": 17.07
+    },
+    {
+      "sku": "SKU-0122",
+      "name": "ITEM-0122",
+      "velocity": 0.001857,
+      "abc": "B",
+      "cube_m3": 0.123,
+      "weight_kg": 13.85
+    },
+    {
+      "sku": "SKU-0123",
+      "name": "ITEM-0123",
+      "velocity": 0.001844,
+      "abc": "B",
+      "cube_m3": 0.129,
+      "weight_kg": 19.9
+    },
+    {
+      "sku": "SKU-0124",
+      "name": "ITEM-0124",
+      "velocity": 0.001832,
+      "abc": "B",
+      "cube_m3": 0.145,
+      "weight_kg": 15.84
+    },
+    {
+      "sku": "SKU-0125",
+      "name": "ITEM-0125",
+      "velocity": 0.001819,
+      "abc": "B",
+      "cube_m3": 0.066,
+      "weight_kg": 26.49
+    },
+    {
+      "sku": "SKU-0126",
+      "name": "ITEM-0126",
+      "velocity": 0.001807,
+      "abc": "B",
+      "cube_m3": 0.072,
+      "weight_kg": 20.13
+    },
+    {
+      "sku": "SKU-0127",
+      "name": "ITEM-0127",
+      "velocity": 0.001795,
+      "abc": "B",
+      "cube_m3": 0.075,
+      "weight_kg": 9.36
+    },
+    {
+      "sku": "SKU-0128",
+      "name": "ITEM-0128",
+      "velocity": 0.001783,
+      "abc": "B",
+      "cube_m3": 0.148,
+      "weight_kg": 21.48
+    },
+    {
+      "sku": "SKU-0129",
+      "name": "ITEM-0129",
+      "velocity": 0.001771,
+      "abc": "B",
+      "cube_m3": 0.153,
+      "weight_kg": 25.53
+    },
+    {
+      "sku": "SKU-0130",
+      "name": "ITEM-0130",
+      "velocity": 0.00176,
+      "abc": "B",
+      "cube_m3": 0.081,
+      "weight_kg": 22.85
+    },
+    {
+      "sku": "SKU-0131",
+      "name": "ITEM-0131",
+      "velocity": 0.001748,
+      "abc": "B",
+      "cube_m3": 0.067,
+      "weight_kg": 26.97
+    },
+    {
+      "sku": "SKU-0132",
+      "name": "ITEM-0132",
+      "velocity": 0.001737,
+      "abc": "B",
+      "cube_m3": 0.075,
+      "weight_kg": 4.72
+    },
+    {
+      "sku": "SKU-0133",
+      "name": "ITEM-0133",
+      "velocity": 0.001726,
+      "abc": "B",
+      "cube_m3": 0.132,
+      "weight_kg": 14.62
+    },
+    {
+      "sku": "SKU-0134",
+      "name": "ITEM-0134",
+      "velocity": 0.001715,
+      "abc": "B",
+      "cube_m3": 0.045,
+      "weight_kg": 10.69
+    },
+    {
+      "sku": "SKU-0135",
+      "name": "ITEM-0135",
+      "velocity": 0.001704,
+      "abc": "B",
+      "cube_m3": 0.101,
+      "weight_kg": 24.62
+    },
+    {
+      "sku": "SKU-0136",
+      "name": "ITEM-0136",
+      "velocity": 0.001693,
+      "abc": "B",
+      "cube_m3": 0.104,
+      "weight_kg": 12.8
+    },
+    {
+      "sku": "SKU-0137",
+      "name": "ITEM-0137",
+      "velocity": 0.001683,
+      "abc": "B",
+      "cube_m3": 0.145,
+      "weight_kg": 6.9
+    },
+    {
+      "sku": "SKU-0138",
+      "name": "ITEM-0138",
+      "velocity": 0.001673,
+      "abc": "B",
+      "cube_m3": 0.097,
+      "weight_kg": 10.94
+    },
+    {
+      "sku": "SKU-0139",
+      "name": "ITEM-0139",
+      "velocity": 0.001662,
+      "abc": "B",
+      "cube_m3": 0.055,
+      "weight_kg": 15.25
+    },
+    {
+      "sku": "SKU-0140",
+      "name": "ITEM-0140",
+      "velocity": 0.001652,
+      "abc": "B",
+      "cube_m3": 0.084,
+      "weight_kg": 21.01
+    },
+    {
+      "sku": "SKU-0141",
+      "name": "ITEM-0141",
+      "velocity": 0.001642,
+      "abc": "B",
+      "cube_m3": 0.102,
+      "weight_kg": 5.59
+    },
+    {
+      "sku": "SKU-0142",
+      "name": "ITEM-0142",
+      "velocity": 0.001632,
+      "abc": "B",
+      "cube_m3": 0.054,
+      "weight_kg": 11.42
+    },
+    {
+      "sku": "SKU-0143",
+      "name": "ITEM-0143",
+      "velocity": 0.001623,
+      "abc": "B",
+      "cube_m3": 0.1,
+      "weight_kg": 8.45
+    },
+    {
+      "sku": "SKU-0144",
+      "name": "ITEM-0144",
+      "velocity": 0.001613,
+      "abc": "B",
+      "cube_m3": 0.145,
+      "weight_kg": 15.85
+    },
+    {
+      "sku": "SKU-0145",
+      "name": "ITEM-0145",
+      "velocity": 0.001604,
+      "abc": "B",
+      "cube_m3": 0.059,
+      "weight_kg": 20.39
+    },
+    {
+      "sku": "SKU-0146",
+      "name": "ITEM-0146",
+      "velocity": 0.001594,
+      "abc": "B",
+      "cube_m3": 0.129,
+      "weight_kg": 12.83
+    },
+    {
+      "sku": "SKU-0147",
+      "name": "ITEM-0147",
+      "velocity": 0.001585,
+      "abc": "B",
+      "cube_m3": 0.131,
+      "weight_kg": 17.19
+    },
+    {
+      "sku": "SKU-0148",
+      "name": "ITEM-0148",
+      "velocity": 0.001576,
+      "abc": "B",
+      "cube_m3": 0.15,
+      "weight_kg": 7.49
+    },
+    {
+      "sku": "SKU-0149",
+      "name": "ITEM-0149",
+      "velocity": 0.001567,
+      "abc": "B",
+      "cube_m3": 0.069,
+      "weight_kg": 11.99
+    },
+    {
+      "sku": "SKU-0150",
+      "name": "ITEM-0150",
+      "velocity": 0.001558,
+      "abc": "B",
+      "cube_m3": 0.09,
+      "weight_kg": 20.67
+    },
+    {
+      "sku": "SKU-0151",
+      "name": "ITEM-0151",
+      "velocity": 0.001549,
+      "abc": "B",
+      "cube_m3": 0.153,
+      "weight_kg": 6.86
+    },
+    {
+      "sku": "SKU-0152",
+      "name": "ITEM-0152",
+      "velocity": 0.001541,
+      "abc": "B",
+      "cube_m3": 0.155,
+      "weight_kg": 19.77
+    },
+    {
+      "sku": "SKU-0153",
+      "name": "ITEM-0153",
+      "velocity": 0.001532,
+      "abc": "B",
+      "cube_m3": 0.05,
+      "weight_kg": 12.08
+    },
+    {
+      "sku": "SKU-0154",
+      "name": "ITEM-0154",
+      "velocity": 0.001524,
+      "abc": "B",
+      "cube_m3": 0.064,
+      "weight_kg": 4.06
+    },
+    {
+      "sku": "SKU-0155",
+      "name": "ITEM-0155",
+      "velocity": 0.001515,
+      "abc": "B",
+      "cube_m3": 0.104,
+      "weight_kg": 16.42
+    },
+    {
+      "sku": "SKU-0156",
+      "name": "ITEM-0156",
+      "velocity": 0.001507,
+      "abc": "B",
+      "cube_m3": 0.04,
+      "weight_kg": 16.25
+    },
+    {
+      "sku": "SKU-0157",
+      "name": "ITEM-0157",
+      "velocity": 0.001499,
+      "abc": "B",
+      "cube_m3": 0.119,
+      "weight_kg": 18.04
+    },
+    {
+      "sku": "SKU-0158",
+      "name": "ITEM-0158",
+      "velocity": 0.001491,
+      "abc": "B",
+      "cube_m3": 0.143,
+      "weight_kg": 6.51
+    },
+    {
+      "sku": "SKU-0159",
+      "name": "ITEM-0159",
+      "velocity": 0.001483,
+      "abc": "B",
+      "cube_m3": 0.146,
+      "weight_kg": 14.59
+    },
+    {
+      "sku": "SKU-0160",
+      "name": "ITEM-0160",
+      "velocity": 0.001475,
+      "abc": "B",
+      "cube_m3": 0.077,
+      "weight_kg": 6.86
+    },
+    {
+      "sku": "SKU-0161",
+      "name": "ITEM-0161",
+      "velocity": 0.001467,
+      "abc": "B",
+      "cube_m3": 0.066,
+      "weight_kg": 26.37
+    },
+    {
+      "sku": "SKU-0162",
+      "name": "ITEM-0162",
+      "velocity": 0.001459,
+      "abc": "B",
+      "cube_m3": 0.093,
+      "weight_kg": 19.24
+    },
+    {
+      "sku": "SKU-0163",
+      "name": "ITEM-0163",
+      "velocity": 0.001452,
+      "abc": "B",
+      "cube_m3": 0.058,
+      "weight_kg": 25.73
+    },
+    {
+      "sku": "SKU-0164",
+      "name": "ITEM-0164",
+      "velocity": 0.001444,
+      "abc": "B",
+      "cube_m3": 0.098,
+      "weight_kg": 9.64
+    },
+    {
+      "sku": "SKU-0165",
+      "name": "ITEM-0165",
+      "velocity": 0.001437,
+      "abc": "B",
+      "cube_m3": 0.128,
+      "weight_kg": 20.78
+    },
+    {
+      "sku": "SKU-0166",
+      "name": "ITEM-0166",
+      "velocity": 0.001429,
+      "abc": "B",
+      "cube_m3": 0.124,
+      "weight_kg": 25.94
+    },
+    {
+      "sku": "SKU-0167",
+      "name": "ITEM-0167",
+      "velocity": 0.001422,
+      "abc": "B",
+      "cube_m3": 0.051,
+      "weight_kg": 11.18
+    },
+    {
+      "sku": "SKU-0168",
+      "name": "ITEM-0168",
+      "velocity": 0.001415,
+      "abc": "B",
+      "cube_m3": 0.123,
+      "weight_kg": 23.51
+    },
+    {
+      "sku": "SKU-0169",
+      "name": "ITEM-0169",
+      "velocity": 0.001408,
+      "abc": "B",
+      "cube_m3": 0.113,
+      "weight_kg": 25.26
+    },
+    {
+      "sku": "SKU-0170",
+      "name": "ITEM-0170",
+      "velocity": 0.001401,
+      "abc": "B",
+      "cube_m3": 0.054,
+      "weight_kg": 19.04
+    },
+    {
+      "sku": "SKU-0171",
+      "name": "ITEM-0171",
+      "velocity": 0.001394,
+      "abc": "B",
+      "cube_m3": 0.066,
+      "weight_kg": 20.32
+    },
+    {
+      "sku": "SKU-0172",
+      "name": "ITEM-0172",
+      "velocity": 0.001387,
+      "abc": "B",
+      "cube_m3": 0.043,
+      "weight_kg": 12.02
+    },
+    {
+      "sku": "SKU-0173",
+      "name": "ITEM-0173",
+      "velocity": 0.00138,
+      "abc": "B",
+      "cube_m3": 0.048,
+      "weight_kg": 6.22
+    },
+    {
+      "sku": "SKU-0174",
+      "name": "ITEM-0174",
+      "velocity": 0.001373,
+      "abc": "B",
+      "cube_m3": 0.123,
+      "weight_kg": 22.94
+    },
+    {
+      "sku": "SKU-0175",
+      "name": "ITEM-0175",
+      "velocity": 0.001367,
+      "abc": "B",
+      "cube_m3": 0.072,
+      "weight_kg": 18.88
+    },
+    {
+      "sku": "SKU-0176",
+      "name": "ITEM-0176",
+      "velocity": 0.00136,
+      "abc": "B",
+      "cube_m3": 0.158,
+      "weight_kg": 6.28
+    },
+    {
+      "sku": "SKU-0177",
+      "name": "ITEM-0177",
+      "velocity": 0.001354,
+      "abc": "B",
+      "cube_m3": 0.071,
+      "weight_kg": 8.09
+    },
+    {
+      "sku": "SKU-0178",
+      "name": "ITEM-0178",
+      "velocity": 0.001347,
+      "abc": "B",
+      "cube_m3": 0.151,
+      "weight_kg": 17.42
+    },
+    {
+      "sku": "SKU-0179",
+      "name": "ITEM-0179",
+      "velocity": 0.001341,
+      "abc": "B",
+      "cube_m3": 0.118,
+      "weight_kg": 14.72
+    },
+    {
+      "sku": "SKU-0180",
+      "name": "ITEM-0180",
+      "velocity": 0.001334,
+      "abc": "B",
+      "cube_m3": 0.08,
+      "weight_kg": 10.39
+    },
+    {
+      "sku": "SKU-0181",
+      "name": "ITEM-0181",
+      "velocity": 0.001328,
+      "abc": "C",
+      "cube_m3": 0.146,
+      "weight_kg": 21.86
+    },
+    {
+      "sku": "SKU-0182",
+      "name": "ITEM-0182",
+      "velocity": 0.001322,
+      "abc": "C",
+      "cube_m3": 0.079,
+      "weight_kg": 13.26
+    },
+    {
+      "sku": "SKU-0183",
+      "name": "ITEM-0183",
+      "velocity": 0.001316,
+      "abc": "C",
+      "cube_m3": 0.099,
+      "weight_kg": 23.59
+    },
+    {
+      "sku": "SKU-0184",
+      "name": "ITEM-0184",
+      "velocity": 0.00131,
+      "abc": "C",
+      "cube_m3": 0.049,
+      "weight_kg": 13.13
+    },
+    {
+      "sku": "SKU-0185",
+      "name": "ITEM-0185",
+      "velocity": 0.001304,
+      "abc": "C",
+      "cube_m3": 0.068,
+      "weight_kg": 23.54
+    },
+    {
+      "sku": "SKU-0186",
+      "name": "ITEM-0186",
+      "velocity": 0.001298,
+      "abc": "C",
+      "cube_m3": 0.148,
+      "weight_kg": 7.71
+    },
+    {
+      "sku": "SKU-0187",
+      "name": "ITEM-0187",
+      "velocity": 0.001292,
+      "abc": "C",
+      "cube_m3": 0.153,
+      "weight_kg": 13.18
+    },
+    {
+      "sku": "SKU-0188",
+      "name": "ITEM-0188",
+      "velocity": 0.001286,
+      "abc": "C",
+      "cube_m3": 0.086,
+      "weight_kg": 7.42
+    },
+    {
+      "sku": "SKU-0189",
+      "name": "ITEM-0189",
+      "velocity": 0.00128,
+      "abc": "C",
+      "cube_m3": 0.157,
+      "weight_kg": 16.57
+    },
+    {
+      "sku": "SKU-0190",
+      "name": "ITEM-0190",
+      "velocity": 0.001274,
+      "abc": "C",
+      "cube_m3": 0.14,
+      "weight_kg": 8.41
+    },
+    {
+      "sku": "SKU-0191",
+      "name": "ITEM-0191",
+      "velocity": 0.001269,
+      "abc": "C",
+      "cube_m3": 0.043,
+      "weight_kg": 23.09
+    },
+    {
+      "sku": "SKU-0192",
+      "name": "ITEM-0192",
+      "velocity": 0.001263,
+      "abc": "C",
+      "cube_m3": 0.14,
+      "weight_kg": 12.5
+    },
+    {
+      "sku": "SKU-0193",
+      "name": "ITEM-0193",
+      "velocity": 0.001258,
+      "abc": "C",
+      "cube_m3": 0.092,
+      "weight_kg": 16.09
+    },
+    {
+      "sku": "SKU-0194",
+      "name": "ITEM-0194",
+      "velocity": 0.001252,
+      "abc": "C",
+      "cube_m3": 0.1,
+      "weight_kg": 20.36
+    },
+    {
+      "sku": "SKU-0195",
+      "name": "ITEM-0195",
+      "velocity": 0.001247,
+      "abc": "C",
+      "cube_m3": 0.046,
+      "weight_kg": 17.79
+    },
+    {
+      "sku": "SKU-0196",
+      "name": "ITEM-0196",
+      "velocity": 0.001241,
+      "abc": "C",
+      "cube_m3": 0.059,
+      "weight_kg": 27.56
+    },
+    {
+      "sku": "SKU-0197",
+      "name": "ITEM-0197",
+      "velocity": 0.001236,
+      "abc": "C",
+      "cube_m3": 0.052,
+      "weight_kg": 12.7
+    },
+    {
+      "sku": "SKU-0198",
+      "name": "ITEM-0198",
+      "velocity": 0.001231,
+      "abc": "C",
+      "cube_m3": 0.077,
+      "weight_kg": 14.83
+    },
+    {
+      "sku": "SKU-0199",
+      "name": "ITEM-0199",
+      "velocity": 0.001225,
+      "abc": "C",
+      "cube_m3": 0.04,
+      "weight_kg": 18.82
+    },
+    {
+      "sku": "SKU-0200",
+      "name": "ITEM-0200",
+      "velocity": 0.00122,
+      "abc": "C",
+      "cube_m3": 0.13,
+      "weight_kg": 17.04
+    },
+    {
+      "sku": "SKU-0201",
+      "name": "ITEM-0201",
+      "velocity": 0.001215,
+      "abc": "C",
+      "cube_m3": 0.086,
+      "weight_kg": 13.13
+    },
+    {
+      "sku": "SKU-0202",
+      "name": "ITEM-0202",
+      "velocity": 0.00121,
+      "abc": "C",
+      "cube_m3": 0.08,
+      "weight_kg": 12.47
+    },
+    {
+      "sku": "SKU-0203",
+      "name": "ITEM-0203",
+      "velocity": 0.001205,
+      "abc": "C",
+      "cube_m3": 0.099,
+      "weight_kg": 25.62
+    },
+    {
+      "sku": "SKU-0204",
+      "name": "ITEM-0204",
+      "velocity": 0.0012,
+      "abc": "C",
+      "cube_m3": 0.155,
+      "weight_kg": 20.89
+    },
+    {
+      "sku": "SKU-0205",
+      "name": "ITEM-0205",
+      "velocity": 0.001195,
+      "abc": "C",
+      "cube_m3": 0.081,
+      "weight_kg": 7.92
+    },
+    {
+      "sku": "SKU-0206",
+      "name": "ITEM-0206",
+      "velocity": 0.00119,
+      "abc": "C",
+      "cube_m3": 0.104,
+      "weight_kg": 8.72
+    },
+    {
+      "sku": "SKU-0207",
+      "name": "ITEM-0207",
+      "velocity": 0.001185,
+      "abc": "C",
+      "cube_m3": 0.155,
+      "weight_kg": 4.68
+    },
+    {
+      "sku": "SKU-0208",
+      "name": "ITEM-0208",
+      "velocity": 0.00118,
+      "abc": "C",
+      "cube_m3": 0.127,
+      "weight_kg": 24.76
+    },
+    {
+      "sku": "SKU-0209",
+      "name": "ITEM-0209",
+      "velocity": 0.001175,
+      "abc": "C",
+      "cube_m3": 0.061,
+      "weight_kg": 20.84
+    },
+    {
+      "sku": "SKU-0210",
+      "name": "ITEM-0210",
+      "velocity": 0.001171,
+      "abc": "C",
+      "cube_m3": 0.094,
+      "weight_kg": 5.08
+    },
+    {
+      "sku": "SKU-0211",
+      "name": "ITEM-0211",
+      "velocity": 0.001166,
+      "abc": "C",
+      "cube_m3": 0.04,
+      "weight_kg": 25.8
+    },
+    {
+      "sku": "SKU-0212",
+      "name": "ITEM-0212",
+      "velocity": 0.001161,
+      "abc": "C",
+      "cube_m3": 0.085,
+      "weight_kg": 27.3
+    },
+    {
+      "sku": "SKU-0213",
+      "name": "ITEM-0213",
+      "velocity": 0.001156,
+      "abc": "C",
+      "cube_m3": 0.132,
+      "weight_kg": 6.55
+    },
+    {
+      "sku": "SKU-0214",
+      "name": "ITEM-0214",
+      "velocity": 0.001152,
+      "abc": "C",
+      "cube_m3": 0.049,
+      "weight_kg": 24.85
+    },
+    {
+      "sku": "SKU-0215",
+      "name": "ITEM-0215",
+      "velocity": 0.001147,
+      "abc": "C",
+      "cube_m3": 0.054,
+      "weight_kg": 7.27
+    },
+    {
+      "sku": "SKU-0216",
+      "name": "ITEM-0216",
+      "velocity": 0.001143,
+      "abc": "C",
+      "cube_m3": 0.149,
+      "weight_kg": 8.1
+    },
+    {
+      "sku": "SKU-0217",
+      "name": "ITEM-0217",
+      "velocity": 0.001138,
+      "abc": "C",
+      "cube_m3": 0.122,
+      "weight_kg": 14.95
+    },
+    {
+      "sku": "SKU-0218",
+      "name": "ITEM-0218",
+      "velocity": 0.001134,
+      "abc": "C",
+      "cube_m3": 0.101,
+      "weight_kg": 14.19
+    },
+    {
+      "sku": "SKU-0219",
+      "name": "ITEM-0219",
+      "velocity": 0.00113,
+      "abc": "C",
+      "cube_m3": 0.159,
+      "weight_kg": 21.18
+    },
+    {
+      "sku": "SKU-0220",
+      "name": "ITEM-0220",
+      "velocity": 0.001125,
+      "abc": "C",
+      "cube_m3": 0.095,
+      "weight_kg": 15.82
+    },
+    {
+      "sku": "SKU-0221",
+      "name": "ITEM-0221",
+      "velocity": 0.001121,
+      "abc": "C",
+      "cube_m3": 0.152,
+      "weight_kg": 11.35
+    },
+    {
+      "sku": "SKU-0222",
+      "name": "ITEM-0222",
+      "velocity": 0.001117,
+      "abc": "C",
+      "cube_m3": 0.089,
+      "weight_kg": 5.31
+    },
+    {
+      "sku": "SKU-0223",
+      "name": "ITEM-0223",
+      "velocity": 0.001112,
+      "abc": "C",
+      "cube_m3": 0.106,
+      "weight_kg": 23.93
+    },
+    {
+      "sku": "SKU-0224",
+      "name": "ITEM-0224",
+      "velocity": 0.001108,
+      "abc": "C",
+      "cube_m3": 0.09,
+      "weight_kg": 23.86
+    },
+    {
+      "sku": "SKU-0225",
+      "name": "ITEM-0225",
+      "velocity": 0.001104,
+      "abc": "C",
+      "cube_m3": 0.041,
+      "weight_kg": 15.56
+    },
+    {
+      "sku": "SKU-0226",
+      "name": "ITEM-0226",
+      "velocity": 0.0011,
+      "abc": "C",
+      "cube_m3": 0.134,
+      "weight_kg": 9.33
+    },
+    {
+      "sku": "SKU-0227",
+      "name": "ITEM-0227",
+      "velocity": 0.001096,
+      "abc": "C",
+      "cube_m3": 0.101,
+      "weight_kg": 24.56
+    },
+    {
+      "sku": "SKU-0228",
+      "name": "ITEM-0228",
+      "velocity": 0.001091,
+      "abc": "C",
+      "cube_m3": 0.074,
+      "weight_kg": 23.62
+    },
+    {
+      "sku": "SKU-0229",
+      "name": "ITEM-0229",
+      "velocity": 0.001087,
+      "abc": "C",
+      "cube_m3": 0.073,
+      "weight_kg": 7.32
+    },
+    {
+      "sku": "SKU-0230",
+      "name": "ITEM-0230",
+      "velocity": 0.001083,
+      "abc": "C",
+      "cube_m3": 0.104,
+      "weight_kg": 25.78
+    },
+    {
+      "sku": "SKU-0231",
+      "name": "ITEM-0231",
+      "velocity": 0.001079,
+      "abc": "C",
+      "cube_m3": 0.131,
+      "weight_kg": 6.72
+    },
+    {
+      "sku": "SKU-0232",
+      "name": "ITEM-0232",
+      "velocity": 0.001075,
+      "abc": "C",
+      "cube_m3": 0.131,
+      "weight_kg": 7.04
+    },
+    {
+      "sku": "SKU-0233",
+      "name": "ITEM-0233",
+      "velocity": 0.001072,
+      "abc": "C",
+      "cube_m3": 0.082,
+      "weight_kg": 12.15
+    },
+    {
+      "sku": "SKU-0234",
+      "name": "ITEM-0234",
+      "velocity": 0.001068,
+      "abc": "C",
+      "cube_m3": 0.108,
+      "weight_kg": 23.36
+    },
+    {
+      "sku": "SKU-0235",
+      "name": "ITEM-0235",
+      "velocity": 0.001064,
+      "abc": "C",
+      "cube_m3": 0.1,
+      "weight_kg": 24.53
+    },
+    {
+      "sku": "SKU-0236",
+      "name": "ITEM-0236",
+      "velocity": 0.00106,
+      "abc": "C",
+      "cube_m3": 0.071,
+      "weight_kg": 17.08
+    },
+    {
+      "sku": "SKU-0237",
+      "name": "ITEM-0237",
+      "velocity": 0.001056,
+      "abc": "C",
+      "cube_m3": 0.113,
+      "weight_kg": 17.4
+    },
+    {
+      "sku": "SKU-0238",
+      "name": "ITEM-0238",
+      "velocity": 0.001052,
+      "abc": "C",
+      "cube_m3": 0.044,
+      "weight_kg": 9.2
+    },
+    {
+      "sku": "SKU-0239",
+      "name": "ITEM-0239",
+      "velocity": 0.001049,
+      "abc": "C",
+      "cube_m3": 0.063,
+      "weight_kg": 7.72
+    },
+    {
+      "sku": "SKU-0240",
+      "name": "ITEM-0240",
+      "velocity": 0.001045,
+      "abc": "C",
+      "cube_m3": 0.045,
+      "weight_kg": 23.19
+    }
+  ]
+}

@@ -1,0 +1,227 @@
+{
+  "schema_version": "2.0",
+  "project": "配送中心数字孪生：区域仓 W + 前置仓 F1/F2/F3",
+  "units": "m",
+  "coord": "layout 2D=[x,z], 3D=[x,h,z]; Blender=(x,z,h), Z-up; glTF 导出用 export_yup=True",
+  "mode": "network",
+  "seed": 20261106,
+  "agv": {
+    "length_m": 1.12,
+    "width_m": 0.77,
+    "height_m": 0.435,
+    "safety_margin_m": 0.05,
+    "speed_mps": 1.5,
+    "omega_rad_s": 1.4,
+    "dwell_pick_s": 2.0,
+    "max_schedule_wait_s": 300.0,
+    "asset_source": "cargoTwin asset_amr (MIT), measured bbox 1.12 x 0.77 x 0.435 m"
+  },
+  "animation": {
+    "fps": 8,
+    "traffic_dt_s": 0.1,
+    "note": "duration 不是输入：t 由弧长/速度 + 停靠 + 错峰 + t_request 决定，由 path_metrics.json 输出"
+  },
+  "render": {
+    "width": 1920,
+    "height": 1080,
+    "samples": 16,
+    "fps": 8,
+    "anim_width": 960,
+    "anim_height": 540,
+    "anim_samples": 8
+  },
+  "scene": {
+    "cameras": [
+      {
+        "name": "CAM_overview",
+        "loc": [
+          56,
+          57,
+          150
+        ],
+        "target": [
+          56,
+          57,
+          0
+        ],
+        "scale": 205,
+        "type": "ORTHO"
+      },
+      {
+        "name": "CAM_interior",
+        "loc": [
+          12,
+          18,
+          9
+        ],
+        "target": [
+          50,
+          35,
+          3
+        ],
+        "scale": 42,
+        "type": "PERSP"
+      },
+      {
+        "name": "CAM_dock",
+        "loc": [
+          44,
+          14,
+          9
+        ],
+        "target": [
+          36,
+          4,
+          1
+        ],
+        "scale": 24,
+        "type": "PERSP"
+      },
+      {
+        "name": "CAM_route",
+        "loc": [
+          50,
+          35,
+          95
+        ],
+        "target": [
+          50,
+          35,
+          0
+        ],
+        "scale": 100,
+        "type": "ORTHO"
+      },
+      {
+        "name": "CAM_heatmap",
+        "loc": [
+          50,
+          35,
+          120
+        ],
+        "target": [
+          50,
+          35,
+          0
+        ],
+        "scale": 150,
+        "type": "ORTHO"
+      },
+      {
+        "name": "CAM_corridor_zoom",
+        "loc": [
+          24,
+          21,
+          70
+        ],
+        "target": [
+          24,
+          21,
+          0
+        ],
+        "scale": 46,
+        "type": "ORTHO"
+      }
+    ],
+    "sun": {
+      "energy": 2.2,
+      "rotation_deg": [
+        38,
+        -25,
+        35
+      ]
+    },
+    "area_lights": [
+      {
+        "loc": [
+          30,
+          30,
+          11
+        ],
+        "energy": 1800,
+        "size": 30
+      },
+      {
+        "loc": [
+          80,
+          30,
+          11
+        ],
+        "energy": 1800,
+        "size": 30
+      },
+      {
+        "loc": [
+          55,
+          80,
+          11
+        ],
+        "energy": 1800,
+        "size": 30
+      }
+    ],
+    "forklifts": [
+      [
+        20,
+        74
+      ],
+      [
+        50,
+        74
+      ],
+      [
+        80,
+        74
+      ]
+    ],
+    "trucks": [
+      [
+        28,
+        78
+      ],
+      [
+        68,
+        78
+      ]
+    ],
+    "vehicle_footprint_m": {
+      "forklift": [
+        2.0,
+        1.2
+      ],
+      "truck": [
+        6.0,
+        2.5
+      ]
+    },
+    "roads": [
+      [
+        5,
+        68,
+        14,
+        92
+      ],
+      [
+        41,
+        68,
+        50,
+        92
+      ],
+      [
+        77,
+        68,
+        86,
+        92
+      ]
+    ],
+    "heat_label_size_m": [
+      0.9,
+      0.9,
+      0.08
+    ],
+    "corridor_visible_in": [
+      "04_agv_route.png",
+      "06_corridor_check.png"
+    ]
+  }
+}

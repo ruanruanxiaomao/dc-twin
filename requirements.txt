@@ -1,0 +1,4 @@
+# 实测环境：Python 3.13.14 / Windows / Blender 5.2.3 LTS
+# 仅 plot_nav_plan.py 与 encode_video.py 需要这两个包；其余脚本为纯标准库 + bpy。
+pillow==13.0.0
+imageio-ffmpeg==0.8.1

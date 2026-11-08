@@ -1,0 +1,1335 @@
+{
+  "method": "order-level cargo state machine; pallet follows AGV from PICK to DROP, then stays at delivery point",
+  "summary": {
+    "orders": 21,
+    "loaded": 21,
+    "delivered": 21,
+    "shelf_locations_changed": 28,
+    "inventory_net_change": -21,
+    "state_transitions": 42,
+    "referential_integrity_errors": 0
+  },
+  "inventory_delta_by_location": {
+    "SHELF-W0019": -1,
+    "SHELF-W0040": 5,
+    "SHELF-W0079": 4,
+    "SHELF-W0179": -5,
+    "SHELF-W0200": -2,
+    "SHELF-W0262": 2,
+    "SHELF-W0239": -1,
+    "SHELF-W0082": -1,
+    "SHELF-W0121": -3,
+    "SHELF-W0059": 3,
+    "SHELF-W0122": -3,
+    "SHELF-W0242": -1,
+    "SHELF-W0180": 1,
+    "SHELF-W0281": -2,
+    "SHELF-W0282": -5,
+    "SHELF-W0220": 5,
+    "SHELF-F10001": -1,
+    "SHELF-F10002": -3,
+    "SHELF-F10014": -4,
+    "SHELF-F10016": 4,
+    "SHELF-F20001": -2,
+    "SHELF-F20002": -5,
+    "SHELF-F20014": -4,
+    "SHELF-F20016": 4,
+    "SHELF-F30001": -3,
+    "SHELF-F30002": -3,
+    "SHELF-F30014": -4,
+    "SHELF-F30016": 4
+  },
+  "state_transitions": [
+    {
+      "t": 21.6617,
+      "cargo_id": "CARGO_DYN_T0002",
+      "from_state": "INBOUND_DOCK",
+      "to_state": "LOADED",
+      "location": "W-IN-01",
+      "agent_id": "W-R02"
+    },
+    {
+      "t": 28.4974,
+      "cargo_id": "CARGO_DYN_T0013",
+      "from_state": "IN_STOCK",
+      "to_state": "LOADED",
+      "location": "SHELF-F10001",
+      "agent_id": "F1-R01"
+    },
+    {
+      "t": 29.8974,
+      "cargo_id": "CARGO_DYN_T0014",
+      "from_state": "IN_STOCK",
+      "to_state": "LOADED",
+      "location": "SHELF-F10002",
+      "agent_id": "F1-R02"
+    },
+    {
+      "t": 29.8974,
+      "cargo_id": "CARGO_DYN_T0016",
+      "from_state": "IN_STOCK",
+      "to_state": "LOADED",
+      "location": "SHELF-F20001",
+      "agent_id": "F2-R01"
+    },
+    {
+      "t": 30.1465,
+      "cargo_id": "CARGO_DYN_T0015",
+      "from_state": "IN_STOCK",
+      "to_state": "LOADED",
+      "location": "SHELF-F10014",
+      "agent_id": "F1-R03"
+    },
+    {
+      "t": 30.9474,
+      "cargo_id": "CARGO_DYN_T0017",
+      "from_state": "IN_STOCK",
+      "to_state": "LOADED",
+      "location": "SHELF-F20002",
+      "agent_id": "F2-R02"
+    },
+    {
+      "t": 31.3874,
+      "cargo_id": "CARGO_DYN_T0019",
+      "from_state": "IN_STOCK",
+      "to_state": "LOADED",
+      "location": "SHELF-F30001",
+      "agent_id": "F3-R01"
+    },
+    {
+      "t": 31.7065,
+      "cargo_id": "CARGO_DYN_T0018",
+      "from_state": "IN_STOCK",
+      "to_state": "LOADED",
+      "location": "SHELF-F20014",
+      "agent_id": "F2-R03"
+    },
+    {
+      "t": 31.9054,
+      "cargo_id": "CARGO_DYN_T0004",
+      "from_state": "IN_STOCK",
+      "to_state": "LOADED",
+      "location": "SHELF-W0179",
+      "agent_id": "W-R04"
+    },
+    {
+      "t": 32.2654,
+      "cargo_id": "CARGO_DYN_T0005",
+      "from_state": "IN_STOCK",
+      "to_state": "LOADED",
+      "location": "SHELF-W0200",
+      "agent_id": "W-R05"
+    },
+    {
+      "t": 32.3874,
+      "cargo_id": "CARGO_DYN_T0020",
+      "from_state": "IN_STOCK",
+      "to_state": "LOADED",
+      "location": "SHELF-F30002",
+      "agent_id": "F3-R02"
+    },
+    {
+      "t": 32.5694,
+      "cargo_id": "CARGO_DYN_T0001",
+      "from_state": "IN_STOCK",
+      "to_state": "LOADED",
+      "location": "SHELF-W0019",
+      "agent_id": "W-R01"
+    },
+    {
+      "t": 32.9735,
+      "cargo_id": "CARGO_DYN_T0006",
+      "from_state": "IN_STOCK",
+      "to_state": "LOADED",
+      "location": "SHELF-W0239",
+      "agent_id": "W-R06"
+    },
+    {
+      "t": 33.1365,
+      "cargo_id": "CARGO_DYN_T0021",
+      "from_state": "IN_STOCK",
+      "to_state": "LOADED",
+      "location": "SHELF-F30014",
+      "agent_id": "F3-R03"
+    },
+    {
+      "t": 36.7238,
+      "cargo_id": "CARGO_DYN_T0015",
+      "from_state": "LOADED",
+      "to_state": "DELIVERED",
+      "location": "SHELF-F10016",
+      "agent_id": "F1-R03"
+    },
+    {
+      "t": 37.5335,
+      "cargo_id": "CARGO_DYN_T0007",
+      "from_state": "IN_STOCK",
+      "to_state": "LOADED",
+      "location": "SHELF-W0082",
+      "agent_id": "W-R07"
+    },
+    {
+      "t": 37.7492,
+      "cargo_id": "CARGO_DYN_T0011",
+      "from_state": "IN_STOCK",
+      "to_state": "LOADED",
+      "location": "SHELF-W0281",
+      "agent_id": "W-R11"
+    },
+    {
+      "t": 38.2838,
+      "cargo_id": "CARGO_DYN_T0018",
+      "from_state": "LOADED",
+      "to_state": "DELIVERED",
+      "location": "SHELF-F20016",
+      "agent_id": "F2-R03"
+    },
+    {
+      "t": 38.5293,
+      "cargo_id": "CARGO_DYN_T0009",
+      "from_state": "IN_STOCK",
+      "to_state": "LOADED",
+      "location": "SHELF-W0122",
+      "agent_id": "W-R09"
+    },
+    {
+      "t": 39.0435,
+      "cargo_id": "CARGO_DYN_T0010",
+      "from_state": "IN_STOCK",
+      "to_state": "LOADED",
+      "location": "SHELF-W0242",
+      "agent_id": "W-R10"
+    },
+    {
+      "t": 39.6193,
+      "cargo_id": "CARGO_DYN_T0012",
+      "from_state": "IN_STOCK",
+      "to_state": "LOADED",
+      "location": "SHELF-W0282",
+      "agent_id": "W-R12"
+    },
+    {
+      "t": 39.7138,
+      "cargo_id": "CARGO_DYN_T0021",
+      "from_state": "LOADED",
+      "to_state": "DELIVERED",
+      "location": "SHELF-F30016",
+      "agent_id": "F3-R03"
+    },
+    {
+      "t": 39.821,
+      "cargo_id": "CARGO_DYN_T0001",
+      "from_state": "LOADED",
+      "to_state": "DELIVERED",
+      "location": "W-OU-02",
+      "agent_id": "W-R01"
+    },
+    {
+      "t": 44.4081,
+      "cargo_id": "CARGO_DYN_T0013",
+      "from_state": "LOADED",
+      "to_state": "DELIVERED",
+      "location": "F1-OU-02",
+      "agent_id": "F1-R01"
+    },
+    {
+      "t": 45.8081,
+      "cargo_id": "CARGO_DYN_T0016",
+      "from_state": "LOADED",
+      "to_state": "DELIVERED",
+      "location": "F2-OU-02",
+      "agent_id": "F2-R01"
+    },
+    {
+      "t": 46.8712,
+      "cargo_id": "CARGO_DYN_T0008",
+      "from_state": "IN_STOCK",
+      "to_state": "LOADED",
+      "location": "SHELF-W0121",
+      "agent_id": "W-R08"
+    },
+    {
+      "t": 47.055,
+      "cargo_id": "CARGO_DYN_T0003",
+      "from_state": "INBOUND_DOCK",
+      "to_state": "LOADED",
+      "location": "W-IN-01",
+      "agent_id": "W-R03"
+    },
+    {
+      "t": 47.2981,
+      "cargo_id": "CARGO_DYN_T0019",
+      "from_state": "LOADED",
+      "to_state": "DELIVERED",
+      "location": "F3-OU-02",
+      "agent_id": "F3-R01"
+    },
+    {
+      "t": 50.7534,
+      "cargo_id": "CARGO_DYN_T0005",
+      "from_state": "LOADED",
+      "to_state": "DELIVERED",
+      "location": "SHELF-W0262",
+      "agent_id": "W-R05"
+    },
+    {
+      "t": 57.5315,
+      "cargo_id": "CARGO_DYN_T0010",
+      "from_state": "LOADED",
+      "to_state": "DELIVERED",
+      "location": "SHELF-W0180",
+      "agent_id": "W-R10"
+    },
+    {
+      "t": 57.824,
+      "cargo_id": "CARGO_DYN_T0002",
+      "from_state": "LOADED",
+      "to_state": "DELIVERED",
+      "location": "SHELF-W0040",
+      "agent_id": "W-R02"
+    },
+    {
+      "t": 57.8894,
+      "cargo_id": "CARGO_DYN_T0014",
+      "from_state": "LOADED",
+      "to_state": "DELIVERED",
+      "location": "F1-OU-02",
+      "agent_id": "F1-R02"
+    },
+    {
+      "t": 58.1073,
+      "cargo_id": "CARGO_DYN_T0012",
+      "from_state": "LOADED",
+      "to_state": "DELIVERED",
+      "location": "SHELF-W0220",
+      "agent_id": "W-R12"
+    },
+    {
+      "t": 58.9394,
+      "cargo_id": "CARGO_DYN_T0017",
+      "from_state": "LOADED",
+      "to_state": "DELIVERED",
+      "location": "F2-OU-02",
+      "agent_id": "F2-R02"
+    },
+    {
+      "t": 60.3794,
+      "cargo_id": "CARGO_DYN_T0020",
+      "from_state": "LOADED",
+      "to_state": "DELIVERED",
+      "location": "F3-OU-02",
+      "agent_id": "F3-R02"
+    },
+    {
+      "t": 63.3668,
+      "cargo_id": "CARGO_DYN_T0011",
+      "from_state": "LOADED",
+      "to_state": "DELIVERED",
+      "location": "W-SORT-01",
+      "agent_id": "W-R11"
+    },
+    {
+      "t": 65.3592,
+      "cargo_id": "CARGO_DYN_T0008",
+      "from_state": "LOADED",
+      "to_state": "DELIVERED",
+      "location": "SHELF-W0059",
+      "agent_id": "W-R08"
+    },
+    {
+      "t": 67.7863,
+      "cargo_id": "CARGO_DYN_T0006",
+      "from_state": "LOADED",
+      "to_state": "DELIVERED",
+      "location": "W-PACK-02",
+      "agent_id": "W-R06"
+    },
+    {
+      "t": 73.2892,
+      "cargo_id": "CARGO_DYN_T0007",
+      "from_state": "LOADED",
+      "to_state": "DELIVERED",
+      "location": "W-OU-04",
+      "agent_id": "W-R07"
+    },
+    {
+      "t": 77.0516,
+      "cargo_id": "CARGO_DYN_T0004",
+      "from_state": "LOADED",
+      "to_state": "DELIVERED",
+      "location": "W-PACK-02",
+      "agent_id": "W-R04"
+    },
+    {
+      "t": 81.2849,
+      "cargo_id": "CARGO_DYN_T0009",
+      "from_state": "LOADED",
+      "to_state": "DELIVERED",
+      "location": "W-OU-04",
+      "agent_id": "W-R09"
+    },
+    {
+      "t": 90.3308,
+      "cargo_id": "CARGO_DYN_T0003",
+      "from_state": "LOADED",
+      "to_state": "DELIVERED",
+      "location": "SHELF-W0079",
+      "agent_id": "W-R03"
+    }
+  ],
+  "cargos": [
+    {
+      "cargo_id": "CARGO_DYN_T0001",
+      "task_id": "T0001",
+      "event_id": "E0001",
+      "order_type": "OUTBOUND",
+      "agent_id": "W-R01",
+      "sku": "SKU-0169",
+      "qty": 1,
+      "pickup_location": "SHELF-W0019",
+      "drop_location": "W-OU-02",
+      "pickup_ap": [
+        39.9,
+        11.5
+      ],
+      "drop_ap": [
+        37.5,
+        9.5
+      ],
+      "t_pick_s": 32.5694,
+      "t_drop_s": 39.821,
+      "carried_duration_s": 7.25,
+      "states": [
+        {
+          "state": "IN_STOCK",
+          "t": 0.0,
+          "location": "SHELF-W0019",
+          "agent_id": null
+        },
+        {
+          "state": "LOADED",
+          "t": 32.5694,
+          "location": "SHELF-W0019",
+          "agent_id": "W-R01"
+        },
+        {
+          "state": "DELIVERED",
+          "t": 39.821,
+          "location": "W-OU-02",
+          "agent_id": null
+        }
+      ],
+      "inventory_delta": {
+        "SHELF-W0019": -1
+      }
+    },
+    {
+      "cargo_id": "CARGO_DYN_T0002",
+      "task_id": "T0002",
+      "event_id": "E0002",
+      "order_type": "INBOUND",
+      "agent_id": "W-R02",
+      "sku": "SKU-0140",
+      "qty": 5,
+      "pickup_location": "W-IN-01",
+      "drop_location": "SHELF-W0040",
+      "pickup_ap": [
+        12.5,
+        9.5
+      ],
+      "drop_ap": [
+        39.9,
+        20.9
+      ],
+      "t_pick_s": 21.6617,
+      "t_drop_s": 57.824,
+      "carried_duration_s": 36.16,
+      "states": [
+        {
+          "state": "INBOUND_DOCK",
+          "t": 0.0,
+          "location": "W-IN-01",
+          "agent_id": null
+        },
+        {
+          "state": "LOADED",
+          "t": 21.6617,
+          "location": "W-IN-01",
+          "agent_id": "W-R02"
+        },
+        {
+          "state": "DELIVERED",
+          "t": 57.824,
+          "location": "SHELF-W0040",
+          "agent_id": null
+        }
+      ],
+      "inventory_delta": {
+        "SHELF-W0040": 5
+      }
+    },
+    {
+      "cargo_id": "CARGO_DYN_T0003",
+      "task_id": "T0003",
+      "event_id": "E0003",
+      "order_type": "REPLENISH",
+      "agent_id": "W-R03",
+      "sku": "SKU-0185",
+      "qty": 4,
+      "pickup_location": "W-IN-01",
+      "drop_location": "SHELF-W0079",
+      "pickup_ap": [
+        12.5,
+        9.5
+      ],
+      "drop_ap": [
+        39.9,
+        27.1
+      ],
+      "t_pick_s": 47.055,
+      "t_drop_s": 90.3308,
+      "carried_duration_s": 43.28,
+      "states": [
+        {
+          "state": "INBOUND_DOCK",
+          "t": 0.0,
+          "location": "W-IN-01",
+          "agent_id": null
+        },
+        {
+          "state": "LOADED",
+          "t": 47.055,
+          "location": "W-IN-01",
+          "agent_id": "W-R03"
+        },
+        {
+          "state": "DELIVERED",
+          "t": 90.3308,
+          "location": "SHELF-W0079",
+          "agent_id": null
+        }
+      ],
+      "inventory_delta": {
+        "SHELF-W0079": 4
+      }
+    },
+    {
+      "cargo_id": "CARGO_DYN_T0004",
+      "task_id": "T0004",
+      "event_id": "E0004",
+      "order_type": "PICK",
+      "agent_id": "W-R04",
+      "sku": "SKU-0197",
+      "qty": 5,
+      "pickup_location": "SHELF-W0179",
+      "drop_location": "W-PACK-02",
+      "pickup_ap": [
+        39.9,
+        39.5
+      ],
+      "drop_ap": [
+        11,
+        60.5
+      ],
+      "t_pick_s": 31.9054,
+      "t_drop_s": 77.0516,
+      "carried_duration_s": 45.15,
+      "states": [
+        {
+          "state": "IN_STOCK",
+          "t": 0.0,
+          "location": "SHELF-W0179",
+          "agent_id": null
+        },
+        {
+          "state": "LOADED",
+          "t": 31.9054,
+          "location": "SHELF-W0179",
+          "agent_id": "W-R04"
+        },
+        {
+          "state": "DELIVERED",
+          "t": 77.0516,
+          "location": "W-PACK-02",
+          "agent_id": null
+        }
+      ],
+      "inventory_delta": {
+        "SHELF-W0179": -5
+      }
+    },
+    {
+      "cargo_id": "CARGO_DYN_T0005",
+      "task_id": "T0005",
+      "event_id": "E0005",
+      "order_type": "TRANSFER",
+      "agent_id": "W-R05",
+      "sku": "SKU-0169",
+      "qty": 2,
+      "pickup_location": "SHELF-W0200",
+      "drop_location": "SHELF-W0262",
+      "pickup_ap": [
+        39.9,
+        48.9
+      ],
+      "drop_ap": [
+        57.5,
+        48.9
+      ],
+      "t_pick_s": 32.2654,
+      "t_drop_s": 50.7534,
+      "carried_duration_s": 18.49,
+      "states": [
+        {
+          "state": "IN_STOCK",
+          "t": 0.0,
+          "location": "SHELF-W0200",
+          "agent_id": null
+        },
+        {
+          "state": "LOADED",
+          "t": 32.2654,
+          "location": "SHELF-W0200",
+          "agent_id": "W-R05"
+        },
+        {
+          "state": "DELIVERED",
+          "t": 50.7534,
+          "location": "SHELF-W0262",
+          "agent_id": null
+        }
+      ],
+      "inventory_delta": {
+        "SHELF-W0200": -2,
+        "SHELF-W0262": 2
+      }
+    },
+    {
+      "cargo_id": "CARGO_DYN_T0006",
+      "task_id": "T0006",
+      "event_id": "E0006",
+      "order_type": "PICK",
+      "agent_id": "W-R06",
+      "sku": "SKU-0181",
+      "qty": 1,
+      "pickup_location": "SHELF-W0239",
+      "drop_location": "W-PACK-02",
+      "pickup_ap": [
+        39.9,
+        55.1
+      ],
+      "drop_ap": [
+        11,
+        60.5
+      ],
+      "t_pick_s": 32.9735,
+      "t_drop_s": 67.7863,
+      "carried_duration_s": 34.81,
+      "states": [
+        {
+          "state": "IN_STOCK",
+          "t": 0.0,
+          "location": "SHELF-W0239",
+          "agent_id": null
+        },
+        {
+          "state": "LOADED",
+          "t": 32.9735,
+          "location": "SHELF-W0239",
+          "agent_id": "W-R06"
+        },
+        {
+          "state": "DELIVERED",
+          "t": 67.7863,
+          "location": "W-PACK-02",
+          "agent_id": null
+        }
+      ],
+      "inventory_delta": {
+        "SHELF-W0239": -1
+      }
+    },
+    {
+      "cargo_id": "CARGO_DYN_T0007",
+      "task_id": "T0007",
+      "event_id": "E0007",
+      "order_type": "PICK",
+      "agent_id": "W-R07",
+      "sku": "SKU-0239",
+      "qty": 1,
+      "pickup_location": "SHELF-W0082",
+      "drop_location": "W-OU-04",
+      "pickup_ap": [
+        57.5,
+        15.7
+      ],
+      "drop_ap": [
+        87.5,
+        9.5
+      ],
+      "t_pick_s": 37.5335,
+      "t_drop_s": 73.2892,
+      "carried_duration_s": 35.76,
+      "states": [
+        {
+          "state": "IN_STOCK",
+          "t": 0.0,
+          "location": "SHELF-W0082",
+          "agent_id": null
+        },
+        {
+          "state": "LOADED",
+          "t": 37.5335,
+          "location": "SHELF-W0082",
+          "agent_id": "W-R07"
+        },
+        {
+          "state": "DELIVERED",
+          "t": 73.2892,
+          "location": "W-OU-04",
+          "agent_id": null
+        }
+      ],
+      "inventory_delta": {
+        "SHELF-W0082": -1
+      }
+    },
+    {
+      "cargo_id": "CARGO_DYN_T0008",
+      "task_id": "T0008",
+      "event_id": "E0008",
+      "order_type": "TRANSFER",
+      "agent_id": "W-R08",
+      "sku": "SKU-0038",
+      "qty": 3,
+      "pickup_location": "SHELF-W0121",
+      "drop_location": "SHELF-W0059",
+      "pickup_ap": [
+        57.5,
+        21.9
+      ],
+      "drop_ap": [
+        39.9,
+        21.9
+      ],
+      "t_pick_s": 46.8712,
+      "t_drop_s": 65.3592,
+      "carried_duration_s": 18.49,
+      "states": [
+        {
+          "state": "IN_STOCK",
+          "t": 0.0,
+          "location": "SHELF-W0121",
+          "agent_id": null
+        },
+        {
+          "state": "LOADED",
+          "t": 46.8712,
+          "location": "SHELF-W0121",
+          "agent_id": "W-R08"
+        },
+        {
+          "state": "DELIVERED",
+          "t": 65.3592,
+          "location": "SHELF-W0059",
+          "agent_id": null
+        }
+      ],
+      "inventory_delta": {
+        "SHELF-W0121": -3,
+        "SHELF-W0059": 3
+      }
+    },
+    {
+      "cargo_id": "CARGO_DYN_T0009",
+      "task_id": "T0009",
+      "event_id": "E0009",
+      "order_type": "OUTBOUND",
+      "agent_id": "W-R09",
+      "sku": "SKU-0141",
+      "qty": 3,
+      "pickup_location": "SHELF-W0122",
+      "drop_location": "W-OU-04",
+      "pickup_ap": [
+        57.5,
+        26.1
+      ],
+      "drop_ap": [
+        87.5,
+        9.5
+      ],
+      "t_pick_s": 38.5293,
+      "t_drop_s": 81.2849,
+      "carried_duration_s": 42.76,
+      "states": [
+        {
+          "state": "IN_STOCK",
+          "t": 0.0,
+          "location": "SHELF-W0122",
+          "agent_id": null
+        },
+        {
+          "state": "LOADED",
+          "t": 38.5293,
+          "location": "SHELF-W0122",
+          "agent_id": "W-R09"
+        },
+        {
+          "state": "DELIVERED",
+          "t": 81.2849,
+          "location": "W-OU-04",
+          "agent_id": null
+        }
+      ],
+      "inventory_delta": {
+        "SHELF-W0122": -3
+      }
+    },
+    {
+      "cargo_id": "CARGO_DYN_T0010",
+      "task_id": "T0010",
+      "event_id": "E0010",
+      "order_type": "TRANSFER",
+      "agent_id": "W-R10",
+      "sku": "SKU-0154",
+      "qty": 1,
+      "pickup_location": "SHELF-W0242",
+      "drop_location": "SHELF-W0180",
+      "pickup_ap": [
+        57.5,
+        43.7
+      ],
+      "drop_ap": [
+        39.9,
+        43.7
+      ],
+      "t_pick_s": 39.0435,
+      "t_drop_s": 57.5315,
+      "carried_duration_s": 18.49,
+      "states": [
+        {
+          "state": "IN_STOCK",
+          "t": 0.0,
+          "location": "SHELF-W0242",
+          "agent_id": null
+        },
+        {
+          "state": "LOADED",
+          "t": 39.0435,
+          "location": "SHELF-W0242",
+          "agent_id": "W-R10"
+        },
+        {
+          "state": "DELIVERED",
+          "t": 57.5315,
+          "location": "SHELF-W0180",
+          "agent_id": null
+        }
+      ],
+      "inventory_delta": {
+        "SHELF-W0242": -1,
+        "SHELF-W0180": 1
+      }
+    },
+    {
+      "cargo_id": "CARGO_DYN_T0011",
+      "task_id": "T0011",
+      "event_id": "E0011",
+      "order_type": "PICK",
+      "agent_id": "W-R11",
+      "sku": "SKU-0169",
+      "qty": 2,
+      "pickup_location": "SHELF-W0281",
+      "drop_location": "W-SORT-01",
+      "pickup_ap": [
+        57.5,
+        49.9
+      ],
+      "drop_ap": [
+        67,
+        60.5
+      ],
+      "t_pick_s": 37.7492,
+      "t_drop_s": 63.3668,
+      "carried_duration_s": 25.62,
+      "states": [
+        {
+          "state": "IN_STOCK",
+          "t": 0.0,
+          "location": "SHELF-W0281",
+          "agent_id": null
+        },
+        {
+          "state": "LOADED",
+          "t": 37.7492,
+          "location": "SHELF-W0281",
+          "agent_id": "W-R11"
+        },
+        {
+          "state": "DELIVERED",
+          "t": 63.3668,
+          "location": "W-SORT-01",
+          "agent_id": null
+        }
+      ],
+      "inventory_delta": {
+        "SHELF-W0281": -2
+      }
+    },
+    {
+      "cargo_id": "CARGO_DYN_T0012",
+      "task_id": "T0012",
+      "event_id": "E0012",
+      "order_type": "TRANSFER",
+      "agent_id": "W-R12",
+      "sku": "SKU-0191",
+      "qty": 5,
+      "pickup_location": "SHELF-W0282",
+      "drop_location": "SHELF-W0220",
+      "pickup_ap": [
+        57.5,
+        54.1
+      ],
+      "drop_ap": [
+        39.9,
+        54.1
+      ],
+      "t_pick_s": 39.6193,
+      "t_drop_s": 58.1073,
+      "carried_duration_s": 18.49,
+      "states": [
+        {
+          "state": "IN_STOCK",
+          "t": 0.0,
+          "location": "SHELF-W0282",
+          "agent_id": null
+        },
+        {
+          "state": "LOADED",
+          "t": 39.6193,
+          "location": "SHELF-W0282",
+          "agent_id": "W-R12"
+        },
+        {
+          "state": "DELIVERED",
+          "t": 58.1073,
+          "location": "SHELF-W0220",
+          "agent_id": null
+        }
+      ],
+      "inventory_delta": {
+        "SHELF-W0282": -5,
+        "SHELF-W0220": 5
+      }
+    },
+    {
+      "cargo_id": "CARGO_DYN_T0013",
+      "task_id": "T0013",
+      "event_id": "E0013",
+      "order_type": "OUTBOUND",
+      "agent_id": "F1-R01",
+      "sku": "SKU-0220",
+      "qty": 1,
+      "pickup_location": "SHELF-F10001",
+      "drop_location": "F1-OU-02",
+      "pickup_ap": [
+        10.5,
+        97.5
+      ],
+      "drop_ap": [
+        28.0,
+        97.5
+      ],
+      "t_pick_s": 28.4974,
+      "t_drop_s": 44.4081,
+      "carried_duration_s": 15.91,
+      "states": [
+        {
+          "state": "IN_STOCK",
+          "t": 0.0,
+          "location": "SHELF-F10001",
+          "agent_id": null
+        },
+        {
+          "state": "LOADED",
+          "t": 28.4974,
+          "location": "SHELF-F10001",
+          "agent_id": "F1-R01"
+        },
+        {
+          "state": "DELIVERED",
+          "t": 44.4081,
+          "location": "F1-OU-02",
+          "agent_id": null
+        }
+      ],
+      "inventory_delta": {
+        "SHELF-F10001": -1
+      }
+    },
+    {
+      "cargo_id": "CARGO_DYN_T0014",
+      "task_id": "T0014",
+      "event_id": "E0014",
+      "order_type": "PICK",
+      "agent_id": "F1-R02",
+      "sku": "SKU-0149",
+      "qty": 3,
+      "pickup_location": "SHELF-F10002",
+      "drop_location": "F1-OU-02",
+      "pickup_ap": [
+        10.5,
+        101.7
+      ],
+      "drop_ap": [
+        28.0,
+        97.5
+      ],
+      "t_pick_s": 29.8974,
+      "t_drop_s": 57.8894,
+      "carried_duration_s": 27.99,
+      "states": [
+        {
+          "state": "IN_STOCK",
+          "t": 0.0,
+          "location": "SHELF-F10002",
+          "agent_id": null
+        },
+        {
+          "state": "LOADED",
+          "t": 29.8974,
+          "location": "SHELF-F10002",
+          "agent_id": "F1-R02"
+        },
+        {
+          "state": "DELIVERED",
+          "t": 57.8894,
+          "location": "F1-OU-02",
+          "agent_id": null
+        }
+      ],
+      "inventory_delta": {
+        "SHELF-F10002": -3
+      }
+    },
+    {
+      "cargo_id": "CARGO_DYN_T0015",
+      "task_id": "T0015",
+      "event_id": "E0015",
+      "order_type": "TRANSFER",
+      "agent_id": "F1-R03",
+      "sku": "SKU-0043",
+      "qty": 4,
+      "pickup_location": "SHELF-F10014",
+      "drop_location": "SHELF-F10016",
+      "pickup_ap": [
+        10.5,
+        106.1
+      ],
+      "drop_ap": [
+        14.1,
+        106.1
+      ],
+      "t_pick_s": 30.1465,
+      "t_drop_s": 36.7238,
+      "carried_duration_s": 6.58,
+      "states": [
+        {
+          "state": "IN_STOCK",
+          "t": 0.0,
+          "location": "SHELF-F10014",
+          "agent_id": null
+        },
+        {
+          "state": "LOADED",
+          "t": 30.1465,
+          "location": "SHELF-F10014",
+          "agent_id": "F1-R03"
+        },
+        {
+          "state": "DELIVERED",
+          "t": 36.7238,
+          "location": "SHELF-F10016",
+          "agent_id": null
+        }
+      ],
+      "inventory_delta": {
+        "SHELF-F10014": -4,
+        "SHELF-F10016": 4
+      }
+    },
+    {
+      "cargo_id": "CARGO_DYN_T0016",
+      "task_id": "T0016",
+      "event_id": "E0016",
+      "order_type": "OUTBOUND",
+      "agent_id": "F2-R01",
+      "sku": "SKU-0202",
+      "qty": 2,
+      "pickup_location": "SHELF-F20001",
+      "drop_location": "F2-OU-02",
+      "pickup_ap": [
+        46.5,
+        97.5
+      ],
+      "drop_ap": [
+        64.0,
+        97.5
+      ],
+      "t_pick_s": 29.8974,
+      "t_drop_s": 45.8081,
+      "carried_duration_s": 15.91,
+      "states": [
+        {
+          "state": "IN_STOCK",
+          "t": 0.0,
+          "location": "SHELF-F20001",
+          "agent_id": null
+        },
+        {
+          "state": "LOADED",
+          "t": 29.8974,
+          "location": "SHELF-F20001",
+          "agent_id": "F2-R01"
+        },
+        {
+          "state": "DELIVERED",
+          "t": 45.8081,
+          "location": "F2-OU-02",
+          "agent_id": null
+        }
+      ],
+      "inventory_delta": {
+        "SHELF-F20001": -2
+      }
+    },
+    {
+      "cargo_id": "CARGO_DYN_T0017",
+      "task_id": "T0017",
+      "event_id": "E0017",
+      "order_type": "PICK",
+      "agent_id": "F2-R02",
+      "sku": "SKU-0033",
+      "qty": 5,
+      "pickup_location": "SHELF-F20002",
+      "drop_location": "F2-OU-02",
+      "pickup_ap": [
+        46.5,
+        101.7
+      ],
+      "drop_ap": [
+        64.0,
+        97.5
+      ],
+      "t_pick_s": 30.9474,
+      "t_drop_s": 58.9394,
+      "carried_duration_s": 27.99,
+      "states": [
+        {
+          "state": "IN_STOCK",
+          "t": 0.0,
+          "location": "SHELF-F20002",
+          "agent_id": null
+        },
+        {
+          "state": "LOADED",
+          "t": 30.9474,
+          "location": "SHELF-F20002",
+          "agent_id": "F2-R02"
+        },
+        {
+          "state": "DELIVERED",
+          "t": 58.9394,
+          "location": "F2-OU-02",
+          "agent_id": null
+        }
+      ],
+      "inventory_delta": {
+        "SHELF-F20002": -5
+      }
+    },
+    {
+      "cargo_id": "CARGO_DYN_T0018",
+      "task_id": "T0018",
+      "event_id": "E0018",
+      "order_type": "TRANSFER",
+      "agent_id": "F2-R03",
+      "sku": "SKU-0212",
+      "qty": 4,
+      "pickup_location": "SHELF-F20014",
+      "drop_location": "SHELF-F20016",
+      "pickup_ap": [
+        46.5,
+        106.1
+      ],
+      "drop_ap": [
+        50.1,
+        106.1
+      ],
+      "t_pick_s": 31.7065,
+      "t_drop_s": 38.2838,
+      "carried_duration_s": 6.58,
+      "states": [
+        {
+          "state": "IN_STOCK",
+          "t": 0.0,
+          "location": "SHELF-F20014",
+          "agent_id": null
+        },
+        {
+          "state": "LOADED",
+          "t": 31.7065,
+          "location": "SHELF-F20014",
+          "agent_id": "F2-R03"
+        },
+        {
+          "state": "DELIVERED",
+          "t": 38.2838,
+          "location": "SHELF-F20016",
+          "agent_id": null
+        }
+      ],
+      "inventory_delta": {
+        "SHELF-F20014": -4,
+        "SHELF-F20016": 4
+      }
+    },
+    {
+      "cargo_id": "CARGO_DYN_T0019",
+      "task_id": "T0019",
+      "event_id": "E0019",
+      "order_type": "OUTBOUND",
+      "agent_id": "F3-R01",
+      "sku": "SKU-0178",
+      "qty": 3,
+      "pickup_location": "SHELF-F30001",
+      "drop_location": "F3-OU-02",
+      "pickup_ap": [
+        82.5,
+        97.5
+      ],
+      "drop_ap": [
+        100.0,
+        97.5
+      ],
+      "t_pick_s": 31.3874,
+      "t_drop_s": 47.2981,
+      "carried_duration_s": 15.91,
+      "states": [
+        {
+          "state": "IN_STOCK",
+          "t": 0.0,
+          "location": "SHELF-F30001",
+          "agent_id": null
+        },
+        {
+          "state": "LOADED",
+          "t": 31.3874,
+          "location": "SHELF-F30001",
+          "agent_id": "F3-R01"
+        },
+        {
+          "state": "DELIVERED",
+          "t": 47.2981,
+          "location": "F3-OU-02",
+          "agent_id": null
+        }
+      ],
+      "inventory_delta": {
+        "SHELF-F30001": -3
+      }
+    },
+    {
+      "cargo_id": "CARGO_DYN_T0020",
+      "task_id": "T0020",
+      "event_id": "E0020",
+      "order_type": "PICK",
+      "agent_id": "F3-R02",
+      "sku": "SKU-0146",
+      "qty": 3,
+      "pickup_location": "SHELF-F30002",
+      "drop_location": "F3-OU-02",
+      "pickup_ap": [
+        82.5,
+        101.7
+      ],
+      "drop_ap": [
+        100.0,
+        97.5
+      ],
+      "t_pick_s": 32.3874,
+      "t_drop_s": 60.3794,
+      "carried_duration_s": 27.99,
+      "states": [
+        {
+          "state": "IN_STOCK",
+          "t": 0.0,
+          "location": "SHELF-F30002",
+          "agent_id": null
+        },
+        {
+          "state": "LOADED",
+          "t": 32.3874,
+          "location": "SHELF-F30002",
+          "agent_id": "F3-R02"
+        },
+        {
+          "state": "DELIVERED",
+          "t": 60.3794,
+          "location": "F3-OU-02",
+          "agent_id": null
+        }
+      ],
+      "inventory_delta": {
+        "SHELF-F30002": -3
+      }
+    },
+    {
+      "cargo_id": "CARGO_DYN_T0021",
+      "task_id": "T0021",
+      "event_id": "E0021",
+      "order_type": "TRANSFER",
+      "agent_id": "F3-R03",
+      "sku": "SKU-0002",
+      "qty": 4,
+      "pickup_location": "SHELF-F30014",
+      "drop_location": "SHELF-F30016",
+      "pickup_ap": [
+        82.5,
+        106.1
+      ],
+      "drop_ap": [
+        86.1,
+        106.1
+      ],
+      "t_pick_s": 33.1365,
+      "t_drop_s": 39.7138,
+      "carried_duration_s": 6.58,
+      "states": [
+        {
+          "state": "IN_STOCK",
+          "t": 0.0,
+          "location": "SHELF-F30014",
+          "agent_id": null
+        },
+        {
+          "state": "LOADED",
+          "t": 33.1365,
+          "location": "SHELF-F30014",
+          "agent_id": "F3-R03"
+        },
+        {
+          "state": "DELIVERED",
+          "t": 39.7138,
+          "location": "SHELF-F30016",
+          "agent_id": null
+        }
+      ],
+      "inventory_delta": {
+        "SHELF-F30014": -4,
+        "SHELF-F30016": 4
+      }
+    }
+  ],
+  "limitations": "箱数=订单数(21)，未模拟拆箱/托盘层级/批次；库位库存只记录增减，不接 WMS 实时账"
+}

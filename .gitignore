@@ -1,0 +1,10 @@
+out/frames/
+out/*.blend1
+out/*.blend2
+runs/
+__pycache__/
+*.pyc
+.venv/
+*.log
+.DS_Store
+# _research/ 位于工作区上层，不属于本仓库

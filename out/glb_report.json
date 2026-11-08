@@ -1,0 +1,13 @@
+{
+  "bytes": 583176,
+  "generator": "Khronos glTF Blender I/O v5.2.41",
+  "nodes": 882,
+  "meshes": 59,
+  "materials": 35,
+  "animations": 0,
+  "has_DC_ROOT": true,
+  "scene_roots": 1,
+  "forbidden_nodes": [],
+  "selected_meshes": 881,
+  "note": "静态预览快照（export_animations=False）；动画请见 anim_dc.mp4 / .blend"
+}

@@ -1,0 +1,48 @@
+{
+  "method": "closed-loop task-driven 8-dir A* on 0.5 m grid (AGV_RADIUS inflated, no corner cutting, HOME-avoid soft cost) + arc-length timing + strict-presence staggering",
+  "reference": "WareTwin backend/app/sim/astar.py (source-reviewed)",
+  "grid": {
+    "cell_size_m": 0.5,
+    "cols": 224,
+    "rows": 228,
+    "agv_radius_m": 0.7296
+  },
+  "speed_mps": 1.5,
+  "omega_rad_s": 1.4,
+  "min_sep_m": 1.4592,
+  "agents": 21,
+  "tasks": 21,
+  "pending_events": 0,
+  "route_kind": "CLOSED_LOOP",
+  "loop_legs": [
+    "DEADHEAD_OUT",
+    "LOADED",
+    "DEADHEAD_BACK"
+  ],
+  "pick_drop_stops": 42,
+  "dwell_pick_s": 2.0,
+  "return_to_home": true,
+  "agents_present_whole_time": true,
+  "astar_failures": 0,
+  "total_path_m": 1765.08,
+  "avg_path_m": 84.05,
+  "duration_s": 117.62,
+  "fps": 8,
+  "samples": 5421,
+  "max_departure_t_s": 21.17,
+  "max_conflict_wait_s": 19.5,
+  "total_conflict_wait_s": 31.5,
+  "event_coverage": 1.0,
+  "event_types_executed": [
+    "INBOUND",
+    "OUTBOUND",
+    "PICK",
+    "REPLENISH",
+    "TRANSFER"
+  ],
+  "on_time_rate": 1.0,
+  "max_tardiness_s": 0.0,
+  "avg_tardiness_s": 0.0,
+  "speed_disclaimer": "all moving segments use exactly 1.50 m/s; dwell/rotate/park segments are stationary",
+  "path_to_euclid_ratio": 1.099
+}

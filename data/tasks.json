@@ -1,0 +1,673 @@
+{
+  "method": "one closed-loop order -> one AGV; preferred_agent from event; all events ASSIGNED; no PENDING",
+  "summary": {
+    "events": 21,
+    "tasks": 21,
+    "assigned": 21,
+    "pending": 0,
+    "agents_total": 21,
+    "agents_with_task": 21,
+    "event_types_executed": [
+      "INBOUND",
+      "OUTBOUND",
+      "PICK",
+      "REPLENISH",
+      "TRANSFER"
+    ],
+    "closed_loop_orders": 21,
+    "referential_integrity_errors": 0
+  },
+  "tasks": [
+    {
+      "task_id": "T0001",
+      "event_id": "E0001",
+      "agent_id": "W-R01",
+      "status": "ASSIGNED",
+      "warehouse_id": "W",
+      "legs": [
+        {
+          "from": "SHELF-W0019",
+          "to": "W-OU-02",
+          "sku": "SKU-0169",
+          "qty": 1
+        }
+      ],
+      "home_id": "HOME-W-R01",
+      "return_to": "HOME-W-R01",
+      "route_kind": "CLOSED_LOOP",
+      "phases": [
+        "DEADHEAD_OUT",
+        "PICK",
+        "LOADED",
+        "DROP",
+        "DEADHEAD_BACK",
+        "PARK"
+      ],
+      "pick_location": "SHELF-W0019",
+      "drop_location": "W-OU-02",
+      "t_request": 0.61,
+      "deadline": 240.61,
+      "priority": 1
+    },
+    {
+      "task_id": "T0002",
+      "event_id": "E0002",
+      "agent_id": "W-R02",
+      "status": "ASSIGNED",
+      "warehouse_id": "W",
+      "legs": [
+        {
+          "from": "W-IN-01",
+          "to": "SHELF-W0040",
+          "sku": "SKU-0140",
+          "qty": 5
+        }
+      ],
+      "home_id": "HOME-W-R02",
+      "return_to": "HOME-W-R02",
+      "route_kind": "CLOSED_LOOP",
+      "phases": [
+        "DEADHEAD_OUT",
+        "PICK",
+        "LOADED",
+        "DROP",
+        "DEADHEAD_BACK",
+        "PARK"
+      ],
+      "pick_location": "W-IN-01",
+      "drop_location": "SHELF-W0040",
+      "t_request": 1.11,
+      "deadline": 241.11,
+      "priority": 2
+    },
+    {
+      "task_id": "T0003",
+      "event_id": "E0003",
+      "agent_id": "W-R03",
+      "status": "ASSIGNED",
+      "warehouse_id": "W",
+      "legs": [
+        {
+          "from": "W-IN-01",
+          "to": "SHELF-W0079",
+          "sku": "SKU-0185",
+          "qty": 4
+        }
+      ],
+      "home_id": "HOME-W-R03",
+      "return_to": "HOME-W-R03",
+      "route_kind": "CLOSED_LOOP",
+      "phases": [
+        "DEADHEAD_OUT",
+        "PICK",
+        "LOADED",
+        "DROP",
+        "DEADHEAD_BACK",
+        "PARK"
+      ],
+      "pick_location": "W-IN-01",
+      "drop_location": "SHELF-W0079",
+      "t_request": 1.67,
+      "deadline": 241.67,
+      "priority": 2
+    },
+    {
+      "task_id": "T0004",
+      "event_id": "E0004",
+      "agent_id": "W-R04",
+      "status": "ASSIGNED",
+      "warehouse_id": "W",
+      "legs": [
+        {
+          "from": "SHELF-W0179",
+          "to": "W-PACK-02",
+          "sku": "SKU-0197",
+          "qty": 5
+        }
+      ],
+      "home_id": "HOME-W-R04",
+      "return_to": "HOME-W-R04",
+      "route_kind": "CLOSED_LOOP",
+      "phases": [
+        "DEADHEAD_OUT",
+        "PICK",
+        "LOADED",
+        "DROP",
+        "DEADHEAD_BACK",
+        "PARK"
+      ],
+      "pick_location": "SHELF-W0179",
+      "drop_location": "W-PACK-02",
+      "t_request": 2.19,
+      "deadline": 242.19,
+      "priority": 1
+    },
+    {
+      "task_id": "T0005",
+      "event_id": "E0005",
+      "agent_id": "W-R05",
+      "status": "ASSIGNED",
+      "warehouse_id": "W",
+      "legs": [
+        {
+          "from": "SHELF-W0200",
+          "to": "SHELF-W0262",
+          "sku": "SKU-0169",
+          "qty": 2
+        }
+      ],
+      "home_id": "HOME-W-R05",
+      "return_to": "HOME-W-R05",
+      "route_kind": "CLOSED_LOOP",
+      "phases": [
+        "DEADHEAD_OUT",
+        "PICK",
+        "LOADED",
+        "DROP",
+        "DEADHEAD_BACK",
+        "PARK"
+      ],
+      "pick_location": "SHELF-W0200",
+      "drop_location": "SHELF-W0262",
+      "t_request": 2.55,
+      "deadline": 242.55,
+      "priority": 2
+    },
+    {
+      "task_id": "T0006",
+      "event_id": "E0006",
+      "agent_id": "W-R06",
+      "status": "ASSIGNED",
+      "warehouse_id": "W",
+      "legs": [
+        {
+          "from": "SHELF-W0239",
+          "to": "W-PACK-02",
+          "sku": "SKU-0181",
+          "qty": 1
+        }
+      ],
+      "home_id": "HOME-W-R06",
+      "return_to": "HOME-W-R06",
+      "route_kind": "CLOSED_LOOP",
+      "phases": [
+        "DEADHEAD_OUT",
+        "PICK",
+        "LOADED",
+        "DROP",
+        "DEADHEAD_BACK",
+        "PARK"
+      ],
+      "pick_location": "SHELF-W0239",
+      "drop_location": "W-PACK-02",
+      "t_request": 3.12,
+      "deadline": 243.12,
+      "priority": 1
+    },
+    {
+      "task_id": "T0007",
+      "event_id": "E0007",
+      "agent_id": "W-R07",
+      "status": "ASSIGNED",
+      "warehouse_id": "W",
+      "legs": [
+        {
+          "from": "SHELF-W0082",
+          "to": "W-OU-04",
+          "sku": "SKU-0239",
+          "qty": 1
+        }
+      ],
+      "home_id": "HOME-W-R07",
+      "return_to": "HOME-W-R07",
+      "route_kind": "CLOSED_LOOP",
+      "phases": [
+        "DEADHEAD_OUT",
+        "PICK",
+        "LOADED",
+        "DROP",
+        "DEADHEAD_BACK",
+        "PARK"
+      ],
+      "pick_location": "SHELF-W0082",
+      "drop_location": "W-OU-04",
+      "t_request": 3.64,
+      "deadline": 243.64,
+      "priority": 1
+    },
+    {
+      "task_id": "T0008",
+      "event_id": "E0008",
+      "agent_id": "W-R08",
+      "status": "ASSIGNED",
+      "warehouse_id": "W",
+      "legs": [
+        {
+          "from": "SHELF-W0121",
+          "to": "SHELF-W0059",
+          "sku": "SKU-0038",
+          "qty": 3
+        }
+      ],
+      "home_id": "HOME-W-R08",
+      "return_to": "HOME-W-R08",
+      "route_kind": "CLOSED_LOOP",
+      "phases": [
+        "DEADHEAD_OUT",
+        "PICK",
+        "LOADED",
+        "DROP",
+        "DEADHEAD_BACK",
+        "PARK"
+      ],
+      "pick_location": "SHELF-W0121",
+      "drop_location": "SHELF-W0059",
+      "t_request": 4.03,
+      "deadline": 244.03,
+      "priority": 2
+    },
+    {
+      "task_id": "T0009",
+      "event_id": "E0009",
+      "agent_id": "W-R09",
+      "status": "ASSIGNED",
+      "warehouse_id": "W",
+      "legs": [
+        {
+          "from": "SHELF-W0122",
+          "to": "W-OU-04",
+          "sku": "SKU-0141",
+          "qty": 3
+        }
+      ],
+      "home_id": "HOME-W-R09",
+      "return_to": "HOME-W-R09",
+      "route_kind": "CLOSED_LOOP",
+      "phases": [
+        "DEADHEAD_OUT",
+        "PICK",
+        "LOADED",
+        "DROP",
+        "DEADHEAD_BACK",
+        "PARK"
+      ],
+      "pick_location": "SHELF-W0122",
+      "drop_location": "W-OU-04",
+      "t_request": 4.55,
+      "deadline": 244.55,
+      "priority": 1
+    },
+    {
+      "task_id": "T0010",
+      "event_id": "E0010",
+      "agent_id": "W-R10",
+      "status": "ASSIGNED",
+      "warehouse_id": "W",
+      "legs": [
+        {
+          "from": "SHELF-W0242",
+          "to": "SHELF-W0180",
+          "sku": "SKU-0154",
+          "qty": 1
+        }
+      ],
+      "home_id": "HOME-W-R10",
+      "return_to": "HOME-W-R10",
+      "route_kind": "CLOSED_LOOP",
+      "phases": [
+        "DEADHEAD_OUT",
+        "PICK",
+        "LOADED",
+        "DROP",
+        "DEADHEAD_BACK",
+        "PARK"
+      ],
+      "pick_location": "SHELF-W0242",
+      "drop_location": "SHELF-W0180",
+      "t_request": 5.15,
+      "deadline": 245.15,
+      "priority": 2
+    },
+    {
+      "task_id": "T0011",
+      "event_id": "E0011",
+      "agent_id": "W-R11",
+      "status": "ASSIGNED",
+      "warehouse_id": "W",
+      "legs": [
+        {
+          "from": "SHELF-W0281",
+          "to": "W-SORT-01",
+          "sku": "SKU-0169",
+          "qty": 2
+        }
+      ],
+      "home_id": "HOME-W-R11",
+      "return_to": "HOME-W-R11",
+      "route_kind": "CLOSED_LOOP",
+      "phases": [
+        "DEADHEAD_OUT",
+        "PICK",
+        "LOADED",
+        "DROP",
+        "DEADHEAD_BACK",
+        "PARK"
+      ],
+      "pick_location": "SHELF-W0281",
+      "drop_location": "W-SORT-01",
+      "t_request": 5.53,
+      "deadline": 245.53,
+      "priority": 1
+    },
+    {
+      "task_id": "T0012",
+      "event_id": "E0012",
+      "agent_id": "W-R12",
+      "status": "ASSIGNED",
+      "warehouse_id": "W",
+      "legs": [
+        {
+          "from": "SHELF-W0282",
+          "to": "SHELF-W0220",
+          "sku": "SKU-0191",
+          "qty": 5
+        }
+      ],
+      "home_id": "HOME-W-R12",
+      "return_to": "HOME-W-R12",
+      "route_kind": "CLOSED_LOOP",
+      "phases": [
+        "DEADHEAD_OUT",
+        "PICK",
+        "LOADED",
+        "DROP",
+        "DEADHEAD_BACK",
+        "PARK"
+      ],
+      "pick_location": "SHELF-W0282",
+      "drop_location": "SHELF-W0220",
+      "t_request": 6.14,
+      "deadline": 246.14,
+      "priority": 2
+    },
+    {
+      "task_id": "T0013",
+      "event_id": "E0013",
+      "agent_id": "F1-R01",
+      "status": "ASSIGNED",
+      "warehouse_id": "F1",
+      "legs": [
+        {
+          "from": "SHELF-F10001",
+          "to": "F1-OU-02",
+          "sku": "SKU-0220",
+          "qty": 1
+        }
+      ],
+      "home_id": "HOME-F1-R01",
+      "return_to": "HOME-F1-R01",
+      "route_kind": "CLOSED_LOOP",
+      "phases": [
+        "DEADHEAD_OUT",
+        "PICK",
+        "LOADED",
+        "DROP",
+        "DEADHEAD_BACK",
+        "PARK"
+      ],
+      "pick_location": "SHELF-F10001",
+      "drop_location": "F1-OU-02",
+      "t_request": 6.66,
+      "deadline": 246.66,
+      "priority": 1
+    },
+    {
+      "task_id": "T0014",
+      "event_id": "E0014",
+      "agent_id": "F1-R02",
+      "status": "ASSIGNED",
+      "warehouse_id": "F1",
+      "legs": [
+        {
+          "from": "SHELF-F10002",
+          "to": "F1-OU-02",
+          "sku": "SKU-0149",
+          "qty": 3
+        }
+      ],
+      "home_id": "HOME-F1-R02",
+      "return_to": "HOME-F1-R02",
+      "route_kind": "CLOSED_LOOP",
+      "phases": [
+        "DEADHEAD_OUT",
+        "PICK",
+        "LOADED",
+        "DROP",
+        "DEADHEAD_BACK",
+        "PARK"
+      ],
+      "pick_location": "SHELF-F10002",
+      "drop_location": "F1-OU-02",
+      "t_request": 7.06,
+      "deadline": 247.06,
+      "priority": 1
+    },
+    {
+      "task_id": "T0015",
+      "event_id": "E0015",
+      "agent_id": "F1-R03",
+      "status": "ASSIGNED",
+      "warehouse_id": "F1",
+      "legs": [
+        {
+          "from": "SHELF-F10014",
+          "to": "SHELF-F10016",
+          "sku": "SKU-0043",
+          "qty": 4
+        }
+      ],
+      "home_id": "HOME-F1-R03",
+      "return_to": "HOME-F1-R03",
+      "route_kind": "CLOSED_LOOP",
+      "phases": [
+        "DEADHEAD_OUT",
+        "PICK",
+        "LOADED",
+        "DROP",
+        "DEADHEAD_BACK",
+        "PARK"
+      ],
+      "pick_location": "SHELF-F10014",
+      "drop_location": "SHELF-F10016",
+      "t_request": 7.61,
+      "deadline": 247.61,
+      "priority": 2
+    },
+    {
+      "task_id": "T0016",
+      "event_id": "E0016",
+      "agent_id": "F2-R01",
+      "status": "ASSIGNED",
+      "warehouse_id": "F2",
+      "legs": [
+        {
+          "from": "SHELF-F20001",
+          "to": "F2-OU-02",
+          "sku": "SKU-0202",
+          "qty": 2
+        }
+      ],
+      "home_id": "HOME-F2-R01",
+      "return_to": "HOME-F2-R01",
+      "route_kind": "CLOSED_LOOP",
+      "phases": [
+        "DEADHEAD_OUT",
+        "PICK",
+        "LOADED",
+        "DROP",
+        "DEADHEAD_BACK",
+        "PARK"
+      ],
+      "pick_location": "SHELF-F20001",
+      "drop_location": "F2-OU-02",
+      "t_request": 8.06,
+      "deadline": 248.06,
+      "priority": 1
+    },
+    {
+      "task_id": "T0017",
+      "event_id": "E0017",
+      "agent_id": "F2-R02",
+      "status": "ASSIGNED",
+      "warehouse_id": "F2",
+      "legs": [
+        {
+          "from": "SHELF-F20002",
+          "to": "F2-OU-02",
+          "sku": "SKU-0033",
+          "qty": 5
+        }
+      ],
+      "home_id": "HOME-F2-R02",
+      "return_to": "HOME-F2-R02",
+      "route_kind": "CLOSED_LOOP",
+      "phases": [
+        "DEADHEAD_OUT",
+        "PICK",
+        "LOADED",
+        "DROP",
+        "DEADHEAD_BACK",
+        "PARK"
+      ],
+      "pick_location": "SHELF-F20002",
+      "drop_location": "F2-OU-02",
+      "t_request": 8.61,
+      "deadline": 248.61,
+      "priority": 1
+    },
+    {
+      "task_id": "T0018",
+      "event_id": "E0018",
+      "agent_id": "F2-R03",
+      "status": "ASSIGNED",
+      "warehouse_id": "F2",
+      "legs": [
+        {
+          "from": "SHELF-F20014",
+          "to": "SHELF-F20016",
+          "sku": "SKU-0212",
+          "qty": 4
+        }
+      ],
+      "home_id": "HOME-F2-R03",
+      "return_to": "HOME-F2-R03",
+      "route_kind": "CLOSED_LOOP",
+      "phases": [
+        "DEADHEAD_OUT",
+        "PICK",
+        "LOADED",
+        "DROP",
+        "DEADHEAD_BACK",
+        "PARK"
+      ],
+      "pick_location": "SHELF-F20014",
+      "drop_location": "SHELF-F20016",
+      "t_request": 9.17,
+      "deadline": 249.17,
+      "priority": 2
+    },
+    {
+      "task_id": "T0019",
+      "event_id": "E0019",
+      "agent_id": "F3-R01",
+      "status": "ASSIGNED",
+      "warehouse_id": "F3",
+      "legs": [
+        {
+          "from": "SHELF-F30001",
+          "to": "F3-OU-02",
+          "sku": "SKU-0178",
+          "qty": 3
+        }
+      ],
+      "home_id": "HOME-F3-R01",
+      "return_to": "HOME-F3-R01",
+      "route_kind": "CLOSED_LOOP",
+      "phases": [
+        "DEADHEAD_OUT",
+        "PICK",
+        "LOADED",
+        "DROP",
+        "DEADHEAD_BACK",
+        "PARK"
+      ],
+      "pick_location": "SHELF-F30001",
+      "drop_location": "F3-OU-02",
+      "t_request": 9.55,
+      "deadline": 249.55,
+      "priority": 1
+    },
+    {
+      "task_id": "T0020",
+      "event_id": "E0020",
+      "agent_id": "F3-R02",
+      "status": "ASSIGNED",
+      "warehouse_id": "F3",
+      "legs": [
+        {
+          "from": "SHELF-F30002",
+          "to": "F3-OU-02",
+          "sku": "SKU-0146",
+          "qty": 3
+        }
+      ],
+      "home_id": "HOME-F3-R02",
+      "return_to": "HOME-F3-R02",
+      "route_kind": "CLOSED_LOOP",
+      "phases": [
+        "DEADHEAD_OUT",
+        "PICK",
+        "LOADED",
+        "DROP",
+        "DEADHEAD_BACK",
+        "PARK"
+      ],
+      "pick_location": "SHELF-F30002",
+      "drop_location": "F3-OU-02",
+      "t_request": 10.05,
+      "deadline": 250.05,
+      "priority": 1
+    },
+    {
+      "task_id": "T0021",
+      "event_id": "E0021",
+      "agent_id": "F3-R03",
+      "status": "ASSIGNED",
+      "warehouse_id": "F3",
+      "legs": [
+        {
+          "from": "SHELF-F30014",
+          "to": "SHELF-F30016",
+          "sku": "SKU-0002",
+          "qty": 4
+        }
+      ],
+      "home_id": "HOME-F3-R03",
+      "return_to": "HOME-F3-R03",
+      "route_kind": "CLOSED_LOOP",
+      "phases": [
+        "DEADHEAD_OUT",
+        "PICK",
+        "LOADED",
+        "DROP",
+        "DEADHEAD_BACK",
+        "PARK"
+      ],
+      "pick_location": "SHELF-F30014",
+      "drop_location": "SHELF-F30016",
+      "t_request": 10.6,
+      "deadline": 250.6,
+      "priority": 2
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "agv_radius_m": 0.7296,
+  "agv_length_width_m": [
+    1.12,
+    0.77
+  ],
+  "obstacle_rects": 247,
+  "obstacles_by_kind": {
+    "RACK": 196,
+    "DOCK": 10,
+    "CONVEYOR": 2,
+    "STATION": 6,
+    "CHARGER": 12,
+    "PILLAR": 16,
+    "FORKLIFT": 3,
+    "TRUCK": 2
+  },
+  "agents": 21,
+  "segments_checked": 5400,
+  "max_segment_jump_m": 0.7071,
+  "min_path_to_obstacle_m": 1.05,
+  "segment_crossings_raw": 0,
+  "segment_crossings_with_agv_radius": 0,
+  "sample_crossings": [],
+  "verdict": "PASS"
+}

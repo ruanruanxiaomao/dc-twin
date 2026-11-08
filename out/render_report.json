@@ -1,0 +1,67 @@
+{
+  "engine": "BLENDER_EEVEE",
+  "fps": 8,
+  "frame_start": 1,
+  "frame_end": 942,
+  "expected_frames": 942,
+  "frames_rendered": 942,
+  "anim_width": 960,
+  "anim_height": 540,
+  "still_shots": [
+    {
+      "camera": "CAM_overview",
+      "file": "01_overview.png",
+      "bytes": 2248867,
+      "width": 1920,
+      "height": 1080,
+      "frame": 1,
+      "t_s": 0.0
+    },
+    {
+      "camera": "CAM_interior",
+      "file": "02_interior.png",
+      "bytes": 2684460,
+      "width": 1920,
+      "height": 1080,
+      "frame": 236,
+      "t_s": 29.38
+    },
+    {
+      "camera": "CAM_dock",
+      "file": "03_dock.png",
+      "bytes": 2154797,
+      "width": 1920,
+      "height": 1080,
+      "frame": 330,
+      "t_s": 41.12
+    },
+    {
+      "camera": "CAM_route",
+      "file": "04_agv_route.png",
+      "bytes": 2535145,
+      "width": 1920,
+      "height": 1080,
+      "frame": 170,
+      "t_s": 21.12
+    },
+    {
+      "camera": "CAM_heatmap",
+      "file": "05_slotting_heatmap.png",
+      "bytes": 2277769,
+      "width": 1920,
+      "height": 1080,
+      "frame": 208,
+      "t_s": 25.88
+    },
+    {
+      "camera": "CAM_corridor_zoom",
+      "file": "06_corridor_check.png",
+      "bytes": 2526045,
+      "width": 1920,
+      "height": 1080,
+      "frame": 114,
+      "t_s": 14.12
+    }
+  ],
+  "duration_s": 117.75
+}

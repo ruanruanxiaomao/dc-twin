@@ -1,0 +1,140 @@
+{
+  "route_kind": "CLOSED_LOOP",
+  "routes": 21,
+  "closed_loops": 21,
+  "loop_leg_lengths_m": {
+    "W-R01": [
+      38.21,
+      2.83,
+      37.04
+    ],
+    "W-R02": [
+      18.57,
+      42.83,
+      38.21
+    ],
+    "W-R03": [
+      26.57,
+      48.45,
+      38.41
+    ],
+    "W-R04": [
+      38.21,
+      54.62,
+      27.36
+    ],
+    "W-R05": [
+      38.21,
+      18.0,
+      56.21
+    ],
+    "W-R06": [
+      38.41,
+      39.12,
+      11.36
+    ],
+    "W-R07": [
+      41.95,
+      40.54,
+      11.54
+    ],
+    "W-R08": [
+      41.12,
+      18.0,
+      59.12
+    ],
+    "W-R09": [
+      41.33,
+      51.04,
+      24.61
+    ],
+    "W-R10": [
+      41.95,
+      18.0,
+      59.95
+    ],
+    "W-R11": [
+      41.12,
+      25.33,
+      39.4
+    ],
+    "W-R12": [
+      41.33,
+      18.0,
+      59.33
+    ],
+    "F1-R01": [
+      24.71,
+      17.5,
+      7.21
+    ],
+    "F1-R02": [
+      24.71,
+      27.21,
+      8.45
+    ],
+    "F1-R03": [
+      24.91,
+      3.5,
+      21.41
+    ],
+    "F2-R01": [
+      24.71,
+      17.5,
+      7.21
+    ],
+    "F2-R02": [
+      24.71,
+      27.21,
+      8.45
+    ],
+    "F2-R03": [
+      24.91,
+      3.5,
+      21.41
+    ],
+    "F3-R01": [
+      24.71,
+      17.5,
+      7.21
+    ],
+    "F3-R02": [
+      24.71,
+      27.21,
+      8.45
+    ],
+    "F3-R03": [
+      24.91,
+      3.5,
+      21.41
+    ]
+  },
+  "loop_leg_totals_m": [
+    669.97,
+    521.39,
+    573.75
+  ],
+  "segments_07": 3444,
+  "segments_08": 3444,
+  "path_obstacle_crossings": 0,
+  "route_head_on_pairs": 0,
+  "centerline_clearance_m": 1.05,
+  "edge_clearance_m": 0.3204,
+  "central_cross_aisle_samples": 128,
+  "home_bays": 21,
+  "sim_duration_s": 117.62,
+  "snapshot_times_s": [
+    0.0,
+    29.41,
+    58.81,
+    88.22,
+    117.62
+  ],
+  "images": [
+    "07_nav_plan.png",
+    "08_corridor_plan_zoom.png",
+    "09_time_space.png",
+    "10_snapshot_sequence.png"
+  ],
+  "note": "each coloured loop is one order: outbound empty / loaded / return empty; HOME bays are the shared origin and terminus"
+}

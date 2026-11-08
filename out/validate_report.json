@@ -1,0 +1,107 @@
+[
+  {
+    "item": "A1 布局实体零重叠",
+    "status": "PASS",
+    "detail": "独立复算重叠=0；layout_audit issues=0 verdict=PASS"
+  },
+  {
+    "item": "A2 全部访问点在通道内且净距 >=0.5 m",
+    "status": "PASS",
+    "detail": "locations=441 异常=0 layout_audit warnings=0"
+  },
+  {
+    "item": "A3 出生点不在实体内且两两 >=1.5 m",
+    "status": "PASS",
+    "detail": "agents=21 异常=[]"
+  },
+  {
+    "item": "A4 AGV_RADIUS 下路径零穿越实体",
+    "status": "PASS",
+    "detail": "独立复算 5400 段命中=0；geometry radius=0.7296 min_clearance=1.05"
+  },
+  {
+    "item": "A5 全程在场：任意时刻两车中心距 >= 2×AGV_RADIUS",
+    "status": "PASS",
+    "detail": "threshold=1.4592 m；min_pair=1.5358 m at [53.15, 'W-R01', 'W-R03']；traffic issues=0；严格口径冲突=0；完成车离场=False"
+  },
+  {
+    "item": "A6 每台车首帧等于出生点（无瞬移）",
+    "status": "PASS",
+    "detail": "agents=21 不匹配=[]"
+  },
+  {
+    "item": "A7 所有移动段速度 ∈[0.8,1.5] m/s",
+    "status": "PASS",
+    "detail": "独立复算异常段=0；config speed=1.5"
+  },
+  {
+    "item": "A8 相邻关键帧 |Δθ| <=10°",
+    "status": "PASS",
+    "detail": "独立复算跳变=0；traffic HEADING_JUMP=0"
+  },
+  {
+    "item": "A9 frame_end 与视频帧数完整一致",
+    "status": "PASS",
+    "detail": "blend frame_end=942 render 1->942 frames=942/942 mp4=117.75s"
+  },
+  {
+    "item": "A10 事件/任务/货位/托盘引用完整可追溯",
+    "status": "PASS",
+    "detail": "events=21 坏=0 tasks=21 坏=0 slot坏=0 托盘=240/240"
+  },
+  {
+    "item": "A11 GLB/PNG/MP4 与 .blend 重开实测一致",
+    "status": "PASS",
+    "detail": "glb nodes=882 forbidden=[] DC_ROOT=True；png尺寸全对=True；objects 914/914 meshes 61/61"
+  },
+  {
+    "item": "A12 LICENSE / NOTICE 含 MIT 全文与资产哈希",
+    "status": "PASS",
+    "detail": "LICENSE=True NOTICE=True MIT段落=3 资产sha=e6bf591fa0a69038"
+  },
+  {
+    "item": "A13 验证器能失败且负测试逐例可核验",
+    "status": "PASS",
+    "detail": "validate 含 sys.exit(1)=True；负测试=7/7；逐例非0退出=True"
+  },
+  {
+    "item": "A14 从零复现所需文件齐备且计数自洽",
+    "status": "PASS",
+    "detail": "缺文件=[] 缺脚本=[]；layout.summary 无 path_samples=True；path_metrics.samples=5421 / paths=5421"
+  },
+  {
+    "item": "A15 订单 100% 执行且 5 种业务类型全部进视频",
+    "status": "PASS",
+    "detail": "executed 21/21 = 100.0%；pending 0；types=['INBOUND', 'OUTBOUND', 'PICK', 'REPLENISH', 'TRANSFER']"
+  },
+  {
+    "item": "A16 任务时间约束生效（start >= t_request，tardiness 可报告）",
+    "status": "PASS",
+    "detail": "违反释放时间=[]；on_time_rate=1.0；max_tardiness=0.0s；max_conflict_wait=19.5s"
+  },
+  {
+    "item": "A17 严格口径交通冲突归零（完成车全程在场）",
+    "status": "PASS",
+    "detail": "strict_violations=0；阈值=1.4592 m；semantics=STRICT / all agents present at all times; none leave scene"
+  },
+  {
+    "item": "A18 路线图语义：路数/迎头对/边缘间隙/时间-空间图/快照",
+    "status": "PASS",
+    "detail": "routes=21 segments=3444 head_on=0 edge_clearance=0.3204m central_cross_aisle_samples=128；09/10 尺寸=True/True"
+  },
+  {
+    "item": "A19 闭环作业数据链：HOME→PICK→DROP→HOME 且全程在场",
+    "status": "PASS",
+    "detail": "agents=21 异常=[]；pick_drop_stops=42；duration=117.62s"
+  },
+  {
+    "item": "A20 货物状态机与全程在场：托盘随车、库存可追溯、无隐藏 AGV",
+    "status": "PASS",
+    "detail": "cargos=21 loaded=21 delivered=21 transitions=42；.blend cargo=21/21 home_bays=21 agv_hidden=0"
+  },
+  {
+    "item": "A21 路线图闭环语义：首尾闭合 + 三段里程可复算",
+    "status": "PASS",
+    "detail": "closed=21/21；独立复算三段=[669.96, 521.37, 573.75]；route_report=[669.97, 521.39, 573.75]m；central_samples=128"
+  }
+]
