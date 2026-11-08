@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "demand_spec",
+  "type": "object",
+  "required": ["schema_version", "source", "sku", "orders"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "source": {"type": "object", "required": ["type"]},
+    "sku": {
+      "type": "object", "required": ["count"],
+      "properties": {"count": {"type": "integer", "minimum": 1}}
+    },
+    "orders": {
+      "type": "object", "required": ["per_hour", "mix", "priority", "deadline_s"],
+      "properties": {
+        "per_hour": {"type": "number", "exclusiveMinimum": 0},
+        "mix": {"type": "object"},
+        "priority": {"type": "object"},
+        "deadline_s": {"type": "object"}
+      }
+    }
+  }
+}

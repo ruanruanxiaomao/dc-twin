@@ -4,7 +4,7 @@ out/*.blend2
 runs/
 __pycache__/
 *.pyc
+*.bak
 .venv/
 *.log
 .DS_Store
-# _research/ 位于工作区上层，不属于本仓库

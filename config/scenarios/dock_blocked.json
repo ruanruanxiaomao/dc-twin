@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "id": "dock_blocked",
+  "name": "月台封锁：1 个出库月台封 1800 s",
+  "layout_spec": "../layout_spec.json",
+  "fleet_spec": "../fleet_spec.json",
+  "demand_spec": "../demand_spec.json",
+  "seed": 20261106,
+  "simulation": {"warmup_s": 0, "duration_s": 28800, "dt_s": 0.1, "fps": 8, "max_wall_clock_s": 900},
+  "overrides": {"demand.orders.per_hour": 45, "fleet.deployment": "as_spec"},
+  "disruptions": [
+    {"type": "dock_blocked", "dock": "W-OU-02", "duration_s": 1800}
+  ],
+  "assertions": [
+    {"metric": "reassigned", "op": ">=", "value": 1},
+    {"metric": "max_dock_queue", "op": ">=", "value": 1}
+  ],
+  "outputs": ["kpi.json", "assertions.json", "manifest.json", "report.md"]
+}

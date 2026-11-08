@@ -126,3 +126,21 @@ SOFTWARE.
 - `Pillow`、`imageio-ffmpeg` 仅在生成 2D 校验图与编码 MP4 时使用，运行时依赖见 `requirements.txt`；
   它们各自的许可证随安装包提供，本项目不再分发其源码。
 - `_research/repos/` 下的三个参考仓库保留各自原始 `LICENSE`，不参与运行。
+
+## 第十阶段新增（依据工作区 `DESIGN_PLAN.md`）
+
+- **设计文档 `DESIGN_PLAN.md`**（工作区根目录，2026-11-08）：本项目内部设计文档，
+  本轮按其 §5/§6/§7/§9/§15 新增四层配置、场景矩阵、KPI 与 A22–A40 验收；
+  仅引用其**方法与字段规范**，未复制其正文或任何第三方代码。
+- **UCI Online Retail II**（https://archive.ics.uci.edu/dataset/502/online+retail+ii，
+  **CC BY 4.0**）：`scripts/adapters/uci_retail.py` 只实现字段映射逻辑，
+  **不打包、不分发该数据集**；企业自行下载并按 docs/REAL_DATA_SOURCES.md 引用。
+  当前 `config/orders_sample.csv` 是本项目生成的合成样例，不是 UCI 数据。
+- **jsonschema 4.23.0**（MIT）、其传递依赖 `rpds-py`、`referencing`、
+  `jsonschema-specifications`：仅用于 `spec_layout.py` 的可选 schema 增强校验，
+  许可证随 PyPI 安装包提供，本项目不分发其源码。
+- **VDA 5050 / ISO 3691-4**：仅作为术语与接口预留引用（见
+  docs/REAL_DATA_SOURCES.md）；本项目**未实现** VDA 5050 兼容，
+  也**不复制** ISO 标准全文，不声称通过任何安全认证。
+- **Pillow 13.0.0（HPND）** / **imageio-ffmpeg 0.8.1（BSD-2-Clause）**：
+  版本已在 `requirements.txt` 锁定；许可证随安装包提供。

@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "id": "scale_50",
+  "name": "规模测试：90 单每小时 / 4 小时 / 50 台 AGV",
+  "layout_spec": "../layout_spec.json",
+  "fleet_spec": "../fleet_spec.json",
+  "demand_spec": "../demand_spec.json",
+  "seed": 20261106,
+  "simulation": {"warmup_s": 0, "duration_s": 14400, "dt_s": 0.1, "fps": 8, "max_wall_clock_s": 900},
+  "overrides": {"demand.orders.per_hour": 90, "fleet.size": 50},
+  "disruptions": [],
+  "assertions": [
+    {"metric": "fleet_size", "op": "==", "value": 50},
+    {"metric": "plan_wall_clock_s", "op": "<", "value": 300}
+  ],
+  "outputs": ["kpi.json", "assertions.json", "manifest.json", "report.md"]
+}

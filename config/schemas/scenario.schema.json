@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "scenario",
+  "type": "object",
+  "required": ["schema_version", "id", "layout_spec", "fleet_spec", "demand_spec", "seed", "simulation", "assertions"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "id": {"type": "string", "minLength": 1},
+    "seed": {"type": "integer"},
+    "layout_spec": {"type": "string"},
+    "fleet_spec": {"type": "string"},
+    "demand_spec": {"type": "string"},
+    "simulation": {
+      "type": "object",
+      "required": ["duration_s", "dt_s"],
+      "properties": {
+        "duration_s": {"type": "number", "exclusiveMinimum": 0},
+        "dt_s": {"type": "number", "exclusiveMinimum": 0},
+        "fps": {"type": "integer", "minimum": 1},
+        "max_wall_clock_s": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "overrides": {"type": "object"},
+    "disruptions": {"type": "array"},
+    "assertions": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["metric", "op", "value"],
+        "properties": {"metric": {"type": "string"},
+                       "op": {"enum": ["==", "!=", ">=", "<=", ">", "<"]},
+                       "value": {}}
+      }
+    },
+    "outputs": {"type": "array"}
+  }
+}

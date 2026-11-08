@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "id": "holiday",
+  "name": "大促：135 单每小时 / 4 小时 / 35 台 AGV",
+  "layout_spec": "../layout_spec.json",
+  "fleet_spec": "../fleet_spec.json",
+  "demand_spec": "../demand_spec.json",
+  "seed": 20261106,
+  "simulation": {"warmup_s": 0, "duration_s": 14400, "dt_s": 0.1, "fps": 8, "max_wall_clock_s": 900},
+  "overrides": {"demand.orders.per_hour": 135, "fleet.size": 35},
+  "disruptions": [],
+  "assertions": [
+    {"metric": "max_dock_queue", "op": "<=", "value": 20},
+    {"metric": "throughput_orders_per_h", "op": ">=", "value": 120},
+    {"metric": "orders_generated", "op": "==", "value": 540}
+  ],
+  "outputs": ["kpi.json", "assertions.json", "manifest.json", "report.md"]
+}

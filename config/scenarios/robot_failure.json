@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "id": "robot_failure",
+  "name": "故障：45 单每小时 / 3 台车各停 600 s",
+  "layout_spec": "../layout_spec.json",
+  "fleet_spec": "../fleet_spec.json",
+  "demand_spec": "../demand_spec.json",
+  "seed": 20261106,
+  "simulation": {"warmup_s": 0, "duration_s": 28800, "dt_s": 0.1, "fps": 8, "max_wall_clock_s": 900},
+  "overrides": {"demand.orders.per_hour": 45, "fleet.deployment": "as_spec"},
+  "disruptions": [
+    {"type": "robot_down", "agent": "W-R01", "duration_s": 600},
+    {"type": "robot_down", "agent": "W-R07", "duration_s": 600},
+    {"type": "robot_down", "agent": "F1-R02", "duration_s": 600}
+  ],
+  "assertions": [
+    {"metric": "fault_count", "op": ">=", "value": 3},
+    {"metric": "replans", "op": ">=", "value": 1},
+    {"metric": "strict_collisions", "op": "==", "value": 0}
+  ],
+  "outputs": ["kpi.json", "assertions.json", "manifest.json", "report.md"]
+}

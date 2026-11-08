@@ -1,0 +1,17 @@
+{
+  "spec": "tests/_tmp_spec/broken_6.json",
+  "verdict": "FAIL",
+  "issues": [
+    {
+      "rule": "L1",
+      "message": "schema_version must be \"1.0\""
+    }
+  ],
+  "warnings": [],
+  "mutex_groups": [],
+  "issue_kinds": {
+    "L1": 1
+  },
+  "warning_kinds": {},
+  "note": "schema validation failed before expansion"
+}

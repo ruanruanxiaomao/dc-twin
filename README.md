@@ -2,10 +2,14 @@
 
 Blender 5.2.3 LTS 的配送中心场景与任务驱动 AGV 仿真。**主交付是 `.blend` 工程 + 可复现的数据/脚本链**，图/视频/GLB 为辅。
 
-> 本版本已完成 `AUDIT_REPORT.md` 两轮审计的 P0 整改与主要 P1 修复，并把「一次性单程搬运」升级为**闭环作业**：
-> HOME 待命 → 取货 → 交付 → 回 HOME，全程在场、严格口径零冲突、货物随车移动。
-> 验收 A1–A21 全部独立实测，且验证器能失败（见 `tests/`）。
-> 当前数字一律以 `out/CURRENT_STATUS.md` 为准（由脚本从 JSON 生成）。
+> 本版本已完成 `AUDIT_REPORT.md` 两轮审计与 `DESIGN_PLAN.md`（参数化/场景化设计）：
+> 闭环作业（HOME → 取货 → 交付 → 回 HOME、全程在场、货物随车）、
+> **四层配置**（布局/设备/需求/场景，改 JSON 不改 Python）、
+> 8 个可断言场景、25 个带公式 KPI、车队状态机与预约表复核。
+> 验收 **A1–A40** 全部独立实测，17 个负测试全部能失败（见 `tests/`）。
+> 当前数字一律以 `out/CURRENT_STATUS.md` 为准（由脚本从 JSON 生成，禁止手写）。
+> 参数怎么填看 `docs/PARAMETER_GUIDE.md`，企业落地看 `docs/ENTERPRISE_SETUP.md`，
+> 数据源与许可看 `docs/REAL_DATA_SOURCES.md`。
 
 ## 1. 环境
 
@@ -13,7 +17,7 @@ Blender 5.2.3 LTS 的配送中心场景与任务驱动 AGV 仿真。**主交付�
 |---|---|
 | Blender | 5.2.3 LTS（本机 `C:\Program Files\Blender Foundation\Blender 5.2\blender.exe`） |
 | Python | 3.13（实测），3.11+ 应可用 |
-| 依赖 | `pip install -r requirements.txt`（Pillow、imageio-ffmpeg） |
+| 依赖 | `pip install -r requirements.txt`（pillow / imageio-ffmpeg / jsonschema，版本已锁定；无 `.venv` 时 `run_all.ps1` 会自动补装） |
 
 `blender` 不在 PATH 时设置 `$env:BLENDER_EXE = '...\blender.exe'`，脚本会读取。
 
@@ -22,21 +26,30 @@ Blender 5.2.3 LTS 的配送中心场景与任务驱动 AGV 仿真。**主交付�
 ```powershell
 cd C:\Users\OYC\Desktop\blender\dc_project
 .\run_all.ps1
+# 或额外再跑一个指定场景：
+.\run_all.ps1 -Scenario config/scenarios/peak.json
 ```
 
 任一步退出码非 0 即 `throw`。脚本顺序**不可颠倒**：
 
 ```
-gen_data → layout_audit → nav_grid → optimize_slotting → gen_tasks
-→ plan_paths → gen_cargo → traffic_check → check_geometry → plot_nav_plan
-→ build_dc → animate → inspect_blend → export_glb → render → annotate_heatmap
-→ encode_video → parse_artifacts → test_validator_can_fail → validate → report_status
+spec_layout → gen_data → layout_audit → nav_grid → optimize_slotting
+→ gen_tasks → plan_paths → gen_cargo → traffic_check → check_geometry
+→ plot_nav_plan → scenario_run --all → csv_orders → fleet_sim → reservation_check
+→ build_dc → animate → inspect_blend → export_glb → render
+→ annotate_heatmap → encode_video → parse_artifacts
+→ test_spec_layout → test_scenario → test_cleanroom → test_validator_can_fail
+→ validate → report_status
 ```
+
+**布局的唯一输入是 `config/layout_spec.json`**：改排数、bay 数、通道宽、月台门数、
+待命位都只改 JSON；`gen_data.py` 会调用 `spec_layout.py` 校验 PASS 后才写 `data/layout.json`。
 
 ## 3. 分步运行（调试）
 
 ```powershell
-python scripts/gen_data.py
+python scripts/spec_layout.py --spec config/layout_spec.json   # L1–L12 校验
+python scripts/gen_data.py            # 内部调用 spec_layout --write
 python scripts/layout_audit.py        # 布局实体冲突，必须退出 0
 python scripts/nav_grid.py            # 0.5 m 导航栅格
 python scripts/optimize_slotting.py
@@ -46,6 +59,10 @@ python scripts/gen_cargo.py           # 订单货物状态机（PICK/DROP、库�
 python scripts/traffic_check.py       # 全程在场：两车间距/速度/朝向，必须退出 0
 python scripts/check_geometry.py      # 线段 vs 实体，必须退出 0
 python scripts/plot_nav_plan.py
+python scripts/scenario_run.py --all                 # 8 个场景 + 断言 + runs/
+python scripts/adapters/csv_orders.py --csv config/orders_sample.csv --out out/csv_events.jsonl
+python scripts/fleet_sim.py                        # 状态机 + 电量
+python scripts/reservation_check.py                # 顶点/边冲突 + AP 互斥
 
 & $Blender -b --factory-startup -P scripts/build_dc.py
 & $Blender -b --factory-startup -P scripts/animate.py
@@ -56,22 +73,32 @@ python scripts/plot_nav_plan.py
 python scripts/annotate_heatmap.py    # 给 05 图叠 5 档图例
 python scripts/encode_video.py
 python scripts/parse_artifacts.py     # 必须在 encode_video 之后
-python scripts/validate.py            # A1–A21 硬门槛，任一 FAIL 退出 1
+python scripts/validate.py            # A1–A40 硬门槛，任一 FAIL 退出 1
 python scripts/report_status.py       # 生成 out/CURRENT_STATUS.md
-python tests/test_validator_can_fail.py   # 7 个负测试
+python tests/test_spec_layout.py          # 6 个 spec 负测试
+python tests/test_scenario.py             # 4 个场景/适配器负测试
+python tests/test_cleanroom.py            # 全新空目录复现
+python tests/test_validator_can_fail.py   # 7 个主链负测试
 ```
 
 ## 4. 目录
 
 ```
-data/     config.json · layout.json · skus.json · events.jsonl · tasks.json
-          slotting.json · nav_grid.json · paths.jsonl · routes.json
-          agent_schedules.json · path_metrics.json · cargo_state.json
-scripts/  20 个脚本（数据 / 校验 / 场景 / 渲染 / 解析）
+config/   layout_spec.json（布局唯一输入）· layout_spec_f4.json · layout_spec_wide.json
+          fleet_spec.json · demand_spec.json · orders_sample.csv
+          scenarios/ 8 个场景 · schemas/ 4 份 JSON Schema
+data/     config.json（L6 渲染/坐标）· layout.json · skus.json · events.jsonl
+          tasks.json · slotting.json · nav_grid.json · paths.jsonl · routes.json
+          agent_schedules.json · path_metrics.json · cargo_state.json   ← 全部派生，禁止手改
+scripts/  spec_layout.py · demand_source.py · scenario_run.py · kpi.py
+          fleet_sim.py · reservation_check.py · adapters/（csv/uci/wms）
+          + 原有 20 个数据/校验/场景/渲染/解析脚本
+docs/     ENTERPRISE_SETUP.md · PARAMETER_GUIDE.md · REAL_DATA_SOURCES.md
 assets/   cargotwin_assets.glb（MIT，见 THIRD_PARTY_NOTICES.md）
 out/      distribution_center.blend · dc_preview.glb · anim_dc.mp4
           renders/01–10 · *_report.json · CURRENT_STATUS.md
-tests/    test_validator_can_fail.py
+runs/     <scenario>/<timestamp>/（manifest / kpi / assertions / report.md）
+tests/    4 个负测试脚本，共 17 个能失败的用例
 ```
 
 ## 5. 预期产物
@@ -90,13 +117,26 @@ tests/    test_validator_can_fail.py
 | `data/cargo_state.json` | 21 件货物 `IN_STOCK→LOADED→DELIVERED`，42 次状态迁移、库位库存增减 |
 | `out/renders/09_time_space.png` | 21 台车 × 时间轴，MOVE/WAIT/PARK/ROTATE/FACE/PICK/DROP 分色 |
 | `out/renders/10_snapshot_sequence.png` | 5 个时刻快照，21 台车全程在场 |
+| `out/spec_layout_report.json` | `SPEC_LAYOUT PASS` 196 货架 / 441 库位 / 38 扇门 / 148 对 AP 互斥（WARN） |
+| `runs/<场景>/<时间戳>/kpi.json` | 25 个 KPI，每个带 `definition/formula/source` |
+| `out/fleet_report.json` | 147 次状态迁移、0 非法、电量最低 ≥ reserve |
+| `out/reservation_report.json` | 顶点 0 / 边交换 0 / 148 对 AP 互斥中 0 对同时占用 |
+| `out/csv_adapter_report.json` | CSV 24 行、引用完整、schema 合法 |
 | `out/CURRENT_STATUS.md` | 由 JSON 自动生成的当前状态表（单一真相源） |
-| `out/validate_report.json` | A1–A21 全 PASS，进程退出码 0 |
+| `out/validate_report.json` | **A1–A40 全 PASS**，进程退出码 0 |
 
 ## 6. 关键设计
 
 - **坐标**：`layout` 平面 `[x,z]` → Blender `(X,Y,Z)=(x,z,h)`，Z-up 米制；GLB `export_yup=True`。
-- **唯一真相源**：`config.json` 管参数，`layout.json` 只由 `gen_data.py` 写；`nav_grid.json` 由 `nav_grid.py` 生成，规划器与校验器共用 `geometry.py` 的 `AGV_RADIUS = 0.7296 m`（AMR 实测 1.12×0.77 m 外接圆 + 0.05 m 余量）。
+- **唯一真相源（四层配置）**：`config/layout_spec.json` 是布局**唯一输入**，
+  `spec_layout.py` 做 L1–L12 校验后展开成 `data/layout.json`（`--write` 前自动备份）；
+  `fleet_spec.json` / `demand_spec.json` / `scenarios/*.json` 分别是设备/需求/场景的唯一输入。
+  `data/config.json` 只剩 L6 渲染与坐标约定。所有 `data/*.json`、`out/*.json` 都是**派生**，禁止手改。
+- **几何常量**：规划器与校验器共用 `geometry.py` 的 `AGV_RADIUS = 0.7296 m`
+  （AMR 实测 1.12×0.77 m 外接圆 + 0.05 m 余量）；`MIN_SEP = 2*AGV_RADIUS = 1.4592 m` 是物理阈值，禁止为了通过测试而调小。
+- **AP 互斥区**：`spec_layout.py` 输出 148 对 `mutex_groups`（两 AP 距离 <2R 不能同时占用）。
+  当前由 `traffic_check.py` 的全局中心距判据**隐含**保证，`reservation_check.py` 独立复算 0 对同时占用。
+  `config/layout_spec_wide.json` 演示方案 A：仅 W 仓通道 4.2 m + AP offset 1.25 → 互斥降到 29 对。
 - **栅格**：0.5 m，所有实体（含月台、柱子、园区车辆）按 AGV 半径膨胀后保守格化。
 - **闭环作业**：一张订单 = 一台车一个完整循环 `HOME → PICK → DROP → HOME`，三段 A* 折点分别记为去程空驶 / 载货 / 回程空驶。取货点在该车专属排间通道深端，交付点按「闭环总里程最短」选真实月台 / 打包台 / 对面半区货架；TRANSFER 单强制跨中央主通道。
 - **HOME 待命位**：每台车有显式 `HOME` 库位（对齐 0.5 m 栅格中心），贴在东西墙 / F 仓东侧待命带，彼此 ≥4 m；A* 对其它车的 HOME 加软代价，避免「停着的车被经过的车擦到」。
@@ -113,17 +153,29 @@ tests/    test_validator_can_fail.py
 3. **货物是订单级箱体**：一件货 = 一张单，未模拟拆箱、托盘层级、批次、叉臂升降；`cargo_state.json` 只记订单级状态与库位库存增减。
 4. **货位优化是 distance_greedy**：目标函数 `Σ(velocity × BFS 通道距离)`，排序配对即 1D 最优（`gap_to_lower_bound=0`）；**未实现 COI 的 cube-per-order 与订单共现约束**。
 5. **GLB 是静态预览**（`export_animations=False`），动画请看 MP4 / `.blend`；视频是 8 fps 匀速单轮演示，无加减速。
-6. **运营层未做**：WMS / 车队管理 / 电量故障 / 站台排队 / 运营 KPI / 真实数据校准；每车只执行 1 张订单。
-7. **场景装饰**（相机、灯、叉车、卡车、道路）参数来自 `config.scene`；园区卡车停在北侧 yard，不在月台门前（未摆拍）。
-8. `events` 驱动任务、货物与视频角标，但未做逐帧库位颜色动画；材质为程序化纯色。
+6. **场景层是解析 what-if**：`scenario_run.py` 用 M/M/c 排队近似算吞吐/等待/利用率，
+   **不是逐车 A\* 仿真**；碰撞与路径仍以主链 `traffic_check.py` / `path_metrics.json` 为准，
+   每个 KPI 都标了 source。8 个场景的订单均为合成，未接企业真实数据。
+7. **运营层是离线回放**：`fleet_sim.py` 基于主链 21 单路径回放状态机与电量，
+   尚未把电量/故障/任务队列接进调度循环（DESIGN_PLAN Step 7 未做）；每车仍只执行 1 张订单。
+8. **交通层是独立复核**：`reservation_check.py` 在 0.05 s / 0.5 m 粒度验证顶点/边冲突，
+   **没有**实现 CBS / WHCA* / tick 级预约表；0 冲突不是连续时间的形式化证明。
+9. **场景装饰**（相机、灯、叉车、卡车、道路）参数来自 `data/config.json` 的 `scene`；
+   园区卡车停在北侧 yard，不在月台门前（未摆拍）。
+10. `events` 驱动任务、货物与视频角标，但未做逐帧库位颜色动画；材质为程序化纯色；
+    GLB 仍是静态预览（`export_animations=False`）；视频 8 fps 匀速、无加减速。
 
-## 8. 常见错误
+## 8. 常见错误与排查
 
 | 现象 | 处理 |
 |---|---|
 | `Blender not found` | 设置 `$env:BLENDER_EXE`，或修改 `run_all.ps1` 里的路径 |
 | `ModuleNotFoundError: imageio_ffmpeg` | `pip install -r requirements.txt` |
 | `ModuleNotFoundError: PIL` | 同上 |
+| `SPEC_LAYOUT FAIL` | 检查 `config/layout_spec.json`：`racks[].origin` 是**仓库局部坐标**；对照 `docs/PARAMETER_GUIDE.md` 的 L1–L12 表按规则修参数，不要改阈值 |
+| `AP_MUTEX warnings` | 预期 148 条 WARN（不是几何错误）；调度需保证互斥 AP 不同时占用，或按 `layout_spec_wide.json` 加宽通道 |
+| `SCENARIO ... FAIL` | 看 `runs/<id>/<ts>/assertions.json` 的 `actual`，按 DESIGN_PLAN §16.2 排查；断言本来就可能失败 |
+| `CSV_MISSING_COLUMNS` / `CSV_VALIDATION_FAIL` | 对照 `demand_spec.csv_mapping` 补齐列；`from/to/return_to` 必须是 `layout.json` 里存在的库位 |
 | `LAYOUT_AUDIT FAIL` | 不要跳过；先修 `layout.json` 的实体重叠，`plan_paths` 依赖它 |
 | `SCHEDULE_FAIL` | 检查任务点分布与冲突结构（缩短单点任务、增加通道），不要把 `MIN_SEP` 调小、也不要一味放宽 `max_schedule_wait_s` |
 | JSON 中文在 PowerShell 5.1 显示乱码 | 用 Python 读；文件本身是 UTF-8 |

@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0",
+  "source": {
+    "type": "synthetic",
+    "seed": 20261106,
+    "note": "synthetic (Zipf + fixed seed); NOT real orders. Replace with csv/wms/uci after calibration."
+  },
+  "sku": {
+    "count": 240,
+    "abc": {"A": 0.2, "B": 0.5, "C": 0.3},
+    "velocity": {"distribution": "zipf", "s": 0.85},
+    "cube_m3": [0.04, 0.16],
+    "weight_kg": [4, 28]
+  },
+  "orders": {
+    "per_hour": 45,
+    "mix": {
+      "INBOUND": 0.2,
+      "OUTBOUND": 0.25,
+      "PICK": 0.25,
+      "REPLENISH": 0.15,
+      "TRANSFER": 0.15
+    },
+    "qty": {"distribution": "lognormal", "mean": 2.2, "sigma": 0.8, "min": 1, "max": 20},
+    "priority": {"P1": 0.1, "P2": 0.6, "P3": 0.3},
+    "deadline_s": {"P1": 900, "P2": 3600, "P3": 7200},
+    "return_to_home": true,
+    "max_legs_per_order": 2
+  },
+  "waves": [
+    {"start": "08:00", "end": "10:00", "multiplier": 1.5},
+    {"start": "14:00", "end": "16:00", "multiplier": 1.3}
+  ],
+  "calendar": {
+    "shift_h": 8,
+    "days": 5,
+    "breaks": [{"at": "12:00", "duration_min": 30}]
+  },
+  "csv_mapping": {
+    "order_id": "order_id",
+    "sku": "sku",
+    "qty": "qty",
+    "type": "type",
+    "t_request_s": "t_request_s",
+    "priority": "priority",
+    "deadline_s": "deadline_s",
+    "from_location": "from_location",
+    "to_location": "to_location"
+  },
+  "meta": {
+    "note": "orders.per_hour=45 是 placeholder（不是现场实测）。主链 demo 为 21 单/117.62 s，与本 spec 的 8 h/360 单不是同一窗口；场景层用 runs/ 独立试算。",
+    "todo": ["用最近 3 个月 WMS 订单行重估 per_hour 与 mix", "用 SKU 频次替换 Zipf", "用订单行数量分布替换 lognormal"]
+  }
+}

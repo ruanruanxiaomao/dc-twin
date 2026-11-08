@@ -1,4 +1,8 @@
-# 实测环境：Python 3.13.14 / Windows / Blender 5.2.3 LTS
-# 仅 plot_nav_plan.py 与 encode_video.py 需要这两个包；其余脚本为纯标准库 + bpy。
+# 实测环境：Python 3.13 / Windows / Blender 5.2.3 LTS
+# 版本锁定（DESIGN_PLAN §0.2 规则 6 / §9 Step 10）
+# plot_nav_plan.py、annotate_heatmap.py、负测试需要 Pillow；
+# encode_video.py 需要 imageio-ffmpeg（自带 ffmpeg 二进制）；
+# spec_layout.py 用 jsonschema 做可选增强校验（未安装时回退到纯标准库必填校验）。
 pillow==13.0.0
 imageio-ffmpeg==0.8.1
+jsonschema==4.23.0

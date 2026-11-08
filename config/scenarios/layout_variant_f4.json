@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "id": "layout_variant_f4",
+  "name": "布局变体：新增前置仓 F4 / 24 台 AGV",
+  "layout_spec": "../layout_spec_f4.json",
+  "fleet_spec": "../fleet_spec.json",
+  "demand_spec": "../demand_spec.json",
+  "seed": 20261106,
+  "simulation": {"warmup_s": 0, "duration_s": 28800, "dt_s": 0.1, "fps": 8, "max_wall_clock_s": 900},
+  "overrides": {"demand.orders.per_hour": 45, "fleet.size": 24},
+  "disruptions": [],
+  "assertions": [
+    {"metric": "layout_issues", "op": "==", "value": 0},
+    {"metric": "warehouses", "op": "==", "value": 5},
+    {"metric": "robots", "op": "==", "value": 24}
+  ],
+  "outputs": ["kpi.json", "assertions.json", "manifest.json", "report.md"]
+}

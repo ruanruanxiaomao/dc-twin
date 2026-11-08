@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "id": "baseline",
+  "name": "基线：单班 8 小时 / 45 单每小时 / 21 台 AGV",
+  "layout_spec": "../layout_spec.json",
+  "fleet_spec": "../fleet_spec.json",
+  "demand_spec": "../demand_spec.json",
+  "seed": 20261106,
+  "simulation": {"warmup_s": 0, "duration_s": 28800, "dt_s": 0.1, "fps": 8, "max_wall_clock_s": 900},
+  "overrides": {"demand.orders.per_hour": 45, "fleet.deployment": "as_spec"},
+  "disruptions": [],
+  "assertions": [
+    {"metric": "strict_collisions", "op": "==", "value": 0},
+    {"metric": "on_time_rate", "op": ">=", "value": 0.95},
+    {"metric": "max_tardiness_s", "op": "<=", "value": 600},
+    {"metric": "event_coverage", "op": "==", "value": 1.0},
+    {"metric": "orders_generated", "op": "==", "value": 360}
+  ],
+  "outputs": ["kpi.json", "assertions.json", "manifest.json", "report.md"]
+}

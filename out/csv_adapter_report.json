@@ -1,0 +1,19 @@
+{
+  "csv": "config/orders_sample.csv",
+  "rows_out": 24,
+  "required_columns": [
+    "order_id",
+    "sku",
+    "qty",
+    "type",
+    "t_request_s",
+    "priority",
+    "deadline_s",
+    "from_location",
+    "to_location"
+  ],
+  "referential_integrity_errors": [],
+  "schema_valid": true,
+  "verdict": "PASS",
+  "note": "mapping comes from demand_spec.json -> csv_mapping"
+}

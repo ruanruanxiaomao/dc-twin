@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "id": "night",
+  "name": "夜班：10 单每小时 / 8 小时 / 12 台 AGV",
+  "layout_spec": "../layout_spec.json",
+  "fleet_spec": "../fleet_spec.json",
+  "demand_spec": "../demand_spec.json",
+  "seed": 20261106,
+  "simulation": {"warmup_s": 0, "duration_s": 28800, "dt_s": 0.1, "fps": 8, "max_wall_clock_s": 900},
+  "overrides": {"demand.orders.per_hour": 10, "fleet.size": 12},
+  "disruptions": [],
+  "assertions": [
+    {"metric": "utilization", "op": "<=", "value": 0.4},
+    {"metric": "orders_generated", "op": "==", "value": 80}
+  ],
+  "outputs": ["kpi.json", "assertions.json", "manifest.json", "report.md"]
+}

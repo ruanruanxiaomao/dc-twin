@@ -1,0 +1,17 @@
+{
+  "method": "time-expanded reservation replay (vertex + edge swap), 0.05 s / 0.5 m",
+  "agents": 21,
+  "sample_dt_s": 0.05,
+  "cell_size_m": 0.5,
+  "samples": 2353,
+  "t_end_s": 117.623,
+  "vertex_conflicts": 0,
+  "edge_conflicts": 0,
+  "vertex_samples": [],
+  "edge_samples": [],
+  "mutex_pairs_total": 148,
+  "mutex_simultaneous_occupations": 0,
+  "mutex_samples": [],
+  "verdict": "PASS",
+  "note": "AP_MUTEX is currently prevented implicitly by the global center-distance >= 2*AGV_RADIUS rule in traffic_check.py, NOT by an explicit mutex lock in plan_paths.py. A 0 result is NOT a continuous-time / CBS proof."
+}

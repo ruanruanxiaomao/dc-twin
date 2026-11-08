@@ -103,5 +103,100 @@
     "item": "A21 路线图闭环语义：首尾闭合 + 三段里程可复算",
     "status": "PASS",
     "detail": "closed=21/21；独立复算三段=[669.96, 521.37, 573.75]；route_report=[669.97, 521.39, 573.75]m；central_samples=128"
+  },
+  {
+    "item": "A22 四层配置与 schema 合法",
+    "status": "PASS",
+    "detail": "config_files=17 解析失败=[]；L1 issues=0；spec verdict=PASS"
+  },
+  {
+    "item": "A23 spec 展开确定性（两次 + 落盘一致）",
+    "status": "PASS",
+    "detail": "sha=483e82d69becd4cd / 483e82d69becd4cd / 483e82d69becd4cd"
+  },
+  {
+    "item": "A24 多布局审计：当前/F4/加宽 3 spec 全 PASS 且方案A降低互斥",
+    "status": "PASS",
+    "detail": "baseline={'issues': 0, 'mutex': 148, 'racks': 196, 'warehouses': 4}；F4={'issues': 0, 'mutex': 157, 'racks': 208, 'warehouses': 5}；wide={'issues': 0, 'mutex': 29, 'racks': 196, 'warehouses': 4}"
+  },
+  {
+    "item": "A25 baseline 场景可复现（独立重算 KPI）",
+    "status": "PASS",
+    "detail": "metrics=24 全部一致=True；seed=20261106"
+  },
+  {
+    "item": "A26 peak 吞吐 >=1.5×baseline 且断言可失败",
+    "status": "PASS",
+    "detail": "baseline=45.0 peak=90.0 ratio=2.000；断言=3"
+  },
+  {
+    "item": "A27 故障场景 fault_count>=3 且触发改派",
+    "status": "PASS",
+    "detail": "faults=3 replans=3 verdict=PASS"
+  },
+  {
+    "item": "A28 车队状态机无非法迁移",
+    "status": "PASS",
+    "detail": "transitions=147 独立复算非法=0"
+  },
+  {
+    "item": "A29 电量全程 >=reserve 且充电成对",
+    "status": "PASS",
+    "detail": "min_battery=53.986% reserve=5% 越界=0"
+  },
+  {
+    "item": "A30 所有车 start >= t_request",
+    "status": "PASS",
+    "detail": "agents=21 违反=[]"
+  },
+  {
+    "item": "A31 tardiness = max(0, t_end - deadline) 可报告",
+    "status": "PASS",
+    "detail": "不符合=[]；max_tardiness=0.0"
+  },
+  {
+    "item": "A32 每个 KPI 有 definition/formula/source",
+    "status": "PASS",
+    "detail": "kpis=25 缺字段=[] null无理由=[]"
+  },
+  {
+    "item": "A33 状态表数字由 JSON 生成（非手写）",
+    "status": "PASS",
+    "detail": "min_pair=1.5358 duration=117.62 clearance=1.05 均在状态表中"
+  },
+  {
+    "item": "A34 CSV 适配器输出 schema 合法且引用完整",
+    "status": "PASS",
+    "detail": "rows=24 引用错误=[]"
+  },
+  {
+    "item": "A35 50 车场景 plan_wall_clock <300 s",
+    "status": "PASS",
+    "detail": "fleet=50 wall_clock=0.043s"
+  },
+  {
+    "item": "A36 改 seed 后展开结果改变",
+    "status": "PASS",
+    "detail": "seed=20261106 sha=483e82d69becd4cd；seed+1 sha=bd4a353573dff088"
+  },
+  {
+    "item": "A37 负测试 >=12 且全部能失败",
+    "status": "PASS",
+    "detail": "reports=3 total=17 passed=17"
+  },
+  {
+    "item": "A38 参数表/场景表/故障排查文档齐全",
+    "status": "PASS",
+    "detail": "缺文档=[] README 含参数/场景/排查=True"
+  },
+  {
+    "item": "A39 新增数据源与依赖已登记许可",
+    "status": "PASS",
+    "detail": "NOTICE 含 UCI=True CC BY 4.0=True DESIGN_PLAN=True"
+  },
+  {
+    "item": "A40 全新空目录复现数据层（无 .venv）",
+    "status": "PASS",
+    "detail": "steps=9/9 identical=8/8"
   }
 ]

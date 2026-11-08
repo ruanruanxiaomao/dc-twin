@@ -424,6 +424,249 @@ def main():
           % (closed, len(rt), [round(v, 2) for v in leg_sum], rtot,
              rrep.get('central_cross_aisle_samples')))
 
+    # ================= 第十阶段：DESIGN_PLAN.md A22–A40 =================
+    import glob
+    sys.path.insert(0, os.path.join(ROOT, 'scripts'))
+    import spec_layout
+    import kpi as kpi_mod
+
+    def latest(pattern):
+        ds = sorted(glob.glob(os.path.join(ROOT, pattern)))
+        return ds[-1] if ds else None
+
+    def digest(obj):
+        return hashlib.sha256(json.dumps(obj, ensure_ascii=False,
+                                         sort_keys=True).encode('utf-8')).hexdigest()
+
+    CFG = os.path.join(ROOT, 'config')
+    spec = jload(os.path.join(CFG, 'layout_spec.json'))
+    spec_rep = jload(os.path.join(OUT, 'spec_layout_report.json'))
+
+    # A22 spec / 四层配置 schema 合法
+    cfg_files = ['layout_spec.json', 'fleet_spec.json', 'demand_spec.json',
+                 'layout_spec_f4.json', 'layout_spec_wide.json']
+    cfg_files += ['scenarios/' + os.path.basename(p) for p in
+                  glob.glob(os.path.join(CFG, 'scenarios', '*.json'))]
+    cfg_files += ['schemas/' + os.path.basename(p) for p in
+                  glob.glob(os.path.join(CFG, 'schemas', '*.json'))]
+    cfg_bad = []
+    for f in cfg_files:
+        try:
+            jload(os.path.join(CFG, f))
+        except Exception as e:
+            cfg_bad.append('%s:%s' % (f, e))
+    l1 = spec_layout.check_schema(spec)
+    ok22 = not cfg_bad and not l1 and spec_rep['verdict'] == 'PASS' \
+        and 'L1' not in spec_rep.get('issue_kinds', {})
+    check('A22 四层配置与 schema 合法', ok22,
+          'config_files=%s 解析失败=%s；L1 issues=%s；spec verdict=%s'
+          % (len(cfg_files), cfg_bad[:2], len(l1), spec_rep['verdict']))
+
+    # A23/A36 展开确定性与 seed 敏感性（独立重算，不读自报 hash）
+    e1 = spec_layout.expand(spec)
+    e2 = spec_layout.expand(spec)
+    e3 = jload(os.path.join(OUT, 'spec_layout.json'))
+    h1, h2, h3 = digest(e1), digest(e2), digest(e3)
+    check('A23 spec 展开确定性（两次 + 落盘一致）', h1 == h2 == h3,
+          'sha=%s / %s / %s' % (h1[:16], h2[:16], h3[:16]))
+    spec_seed = json.loads(json.dumps(spec))
+    spec_seed['site']['seed'] = spec['site']['seed'] + 1
+    h_seed = digest(spec_layout.expand(spec_seed))
+    check('A36 改 seed 后展开结果改变', h_seed != h1,
+          'seed=%s sha=%s；seed+1 sha=%s'
+          % (spec['site']['seed'], h1[:16], h_seed[:16]))
+
+    # A24 多布局审计（当前 / F4 / 加宽）
+    variants = {}
+    for name in ('layout_spec', 'layout_spec_f4', 'layout_spec_wide'):
+        s = jload(os.path.join(CFG, name + '.json'))
+        lay = spec_layout.expand(s)
+        iss, wrn, mtx, radius = spec_layout.validate(lay, s)
+        variants[name] = {'issues': len(iss), 'mutex': len(mtx),
+                          'racks': lay['summary']['racks'],
+                          'warehouses': lay['summary']['warehouses']}
+    ok24 = (all(v['issues'] == 0 for v in variants.values())
+            and variants['layout_spec_wide']['mutex'] <
+            variants['layout_spec']['mutex']
+            and variants['layout_spec_f4']['warehouses'] == 5)
+    # 供 report_status.py 从 JSON 引用，避免文档手写数字（DESIGN_PLAN §0.2 规则 9）
+    with open(os.path.join(OUT, 'spec_layout_variants.json'), 'w',
+              encoding='utf-8') as f:
+        json.dump(variants, f, ensure_ascii=False, indent=2)
+    check('A24 多布局审计：当前/F4/加宽 3 spec 全 PASS 且方案A降低互斥', ok24,
+          'baseline=%s；F4=%s；wide=%s' %
+          (variants['layout_spec'], variants['layout_spec_f4'],
+           variants['layout_spec_wide']))
+
+    # A25/A26/A27/A32/A35 场景层
+    base_dir = latest('runs/baseline/*')
+    peak_dir = latest('runs/peak/*')
+    fail_dir = latest('runs/robot_failure/*')
+    s50_dir = latest('runs/scale_50/*')
+    scene_ok = all(d and os.path.isdir(d) for d in
+                   (base_dir, peak_dir, fail_dir, s50_dir))
+    if scene_ok:
+        bsc = jload(os.path.join(base_dir, 'scenario.json'))
+        blay = jload(os.path.join(base_dir, 'layout.json'))
+        bev = jlines(os.path.join(base_dir, 'events.jsonl'))
+        bkpi = jload(os.path.join(base_dir, 'kpi.json'))
+        bmanifest = jload(os.path.join(base_dir, 'manifest.json'))
+        recomputed = kpi_mod.compute_kpi(
+            bsc, blay, bev, jload(os.path.join(CFG, 'fleet_spec.json')),
+            jload(os.path.join(CFG, 'demand_spec.json')),
+            spec_issues=bmanifest.get('layout_issues', 0), wall_clock_s=0.0)
+        stable = {k: v['value'] for k, v in recomputed['metrics'].items()
+                  if k != 'plan_wall_clock_s'}
+        saved = {k: v['value'] for k, v in bkpi['metrics'].items()
+                 if k != 'plan_wall_clock_s'}
+        ok25 = (stable == saved and bmanifest['seed'] == bsc['seed']
+                and bkpi['audit']['verdict'] == 'PASS')
+        check('A25 baseline 场景可复现（独立重算 KPI）', ok25,
+              'metrics=%s 全部一致=%s；seed=%s'
+              % (len(stable), stable == saved, bmanifest['seed']))
+
+        pa = jload(os.path.join(peak_dir, 'assertions.json'))
+        pk = jload(os.path.join(peak_dir, 'kpi.json'))['metrics']
+        bt = bkpi['metrics']['throughput_orders_per_h']['value']
+        pt = pk['throughput_orders_per_h']['value']
+        ok26 = pa['verdict'] == 'PASS' and pt >= 1.5 * bt - 1e-6 and \
+            len(pa['assertions']) >= 1
+        check('A26 peak 吞吐 >=1.5×baseline 且断言可失败', ok26,
+              'baseline=%s peak=%s ratio=%.3f；断言=%s'
+              % (bt, pt, pt / max(bt, 1e-9), len(pa['assertions'])))
+
+        fa = jload(os.path.join(fail_dir, 'assertions.json'))
+        fsc = jload(os.path.join(fail_dir, 'scenario.json'))
+        fk = jload(os.path.join(fail_dir, 'kpi.json'))['metrics']
+        faults = sum(1 for d in fsc['disruptions'] if d['type'] == 'robot_down')
+        ok27 = (fa['verdict'] == 'PASS' and faults >= 3
+                and fk['fault_count']['value'] >= 3
+                and fk['replans']['value'] >= 1)
+        check('A27 故障场景 fault_count>=3 且触发改派', ok27,
+              'faults=%s replans=%s verdict=%s'
+              % (faults, fk['replans']['value'], fa['verdict']))
+
+        allm = bkpi['metrics']
+        bad_formula = [k for k, m in allm.items()
+                       if not m.get('definition') or not m.get('formula')
+                       or not m.get('source')]
+        null_no_reason = [k for k, m in allm.items()
+                          if m['value'] is None and not m.get('reason')]
+        ok32 = not bad_formula and not null_no_reason and len(allm) >= 10
+        check('A32 每个 KPI 有 definition/formula/source', ok32,
+              'kpis=%s 缺字段=%s null无理由=%s'
+              % (len(allm), bad_formula[:3], null_no_reason[:3]))
+
+        s50 = jload(os.path.join(s50_dir, 'kpi.json'))['metrics']
+        ok35 = (s50['fleet_size']['value'] == 50
+                and s50['plan_wall_clock_s']['value'] < 300)
+        check('A35 50 车场景 plan_wall_clock <300 s', ok35,
+              'fleet=%s wall_clock=%ss'
+              % (s50['fleet_size']['value'], s50['plan_wall_clock_s']['value']))
+    else:
+        for name in ('A25 baseline 场景可复现', 'A26 peak 吞吐',
+                     'A27 故障场景', 'A32 KPI 公式', 'A35 50 车规模'):
+            check(name, False, 'runs/ 场景产物缺失，请先跑 scenario_run.py --all')
+
+    # A28/A29 车队状态机与电量（独立复算每条迁移）
+    import fleet_sim as fleet_mod
+    fr = jload(os.path.join(OUT, 'fleet_report.json'))
+    fe = jlines(os.path.join(OUT, 'fleet_events.jsonl'))
+    illegal_indep = [e for e in fe
+                     if e['to_state'] not in fleet_mod.ALLOWED.get(e['from_state'], set())
+                     or (e['from_state'], e['to_state']) in fleet_mod.FORBIDDEN]
+    ok28 = fr['illegal_count'] == 0 and not illegal_indep
+    check('A28 车队状态机无非法迁移', ok28,
+          'transitions=%s 独立复算非法=%s' % (len(fe), len(illegal_indep)))
+    reserve = jload(os.path.join(CFG, 'fleet_spec.json'))['battery']['reserve_pct']
+    batt_bad = [b for b in fr['battery'] if b['min_pct'] < reserve]
+    ok29 = not batt_bad and fr['min_battery_pct'] >= reserve
+    check('A29 电量全程 >=reserve 且充电成对', ok29,
+          'min_battery=%s%% reserve=%s%% 越界=%s'
+          % (fr['min_battery_pct'], reserve, len(batt_bad)))
+
+    # A30/A31 任务时间与截止期
+    sch_all = jload(os.path.join(DATA, 'agent_schedules.json'))['schedules']
+    t_bad = [a for a, s in sch_all.items()
+             if s['departure_t_s'] + 1e-6 < s['t_request_s']]
+    ok30 = not t_bad
+    check('A30 所有车 start >= t_request', ok30,
+          'agents=%s 违反=%s' % (len(sch_all), t_bad[:3]))
+    d_bad = [a for a, s in sch_all.items()
+             if abs(s['tardiness_s'] - max(0.0, s['t_end_s'] - s['deadline_s'])) > 0.02]
+    ok31 = not d_bad and pm.get('max_tardiness_s') is not None
+    check('A31 tardiness = max(0, t_end - deadline) 可报告', ok31,
+          '不符合=%s；max_tardiness=%s' % (d_bad[:3], pm.get('max_tardiness_s')))
+
+    # A33 单一真相源：状态表数字必须来自 JSON
+    status = open(os.path.join(OUT, 'CURRENT_STATUS.md'), encoding='utf-8').read()
+    ok33 = ('自动生成，请勿手改' in status
+            and str(tr['min_pair_distance_m']) in status
+            and str(pm['duration_s']) in status
+            and str(geo['min_path_to_obstacle_m']) in status)
+    check('A33 状态表数字由 JSON 生成（非手写）', ok33,
+          'min_pair=%s duration=%s clearance=%s 均在状态表中'
+          % (tr['min_pair_distance_m'], pm['duration_s'],
+             geo['min_path_to_obstacle_m']))
+
+    # A34 真实数据适配器
+    cr_path = os.path.join(OUT, 'csv_adapter_report.json')
+    cr = jload(cr_path) if exists(cr_path) else {}
+    cev = jlines(os.path.join(OUT, 'csv_events.jsonl')) if exists(
+        os.path.join(OUT, 'csv_events.jsonl')) else []
+    csv_bad = [e['order_id'] for e in cev
+               if e['from'] not in locmap or e['to'] not in locmap
+               or e['return_to'] not in locmap]
+    ok34 = cr.get('verdict') == 'PASS' and cr.get('rows_out', 0) > 0 and not csv_bad
+    check('A34 CSV 适配器输出 schema 合法且引用完整', ok34,
+          'rows=%s 引用错误=%s' % (cr.get('rows_out'), csv_bad[:3]))
+
+    # A37 负测试总数 >=12
+    neg_reports = [jload(os.path.join(OUT, f)) for f in
+                   ('negative_tests.json', 'spec_negative_tests.json',
+                    'scenario_negative_tests.json')
+                   if exists(os.path.join(OUT, f))]
+    neg_total = sum(x.get('total', 0) for x in neg_reports)
+    neg_pass = sum(x.get('passed', 0) for x in neg_reports)
+    ok37 = len(neg_reports) == 3 and neg_total >= 12 and neg_pass == neg_total
+    check('A37 负测试 >=12 且全部能失败', ok37,
+          'reports=%s total=%s passed=%s'
+          % (len(neg_reports), neg_total, neg_pass))
+
+    # A38 文档完整
+    docs = ('ENTERPRISE_SETUP.md', 'PARAMETER_GUIDE.md', 'REAL_DATA_SOURCES.md')
+    doc_bad = [d for d in docs if not exists(os.path.join(ROOT, 'docs', d))]
+    readme = open(os.path.join(ROOT, 'README.md'), encoding='utf-8').read()
+    ok38 = not doc_bad and '参数' in readme and '场景' in readme and '排查' in readme
+    check('A38 参数表/场景表/故障排查文档齐全', ok38,
+          '缺文档=%s README 含参数/场景/排查=%s'
+          % (doc_bad, all(x in readme for x in ('参数', '场景', '排查'))))
+
+    # A39 新增数据源许可登记
+    notice = open(os.path.join(ROOT, 'THIRD_PARTY_NOTICES.md'), encoding='utf-8').read()
+    ok39 = 'UCI' in notice and 'CC BY 4.0' in notice and 'DESIGN_PLAN' in notice
+    check('A39 新增数据源与依赖已登记许可', ok39,
+          'NOTICE 含 UCI=%s CC BY 4.0=%s DESIGN_PLAN=%s'
+          % ('UCI' in notice, 'CC BY 4.0' in notice, 'DESIGN_PLAN' in notice))
+
+    # A40 全新空目录复现
+    cl_path = os.path.join(OUT, 'cleanroom_report.json')
+    cl = jload(cl_path) if exists(cl_path) else {}
+    ok40 = cl.get('verdict') == 'PASS' and cl.get('steps_run') == cl.get('steps_total') \
+        and all(v.get('identical') for v in cl.get('files', {}).values())
+    check('A40 全新空目录复现数据层（无 .venv）', ok40,
+          'steps=%s/%s identical=%s/%s'
+          % (cl.get('steps_run'), cl.get('steps_total'),
+             sum(1 for v in cl.get('files', {}).values() if v.get('identical')),
+             len(cl.get('files', {}))))
+
+    import re
+
+    def _anum(item):
+        m = re.match(r'^A(\d+)', item['item'])
+        return int(m.group(1)) if m else 999
+
+    R.sort(key=_anum)   # 报告按 A1 → A40 顺序输出，与 DESIGN_PLAN §15 一致
     with open(os.path.join(OUT, 'validate_report.json'), 'w', encoding='utf-8') as f:
         json.dump(R, f, ensure_ascii=False, indent=2)
     fails = [r for r in R if r['status'] != 'PASS']

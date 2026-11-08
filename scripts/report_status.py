@@ -36,9 +36,26 @@ def main():
     L = j(DATA, 'layout.json')
     vr = j(OUT, 'validate_report.json')
     neg = j(OUT, 'negative_tests.json')
+    neg_spec = j(OUT, 'spec_negative_tests.json')
+    neg_scen = j(OUT, 'scenario_negative_tests.json')
     route = j(OUT, 'route_report.json')
+    spec_rep = j(OUT, 'spec_layout_report.json')
+    fleet = j(OUT, 'fleet_report.json')
+    resv = j(OUT, 'reservation_report.json')
+    clean = j(OUT, 'cleanroom_report.json')
+    csv_rep = j(OUT, 'csv_adapter_report.json')
+    variants = j(OUT, 'spec_layout_variants.json')
+    scenarios = [p for p in os.listdir(os.path.join(ROOT, 'runs'))
+                 if os.path.isdir(os.path.join(ROOT, 'runs', p))]
+    kpi_dirs = []
+    for d in scenarios:
+        kpi_dirs += [p for p in os.listdir(os.path.join(ROOT, 'runs', d))]
+    base_runs = sorted(os.listdir(os.path.join(ROOT, 'runs', 'baseline')))
+    base_kpi = j(ROOT, 'runs', 'baseline', base_runs[-1], 'kpi.json') if base_runs else {}
 
     passed = sum(1 for r in vr if r['status'] == 'PASS')
+    neg_total = sum(x['total'] for x in (neg, neg_spec, neg_scen))
+    neg_pass = sum(x['passed'] for x in (neg, neg_spec, neg_scen))
     Ls = L['summary']
     home_n = sum(1 for w in L['warehouses'] for l in w['locations']
                  if l['kind'] == 'HOME')
@@ -46,6 +63,18 @@ def main():
     rows = [
         ('生成时间', ts),
         ('Blender', br['blender']),
+        ('布局来源', 'config/layout_spec.json → spec_layout.py（L1–L12 PASS，'
+                     'issues=%s warnings=%s；%s 扇门）'
+         % (len(spec_rep['issues']), len(spec_rep['warnings']),
+            spec_rep['summary'].get('doors'))),
+        ('AP 互斥', '%s 对（WARN，两 AP <2R 不能同时占用）；'
+                    '预约表复核同时占用 %s 次；加宽变体互斥 %s 对'
+         % (spec_rep['mutex_pairs'], resv['mutex_simultaneous_occupations'],
+            variants['layout_spec_wide']['mutex'])),
+        ('四层配置', 'layout_spec / fleet_spec / demand_spec / 8 个 scenarios + 4 份 schema；'
+                     '3 个布局 spec（当前 / F4 / 加宽）全部审计 PASS'),
+        ('场景', '%d 个场景 × %d 次运行；%d 个 KPI 每个带 definition/formula/source'
+         % (len(scenarios), len(kpi_dirs), len(base_kpi.get('metrics', {})))),
         ('布局', '%d 仓 / %d 货架 / %d 库位（%d SHELF + %d HOME）/ %d 月台 / %d 站 / %d AGV'
          % (Ls['warehouses'], Ls['racks'], Ls['locations'],
             Ls['shelf_locations'], home_n,
@@ -101,8 +130,17 @@ def main():
          % (route.get('closed_loops'), route['routes'], route['segments_07'],
             route['route_head_on_pairs'], route['edge_clearance_m'],
             route['central_cross_aisle_samples'])),
-        ('验收', '%d/%d PASS；负测试 %d/%d'
-         % (passed, len(vr), neg['passed'], neg['total'])),
+        ('车队/交通复核', '状态迁移 %s 次/非法 %s；最低电量 %s%%；'
+                         '预约表顶点 %s / 边交换 %s'
+         % (fleet['state_transitions'], fleet['illegal_count'],
+            fleet['min_battery_pct'], resv['vertex_conflicts'],
+            resv['edge_conflicts'])),
+        ('数据适配/复现', 'CSV %s 行 schema=%s；全新空目录复现 %s/%s 步、%s 份 JSON 逐字节一致'
+         % (csv_rep['rows_out'], csv_rep['verdict'], clean['steps_run'],
+            clean['steps_total'],
+            sum(1 for v in clean['files'].values() if v['identical']))),
+        ('验收', '%d/%d PASS（A1–A40）；负测试 %d/%d（3 个测试文件）'
+         % (passed, len(vr), neg_pass, neg_total)),
     ]
     lines = [
         '# 当前状态（自动生成，请勿手改）',
@@ -124,9 +162,16 @@ def main():
         '每种类型 4–5 单，不是真实订单分布。',
         '- **货物为订单级箱体**：一件货 = 一张单，未模拟拆箱/托盘层级/批次/叉臂升降。',
         '- **动画为 8 fps 匀速**：无加减速、无 24 fps；GLB 仍是静态预览。',
-        '- **运营层未做**：WMS/车队管理/电量故障/站台排队/运营 KPI/真实数据校准。',
-        '- **clean-room 只做到数据层**：全新空目录复现的 5 份关键 JSON 与主工程逐字节一致；'
-        'Blender 场景层全新机器一键跑通 / venv 自动创建 / CI 仍未做。',
+        '- **场景层是解析 what-if**：M/M/c 排队近似算吞吐/等待/利用率，不是逐车 A\\* 仿真；'
+        '碰撞与路径以主链 `traffic_check.py` / `path_metrics.json` 为准。',
+        '- **运营层是离线回放**：`fleet_sim.py` 回放状态机与电量，尚未把电量/故障/任务队列'
+        '接入调度循环（DESIGN_PLAN Step 7 未做）；每车仍 1 单。',
+        '- **交通层是独立复核**：`reservation_check.py` 在 0.05 s / 0.5 m 粒度验证顶点/边冲突，'
+        '未实现 CBS / WHCA\\* / tick 级预约表；0 冲突不是连续时间的形式化证明。',
+        '- **需求仍是合成**：CSV / UCI / WMS 适配器已提供接口与校验，未接企业真实数据；'
+        '`orders_per_hour=45` 仍是 placeholder。',
+        '- **clean-room 只做到数据层**：9 步 / 8 份 JSON 逐字节一致；'
+        'Blender 场景层全新机器一键跑通与 CI 仍未做。',
         '- **03 月台图**：已拍到月台门、月台平台与黄色月台边线；园区卡车停在北侧 yard，'
         '不在月台门前（如实记录，未摆拍）。',
         '',

@@ -1,0 +1,913 @@
+{
+  "schema_version": "1.0",
+  "site": {
+    "id": "DC-WUHAN-DEMO",
+    "name": "区域仓 W + 前置仓 F1/F2/F3",
+    "units": "m",
+    "seed": 20261106,
+    "size": [
+      112,
+      114,
+      12
+    ],
+    "coordinate_system": "layout 2D=[x,z]; 3D=[x,h,z]; Blender=(x,z,h), Z-up",
+    "floor_flatness_mm_per_3m": 3,
+    "climate": {
+      "temp_c": [
+        15,
+        30
+      ],
+      "humidity_pct": [
+        20,
+        70
+      ]
+    },
+    "yard": {
+      "roads": [
+        [
+          5,
+          68,
+          14,
+          92
+        ],
+        [
+          41,
+          68,
+          50,
+          92
+        ],
+        [
+          77,
+          68,
+          86,
+          92
+        ]
+      ],
+      "trucks": [
+        [
+          28,
+          78
+        ],
+        [
+          68,
+          78
+        ]
+      ],
+      "forklifts": [
+        [
+          20,
+          74
+        ],
+        [
+          50,
+          74
+        ],
+        [
+          80,
+          74
+        ]
+      ]
+    }
+  },
+  "defaults": {
+    "agv": {
+      "length": 1.12,
+      "width": 0.77,
+      "height": 0.435,
+      "safety_margin": 0.05,
+      "payload_kg": 250,
+      "speed": 1.5,
+      "accel": 0.3,
+      "decel": 0.5,
+      "omega": 1.4,
+      "battery_kwh": 1.6,
+      "consumption_kwh_per_m": 0.0008,
+      "idle_kw": 0.05,
+      "charge_kw": 3.0,
+      "mtbf_h": 200,
+      "mttr_min": 15,
+      "source": "measured asset bbox (cargoTwin asset_amr, MIT) + site speed limit",
+      "confidence": "medium"
+    },
+    "pallet": {
+      "standard": "EUR",
+      "length": 1.2,
+      "width": 0.8,
+      "height": 0.144,
+      "max_weight_kg": 1500,
+      "source": "EN 13698-1 (standard)"
+    },
+    "rack": {
+      "length": 3.0,
+      "depth": 1.2,
+      "levels": 4,
+      "level_height": 1.5,
+      "top_height": 6.0,
+      "model": "rack_double"
+    },
+    "aisle": {
+      "one_way_min": 1.8,
+      "two_way_min": 3.0,
+      "cross": 4.0,
+      "main": 6.0
+    },
+    "ap": {
+      "offset": 1.5,
+      "min_clearance": 0.5,
+      "spawn_sep": 1.5
+    },
+    "dock": {
+      "platform_depth": 8.0,
+      "door_width": 3.0,
+      "door_height": 3.0,
+      "door_pitch": 4.0,
+      "dock_height": 1.2
+    },
+    "grid": {
+      "cell_size": 0.5,
+      "diagonal": true,
+      "corner_cutting": false
+    }
+  },
+  "warehouses": [
+    {
+      "id": "W",
+      "kind": "REGIONAL",
+      "origin": [
+        0,
+        0
+      ],
+      "size": {
+        "width": 100,
+        "depth": 70,
+        "height": 12
+      },
+      "zones": [
+        {
+          "id": "A",
+          "name": "Zone A",
+          "rect": [
+            4,
+            10,
+            46,
+            32
+          ],
+          "color": "#3b82f6"
+        },
+        {
+          "id": "B",
+          "name": "Zone B",
+          "rect": [
+            54,
+            10,
+            96,
+            32
+          ],
+          "color": "#a855f7"
+        },
+        {
+          "id": "C",
+          "name": "Zone C",
+          "rect": [
+            4,
+            38,
+            46,
+            62
+          ],
+          "color": "#22c55e"
+        },
+        {
+          "id": "D",
+          "name": "Zone D",
+          "rect": [
+            54,
+            38,
+            96,
+            62
+          ],
+          "color": "#f59e0b"
+        }
+      ],
+      "racks": [
+        {
+          "mode": "grid",
+          "zone": "A",
+          "origin": [
+            4,
+            10
+          ],
+          "margin": [
+            2,
+            3
+          ],
+          "rows": 4,
+          "bays": 10,
+          "aisle_width": 4.0,
+          "bay_gap": 0.6,
+          "orientation": "x",
+          "rack": {
+            "length": 3.0,
+            "depth": 1.2,
+            "levels": 4,
+            "level_height": 1.5,
+            "top_height": 6.0
+          }
+        },
+        {
+          "mode": "grid",
+          "zone": "B",
+          "origin": [
+            54,
+            10
+          ],
+          "margin": [
+            2,
+            3
+          ],
+          "rows": 4,
+          "bays": 10,
+          "aisle_width": 4.0,
+          "bay_gap": 0.6,
+          "orientation": "x",
+          "rack": {
+            "length": 3.0,
+            "depth": 1.2,
+            "levels": 4,
+            "level_height": 1.5,
+            "top_height": 6.0
+          }
+        },
+        {
+          "mode": "grid",
+          "zone": "C",
+          "origin": [
+            4,
+            38
+          ],
+          "margin": [
+            2,
+            3
+          ],
+          "rows": 4,
+          "bays": 10,
+          "aisle_width": 4.0,
+          "bay_gap": 0.6,
+          "orientation": "x",
+          "rack": {
+            "length": 3.0,
+            "depth": 1.2,
+            "levels": 4,
+            "level_height": 1.5,
+            "top_height": 6.0
+          }
+        },
+        {
+          "mode": "grid",
+          "zone": "D",
+          "origin": [
+            54,
+            38
+          ],
+          "margin": [
+            2,
+            3
+          ],
+          "rows": 4,
+          "bays": 10,
+          "aisle_width": 4.0,
+          "bay_gap": 0.6,
+          "orientation": "x",
+          "rack": {
+            "length": 3.0,
+            "depth": 1.2,
+            "levels": 4,
+            "level_height": 1.5,
+            "top_height": 6.0
+          }
+        }
+      ],
+      "docks": {
+        "mode": "strip",
+        "edge": "south",
+        "depth": 8.0,
+        "door_width": 3.0,
+        "door_height": 3.0,
+        "door_pitch": 4.0,
+        "zones": [
+          {
+            "id": "IN-01",
+            "kind": "INBOUND",
+            "x0": 2,
+            "x1": 23,
+            "doors": 5
+          },
+          {
+            "id": "OU-02",
+            "kind": "OUTBOUND",
+            "x0": 27,
+            "x1": 48,
+            "doors": 5
+          },
+          {
+            "id": "IN-03",
+            "kind": "INBOUND",
+            "x0": 52,
+            "x1": 73,
+            "doors": 5
+          },
+          {
+            "id": "OU-04",
+            "kind": "OUTBOUND",
+            "x0": 77,
+            "x1": 98,
+            "doors": 5
+          }
+        ]
+      },
+      "stations": [
+        {
+          "id": "PACK-02",
+          "kind": "PACKING",
+          "rect": [
+            4,
+            62,
+            18,
+            67
+          ],
+          "ap": [
+            11,
+            60.5
+          ]
+        },
+        {
+          "id": "PACK-01",
+          "kind": "PACKING",
+          "rect": [
+            82,
+            62,
+            96,
+            67
+          ],
+          "ap": [
+            89,
+            60.5
+          ]
+        },
+        {
+          "id": "SORT-01",
+          "kind": "SORTING",
+          "rect": [
+            60,
+            62,
+            74,
+            67
+          ],
+          "ap": [
+            67,
+            60.5
+          ]
+        }
+      ],
+      "chargers": {
+        "mode": "line",
+        "start": [
+          30,
+          68.5
+        ],
+        "count": 6,
+        "pitch": 2.5,
+        "ap_dz": -2.0,
+        "power_kw": 3.0
+      },
+      "spawns": {
+        "mode": "explicit",
+        "points": [
+          [
+            1.75,
+            12.25
+          ],
+          [
+            1.75,
+            20.25
+          ],
+          [
+            1.75,
+            28.25
+          ],
+          [
+            1.75,
+            40.25
+          ],
+          [
+            1.75,
+            48.25
+          ],
+          [
+            1.75,
+            56.25
+          ],
+          [
+            98.25,
+            12.25
+          ],
+          [
+            98.25,
+            20.25
+          ],
+          [
+            98.25,
+            28.25
+          ],
+          [
+            98.25,
+            40.25
+          ],
+          [
+            98.25,
+            48.25
+          ],
+          [
+            98.25,
+            56.25
+          ]
+        ]
+      },
+      "pillars": {
+        "mode": "corners",
+        "inset": 0.5,
+        "size": [
+          0.6,
+          0.6
+        ]
+      },
+      "conveyors": [
+        {
+          "id": "CV-W01",
+          "zone": "A",
+          "path": [
+            [
+              10,
+              35
+            ],
+            [
+              46,
+              35
+            ]
+          ],
+          "width": 1.0,
+          "speed_mps": 0.6
+        },
+        {
+          "id": "CV-W02",
+          "zone": "B",
+          "path": [
+            [
+              54,
+              35
+            ],
+            [
+              90,
+              35
+            ]
+          ],
+          "width": 1.0,
+          "speed_mps": 0.6
+        }
+      ]
+    },
+    {
+      "id": "F1",
+      "kind": "FORWARD",
+      "origin": [
+        6,
+        90
+      ],
+      "size": {
+        "width": 30,
+        "depth": 20,
+        "height": 8
+      },
+      "zones": [
+        {
+          "id": "Z1",
+          "name": "Zone Z1",
+          "rect": [
+            2,
+            2,
+            28,
+            18
+          ],
+          "color": "#14b8a6"
+        }
+      ],
+      "racks": [
+        {
+          "mode": "grid",
+          "zone": "Z1",
+          "origin": [
+            2,
+            2
+          ],
+          "margin": [
+            1,
+            7
+          ],
+          "rows": 2,
+          "bays": 6,
+          "aisle_width": 3.2,
+          "bay_gap": 0.6,
+          "orientation": "x",
+          "rack": {
+            "length": 3.0,
+            "depth": 1.2,
+            "levels": 3,
+            "level_height": 1.5,
+            "top_height": 4.5
+          }
+        }
+      ],
+      "docks": {
+        "mode": "strip",
+        "edge": "south",
+        "depth": 6.0,
+        "door_width": 3.0,
+        "door_height": 3.0,
+        "door_pitch": 4.0,
+        "zones": [
+          {
+            "id": "IN-01",
+            "kind": "INBOUND",
+            "x0": 2,
+            "x1": 14,
+            "doors": 3
+          },
+          {
+            "id": "OU-02",
+            "kind": "OUTBOUND",
+            "x0": 16,
+            "x1": 28,
+            "doors": 3
+          }
+        ]
+      },
+      "stations": [
+        {
+          "id": "PACK-01",
+          "kind": "PACKING",
+          "rect": [
+            22,
+            18,
+            28,
+            20
+          ],
+          "ap": [
+            25,
+            16.5
+          ]
+        }
+      ],
+      "chargers": {
+        "mode": "line",
+        "start": [
+          4,
+          18
+        ],
+        "count": 2,
+        "pitch": 2.5,
+        "ap_dz": -1.9,
+        "power_kw": 3.0
+      },
+      "spawns": {
+        "mode": "explicit",
+        "points": [
+          [
+            29.25,
+            7.25
+          ],
+          [
+            29.25,
+            11.25
+          ],
+          [
+            29.25,
+            15.25
+          ]
+        ]
+      },
+      "pillars": {
+        "mode": "corners",
+        "inset": 0.5,
+        "size": [
+          0.6,
+          0.6
+        ]
+      },
+      "conveyors": []
+    },
+    {
+      "id": "F2",
+      "kind": "FORWARD",
+      "origin": [
+        42,
+        90
+      ],
+      "size": {
+        "width": 30,
+        "depth": 20,
+        "height": 8
+      },
+      "zones": [
+        {
+          "id": "Z1",
+          "name": "Zone Z1",
+          "rect": [
+            2,
+            2,
+            28,
+            18
+          ],
+          "color": "#14b8a6"
+        }
+      ],
+      "racks": [
+        {
+          "mode": "grid",
+          "zone": "Z1",
+          "origin": [
+            2,
+            2
+          ],
+          "margin": [
+            1,
+            7
+          ],
+          "rows": 2,
+          "bays": 6,
+          "aisle_width": 3.2,
+          "bay_gap": 0.6,
+          "orientation": "x",
+          "rack": {
+            "length": 3.0,
+            "depth": 1.2,
+            "levels": 3,
+            "level_height": 1.5,
+            "top_height": 4.5
+          }
+        }
+      ],
+      "docks": {
+        "mode": "strip",
+        "edge": "south",
+        "depth": 6.0,
+        "door_width": 3.0,
+        "door_height": 3.0,
+        "door_pitch": 4.0,
+        "zones": [
+          {
+            "id": "IN-01",
+            "kind": "INBOUND",
+            "x0": 2,
+            "x1": 14,
+            "doors": 3
+          },
+          {
+            "id": "OU-02",
+            "kind": "OUTBOUND",
+            "x0": 16,
+            "x1": 28,
+            "doors": 3
+          }
+        ]
+      },
+      "stations": [
+        {
+          "id": "PACK-01",
+          "kind": "PACKING",
+          "rect": [
+            22,
+            18,
+            28,
+            20
+          ],
+          "ap": [
+            25,
+            16.5
+          ]
+        }
+      ],
+      "chargers": {
+        "mode": "line",
+        "start": [
+          4,
+          18
+        ],
+        "count": 2,
+        "pitch": 2.5,
+        "ap_dz": -1.9,
+        "power_kw": 3.0
+      },
+      "spawns": {
+        "mode": "explicit",
+        "points": [
+          [
+            29.25,
+            7.25
+          ],
+          [
+            29.25,
+            11.25
+          ],
+          [
+            29.25,
+            15.25
+          ]
+        ]
+      },
+      "pillars": {
+        "mode": "corners",
+        "inset": 0.5,
+        "size": [
+          0.6,
+          0.6
+        ]
+      },
+      "conveyors": []
+    },
+    {
+      "id": "F3",
+      "kind": "FORWARD",
+      "origin": [
+        78,
+        90
+      ],
+      "size": {
+        "width": 30,
+        "depth": 20,
+        "height": 8
+      },
+      "zones": [
+        {
+          "id": "Z1",
+          "name": "Zone Z1",
+          "rect": [
+            2,
+            2,
+            28,
+            18
+          ],
+          "color": "#14b8a6"
+        }
+      ],
+      "racks": [
+        {
+          "mode": "grid",
+          "zone": "Z1",
+          "origin": [
+            2,
+            2
+          ],
+          "margin": [
+            1,
+            7
+          ],
+          "rows": 2,
+          "bays": 6,
+          "aisle_width": 3.2,
+          "bay_gap": 0.6,
+          "orientation": "x",
+          "rack": {
+            "length": 3.0,
+            "depth": 1.2,
+            "levels": 3,
+            "level_height": 1.5,
+            "top_height": 4.5
+          }
+        }
+      ],
+      "docks": {
+        "mode": "strip",
+        "edge": "south",
+        "depth": 6.0,
+        "door_width": 3.0,
+        "door_height": 3.0,
+        "door_pitch": 4.0,
+        "zones": [
+          {
+            "id": "IN-01",
+            "kind": "INBOUND",
+            "x0": 2,
+            "x1": 14,
+            "doors": 3
+          },
+          {
+            "id": "OU-02",
+            "kind": "OUTBOUND",
+            "x0": 16,
+            "x1": 28,
+            "doors": 3
+          }
+        ]
+      },
+      "stations": [
+        {
+          "id": "PACK-01",
+          "kind": "PACKING",
+          "rect": [
+            22,
+            18,
+            28,
+            20
+          ],
+          "ap": [
+            25,
+            16.5
+          ]
+        }
+      ],
+      "chargers": {
+        "mode": "line",
+        "start": [
+          4,
+          18
+        ],
+        "count": 2,
+        "pitch": 2.5,
+        "ap_dz": -1.9,
+        "power_kw": 3.0
+      },
+      "spawns": {
+        "mode": "explicit",
+        "points": [
+          [
+            29.25,
+            7.25
+          ],
+          [
+            29.25,
+            11.25
+          ],
+          [
+            29.25,
+            15.25
+          ]
+        ]
+      },
+      "pillars": {
+        "mode": "corners",
+        "inset": 0.5,
+        "size": [
+          0.6,
+          0.6
+        ]
+      },
+      "conveyors": []
+    }
+  ],
+  "meta": {
+    "created": "2026-11-08",
+    "author": "OYC",
+    "note": "参数取自当前 dc_project 实测布局（2026-11-06 第九阶段），不是 DESIGN_PLAN §5.3 示例值；示例中的充电桩起点 32.5/园区 4 辆卡车与实测不符，已更正为 30/2 辆。",
+    "sources": [
+      {
+        "param": "defaults.agv.length/width/height",
+        "value": [
+          1.12,
+          0.77,
+          0.435
+        ],
+        "source": "cargoTwin asset_amr 实测包围盒 (MIT)",
+        "level": "measured"
+      },
+      {
+        "param": "defaults.agv.speed",
+        "value": 1.5,
+        "source": "现场限速假设",
+        "level": "assumption"
+      },
+      {
+        "param": "defaults.pallet",
+        "value": "EUR 1200x800x144",
+        "source": "EN 13698-1",
+        "level": "standard"
+      },
+      {
+        "param": "defaults.dock.door_pitch",
+        "value": 4.0,
+        "source": "行业 12-14 ft 门距",
+        "level": "standard"
+      },
+      {
+        "param": "site.size / warehouse origins",
+        "value": "see warehouses",
+        "source": "当前演示布局实测",
+        "level": "placeholder"
+      }
+    ],
+    "todo": [
+      "site / warehouse 尺寸替换为建筑 CAD 实测值",
+      "defaults.agv.speed/accel/decel 替换为实际车型手册",
+      "月台门数量与门洞按现场核对",
+      "orders_per_hour 替换为最近 3 个月 WMS 实测值"
+    ]
+  }
+}
