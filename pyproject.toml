@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dc-twin"
+version = "0.1.0"
+description = "Blender-based distribution-center digital twin: 4 warehouses, 21 AGVs, closed-loop A* tasks, reproducible data chain and 40 acceptance checks"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+authors = [{name = "OYC"}]
+keywords = ["digital-twin", "warehouse", "agv", "blender", "simulation", "logistics", "pathfinding"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering :: Visualization",
+]
+dependencies = [
+  "pillow==13.0.0",
+  "imageio-ffmpeg==0.8.1",
+  "jsonschema==4.23.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+  "ruff>=0.6",
+]
+
+[project.scripts]
+dc = "dc_twin.cli:main"
+
+# [project.urls] intentionally omitted until a remote exists:
+# never ship a guessed repository URL (it would be a dead link on day one).
+
+[tool.setuptools.packages.find]
+include = ["dc_twin*"]
+exclude = ["tests*", "scripts*", "console*"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = "-ra"
+markers = [
+  "blender: requires a local Blender 5.2 installation",
+  "slow: takes more than 30 seconds",
+  "contract: report/manifest schema checks",
+  "acceptance: A1-A40 acceptance checks",
+]
+
+[tool.ruff]
+line-length = 110
+exclude = ["out", "runs", "demo", ".venv", "tests/_tmp_spec", "console/static/vendor"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+ignore = ["E501"]

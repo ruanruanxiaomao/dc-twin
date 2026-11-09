@@ -45,6 +45,11 @@ def main():
     clean = j(OUT, 'cleanroom_report.json')
     csv_rep = j(OUT, 'csv_adapter_report.json')
     variants = j(OUT, 'spec_layout_variants.json')
+    man = j(OUT, 'manifest.json') if os.path.exists(os.path.join(OUT, 'manifest.json')) else {}
+    vdata = j(OUT, 'validate_data_report.json') \
+        if os.path.exists(os.path.join(OUT, 'validate_data_report.json')) else {}
+    demo_man = j(ROOT, 'demo', 'manifest.json') \
+        if os.path.exists(os.path.join(ROOT, 'demo', 'manifest.json')) else {}
     scenarios = [p for p in os.listdir(os.path.join(ROOT, 'runs'))
                  if os.path.isdir(os.path.join(ROOT, 'runs', p))]
     kpi_dirs = []
@@ -141,6 +146,15 @@ def main():
             sum(1 for v in clean['files'].values() if v['identical']))),
         ('验收', '%d/%d PASS（A1–A40）；负测试 %d/%d（3 个测试文件）'
          % (passed, len(vr), neg_pass, neg_total)),
+        ('开源交付层', 'dc CLI 7 命令 / 31 步链（data 11 · scenarios 16 · full 31）；'
+                       '输出契约 sidecar %s 份 / manifest %s 个产物；'
+                       '静态 Demo %s 个场景 · %s 台车'
+         % (man.get('counts', {}).get('report_sidecars'),
+            man.get('counts', {}).get('artifacts'),
+            demo_man.get('scenarios'), demo_man.get('agents'))),
+        ('分档验收', 'data tier %s/%s PASS；pytest -m "not blender" 与 CI 矩阵见 '
+                     '`.github/workflows/ci.yml`'
+         % (vdata.get('passed'), vdata.get('total'))),
     ]
     lines = [
         '# 当前状态（自动生成，请勿手改）',

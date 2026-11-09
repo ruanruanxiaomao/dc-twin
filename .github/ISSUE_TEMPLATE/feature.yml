@@ -1,0 +1,30 @@
+name: Feature request
+description: A new scenario, KPI, adapter or visualisation
+title: "[feat] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does it solve
+    validations:
+      required: true
+  - type: dropdown
+    id: layer
+    attributes:
+      label: Which layer
+      options:
+        - L1 config / layout spec
+        - L2 data chain / planner
+        - L3 validators / acceptance
+        - L4 Blender / renders
+        - console / static demo
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: How would we verify it
+      description: Name the check or test that must fail before the change and pass after it.
+    validations:
+      required: true

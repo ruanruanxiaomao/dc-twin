@@ -57,7 +57,7 @@ def break_layout(path):
 
 
 def break_traffic(path):
-    rows = [json.loads(l) for l in open(path, encoding='utf-8') if l.strip()]
+    rows = [json.loads(line) for line in open(path, encoding='utf-8') if line.strip()]
     other = [p for p in rows if p['agent_id'] == 'F1-R02']
     pos = {p['t']: (p['x'], p['y']) for p in other}
     for p in rows:

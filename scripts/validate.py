@@ -21,6 +21,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from geometry import AGV_RADIUS, MIN_SEP, obstacle_rects, seg_hits_rect, inflate
 
 R = []
+FLAGS = {}          # set by the __main__ CLI (--tier / --json / --junit / --check)
 
 
 def check(name, ok, detail):
@@ -243,27 +244,29 @@ def main():
           'LICENSE=%s NOTICE=%s MIT段落=%s 资产sha=%s'
           % (exists(lic), exists(notice), ntc_txt.count('MIT License'), sha[:16]))
 
-    # A13 验证器能失败
+    # A13 行为测试（OPEN_SOURCE_PLAN §4.2）：不再读取本文件源码里的字符串自证，
+    # 而是核验 7 个破坏性用例真的让校验器/生成器返回非 0 退出码。
+    # 其中 5 个用例的 check 目标是 validate.py 本身（删除 LICENSE / 截断 GLB /
+    # 换空白 PNG / 篡改 samples / 删 NOTICE），即"扰动产物 -> validate 退出 1"。
     neg = os.path.join(OUT, 'negative_tests.json')
     neg_report = jload(neg) if exists(neg) else None
-    src = open(os.path.join(ROOT, 'scripts', 'validate.py'), encoding='utf-8').read()
-    # 第二轮审计 §3.8：不能只信报告里的 PASS 数字，要核对每个用例真的返回了非 0
     cases = neg_report.get('cases', []) if neg_report else []
-    neg_ok = (neg_report is None or
-              (neg_report.get('passed') == neg_report.get('total') == 7
-               and neg_report.get('verdict') == 'PASS'
-               and len(cases) == 7
-               and all(c.get('ok') is True and c.get('exit_code') not in (0, None)
-                       for c in cases)))
-    ok13 = ('sys.exit(1' in src
-            and exists(os.path.join(ROOT, 'tests', 'test_validator_can_fail.py'))
-            and neg_ok)
-    check('A13 验证器能失败且负测试逐例可核验', ok13,
-          'validate 含 sys.exit(1)=%s；负测试=%s；逐例非0退出=%s'
-          % ('sys.exit(1' in src,
-             ('%s/%s' % (neg_report['passed'], neg_report['total']))
-             if neg_report else '报告未生成（脚本已存在）',
-             all(c.get('exit_code') not in (0, None) for c in cases)))
+    behavior_cases = [c for c in cases if 'validate' in str(c.get('check', ''))]
+    cases_ok = all(c.get('ok') is True and c.get('exit_code') not in (0, None)
+                   for c in cases)
+    neg_ok = (neg_report is not None
+              and neg_report.get('passed') == neg_report.get('total') == 7
+              and neg_report.get('verdict') == 'PASS'
+              and len(cases) == 7 and cases_ok
+              and len(behavior_cases) >= 5)
+    ok13 = (exists(os.path.join(ROOT, 'tests', 'run_all_negative.py')) and neg_ok)
+    check('A13 行为证明：扰动产物后校验器真的失败', ok13,
+          '负测试=%s；逐例非0退出=%s；其中 validate 行为用例=%d/7；'
+          'runner=%s'
+          % (('%s/%s' % (neg_report['passed'], neg_report['total']))
+             if neg_report else '报告未生成',
+             cases_ok, len(behavior_cases),
+             exists(os.path.join(ROOT, 'tests', 'run_all_negative.py'))))
 
     # A14 从零可复现
     need = ['run_all.ps1', 'requirements.txt', 'README.md', '.gitignore',
@@ -633,14 +636,19 @@ def main():
           'reports=%s total=%s passed=%s'
           % (len(neg_reports), neg_total, neg_pass))
 
-    # A38 文档完整
-    docs = ('ENTERPRISE_SETUP.md', 'PARAMETER_GUIDE.md', 'REAL_DATA_SOURCES.md')
+    # A38 文档完整（v0.1.0 起英文 Hero 首页 + 中文版 + 独立 getting-started）
+    docs = ('ENTERPRISE_SETUP.md', 'PARAMETER_GUIDE.md', 'REAL_DATA_SOURCES.md',
+            'getting-started.md', 'cli.md', 'data-contracts.md')
     doc_bad = [d for d in docs if not exists(os.path.join(ROOT, 'docs', d))]
-    readme = open(os.path.join(ROOT, 'README.md'), encoding='utf-8').read()
-    ok38 = not doc_bad and '参数' in readme and '场景' in readme and '排查' in readme
+    zh = open(os.path.join(ROOT, 'README.zh-CN.md'), encoding='utf-8').read() \
+        if exists(os.path.join(ROOT, 'README.zh-CN.md')) else ''
+    en = open(os.path.join(ROOT, 'README.md'), encoding='utf-8').read()
+    zh_ok = all(x in zh for x in ('参数', '场景', '排查'))
+    en_ok = 'getting-started' in en and 'What it is not' in en
+    ok38 = not doc_bad and zh_ok and en_ok
     check('A38 参数表/场景表/故障排查文档齐全', ok38,
-          '缺文档=%s README 含参数/场景/排查=%s'
-          % (doc_bad, all(x in readme for x in ('参数', '场景', '排查'))))
+          '缺文档=%s 中文README三节=%s 英文首页链接=%s'
+          % (doc_bad, zh_ok, en_ok))
 
     # A39 新增数据源许可登记
     notice = open(os.path.join(ROOT, 'THIRD_PARTY_NOTICES.md'), encoding='utf-8').read()
@@ -670,14 +678,57 @@ def main():
     with open(os.path.join(OUT, 'validate_report.json'), 'w', encoding='utf-8') as f:
         json.dump(R, f, ensure_ascii=False, indent=2)
     fails = [r for r in R if r['status'] != 'PASS']
-    for r in R:
-        print('[%s] %s — %s' % (r['status'], r['item'], r['detail']))
-    print('SUMMARY', len(R) - len(fails), '/', len(R), 'PASS')
-    if fails:
+    if FLAGS.get('junit'):
+        import xml.etree.ElementTree as ET
+        suite = ET.Element('testsuite', name='dc-twin-acceptance',
+                           tests=str(len(R)), failures=str(len(fails)))
+        for r in R:
+            case = ET.SubElement(suite, 'testcase', name=r['item'], classname='validate')
+            if r['status'] != 'PASS':
+                ET.SubElement(case, 'failure', message=r['detail'])
+        ET.ElementTree(suite).write(FLAGS['junit'], encoding='utf-8', xml_declaration=True)
+    if FLAGS.get('json'):
+        print(json.dumps({'schema_version': '1.0', 'kind': 'validate_run',
+                          'tier': FLAGS.get('tier', 'full'), 'checks': R,
+                          'passed': len(R) - len(fails), 'total': len(R)},
+                         ensure_ascii=False))
+    else:
+        for r in R:
+            print('[%s] %s — %s' % (r['status'], r['item'], r['detail']))
+        print('SUMMARY', len(R) - len(fails), '/', len(R), 'PASS')
+    if fails and not FLAGS.get('json'):
         print('FAILED:', [r['item'] for r in fails])
+        sys.exit(1)
+    if fails:
         sys.exit(1)
     sys.exit(0)
 
 
 if __name__ == '__main__':
+    import argparse
+    import subprocess
+
+    ap = argparse.ArgumentParser(description='A1-A40 acceptance gate')
+    ap.add_argument('--tier', choices=('data', 'render', 'full'), default='full',
+                    help='data = no Blender (delegates to validate_data.py)')
+    ap.add_argument('--json', action='store_true', help='machine-readable stdout')
+    ap.add_argument('--junit', default=None, help='write JUnit XML for CI')
+    ap.add_argument('--check', action='store_true',
+                    help='verify artifacts against out/manifest.json first')
+    a = ap.parse_args()
+    if a.tier == 'data':
+        cmd = [sys.executable, os.path.join(ROOT, 'scripts', 'validate_data.py')]
+        if a.json:
+            cmd.append('--json')
+        if a.junit:
+            cmd += ['--junit', a.junit]
+        if a.check:
+            cmd.append('--check')
+        sys.exit(subprocess.call(cmd, cwd=ROOT))
+    if a.check:
+        from manifest import check_manifest
+        rc = check_manifest()
+        if rc:
+            sys.exit(rc)
+    FLAGS.update(vars(a))
     main()

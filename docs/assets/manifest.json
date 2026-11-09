@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "kind": "docs_assets_manifest",
+  "generated_by": "scripts/build_docs_assets.py",
+  "webp": [
+    {
+      "file": "01_overview.webp",
+      "source": "01_overview.png",
+      "bytes": 47498,
+      "width": 1600,
+      "height": 900,
+      "quality": 82,
+      "source_sha256": "53b6fcabeb5d29171c212405802233eba588ce5bab06ca8207a09e817e79a489",
+      "hero": true
+    },
+    {
+      "file": "02_interior.webp",
+      "source": "02_interior.png",
+      "bytes": 110466,
+      "width": 1600,
+      "height": 900,
+      "quality": 82,
+      "source_sha256": "d9f58f8800b445d05e31ae97163c546c019329d528231bb9843af9a189de53a6",
+      "hero": false
+    },
+    {
+      "file": "03_dock.webp",
+      "source": "03_dock.png",
+      "bytes": 24292,
+      "width": 1600,
+      "height": 900,
+      "quality": 82,
+      "source_sha256": "d87fe44c1cd27152a1da327c6bed89c6002f4d7c9392e015d98fe68c59d1965f",
+      "hero": true
+    },
+    {
+      "file": "04_agv_route.webp",
+      "source": "04_agv_route.png",
+      "bytes": 70804,
+      "width": 1600,
+      "height": 900,
+      "quality": 82,
+      "source_sha256": "b72d8abade9255bf1c1097dafbb8968de52e49661e68aaf03cf845b5b2595a4d",
+      "hero": false
+    },
+    {
+      "file": "05_slotting_heatmap.webp",
+      "source": "05_slotting_heatmap.png",
+      "bytes": 49454,
+      "width": 1600,
+      "height": 900,
+      "quality": 82,
+      "source_sha256": "beca8193d01ab2e347edc73e3ad1c97823a78fae6152efd40ddfdba8f73f9fd4",
+      "hero": true
+    },
+    {
+      "file": "06_corridor_check.webp",
+      "source": "06_corridor_check.png",
+      "bytes": 39276,
+      "width": 1600,
+      "height": 900,
+      "quality": 82,
+      "source_sha256": "74da20e37389325a34bab950dad5a25e29e03ee57240e9a4eef7433d4e6dfbbe",
+      "hero": false
+    },
+    {
+      "file": "07_nav_plan.webp",
+      "source": "07_nav_plan.png",
+      "bytes": 73942,
+      "width": 1032,
+      "height": 1104,
+      "quality": 82,
+      "source_sha256": "31b6edde0554052f594a389853986f8937fbcb4fd94788be3852922365d23a4b",
+      "hero": false
+    },
+    {
+      "file": "08_corridor_plan_zoom.webp",
+      "source": "08_corridor_plan_zoom.png",
+      "bytes": 42268,
+      "width": 1464,
+      "height": 858,
+      "quality": 82,
+      "source_sha256": "7df58247cf3db3c48f76b0d0bb1bc3c943498a8802544b667834d70eb7463572",
+      "hero": true
+    },
+    {
+      "file": "09_time_space.webp",
+      "source": "09_time_space.png",
+      "bytes": 41454,
+      "width": 1400,
+      "height": 900,
+      "quality": 82,
+      "source_sha256": "5139f98d5a8cc75b94a6d91b700c5325b325cfff2717c3afed7e43d394930597",
+      "hero": true
+    },
+    {
+      "file": "10_snapshot_sequence.webp",
+      "source": "10_snapshot_sequence.png",
+      "bytes": 54346,
+      "width": 1600,
+      "height": 857,
+      "quality": 82,
+      "source_sha256": "cacd8ab5dfb2cf84b5b234e84877854f459c781cafd6c612ecc0417d530b43f4",
+      "hero": false
+    }
+  ],
+  "gif": {
+    "file": "demo.gif",
+    "source": "anim_dc.mp4",
+    "bytes": 881698,
+    "frames": 32,
+    "fps": 8,
+    "duration_s": 4.0,
+    "source_sha256": "42c3b1319a9825ab94348b6b2b52759b9a6dca1c06180668e87a70e4b6332b2f"
+  },
+  "total_bytes": 1435498
+}

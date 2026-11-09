@@ -1,0 +1,27 @@
+name: Bug report
+description: Something is broken or a validator reports a false result
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: Include the exact command and the full error output.
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: Paste the output of `dc doctor --json` (redact local paths if needed).
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Minimal reproduction
+      description: Steps from a fresh clone, or the smallest config change that triggers it.
+    validations:
+      required: true

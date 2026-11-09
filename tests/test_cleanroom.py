@@ -6,7 +6,6 @@
 
 运行：python tests/test_cleanroom.py   产出：out/cleanroom_report.json
 """
-import filecmp
 import hashlib
 import json
 import os

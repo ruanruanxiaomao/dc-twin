@@ -18,6 +18,8 @@ OUT = os.path.join(ROOT, 'out')
 RENDERS = os.path.join(OUT, 'renders')
 BLEND = os.path.join(OUT, 'distribution_center.blend')
 CFG = json.load(open(os.path.join(ROOT, 'data', 'config.json'), encoding='utf-8'))
+# `dc run --preview` / CI smoke: 1 low-resolution still, no 942-frame sequence.
+PREVIEW = os.environ.get('DC_RENDER_PREVIEW') == '1'
 
 CAMS = [
     ('CAM_overview', '01_overview.png'),
@@ -51,8 +53,8 @@ def main():
             pass
     elif eng == 'CYCLES':
         scene.cycles.samples = 8
-    scene.render.resolution_x = CFG['render']['width']
-    scene.render.resolution_y = CFG['render']['height']
+    scene.render.resolution_x = 640 if PREVIEW else CFG['render']['width']
+    scene.render.resolution_y = 360 if PREVIEW else CFG['render']['height']
     scene.render.resolution_percentage = 100
     scene.render.image_settings.file_format = 'PNG'
     print('RENDER_ENGINE', eng)
@@ -69,7 +71,7 @@ def main():
                  '05_slotting_heatmap.png': 0.22, '06_corridor_check.png': 0.12}
     shot_t = {k: round(v * dur_s, 2) for k, v in shot_frac.items()}
     shots = []
-    for cam, fname in CAMS:
+    for cam, fname in (CAMS[:1] if PREVIEW else CAMS):
         c = bpy.data.objects.get(cam)
         if c is None:
             print('MISSING_CAM', cam)
@@ -89,35 +91,39 @@ def main():
         bpy.ops.render.render(write_still=True)
         shots.append({'camera': cam, 'file': fname,
                       'bytes': os.path.getsize(scene.render.filepath),
-                      'width': CFG['render']['width'],
-                      'height': CFG['render']['height'],
+                      'width': scene.render.resolution_x,
+                      'height': scene.render.resolution_y,
                       'frame': frame, 't_s': round((frame - 1) / fps, 2)})
         print('RENDER_OK', fname, shots[-1]['bytes'], 'frame', frame)
 
-    scene.render.resolution_x = CFG['render']['anim_width']
-    scene.render.resolution_y = CFG['render']['anim_height']
-    if eng.startswith('BLENDER_EEVEE'):
-        try:
-            scene.eevee.taa_render_samples = CFG['render']['anim_samples']
-        except AttributeError:
-            pass
-    scene.camera = bpy.data.objects.get('CAM_route')
-    if corridor:
-        corridor.hide_render = False
-    # 审计 P0-3：不夹断，frame_end 就是 animate.py 写下的最后一个关键帧
     frame_start, frame_end = scene.frame_start, scene.frame_end
-    frames = os.path.join(OUT, 'frames')
-    os.makedirs(frames, exist_ok=True)
-    for stale in glob.glob(os.path.join(frames, 'f_*.png')):
-        os.remove(stale)
-    scene.render.image_settings.file_format = 'PNG'
-    scene.render.filepath = os.path.join(frames, 'f_')
-    bpy.ops.render.render(animation=True)
-    n = len(glob.glob(os.path.join(frames, 'f_*.png')))
-    print('FRAMES_OK', n, 'frames', frame_start, '->', frame_end)
+    if PREVIEW:
+        n = 0
+        print('RENDER_PREVIEW_OK skipped frame sequence')
+    else:
+        scene.render.resolution_x = CFG['render']['anim_width']
+        scene.render.resolution_y = CFG['render']['anim_height']
+        if eng.startswith('BLENDER_EEVEE'):
+            try:
+                scene.eevee.taa_render_samples = CFG['render']['anim_samples']
+            except AttributeError:
+                pass
+        scene.camera = bpy.data.objects.get('CAM_route')
+        if corridor:
+            corridor.hide_render = False
+        # 审计 P0-3：不夹断，frame_end 就是 animate.py 写下的最后一个关键帧
+        frames = os.path.join(OUT, 'frames')
+        os.makedirs(frames, exist_ok=True)
+        for stale in glob.glob(os.path.join(frames, 'f_*.png')):
+            os.remove(stale)
+        scene.render.image_settings.file_format = 'PNG'
+        scene.render.filepath = os.path.join(frames, 'f_')
+        bpy.ops.render.render(animation=True)
+        n = len(glob.glob(os.path.join(frames, 'f_*.png')))
+        print('FRAMES_OK', n, 'frames', frame_start, '->', frame_end)
 
     report = {
-        'engine': eng, 'fps': fps,
+        'preview': PREVIEW, 'engine': eng, 'fps': fps,
         'frame_start': frame_start, 'frame_end': frame_end,
         'expected_frames': frame_end - frame_start + 1,
         'frames_rendered': n,

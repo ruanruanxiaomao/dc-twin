@@ -1,0 +1,97 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  data:
+    name: data (${{ matrix.os }} / py${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.11", "3.13"]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+
+      - name: Install
+        run: python -m pip install -e ".[dev]"
+
+      - name: Lint new code (legacy scripts predate the lint gate)
+        run: ruff check dc_twin run.py scripts/manifest.py scripts/validate_data.py scripts/build_docs_assets.py tests/unit tests/contract tests/integration tests/acceptance tests/e2e tests/blender
+
+      - name: Doctor
+        run: python -m dc_twin doctor
+
+      - name: Data + scenario chain (no Blender)
+        run: python -m dc_twin run --scope scenarios
+
+      - name: Negative tests (17 cases)
+        run: python tests/run_all_negative.py
+
+      - name: Derived reports and output contracts
+        run: |
+          python scripts/validate_data.py
+          python scripts/report_status.py
+          python scripts/manifest.py
+
+      - name: pytest (no Blender)
+        run: pytest -m "not blender" --cov=dc_twin --cov-report=term-missing
+
+      - name: Acceptance tier + JUnit
+        run: python -m dc_twin validate --tier data --junit out/junit.xml
+
+      - name: Upload JUnit on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-${{ matrix.os }}-${{ matrix.python }}
+          path: out/junit.xml
+          if-no-files-found: ignore
+
+  blender-smoke:
+    # Manual only: downloading a portable Blender is slow and the full
+    # 942-frame render is intentionally NOT part of CI.
+    name: blender one-frame smoke
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: python -m pip install -e .
+      - name: Download portable Blender 5.2
+        run: |
+          set -euo pipefail
+          curl -fsSL -o blender.tar.xz \
+            "https://download.blender.org/release/Blender5.2/blender-5.2.3-linux-x64.tar.xz"
+          mkdir -p /tmp/blender && tar -xf blender.tar.xz -C /tmp/blender --strip-components=1
+          echo "BLENDER_EXE=/tmp/blender/blender" >> "$GITHUB_ENV"
+      - name: Build scene and render one preview frame
+        env:
+          DC_RENDER_PREVIEW: "1"
+        run: |
+          python -m dc_twin run --scope data
+          "$BLENDER_EXE" -b --factory-startup -P scripts/build_dc.py
+          "$BLENDER_EXE" -b --factory-startup -P scripts/inspect_blend.py
+          "$BLENDER_EXE" -b --factory-startup -P scripts/render.py
+      - name: Upload preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: blender-preview
+          path: out/renders/*.png
+          if-no-files-found: ignore

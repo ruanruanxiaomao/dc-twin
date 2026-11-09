@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Distribution Center Digital Twin (dc-twin)"
+type: software
+authors:
+  - name: "OYC"
+abstract: >-
+  A Blender 5.2 based digital twin of a four-warehouse distribution center
+  with 21 AGVs, closed-loop A* task planning, a reproducible four-layer
+  configuration and 40 independent acceptance checks.
+version: 0.1.0
+date-released: 2026-11-08
+license: MIT
+keywords:
+  - digital-twin
+  - warehouse
+  - agv
+  - blender
+  - simulation
+  - logistics
+  - pathfinding

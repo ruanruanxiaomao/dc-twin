@@ -1,10 +1,30 @@
-out/frames/
-out/*.blend1
-out/*.blend2
+# Generated artifacts are rebuilt by: dc run --scope full / python run.py
+out/*
+!out/CURRENT_STATUS.md
+!out/renders/
+out/renders/*
+!out/renders/.gitkeep
+
+# Scenario runs and local state
 runs/
-__pycache__/
-*.pyc
+tests/_tmp_spec/
 *.bak
+data/config.bak.json
+
+# Python / tooling
+__pycache__/
+*.py[cod]
 .venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
+
+# Blender / OS / logs
+*.blend1
+*.blend2
 *.log
 .DS_Store

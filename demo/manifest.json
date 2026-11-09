@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "kind": "demo_manifest",
+  "generated_at": "2026-11-08T11:31:05+00:00",
+  "engine": "static, no backend",
+  "agents": 21,
+  "duration_s": 117.6233,
+  "scenarios": 8,
+  "assets": [
+    "dc_preview.glb",
+    "overview.webp"
+  ],
+  "files": {
+    "app.js": {
+      "sha256": "5ae7069422ced428eff29fc54c8bd180f61a2dd46abbc81598ea75d713ff830b",
+      "bytes": 7880
+    },
+    "dc_preview.glb": {
+      "sha256": "d60e5a8c9300ff6c2972a7d0960025da474fbda80e53344bea3a45d9d03e727d",
+      "bytes": 583176
+    },
+    "overview.webp": {
+      "sha256": "0b92792a4222b13465005a6880077faf1486bf0d500870c7b36fe677a0c551c6",
+      "bytes": 47498
+    },
+    "data.js": {
+      "sha256": "eea81248f5fd02ff079ad1c5cf2beaa4d996b6d6db5ed1a7326cae44449efa59",
+      "bytes": 70329
+    },
+    "index.html": {
+      "sha256": "fdb5d58c72cfee3ed5368b09c6c64f36353fa10a6027eed0a986cf9f329b43be",
+      "bytes": 3293
+    },
+    "manifest.json": {
+      "sha256": "b10e56f5f167447d2c36e777b0a32155a051a702e900deb975b2d4f7fd54938d",
+      "bytes": 1242
+    },
+    "style.css": {
+      "sha256": "6a2118ed8e0f7725d840a2dac2da2106d830662ada266351a046dc0c1656bb03",
+      "bytes": 3680
+    }
+  }
+}
