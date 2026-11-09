@@ -33,6 +33,13 @@ G1/G2 completed and a **zero-backend activity submission web app** added.
 - `tests/test_stage_g.py`: 6 contract tests (DXF import / calibration / unknown
   layers, snapshot fields, static asset references, no CDN).
 
+### Published
+
+- Static submission app is live at
+  `https://dc-twin-studio.app.workbuddy.host/?sharecode=SRGROMS4ZA`.
+  The link is recorded in `submission/提交说明.md` and `docs/COMPLETION_STATUS.md`.
+  Manage it from 「设置—数据管理—应用」.
+
 ### Changed
 
 - `docs/COMPLETION_STATUS.md`, README and this changelog: G1/G2 status updated
