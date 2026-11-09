@@ -4,6 +4,43 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-11-09
+
+G1/G2 completed and a **zero-backend activity submission web app** added.
+
+### Added
+
+- **G1 — visual 2D layout editor** (`submission/editor.js`): select/move, add
+  zone / rack row / dock door / home, delete, undo, keyboard shortcuts, live
+  validation with red outlines, background tracing with two-point calibration,
+  and draft-only JSON export (never overwrites `config/layout_spec.json`).
+  Interaction reference: `Stegocode/warehouse_layout_editor` (MIT verified).
+- **G2 — DXF import** (`scripts/import_dxf.py`, `config/layer_mapping.json`):
+  zero-dependency ASCII DXF reader for LWPOLYLINE / LINE / INSERT, layer mapping,
+  two-point scale calibration, sample DXF generator, and a loud refusal when no
+  rack/wall layer is recognised (falls back to background tracing).
+  `ezdxf` (MIT) remains an optional enhancement, not a required dependency.
+- **Submission app** (`submission/`): 7-tab static site — overview, live twin
+  (21 AGVs driven by **real inlined keyframes** from `data/paths.jsonl`),
+  scenario lab with draft export, P&L waterfall / breakeven / sensitivity,
+  layout editor, evidence gallery, and a submission-material tab.
+  No CDN, no backend, no network, no build step; opens from `file://`.
+- `scripts/build_submission.py` regenerates `submission/data.js` from real
+  `out/*.json` + `data/layout.json` and copies 8 WebP renders (416 KB).
+- `submission/提交说明.md`: ready-to-paste abstract, the WorkBuddy conversation
+  share-link steps, a privacy checklist (personal paths / secrets / screenshots),
+  a 3-minute reviewer tour and reproduction commands.
+- `tests/test_stage_g.py`: 6 contract tests (DXF import / calibration / unknown
+  layers, snapshot fields, static asset references, no CDN).
+
+### Changed
+
+- `docs/COMPLETION_STATUS.md`, README and this changelog: G1/G2 status updated
+  from "degraded" to "implemented (2D / ASCII subset)"; 3D drag preview and
+  complex/binary DXF remain declared limitations.
+
+---
+
 ## [0.2.0] - 2026-11-09
 
 Stage A/B/C of [`docs/COMPLETION_PLAN.md`](docs/COMPLETION_PLAN.md): from a

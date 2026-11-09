@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>配送中心数字孪生 · DC Twin Studio</title>
+<meta name="description" content="可仿真、可算账、可定制的配送中心运营数字孪生 · WorkBuddy 创作作品">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">DC</span>
+    <span class="brand-txt"><strong>DC TWIN STUDIO</strong><small>配送中心数字孪生</small></span>
+  </div>
+  <nav class="nav" id="nav">
+    <button data-tab="home" class="active">总览</button>
+    <button data-tab="twin">实时孪生</button>
+    <button data-tab="lab">场景实验室</button>
+    <button data-tab="ops">运营盈亏</button>
+    <button data-tab="editor">布局编辑</button>
+    <button data-tab="proof">验收证据</button>
+    <button data-tab="submit" class="nav-cta">提交材料</button>
+  </nav>
+  <div class="badges" id="topBadges"></div>
+</header>
+
+<main>
+  <!-- 总览 -->
+  <section class="pane active" id="pane-home">
+    <div class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">WORKBUDDY 创作作品 · 物流数智化</span>
+        <h1>从一张布局图纸<br>到<span> 可仿真 · 可算账 · 可定制 </span>的运营孪生</h1>
+        <p id="heroDesc"></p>
+        <div class="hero-actions">
+          <button class="btn primary" data-go="twin">进入实时孪生 <span>→</span></button>
+          <button class="btn ghost" data-go="proof">查看验收证据</button>
+        </div>
+        <div class="hero-note" id="heroNote"></div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-frame"><img id="heroImg" alt="配送中心 Blender 总览渲染"></div>
+        <div class="hero-stats" id="heroStats"></div>
+      </div>
+    </div>
+    <div class="section-title"><h2>四层能力，一条数据链</h2><p>每一步都对应磁盘上的真实文件，可独立复算</p></div>
+    <div class="feature-grid" id="featureGrid"></div>
+    <div class="section-title"><h2>3 分钟看懂这个作品</h2><p>建议按此顺序浏览，评审无需安装任何环境</p></div>
+    <ol class="tour" id="tourList"></ol>
+  </section>
+
+  <!-- 实时孪生 -->
+  <section class="pane" id="pane-twin">
+    <div class="section-title"><h2>实时孪生 · 21 台 AGV 闭环作业</h2>
+      <p>画面由 <code>data/paths.jsonl</code> 的真实关键帧驱动（已内联），非示意动画</p></div>
+    <div class="twin-wrap">
+      <div class="canvas-card">
+        <canvas id="twinCanvas" width="1000" height="720"></canvas>
+        <div class="canvas-legend" id="twinLegend"></div>
+      </div>
+      <aside class="twin-side">
+        <div class="side-card">
+          <h3>播放控制</h3>
+          <div class="row"><button class="btn primary" id="btnPlay">暂停</button>
+            <button class="btn ghost" id="btnReset">回到起点</button></div>
+          <label class="range-label">时间 <span id="timeLabel">0.0 s</span></label>
+          <input type="range" id="timeRange" min="0" max="1000" value="0">
+          <label class="range-label">倍速 <span id="speedLabel">1.0×</span></label>
+          <input type="range" id="speedRange" min="1" max="8" step="1" value="2">
+        </div>
+        <div class="side-card">
+          <h3>场景快照</h3>
+          <select id="twinScenario"></select>
+          <div id="twinMetrics" class="metric-list"></div>
+        </div>
+        <div class="side-card note-card" id="twinNote"></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- 场景实验室 -->
+  <section class="pane" id="pane-lab">
+    <div class="section-title"><h2>场景实验室 · 8 个场景真的跑过</h2>
+      <p>KPI 全部来自 tick 级仿真事件流，可与解析近似值并列区分</p></div>
+    <div class="scen-grid" id="scenGrid"></div>
+    <div class="section-title"><h2>自定义场景编排</h2>
+      <p>在浏览器里排好参数，导出草稿到本地项目即可真跑</p></div>
+    <div class="lab-layout">
+      <div class="lab-form" id="labForm"></div>
+      <div class="lab-output">
+        <div class="row"><button class="btn primary" id="btnGenScen">生成场景草稿</button>
+          <button class="btn ghost" id="btnDownloadScen">下载 JSON</button></div>
+        <pre id="scenPreview">点击「生成场景草稿」查看 JSON…</pre>
+        <div class="hint" id="scenHint"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 运营盈亏 -->
+  <section class="pane" id="pane-ops">
+    <div class="section-title"><h2>运营盈亏 · 事件溯源账本</h2>
+      <p id="opsSubtitle"></p></div>
+    <div class="ops-top">
+      <div class="card"><h3>损益瀑布（baseline）</h3><div id="waterfall"></div></div>
+      <div class="card"><h3>单均与盈亏平衡</h3><div id="breakeven"></div></div>
+    </div>
+    <div class="card"><h3>9 个运行的利润对比</h3><div id="pnlChart"></div></div>
+    <div class="card"><h3>敏感性（电价 / 单量 / 车数 ±20%）</h3><div id="sensitivity"></div></div>
+    <div class="card"><h3>运行明细</h3><div class="table-wrap"><table id="pnlTable"></table></div></div>
+  </section>
+
+  <!-- 布局编辑器 -->
+  <section class="pane" id="pane-editor">
+    <div class="section-title"><h2>可视化布局编辑器 · G1 已补齐</h2>
+      <p>拖拽实体、描图标定、实时校验；导出的是<strong>草稿</strong>，绝不静默覆盖现有布局</p></div>
+    <div class="editor-layout">
+      <div class="editor-tools">
+        <div class="tool-group"><h3>工具</h3><div id="editorTools"></div></div>
+        <div class="tool-group"><h3>背景描图（G2 兜底）</h3>
+          <input type="file" id="bgFile" accept="image/*">
+          <div class="row"><input type="number" id="bgMeters" value="100" step="1" min="1" title="两点实际距离(米)">
+            <button class="btn ghost" id="btnCalib">两点标定</button></div>
+          <div class="hint" id="calibHint">上传平面图后，在画布上依次点两个已知距离的点，填入实际米数。</div>
+        </div>
+        <div class="tool-group"><h3>操作</h3>
+          <div class="row"><button class="btn ghost" id="btnUndo">撤销</button>
+            <button class="btn ghost" id="btnResetEditor">还原</button></div>
+          <div class="row"><button class="btn primary" id="btnExportDraft">导出草稿 JSON</button></div>
+          <div id="editorIssues" class="issue"></div>
+        </div>
+      </div>
+      <div class="canvas-card"><canvas id="editorCanvas" width="1000" height="720"></canvas>
+        <div class="canvas-legend">左键拖拽移动 · 工具栏选择后点击添加 · Delete 删除选中 · 红框 = 校验问题</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 验收证据 -->
+  <section class="pane" id="pane-proof">
+    <div class="section-title"><h2>验收证据 · 验证器必须能失败</h2><p>所有数字来自可独立复算的报告文件</p></div>
+    <div class="proof-grid" id="proofGrid"></div>
+    <div class="section-title"><h2>GitHub 开源对照</h2><p>许可证逐项核实，代码衍生与概念参照严格区分</p></div>
+    <div class="card"><table id="githubTable"></table></div>
+    <div class="section-title"><h2>Blender 渲染图集</h2><p>点击放大，10 张静帧由脚本自动生成</p></div>
+    <div class="gallery" id="gallery"></div>
+    <div class="section-title"><h2>已知限制（如实声明）</h2></div>
+    <div class="card"><ul id="limitsList"></ul></div>
+  </section>
+
+  <!-- 提交材料 -->
+  <section class="pane" id="pane-submit">
+    <div class="section-title"><h2>活动提交材料</h2><p>可直接复制进报名表；提交前请完成隐私检查</p></div>
+    <div class="submit-grid">
+      <div class="card"><h3>作品简介（可复制）</h3>
+        <textarea id="introBox" rows="9"></textarea>
+        <div class="row"><button class="btn primary" id="btnCopyIntro">复制简介</button>
+          <span class="hint" id="copyMsg"></span></div>
+      </div>
+      <div class="card"><h3>作品信息</h3><table id="submitInfo"></table></div>
+    </div>
+    <div class="card"><h3>「05 WorkBuddy 创作对话记录」获取步骤</h3>
+      <ol class="steps" id="shareSteps"></ol>
+      <div class="warn" id="privacyWarn"></div>
+    </div>
+    <div class="card"><h3>提交前自检清单</h3><div id="checklist"></div></div>
+    <div class="card"><h3>本地复现（评审可选）</h3><pre id="repro"></pre></div>
+  </section>
+</main>
+
+<footer>
+  <span>DC TWIN STUDIO · 由 WorkBuddy 辅助创作 · 数据快照 <span id="genAt"></span></span>
+  <span>零后端静态应用 · 不联网 · 不上传任何数据</span>
+</footer>
+
+<div class="lightbox" id="lightbox"><img id="lightboxImg" alt=""><div id="lightboxCap"></div></div>
+
+<script src="data.js"></script>
+<script src="editor.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

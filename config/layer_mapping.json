@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "kind": "layer_mapping",
+  "map": {
+    "WALL": "walls",
+    "WALLS": "walls",
+    "A-WALL": "walls",
+    "RACK": "racks",
+    "RACKS": "racks",
+    "A-RACK": "racks",
+    "SHELF": "racks",
+    "DOCK": "docks",
+    "DOOR": "docks",
+    "A-DOCK": "docks",
+    "HOME": "home",
+    "CHARGE": "home",
+    "AP": "home",
+    "ANNOTATION": "annotations",
+    "DIM": "annotations",
+    "TEXT": "annotations"
+  },
+  "known_block_prefixes": ["RACK", "PALLET", "DOCK"],
+  "meta": {
+    "source": "COMPLETION_PLAN.md 5.5 (C4)",
+    "rule": "未识别图层一律记入 unknown_layers 并提示转人工描图（G2），绝不静默生成布局",
+    "calibration": "两点标定：--p1 x1,y1 --p2 x2,y2 --meters M；图纸单位≠米时必须提供"
+  }
+}

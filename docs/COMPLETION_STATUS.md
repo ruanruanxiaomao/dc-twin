@@ -50,9 +50,9 @@ F4 电费与 S2 能量守恒闭合（误差 <0.004%）；F6 `prices_source=demo`
 | 步 | 状态 | 说明 |
 |---|---|---|
 | C1 自定义场景 | **完成** | `scripts/scenario_tools.py` + 控制台「场景」面板：新建/复制内置/校验/600 s 试算/保存/运行/删除；自定义场景只存 `config/scenarios/custom/`，不污染 8 个冻结场景；运行隔离在 `runs/custom/`，不覆盖 `out/sim_index.json` |
-| C2 布局编辑器 | **G1 降级** | 表单 + 场景面板 + 背景描图路径保留；拖拽 2D/3D 预览未实现，如实声明 |
+| C2 布局编辑器 | **已补齐（2D）** | `submission/editor.js`：选择/移动、加分区/货架排/月台门/待命位、删除、撤销、实时校验红框、背景描图两点标定、导出草稿；3D 拖拽预览仍未实现（G1 保留） |
 | C3 适配器框架 | **完成核心 / G3 降级** | `scripts/adapters/base.py`（接口、幂等、指数退避×3、只读 ack）、`generic_rest.py`、`config/integrations.json`（密钥仅环境变量名）；OpenBoxes/Odoo 标 `unverified`，**未经真实系统验证、未向生产写入** |
-| C4 DXF 导入 | **G2 降级** | ezdxf（MIT）已核实但未引入；图纸质量差的场景转人工描图，不静默生成布局 |
+| C4 DXF 导入 | **已补齐（ASCII 子集）** | `scripts/import_dxf.py`：零依赖解析 LWPOLYLINE/LINE/INSERT + `config/layer_mapping.json` 图层映射 + 两点标定比例尺；样例 DXF 实测 5 实体 / 2 货架排 / 100×70 m，乱图层明确报错并提示转人工描图。复杂图纸 / 二进制 DXF 仍走 G2 降级（ezdxf 为可选 MIT 增强，未引入必需依赖） |
 | C5 fleet_spec 接入 | **完成** | `spec_layout.py --fleet-spec` + 新 L13 规则；默认 12/3/3/3=21 与冻结基线**逐字节一致**（已做哈希核对），缩减到 18 台生效，超配 30 台明确报 L13 而不是让 AGV 重叠 |
 | C6 LIF | **完成（自研）** | `scripts/lif.py`：导出 74 节点/70 边、导入草稿、往返自测 PASS；**GPL-3.0 隔离**，未复制 vda5050_lif_editor 代码；明确「非 VDA 5050 认证、边为示意连通关系」 |
 | C7 文档 | **完成** | 本文件 + `docs/GITHUB_REFERENCE_AUDIT.md` + `THIRD_PARTY_NOTICES.md` + README/CHANGELOG |
@@ -87,7 +87,7 @@ python scripts/sim_engine.py --all --include-custom   # 把自定义场景也纳
 2. `scale_50` 有 50 台车，但只有 30 台实际接单移动；空闲车如实报告。
 3. LIF 是「语义对齐的自研草稿格式」，**非 VDA 5050 认证**，边为示意连通、非可行驶路网。
 4. 未对接任何真实 WMS；ack 默认 dry-run；`integrations.json` 不含密钥。
-5. 布局拖拽编辑器、DXF 自动导入、多楼层/电梯、物理级仿真、连续时间零碰撞形式化证明均**未实现**。
+5. 2D 拖拽布局编辑器与 ASCII DXF 导入**已实现**；3D 拖拽预览、复杂/二进制 DXF 自动导入、多楼层/电梯、物理级仿真、连续时间零碰撞形式化证明仍**未实现**。
 6. 碰撞结论口径仍是 `sampled verification + reservation check`，不宣称形式化保证。
 7. `MIN_SEP=1.4592 m` 全程未调小以迁就测试。
 8. 问之前这一轮**没有**新 clone 推荐项目；补做记录见 `docs/GITHUB_REFERENCE_AUDIT.md`（16 个仓库 API 实测、2 个新 clone、5 处许可证事实纠正）。
@@ -108,3 +108,24 @@ python -m dc_twin.cli serve              # 控制台（默认 127.0.0.1:8765）
 ```
 
 主链新注册步骤（`dc_twin/runner.py` SCENARIO_CHAIN）：`sim_engine --all` → `ledger --all --rebuild` → `pnl_report --all` → `validate_sim` → `validate_pnl`。既有 DATA_CHAIN 第一步增加 `--fleet-spec config/fleet_spec.json`。
+
+---
+
+## 7. 活动提交作品页（2026-11-09 追加）
+
+针对活动表单「05 WorkBuddy 创作对话记录」，新增**零后端静态作品应用** `submission/`：
+
+| 文件 | 作用 |
+|---|---|
+| `submission/index.html` / `style.css` / `app.js` | 7 个标签页：总览、实时孪生、场景实验室、运营盈亏、布局编辑、验收证据、提交材料 |
+| `submission/data.js` | 由 `scripts/build_submission.py` 从 `out/*.json` 与 `data/layout.json` 生成的内联真实数据快照（8 场景、9 损益运行、4 仓布局、**5421 条真实 AGV 关键帧降采样**） |
+| `submission/editor.js` | G1 可视化布局编辑器（拖拽 / 背景描图 / 校验 / 导出草稿） |
+| `submission/assets/*.webp` | 8 张 Blender 渲染图（共 416 KB） |
+| `submission/提交说明.md` | 作品简介、分享链接获取步骤、隐私检查清单、评审导览、复现命令 |
+
+特点：**不联网、不上传数据、无 CDN、无构建步骤**；`file://` 直接打开或静态托管均可。
+作品页明确标注「场景 KPI 与动画不是同一次运行」「演示价格不可用于真实决策」「LIF 非 VDA5050 认证」。
+在线链接发布后回填 `提交说明.md` §6 与页面「作品信息」表。
+
+G1/G2 补齐后的契约测试：`tests/test_stage_g.py`（DXF 样例导入 / 标定 / 乱图层拒绝、
+数据快照字段、静态资源引用完整性、无 CDN）。

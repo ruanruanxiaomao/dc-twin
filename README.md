@@ -67,7 +67,7 @@ are thin wrappers around the same `run.py` driver. See
 | 8-direction A\* on a 0.5 m grid with AGV-radius obstacle inflation, no corner cutting, arc-length timing at 1.5 m/s | A formal collision *proof*: verification is 0.05 s sampling + an independent reservation-table replay, not CBS/WHCA\* |
 | **A — tick-level DES**: continuous order arrivals, 9-state FSM, battery/charging, fault injection & reassignment, L1 space-time reservation; 8 scenarios really executed | Full physics (dynamics/LiDAR/Gazebo), VDA 5050 MQTT, multi-floor elevators, or a continuous-time zero-collision *proof* |
 | **B — event-sourced ledger → P&L**: measured kWh/orders → postings → income statement, breakeven, sensitivity; F1–F7 independent recomputation | An external financial statement or tax-compliant books; all prices are `demo` and badged as such |
-| **C — user-defined scenarios** (console UI + CLI: validate → 600 s dry-run → save → run), `fleet_spec` L13 capacity guard, LIF-like import/export, WMS adapter framework | A drag-and-drop 2D/3D layout editor (G1), automatic DXF import (G2), or a **verified** live WMS integration (G3) |
+| **C — user-defined scenarios** (console UI + CLI: validate → 600 s dry-run → save → run), `fleet_spec` L13 capacity guard, LIF-like import/export, WMS adapter framework | A 3D drag-and-drop editor (G1), complex/binary DXF auto-import (G2), or a **verified** live WMS integration (G3); the 2D editor and ASCII DXF import **are** implemented |
 | Independent validators: layout, traffic, geometry, reservation, A1–A40, S1–S9, F1–F7, 21 negative tests | Mixing analytic and measured KPIs: the two engines are separate, each metric carries `source` |
 | Blender 5.2 procedural `.blend` + GLB + 10 renders + MP4 + local 2D/3D console + static demo | An animated GLB (`export_animations=False`); animation lives in the MP4 / `.blend` |
 | Four-layer config, 8 frozen + custom scenarios, 27 measured KPIs with definitions/formulas | CBS/L3 solver in the default chain (D3: `experimental`, see [implementation status](docs/COMPLETION_STATUS.md)) |
@@ -75,6 +75,11 @@ are thin wrappers around the same `run.py` driver. See
 > Stage A/B/C implementation status, degradation register and honest limitations:
 > [`docs/COMPLETION_STATUS.md`](docs/COMPLETION_STATUS.md). GitHub reference audit (16 repos
 > re-checked, 5 licence corrections): [`docs/GITHUB_REFERENCE_AUDIT.md`](docs/GITHUB_REFERENCE_AUDIT.md).
+>
+> **Zero-backend submission web app** (open directly in a browser, no server / no network):
+> [`submission/index.html`](submission/index.html) ·
+> [submission guide](submission/%E6%8F%90%E4%BA%A4%E8%AF%B4%E6%98%8E.md) ·
+> rebuild its data snapshot with `python scripts/build_submission.py`.
 
 Current measured numbers are always generated from JSON into
 [`out/CURRENT_STATUS.md`](out/CURRENT_STATUS.md); the prose in this README

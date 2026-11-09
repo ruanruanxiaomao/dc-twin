@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "kind": "submission_manifest",
+  "generated_at": "2026-11-09T10:46:03+00:00",
+  "images": [
+    "assets/01_overview.webp",
+    "assets/03_dock.webp",
+    "assets/04_agv_route.webp",
+    "assets/05_slotting_heatmap.webp",
+    "assets/07_nav_plan.webp",
+    "assets/08_corridor_plan_zoom.webp",
+    "assets/09_time_space.webp",
+    "assets/10_snapshot_sequence.webp"
+  ],
+  "scenarios": 8,
+  "pnl_runs": 9,
+  "warehouses": 4,
+  "source": "generated from out/*.json + data/layout.json"
+}
