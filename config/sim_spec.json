@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "engine": "tick",
+  "tick_s": 0.1,
+  "horizon_s": 3600,
+  "seed": 42,
+  "traffic": {
+    "level": "L1_reservation",
+    "replan_window_s": 10,
+    "max_wait_s": 6,
+    "reserve_radius_cells": 3
+  },
+  "dispatch": {
+    "policy": "nearest_first",
+    "max_waiting": 12,
+    "battery_reserve_pct": 20
+  },
+  "battery": {
+    "initial_soc_pct": 60,
+    "low_soc_pct": 22,
+    "low_soc_robot_every": 7,
+    "charge_to_pct": 60,
+    "charge_policy": "opportunistic",
+    "critical_pct": 20,
+    "note": "Fleet starts at 60%; every 7th robot starts a shift at 22% (real low-battery units). Charging happens when an IDLE robot falls below critical, at its assigned charger slot in place; no task is interrupted, no order is lost to charging."
+  },
+  "faults": [],
+  "output": {
+    "event_ring": 5000,
+    "kpi_every_ticks": 100
+  },
+  "meta": {
+    "source": "COMPLETION_PLAN.md §3.4 (WareTwin tick constants, re-calibrated)",
+    "horizon_note": "3600 s at 1.5 m/s real time; idle periods are skipped by event-driven tick jumps (no time compression)",
+    "degradation": "none; D4 (1800 s) not activated"
+  }
+}

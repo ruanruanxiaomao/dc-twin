@@ -27,6 +27,7 @@ CFG = json.load(open(os.path.join(DATA, 'config.json'), encoding='utf-8'))
 RNG = random.Random(CFG['seed'])
 N_SKUS = 240
 SPEC = os.path.join(ROOT, 'config', 'layout_spec.json')
+FLEET_SPEC = os.path.join(ROOT, 'config', 'fleet_spec.json')
 SPEC_LAYOUT = os.path.join(os.path.dirname(__file__), 'spec_layout.py')
 
 
@@ -141,6 +142,7 @@ def build_events(layout, skus):
 def main():
     # Step 3：布局唯一来源 = config/layout_spec.json（校验 PASS 才会 --write）
     subprocess.run([sys.executable, SPEC_LAYOUT, '--spec', SPEC,
+                    '--fleet-spec', FLEET_SPEC,
                     '--write', os.path.join(DATA, 'layout.json'), '--quiet'],
                    check=True)
     layout = json.load(open(os.path.join(DATA, 'layout.json'), encoding='utf-8'))

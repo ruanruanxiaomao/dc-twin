@@ -55,8 +55,12 @@ def main():
     kpi_dirs = []
     for d in scenarios:
         kpi_dirs += [p for p in os.listdir(os.path.join(ROOT, 'runs', d))]
-    base_runs = sorted(os.listdir(os.path.join(ROOT, 'runs', 'baseline')))
-    base_kpi = j(ROOT, 'runs', 'baseline', base_runs[-1], 'kpi.json') if base_runs else {}
+    # Only analytic runs own kpi.json; stage-A tick runs share the same tree
+    # (sim_kpi.json) and must not be picked by a plain directory-name sort.
+    base_root = os.path.join(ROOT, 'runs', 'baseline')
+    base_runs = sorted(d for d in os.listdir(base_root)
+                       if os.path.isfile(os.path.join(base_root, d, 'kpi.json')))
+    base_kpi = j(base_root, base_runs[-1], 'kpi.json') if base_runs else {}
 
     passed = sum(1 for r in vr if r['status'] == 'PASS')
     neg_total = sum(x['total'] for x in (neg, neg_spec, neg_scen))

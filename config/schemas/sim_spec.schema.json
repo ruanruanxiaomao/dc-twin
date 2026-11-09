@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "dc-twin sim_spec",
+  "type": "object",
+  "required": ["schema_version", "engine", "tick_s", "horizon_s", "seed", "traffic", "dispatch", "battery", "output"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "engine": {"const": "tick"},
+    "tick_s": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+    "horizon_s": {"type": "number", "exclusiveMinimum": 0},
+    "seed": {"type": "integer"},
+    "traffic": {
+      "type": "object",
+      "required": ["level", "max_wait_s", "reserve_radius_cells"],
+      "properties": {
+        "level": {"enum": ["L1_reservation", "L2_whca", "L3_cbs"]},
+        "replan_window_s": {"type": "number", "minimum": 0},
+        "max_wait_s": {"type": "number", "minimum": 0},
+        "reserve_radius_cells": {"type": "integer", "minimum": 1, "maximum": 8}
+      }
+    },
+    "dispatch": {
+      "type": "object",
+      "required": ["policy", "max_waiting", "battery_reserve_pct"],
+      "properties": {
+        "policy": {"enum": ["nearest_first"]},
+        "max_waiting": {"type": "integer", "minimum": 1},
+        "battery_reserve_pct": {"type": "number", "minimum": 0, "maximum": 100}
+      }
+    },
+    "battery": {
+      "type": "object",
+      "required": ["initial_soc_pct", "charge_to_pct", "critical_pct"],
+      "properties": {
+        "initial_soc_pct": {"type": "number", "minimum": 0, "maximum": 100},
+        "charge_to_pct": {"type": "number", "minimum": 0, "maximum": 100},
+        "charge_policy": {"enum": ["opportunistic"]},
+        "critical_pct": {"type": "number", "minimum": 0, "maximum": 100}
+      }
+    },
+    "faults": {"type": "array"},
+    "output": {
+      "type": "object",
+      "required": ["kpi_every_ticks"],
+      "properties": {
+        "event_ring": {"type": "integer", "minimum": 1},
+        "kpi_every_ticks": {"type": "integer", "minimum": 1}
+      }
+    }
+  },
+  "additionalProperties": true
+}

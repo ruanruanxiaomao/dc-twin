@@ -20,7 +20,8 @@ from . import paths
 
 # (relative script path, args..., kind)  kind = python | blender
 DATA_CHAIN = [
-    ("scripts/spec_layout.py", ("--spec", "config/layout_spec.json", "--quiet"), "python"),
+    ("scripts/spec_layout.py", ("--spec", "config/layout_spec.json",
+                                "--fleet-spec", "config/fleet_spec.json", "--quiet"), "python"),
     ("scripts/gen_data.py", (), "python"),
     ("scripts/layout_audit.py", (), "python"),
     ("scripts/nav_grid.py", (), "python"),
@@ -38,6 +39,12 @@ SCENARIO_CHAIN = [
      ("--csv", "config/orders_sample.csv", "--out", "out/csv_events.jsonl"), "python"),
     ("scripts/fleet_sim.py", (), "python"),
     ("scripts/reservation_check.py", (), "python"),
+    # COMPLETION_PLAN 1.2: stage A/B appended in the same registration style.
+    ("scripts/sim_engine.py", ("--all",), "python"),
+    ("scripts/ledger.py", ("--all", "--rebuild"), "python"),
+    ("scripts/pnl_report.py", ("--all",), "python"),
+    ("scripts/validate_sim.py", (), "python"),
+    ("scripts/validate_pnl.py", (), "python"),
     ("scripts/manifest.py", (), "python"),
 ]
 BLENDER_CHAIN = [

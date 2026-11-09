@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "currency": "CNY",
+  "prices_source": "demo",
+  "revenue": {
+    "per_order": {
+      "INBOUND": 3.5,
+      "OUTBOUND": 6.0,
+      "PICK": 4.0,
+      "REPLENISH": 2.5,
+      "TRANSFER": 3.0
+    },
+    "per_line_extra": 0.8,
+    "sla_penalty_per_tardy_s": 0.02,
+    "lost_order_penalty": 5.0
+  },
+  "variable_costs": {
+    "energy_tariff_per_kwh": 0.85,
+    "consumables_per_order": 0.15
+  },
+  "fixed_costs_per_day": {
+    "labor": {"operators": 4, "hourly_rate": 35, "shift_h": 8, "supervision_ratio": 0.25},
+    "robot_depreciation": {"capex_per_unit": 120000, "life_h": 12000, "units": 21},
+    "maintenance_pct_of_capex_per_year": 0.06,
+    "space_rent_per_m2_month": 28,
+    "it_systems_per_day": 150
+  },
+  "allocation": {"basis": "orders", "shift_hours": 8},
+  "meta": {
+    "source": "COMPLETION_PLAN.md 4.2 (management-accounting scope, demo prices)",
+    "scope": "内部管理会计口径，非对外财务报表、非税务合规；固定成本按运行时长/班次分摊",
+    "energy_basis": "按车辆端实测耗电(ENERGY_TICK.motion_kwh + idle_kwh)计费，不含充电转换损耗；充电输入不重复计费",
+    "area_source": "data/layout.json warehouses[].size.width * depth",
+    "warning": "全部单价为演示值，禁止直接用于真实经营决策；填入真实价格后请把 prices_source 改为 user"
+  }
+}

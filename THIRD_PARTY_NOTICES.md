@@ -53,10 +53,15 @@ SOFTWARE.
     `backend/app/sim/astar.py` 的算法结构。
   - `data/layout.json` 的仓库 / 库位 / 事件字段设计参考
     `backend/app/warehouse_layout.json` 与 `docs/layout/warehouse_layout_格式說明.md`。
-  - **对照结论**：WareTwin `backend/app/sim/engine.py` 采用
-    `TICK_S=0.1`、`MAX_SPEED=1.5`、`MIN_SEP=0.9` 与 cell `reserved_by`
-    做 tick 级时空预约；本项目采用 1.5 m/s、1.2 m 最小间距的
-    **优先级错峰**作为轻量近似，尚未实现 tick 级 cell reservation（见 README 已知限制）。
+  - **engine 结构衍生声明（A 阶段，2026-11-09）**：`scripts/sim_engine.py` 的
+    tick 循环顺序、对象化确定性 PRNG、事件环缓冲、等待队列上限、KPI 采样
+    与 `ENERGY_TICK` 窗口聚合，参照 `backend/app/sim/engine.py`
+    （源 commit `81f365f323e1a097e5819ca9045637544163f219`）。
+    属 **MIT 许可下的结构衍生**，数值函数均以 Python 原生重写。
+    本项目物理阈值 `MIN_SEP=1.4592 m`（2×AGV_RADIUS）**未沿用** WareTwin 的 0.9 m。
+  - **过时表述更正**：旧版本文件称「尚未实现 tick 级 cell reservation」；
+    A 阶段已实现 tick 级仿真 + 逐 tick 格点占用复核 + 1 s 间距采样验证
+    （`out/sim_validation.json` S6）。该表述已作废。
 
 ```
 MIT License
@@ -125,7 +130,8 @@ SOFTWARE.
 
 - `Pillow`、`imageio-ffmpeg` 仅在生成 2D 校验图与编码 MP4 时使用，运行时依赖见 `requirements.txt`；
   它们各自的许可证随安装包提供，本项目不再分发其源码。
-- `_research/repos/` 下的三个参考仓库保留各自原始 `LICENSE`，不参与运行。
+- `_research/repos/` 下的五个参考仓库（`cargotwin`、`WareTwin`、`smart-warehouse`、
+  `MAPF-CBS`、`layout-editor`）保留各自原始 `LICENSE`，不参与运行。
 
 ## 第十阶段新增（依据工作区 `DESIGN_PLAN.md`）
 
@@ -144,3 +150,26 @@ SOFTWARE.
   也**不复制** ISO 标准全文，不声称通过任何安全认证。
 - **Pillow 13.0.0（HPND）** / **imageio-ffmpeg 0.8.1（BSD-2-Clause）**：
   版本已在 `requirements.txt` 锁定；许可证随安装包提供。
+
+---
+
+## A/B/C 阶段新增（依据 `docs/COMPLETION_PLAN.md` 与 `docs/GITHUB_REFERENCE_AUDIT.md`）
+
+- **GavinPHR/Multi-Agent-Path-Finding**（https://github.com/GavinPHR/Multi-Agent-Path-Finding，
+  **MIT**，`Copyright (c) 2018 YOUR NAME`）：仅做源码级对照
+  （`cbs_mapf/planner.py` 的 CBS / Space-Time A*、`constraint_tree.py` 的 SIC 代价），
+  **未复制任何代码、未引入依赖**。实测其依赖外部 `stastar` 包且文件名
+  `LICENSE.txt ` 带尾随空格导致 Windows 工作树为空，故 L3 求解器触发 D3 降级，
+  标 experimental，不进默认链。
+- **Stegocode/warehouse_layout_editor**（https://github.com/Stegocode/warehouse_layout_editor，
+  **MIT**，`Copyright (c) 2026 Scott Tegenfeldt`）：许可证已核实（方案原标「未核实」）。
+  仅参照其交互与架构（工具栏 / 双端同规则校验 / JSON 导入导出 / 校准背景描图），
+  **代码全部自研**，不打包其前端文件。
+- **GPL 隔离声明**：`frappe/erpnext`（GPL-3.0）、`beancount/beancount`（GPL-2.0）、
+  `bekirbostanci/vda5050_lif_editor`（GPL-3.0，本次核实）、`OCA/wms`（AGPL-3.0）
+  仅作为**概念 / 接口语义参照**，本项目账本、LIF 解析器、适配器均为自研，
+  **无任何代码衍生**，亦不分发其源码。
+- **openTCS/opentcs**：GitHub API `license` 字段为 `null`，不能按 MIT 处理；
+  仅借「transport order → drive order + 资源锁」架构概念，不嵌入 Java 栈。
+- **salabim/salabim**：许可证仍未被 GitHub 识别，维持「核实前不引入」。
+- **VDA5050/VDA5050**（**MIT**）：仅事件命名语义对齐，不构成代码衍生。

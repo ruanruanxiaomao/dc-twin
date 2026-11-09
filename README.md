@@ -65,9 +65,16 @@ are thin wrappers around the same `run.py` driver. See
 | 4 warehouses (W + F1/F2/F3), 196 racks, 441 locations, 21 AGVs, generated from one [`layout_spec.json`](config/layout_spec.json) | A production WMS / fleet manager; SKU velocities and orders are **synthetic** |
 | 21 closed-loop orders (`HOME → PICK → DROP → HOME`), 5 business types, cargo state machine, 0 pending | Real order data; CSV / UCI / WMS **adapters** exist but are not connected to live systems |
 | 8-direction A\* on a 0.5 m grid with AGV-radius obstacle inflation, no corner cutting, arc-length timing at 1.5 m/s | A formal collision *proof*: verification is 0.05 s sampling + an independent reservation-table replay, not CBS/WHCA\* |
-| Independent validators: layout, traffic, geometry, reservation, 40 acceptance checks, 17 negative tests | A claim that scenario KPIs are full simulations: the 8 scenarios are **M/M/c analytic what-if**, explicitly labelled |
+| **A — tick-level DES**: continuous order arrivals, 9-state FSM, battery/charging, fault injection & reassignment, L1 space-time reservation; 8 scenarios really executed | Full physics (dynamics/LiDAR/Gazebo), VDA 5050 MQTT, multi-floor elevators, or a continuous-time zero-collision *proof* |
+| **B — event-sourced ledger → P&L**: measured kWh/orders → postings → income statement, breakeven, sensitivity; F1–F7 independent recomputation | An external financial statement or tax-compliant books; all prices are `demo` and badged as such |
+| **C — user-defined scenarios** (console UI + CLI: validate → 600 s dry-run → save → run), `fleet_spec` L13 capacity guard, LIF-like import/export, WMS adapter framework | A drag-and-drop 2D/3D layout editor (G1), automatic DXF import (G2), or a **verified** live WMS integration (G3) |
+| Independent validators: layout, traffic, geometry, reservation, A1–A40, S1–S9, F1–F7, 21 negative tests | Mixing analytic and measured KPIs: the two engines are separate, each metric carries `source` |
 | Blender 5.2 procedural `.blend` + GLB + 10 renders + MP4 + local 2D/3D console + static demo | An animated GLB (`export_animations=False`); animation lives in the MP4 / `.blend` |
-| Four-layer config, 8 asserted scenarios, 25 KPIs with definitions and formulas | Tick-level cell reservation, SOC/failure closed loop, VDA 5050, multi-floor layouts |
+| Four-layer config, 8 frozen + custom scenarios, 27 measured KPIs with definitions/formulas | CBS/L3 solver in the default chain (D3: `experimental`, see [implementation status](docs/COMPLETION_STATUS.md)) |
+
+> Stage A/B/C implementation status, degradation register and honest limitations:
+> [`docs/COMPLETION_STATUS.md`](docs/COMPLETION_STATUS.md). GitHub reference audit (16 repos
+> re-checked, 5 licence corrections): [`docs/GITHUB_REFERENCE_AUDIT.md`](docs/GITHUB_REFERENCE_AUDIT.md).
 
 Current measured numbers are always generated from JSON into
 [`out/CURRENT_STATUS.md`](out/CURRENT_STATUS.md); the prose in this README
@@ -88,7 +95,10 @@ flowchart LR
   G --> H[.blend · GLB · 10 renders · MP4]
   F --> I[validate.py A1-A40<br/>CURRENT_STATUS.md]
   H --> I
-  E --> J[console + static demo]
+  F --> K[sim_engine tick DES<br/>sim_events.jsonl]
+  K --> L[ledger → pnl_report<br/>S1-S9 / F1-F7 validators]
+  L --> J
+  E --> J[console + static demo<br/>运营 / 场景 panels]
   H --> J
 ```
 

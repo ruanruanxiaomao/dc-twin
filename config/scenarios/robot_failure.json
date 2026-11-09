@@ -8,10 +8,11 @@
   "seed": 20261106,
   "simulation": {"warmup_s": 0, "duration_s": 28800, "dt_s": 0.1, "fps": 8, "max_wall_clock_s": 900},
   "overrides": {"demand.orders.per_hour": 45, "fleet.deployment": "as_spec"},
+  "fault_target_policy": "preempt_busy",
   "disruptions": [
-    {"type": "robot_down", "agent": "W-R01", "duration_s": 600},
-    {"type": "robot_down", "agent": "W-R07", "duration_s": 600},
-    {"type": "robot_down", "agent": "F1-R02", "duration_s": 600}
+    {"type": "robot_down", "agent": "W-R01", "start_s": 0, "duration_s": 600},
+    {"type": "robot_down", "agent": "W-R07", "start_s": 600, "duration_s": 600},
+    {"type": "robot_down", "agent": "F1-R02", "start_s": 1200, "duration_s": 600}
   ],
   "assertions": [
     {"metric": "fault_count", "op": ">=", "value": 3},

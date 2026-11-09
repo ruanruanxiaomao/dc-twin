@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "active": "csv",
+  "adapters": [
+    {
+      "name": "csv",
+      "type": "csv",
+      "path": "config/orders_sample.csv",
+      "read_only": true,
+      "note": "P0，已有 scripts/adapters/csv_orders.py；样例为本项目合成数据"
+    },
+    {
+      "name": "generic_rest",
+      "type": "generic_rest",
+      "endpoint": "http://127.0.0.1:8999",
+      "orders_path": "/api/orders",
+      "locations_path": "/api/locations",
+      "auth": {"type": "bearer", "token_env": "DC_WMS_TOKEN"},
+      "field_map": {
+        "order_id": "id",
+        "order_type": "type",
+        "warehouse": "site",
+        "sku": "sku",
+        "qty": "quantity",
+        "priority": "priority",
+        "t_arrive": "created_at"
+      },
+      "dry_run": true,
+      "timeout_s": 5,
+      "note": "P2，企业自研 WMS 通用适配；ack 默认 dry-run"
+    },
+    {
+      "name": "openboxes",
+      "type": "experimental",
+      "status": "unverified",
+      "note": "G3：无真实 OpenBoxes 测试环境，契约测试仅用本地 mock，不声称已对接"
+    },
+    {
+      "name": "odoo",
+      "type": "experimental",
+      "status": "unverified",
+      "note": "G3：OCA/wms 为 AGPL-3.0，仅作为对接目标，无代码衍生"
+    }
+  ],
+  "meta": {
+    "secrets": "密钥一律用环境变量名引用（如 DC_WMS_TOKEN），禁止写进本文件或提交到 git",
+    "write_policy": "ack_order 默认 dry_run=true；未显式关闭前不向任何生产系统写入",
+    "validation": "未经真实 WMS 验证；契约测试见 tests/test_stage_c.py",
+    "source": "COMPLETION_PLAN.md 5.4"
+  }
+}

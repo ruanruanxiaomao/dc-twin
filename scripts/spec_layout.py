@@ -108,8 +108,17 @@ def check_schema(spec):
 
 
 # ---------------------------------------------------------------- 展开
-def expand(spec):
-    """按 §5.4 伪代码展开；坐标一律 = warehouse.origin + 局部坐标。"""
+def expand(spec, fleet_counts=None):
+    """按 §5.4 伪代码展开；坐标一律 = warehouse.origin + 局部坐标。
+
+    C5: when fleet_counts is given (from config/fleet_spec.json deployment),
+    the standby lane is trimmed to that count. Over-capacity is recorded as an
+    overflow and rejected by L13 rather than silently spawning overlapping AGVs.
+    With the shipped fleet_spec (12/3/3/3 = 21) output is byte-identical to the
+    frozen baseline.
+    """
+    fleet_info = {'source': 'config/fleet_spec.json' if fleet_counts is not None else None,
+                  'per_warehouse': {}, 'overflow': []}
     defaults = spec['defaults']
     d_rack = defaults['rack']
     d_ap = defaults['ap']
@@ -296,6 +305,17 @@ def expand(spec):
             pitch = sp.get('pitch', 8.0)
             spawns = [[sx + k * dx * pitch, sz + k * dz * pitch]
                       for k in range(int(sp.get('count', 1)))]
+        if fleet_counts is not None and wh['id'] in fleet_counts:
+            target = int(fleet_counts[wh['id']])
+            capacity = len(spawns)
+            if target > capacity:
+                fleet_info['overflow'].append(
+                    {'warehouse': wh['id'], 'requested': target, 'capacity': capacity})
+            else:
+                spawns = spawns[:target]
+            fleet_info['per_warehouse'][wh['id']] = {
+                'requested': target, 'capacity': capacity,
+                'actual': min(target, capacity)}
         for i, (x, z) in enumerate(spawns, 1):
             rid = '%s-R%02d' % (wh['id'], i)
             hid = 'HOME-%s-R%02d' % (wh['id'], i)
@@ -347,6 +367,14 @@ def expand(spec):
             'robots': sum(len(w['spawn']['robots']) for w in warehouses),
         },
     }
+    # Do NOT add a field when deployment equals the standby lane capacity:
+    # that would change layout.json byte-for-byte and break the frozen baseline
+    # (A1-A40 / baseline_sha256.json). Metadata appears only on a real change.
+    if fleet_counts is not None and (
+            fleet_info['overflow']
+            or any(v['actual'] != v['capacity']
+                   for v in fleet_info['per_warehouse'].values())):
+        layout['fleet_deployment'] = fleet_info
     return layout
 
 
@@ -398,6 +426,11 @@ def validate(layout, spec):
     two_way = 4 * R + 0.2
     cols, rows, cell, cells, solids = build_grid(layout, R)
 
+    # L13 车队部署不得超过待命带容量（C5）
+    for o in layout.get('fleet_deployment', {}).get('overflow', []):
+        issues.append(('L13', 'fleet_spec deployment %s requests %d robots but '
+                       'standby lane capacity is %d; widen the lane first'
+                       % (o['warehouse'], o['requested'], o['capacity'])))
     # L12 尺寸 / 层数
     if layout['size']['width'] <= 0 or layout['size']['depth'] <= 0:
         issues.append(('L12', 'site size must be > 0'))
@@ -505,8 +538,20 @@ def main():
     ap.add_argument('--write', default=None,
                     help='only with this flag will data/layout.json be overwritten')
     ap.add_argument('--quiet', action='store_true')
+    ap.add_argument('--fleet-spec', default=None,
+                    help='C5: read config/fleet_spec.json deployment counts '
+                         '(over-capacity is rejected by L13)')
     args = ap.parse_args()
 
+    fleet_counts = None
+    if args.fleet_spec:
+        fp = args.fleet_spec if os.path.isabs(args.fleet_spec) else os.path.join(ROOT, args.fleet_spec)
+        fl = json.load(open(fp, encoding='utf-8'))
+        models = {m.get('id', m.get('model')) for m in fl.get('models', [])}
+        if len(models) > 1:
+            print('SPEC_LAYOUT refuses mixed fleet models (C5 G4: single model only)')
+            sys.exit(1)
+        fleet_counts = {d['warehouse']: d['count'] for d in fl.get('deployment', [])}
     spec = json.load(open(args.spec, encoding='utf-8'))
     schema_issues = check_schema(spec)
     if schema_issues:
@@ -530,7 +575,7 @@ def main():
               'doors 0 robots 0 issues %s warnings 0' % len(schema_issues))
         sys.exit(1)
 
-    layout = expand(spec)
+    layout = expand(spec, fleet_counts)
     issues, warnings, mutex, R = validate(layout, spec)
     issues = schema_issues + issues
     os.makedirs(OUT, exist_ok=True)
@@ -540,6 +585,9 @@ def main():
     report = {
         'spec': os.path.relpath(args.spec, ROOT).replace('\\', '/'),
         'spec_sha256': hashlib.sha256(open(args.spec, 'rb').read()).hexdigest(),
+        'fleet_spec_checked': fleet_counts is not None,
+        'fleet_deployment': layout.get('fleet_deployment'),
+        'fleet_robots_actual': layout['summary']['robots'],
         'layout_sha256': sha,
         'agv_radius_m': R,
         'schema_checks': 'L1-L12 + optional jsonschema',

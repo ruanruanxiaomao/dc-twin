@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "dc-twin cost_spec",
+  "type": "object",
+  "required": ["schema_version", "currency", "prices_source", "revenue", "variable_costs", "fixed_costs_per_day", "allocation"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "currency": {"const": "CNY"},
+    "prices_source": {"enum": ["demo", "user", "live"]},
+    "revenue": {
+      "type": "object",
+      "required": ["per_order", "per_line_extra", "sla_penalty_per_tardy_s", "lost_order_penalty"],
+      "properties": {
+        "per_order": {
+          "type": "object",
+          "required": ["INBOUND", "OUTBOUND", "PICK", "REPLENISH", "TRANSFER"],
+          "additionalProperties": {"type": "number", "minimum": 0}
+        },
+        "per_line_extra": {"type": "number", "minimum": 0},
+        "sla_penalty_per_tardy_s": {"type": "number", "minimum": 0},
+        "lost_order_penalty": {"type": "number", "minimum": 0}
+      }
+    },
+    "variable_costs": {
+      "type": "object",
+      "required": ["energy_tariff_per_kwh", "consumables_per_order"],
+      "properties": {
+        "energy_tariff_per_kwh": {"type": "number", "minimum": 0},
+        "consumables_per_order": {"type": "number", "minimum": 0}
+      }
+    },
+    "fixed_costs_per_day": {
+      "type": "object",
+      "required": ["labor", "robot_depreciation", "maintenance_pct_of_capex_per_year", "space_rent_per_m2_month", "it_systems_per_day"],
+      "properties": {
+        "labor": {
+          "type": "object",
+          "required": ["operators", "hourly_rate", "shift_h", "supervision_ratio"],
+          "properties": {
+            "operators": {"type": "integer", "minimum": 0},
+            "hourly_rate": {"type": "number", "minimum": 0},
+            "shift_h": {"type": "number", "exclusiveMinimum": 0},
+            "supervision_ratio": {"type": "number", "minimum": 0}
+          }
+        },
+        "robot_depreciation": {
+          "type": "object",
+          "required": ["capex_per_unit", "life_h", "units"],
+          "properties": {
+            "capex_per_unit": {"type": "number", "minimum": 0},
+            "life_h": {"type": "number", "exclusiveMinimum": 0},
+            "units": {"type": "integer", "minimum": 1}
+          }
+        },
+        "maintenance_pct_of_capex_per_year": {"type": "number", "minimum": 0},
+        "space_rent_per_m2_month": {"type": "number", "minimum": 0},
+        "it_systems_per_day": {"type": "number", "minimum": 0}
+      }
+    },
+    "allocation": {
+      "type": "object",
+      "required": ["basis", "shift_hours"],
+      "properties": {
+        "basis": {"enum": ["orders", "hours", "area"]},
+        "shift_hours": {"type": "number", "exclusiveMinimum": 0}
+      }
+    }
+  },
+  "additionalProperties": true
+}

@@ -433,8 +433,12 @@ def main():
     import spec_layout
     import kpi as kpi_mod
 
-    def latest(pattern):
+    def latest(pattern, require=None):
         ds = sorted(glob.glob(os.path.join(ROOT, pattern)))
+        # Stage-A tick runs share runs/<scenario>/ but have no kpi.json /
+        # scenario.json. Only analytic scenario runs qualify here.
+        if require:
+            ds = [d for d in ds if os.path.isfile(os.path.join(d, require))]
         return ds[-1] if ds else None
 
     def digest(obj):
@@ -502,10 +506,10 @@ def main():
            variants['layout_spec_wide']))
 
     # A25/A26/A27/A32/A35 场景层
-    base_dir = latest('runs/baseline/*')
-    peak_dir = latest('runs/peak/*')
-    fail_dir = latest('runs/robot_failure/*')
-    s50_dir = latest('runs/scale_50/*')
+    base_dir = latest('runs/baseline/*', require='scenario.json')
+    peak_dir = latest('runs/peak/*', require='scenario.json')
+    fail_dir = latest('runs/robot_failure/*', require='scenario.json')
+    s50_dir = latest('runs/scale_50/*', require='scenario.json')
     scene_ok = all(d and os.path.isdir(d) for d in
                    (base_dir, peak_dir, fail_dir, s50_dir))
     if scene_ok:
@@ -675,8 +679,12 @@ def main():
         return int(m.group(1)) if m else 999
 
     R.sort(key=_anum)   # 报告按 A1 → A40 顺序输出，与 DESIGN_PLAN §15 一致
-    with open(os.path.join(OUT, 'validate_report.json'), 'w', encoding='utf-8') as f:
-        json.dump(R, f, ensure_ascii=False, indent=2)
+    # --json is a read-only machine-readable query (used by pytest acceptance):
+    # it must NOT rewrite the report, otherwise out/validate_report.json drifts
+    # from its sidecar / manifest hashes. The normal run still persists it.
+    if not FLAGS.get('json'):
+        with open(os.path.join(OUT, 'validate_report.json'), 'w', encoding='utf-8') as f:
+            json.dump(R, f, ensure_ascii=False, indent=2)
     fails = [r for r in R if r['status'] != 'PASS']
     if FLAGS.get('junit'):
         import xml.etree.ElementTree as ET

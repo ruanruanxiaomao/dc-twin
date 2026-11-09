@@ -80,6 +80,8 @@
       <button data-tab="audit">验收</button>
       <button data-tab="params">参数</button>
       <button data-tab="artifacts">产物</button>
+      <button data-tab="ops">运营</button>
+      <button data-tab="scenarios">场景</button>
     </nav>
 
     <div class="panes">
@@ -131,6 +133,42 @@
         <div class="md" id="statusMd"></div>
       </div>
 
+      <div class="pane" id="pane-ops">
+        <div id="opsBadges"></div>
+        <div class="pane-sub">选择运行（损益来源：事件溯源账本）</div>
+        <select id="opsRun" style="width:100%;padding:6px;margin-bottom:8px"></select>
+        <div id="opsKpis"></div>
+        <div class="pane-sub">损益瀑布</div>
+        <div id="opsWaterfall"></div>
+        <div class="pane-sub">场景对比（利润差）</div>
+        <div id="opsCompare"></div>
+        <div class="pane-sub">账本分录（前 30 笔）</div>
+        <div class="list" id="opsLedger"></div>
+        <div class="pane-sub">价格参数（写回 config/cost_spec.json）</div>
+        <div class="form" id="opsPriceForm"></div>
+        <div class="row-actions">
+          <button class="btn" id="btnSavePrice">保存价格</button>
+          <span class="muted" id="priceMsg"></span>
+        </div>
+      </div>
+
+      <div class="pane" id="pane-scenarios">
+        <div class="pane-sub">场景列表（内置 8 个冻结，自定义存于 config/scenarios/custom/）</div>
+        <div class="list" id="scenList"></div>
+        <div class="pane-sub">新建 / 编辑自定义场景</div>
+        <div class="form" id="scenForm"></div>
+        <div class="row-actions" style="flex-wrap:wrap;gap:4px">
+          <button class="btn" id="btnScenNew">新建</button>
+          <button class="btn" id="btnScenValidate">校验</button>
+          <button class="btn" id="btnScenDry">试算 600s</button>
+          <button class="btn primary" id="btnScenSave">保存</button>
+          <button class="btn" id="btnScenRun">运行并出损益</button>
+          <button class="btn danger" id="btnScenDelete">删除</button>
+        </div>
+        <div class="pane-sub">结果</div>
+        <pre class="log" id="scenResult" style="max-height:220px"></pre>
+      </div>
+
     </div>
   </aside>
 
@@ -151,5 +189,6 @@
 <div class="lightbox" id="lightbox"><img id="lightboxImg" alt=""><div class="lb-cap" id="lightboxCap"></div></div>
 
 <script src="/static/app.js"></script>
+<script src="/static/ops.js"></script>
 </body>
 </html>

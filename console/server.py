@@ -30,6 +30,8 @@ ROOT = HERE.parent
 STATIC = HERE / "static"
 DATA = ROOT / "data"
 OUT = ROOT / "out"
+sys.path.insert(0, str(ROOT / "scripts"))
+import scenario_tools  # noqa: E402  (C1: user-defined scenario tools)
 
 HOST = os.environ.get("DC_CONSOLE_HOST", "127.0.0.1")
 PORT = int(os.environ.get("DC_CONSOLE_PORT", "8765"))
@@ -436,6 +438,121 @@ def set_nested(d, path, value):
     cur[parts[-1]] = value
 
 
+# ---------------------------------------------------------------- B/C 阶段 API helpers
+
+def _load(path, default=None):
+    try:
+        return json.loads(Path(path).read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        return default
+
+
+def pnl_run_map():
+    """run_id -> run_dir, strictly from the generated index (no arbitrary paths)."""
+    idx = _load(OUT / "pnl_index.json", {}) or {}
+    return {r["run_id"]: Path(r["run_dir"]) for r in idx.get("runs", [])}
+
+
+def pnl_payload(run_id=None, include_all=False):
+    runs = pnl_run_map()
+    if include_all:
+        rows = []
+        for rid, d in runs.items():
+            p = _load(d / "pnl.json", {}) or {}
+            rows.append({"run_id": rid, "engine": p.get("engine"),
+                         "prices_source": p.get("prices_source"),
+                         "revenue": p.get("revenue_total"),
+                         "variable": p.get("variable_cost_total"),
+                         "fixed": p.get("fixed_cost_total"),
+                         "profit": p.get("operating_profit"),
+                         "orders": p.get("orders_completed")})
+        return {"ok": True, "runs": rows}
+    if run_id not in runs:
+        return {"ok": False, "issues": ["unknown run_id: %s" % run_id],
+                "available": sorted(runs)}
+    d = runs[run_id]
+    return {"ok": True, "run_id": run_id,
+            "pnl": _load(d / "pnl.json", {}),
+            "meta": _load(d / "ledger_meta.json", {}),
+            "md": (d / "pnl.md").read_text(encoding="utf-8") if (d / "pnl.md").exists() else ""}
+
+
+def ledger_payload(run_id, account=None, limit=200):
+    runs = pnl_run_map()
+    if run_id not in runs:
+        return {"ok": False, "issues": ["unknown run_id: %s" % run_id]}
+    path = runs[run_id] / "ledger.jsonl"
+    try:
+        rows = [json.loads(x) for x in path.read_text(encoding="utf-8").splitlines() if x.strip()]
+    except Exception as exc:  # noqa: BLE001
+        return {"ok": False, "issues": ["cannot read ledger: %r" % (exc,)]}
+    if account:
+        rows = [r for r in rows if r["account"].startswith(account)]
+    return {"ok": True, "run_id": run_id, "total": len(rows),
+            "entries": rows[:max(1, min(limit, 1000))]}
+
+
+COST_FIELDS = [
+    ("revenue.per_order.INBOUND", 0, 1e6), ("revenue.per_order.OUTBOUND", 0, 1e6),
+    ("revenue.per_order.PICK", 0, 1e6), ("revenue.per_order.REPLENISH", 0, 1e6),
+    ("revenue.per_order.TRANSFER", 0, 1e6), ("revenue.per_line_extra", 0, 1e4),
+    ("revenue.sla_penalty_per_tardy_s", 0, 1e4), ("revenue.lost_order_penalty", 0, 1e4),
+    ("variable_costs.energy_tariff_per_kwh", 0, 1e3),
+    ("variable_costs.consumables_per_order", 0, 1e3),
+    ("fixed_costs_per_day.labor.operators", 0, 1000),
+    ("fixed_costs_per_day.labor.hourly_rate", 0, 1e4),
+    ("fixed_costs_per_day.labor.supervision_ratio", 0, 10),
+    ("fixed_costs_per_day.robot_depreciation.capex_per_unit", 0, 1e9),
+    ("fixed_costs_per_day.robot_depreciation.life_h", 1, 1e6),
+    ("fixed_costs_per_day.robot_depreciation.units", 1, 10000),
+    ("fixed_costs_per_day.maintenance_pct_of_capex_per_year", 0, 1),
+    ("fixed_costs_per_day.space_rent_per_m2_month", 0, 1e4),
+    ("fixed_costs_per_day.it_systems_per_day", 0, 1e5),
+]
+
+
+def patch_cost_spec(patch):
+    path = ROOT / "config" / "cost_spec.json"
+    cur = _load(path)
+    if cur is None:
+        return {"ok": False, "issues": ["cannot read cost_spec.json"]}
+    allowed = {f[0]: f for f in COST_FIELDS}
+    applied, rejected = {}, []
+    for key, value in (patch or {}).items():
+        if key == "prices_source":
+            if value not in ("demo", "user", "live"):
+                rejected.append({"path": key, "reason": "enum 只允许 demo/user/live"})
+            else:
+                cur["prices_source"] = value
+                applied[key] = value
+            continue
+        field = allowed.get(key)
+        if field is None:
+            rejected.append({"path": key, "reason": "不在可编辑白名单内"})
+            continue
+        try:
+            v = float(value)
+        except (TypeError, ValueError):
+            rejected.append({"path": key, "reason": "不是数字"})
+            continue
+        if not (field[1] <= v <= field[2]):
+            rejected.append({"path": key, "reason": "超出范围 [%s,%s]" % field[1:]})
+            continue
+        if "operators" in key or "units" in key or "life_h" in key:
+            v = int(round(v))
+        set_nested(cur, key, v)
+        applied[key] = v
+    if not applied:
+        return {"ok": False, "applied": applied, "rejected": rejected}
+    try:
+        shutil.copyfile(path, ROOT / "config" / "cost_spec.bak.json")
+        path.write_text(json.dumps(cur, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    except Exception as exc:  # noqa: BLE001
+        return {"ok": False, "issues": ["写入失败: %r" % (exc,)]}
+    return {"ok": True, "applied": applied, "rejected": rejected,
+            "note": "价格已更新；需重跑 ledger.py --all --rebuild 与 pnl_report.py --all 才会反映到报表"}
+
+
 # ---------------------------------------------------------------- HTTP
 
 class Handler(BaseHTTPRequestHandler):
@@ -528,6 +645,25 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send_json(job.snapshot(since))
             if path == "/api/status":
                 return self.send_json(build_bootstrap()["reports"])
+            if path == "/api/scenarios":
+                return self.send_json({"ok": True, "scenarios": scenario_tools.list_scenarios(),
+                                       "builtin_frozen": list(scenario_tools.BUILTIN)})
+            if path == "/api/scenario/get":
+                return self.send_json(scenario_tools.get_scenario((qs.get("id") or [""])[0]))
+            if path == "/api/scenario/template":
+                sid = (qs.get("id") or ["my_scenario"])[0]
+                return self.send_json({"ok": True,
+                                       "template": scenario_tools.default_template(sid)})
+            if path == "/api/pnl":
+                return self.send_json(pnl_payload(
+                    (qs.get("run") or [None])[0], (qs.get("all") or ["0"])[0] == "1"))
+            if path == "/api/ledger":
+                return self.send_json(ledger_payload(
+                    (qs.get("run") or [None])[0], (qs.get("account") or [None])[0],
+                    int((qs.get("limit") or ["200"])[0])))
+            if path == "/api/cost-spec":
+                return self.send_json({"ok": True, "spec": _load(ROOT / "config" / "cost_spec.json"),
+                                       "editable": [f[0] for f in COST_FIELDS] + ["prices_source"]})
             if path.startswith("/static/"):
                 target = self.static_path(path[len("/static/"):])
                 if target is None:
@@ -558,6 +694,22 @@ class Handler(BaseHTTPRequestHandler):
         try:
             if path == "/api/config":
                 return self.handle_config(payload)
+            if path == "/api/cost-spec":
+                return self.send_json(patch_cost_spec(payload.get("patch")))
+            if path == "/api/scenario/validate":
+                issues, warnings = scenario_tools.validate_scenario(payload.get("scenario") or {})
+                return self.send_json({"ok": not issues, "issues": issues,
+                                       "warnings": warnings})
+            if path == "/api/scenario/dry-run":
+                return self.send_json(scenario_tools.dry_run(
+                    payload.get("scenario") or {}, float(payload.get("horizon") or 600)))
+            if path == "/api/scenario/save":
+                return self.send_json(scenario_tools.save_scenario(payload.get("scenario") or {}))
+            if path == "/api/scenario/delete":
+                return self.send_json(scenario_tools.delete_scenario(payload.get("id") or ""))
+            if path == "/api/scenario/run":
+                return self.send_json(scenario_tools.run_scenario(
+                    payload.get("id") or "", payload.get("horizon")))
             if path == "/api/run":
                 return self.handle_run(payload)
             if path == "/api/cancel":

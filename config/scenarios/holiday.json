@@ -7,7 +7,11 @@
   "demand_spec": "../demand_spec.json",
   "seed": 20261106,
   "simulation": {"warmup_s": 0, "duration_s": 14400, "dt_s": 0.1, "fps": 8, "max_wall_clock_s": 900},
-  "overrides": {"demand.orders.per_hour": 135, "fleet.size": 35},
+  "overrides": {
+    "demand.orders.per_hour": 135,
+    "fleet.size": 35,
+    "demand.orders.mix": {"INBOUND": 0.05, "OUTBOUND": 0.55, "PICK": 0.30, "REPLENISH": 0.05, "TRANSFER": 0.05}
+  },
   "disruptions": [],
   "assertions": [
     {"metric": "max_dock_queue", "op": "<=", "value": 20},

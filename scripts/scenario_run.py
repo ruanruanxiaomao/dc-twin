@@ -45,10 +45,18 @@ def resolve(scenario_path, key):
     return os.path.normpath(os.path.join(os.path.dirname(scenario_path['__path']), p))
 
 
+def analytic_runs(scenario='baseline'):
+    """Only analytic runs (they own kpi.json). Stage-A tick simulations share
+    the same runs/<scenario>/ tree but write sim_kpi.json instead; sorting by
+    directory name alone would pick a tick run and fail on the missing file."""
+    return [d for d in sorted(glob.glob(os.path.join(RUNS, scenario, '*')))
+            if os.path.isfile(os.path.join(d, 'kpi.json'))]
+
+
 def baseline_metric(expr):
     """解析 '1.5*baseline:throughput_orders_per_h' 这类跨场景断言。"""
     factor, metric = expr.split('*baseline:', 1)
-    dirs = sorted(glob.glob(os.path.join(RUNS, 'baseline', '*')))
+    dirs = analytic_runs('baseline')
     if not dirs:
         raise SystemExit('BASELINE_RUN_NOT_FOUND: 先跑 baseline 场景')
     k = jload(os.path.join(dirs[-1], 'kpi.json'))
