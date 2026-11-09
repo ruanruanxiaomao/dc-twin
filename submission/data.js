@@ -1,5 +1,5 @@
 window.DC_SUBMISSION = {
-  "generated_at": "2026-11-09T10:46:03+00:00",
+  "generated_at": "2026-11-09T11:44:01+00:00",
   "project": {
     "name": "配送中心数字孪生 · DC Twin Studio",
     "tagline": "从一张布局图纸，到可仿真、可算账、可定制的运营孪生",
@@ -17,9 +17,17 @@ window.DC_SUBMISSION = {
     "tech": [
       "Python 标准库",
       "Blender 5.2 (bpy)",
-      "Canvas 2D / WebGL",
+      "Canvas 2D 软件 3D 投影",
       "零后端静态发布"
-    ]
+    ],
+    "site": {
+      "width": 112,
+      "depth": 114,
+      "height": 12
+    },
+    "hero_image": "assets/02_interior.webp",
+    "site_url": "https://dc-twin-studio.app.workbuddy.host/?sharecode=SRGROMS4ZA",
+    "version": "0.4.0"
   },
   "layout": {
     "size": [
@@ -26016,7 +26024,7 @@ window.DC_SUBMISSION = {
       ]
     },
     "t_end": 117.62,
-    "total_keyframes": 5493,
+    "total_keyframes": 5421,
     "inlined_keyframes": 4055,
     "note": "data/paths.jsonl 的真实关键帧（降采样），按 t 线性插值"
   },
@@ -26503,7 +26511,7 @@ window.DC_SUBMISSION = {
       "negative": 4,
       "label": "F1–F7 盈亏"
     },
-    "pytest": 35,
+    "pytest": 41,
     "chain_steps": 21,
     "min_sep_m": 1.4592
   },
@@ -26539,11 +26547,2219 @@ window.DC_SUBMISSION = {
       "role": "仅语义参照；LIF 自研（GPL 隔离）"
     }
   ],
+  "architecture": [
+    {
+      "n": "01",
+      "title": "四层配置",
+      "icon": "CFG",
+      "in": "config/layout_spec.json · fleet_spec · demand_spec · sim_spec",
+      "out": "data/layout.json",
+      "body": "spec_layout.py 展开 4 仓 / 196 货架 / 441 库位 / 38 扇门，L1–L13 校验（含车队超配守卫），冻结基线逐字节可复现。"
+    },
+    {
+      "n": "02",
+      "title": "路径与作业",
+      "icon": "A*",
+      "in": "layout.json · nav_grid.json · slotting.json",
+      "out": "paths.jsonl · tasks.json · routes.json",
+      "body": "闭环任务 HOME→PICK→DROP→HOME→PARK，8 向 A* + 线段-矩形几何校验 + MIN_SEP 交通复核，21 车 0 穿货架。"
+    },
+    {
+      "n": "03",
+      "title": "Blender 孪生",
+      "icon": "3D",
+      "in": "layout.json · paths.jsonl · cargo_state.json",
+      "out": ".blend · .glb · 10 renders · .mp4",
+      "body": "build_dc.py 程序化生成 914 个对象，animate.py 写 42 个动作；EEVEE 渲染 1920×1080 静帧与闭环动画。"
+    },
+    {
+      "n": "04",
+      "title": "tick 级真仿真",
+      "icon": "SIM",
+      "in": "sim_spec.json · 8 个场景配置",
+      "out": "sim_events.jsonl · sim_kpi.json · sim_state.json",
+      "body": "离散事件引擎：泊松到达、在线派单、9 态 FSM、电量/充电、故障重派、L1 时空预约；27 项 measured KPI。"
+    },
+    {
+      "n": "05",
+      "title": "运营账本",
+      "icon": "P&L",
+      "in": "sim_events.jsonl · cost_spec.json",
+      "out": "ledger.jsonl · pnl.json / .md / .csv",
+      "body": "事件溯源逐笔分录，独立复算收入、变动、固定分摊、单均成本、盈亏平衡与 ±20% 敏感性。"
+    },
+    {
+      "n": "06",
+      "title": "验收与交付",
+      "icon": "QA",
+      "in": "全部报告 + 负测试",
+      "out": "A1–A40 · S1–S9 · F1–F7 · pytest · CI",
+      "body": "三个独立验证器都能被篡改数据击穿；CLI / Pages / 静态 Demo / 本作品页同源复算。"
+    }
+  ],
+  "deliverables": {
+    "items": [
+      {
+        "group": "四层配置 / Schema",
+        "path": "config/layout_spec.json",
+        "bytes": 18021,
+        "size": "17.6 KB",
+        "note": "布局真相源：4 仓、196 货架、441 库位、38 扇门"
+      },
+      {
+        "group": "四层配置 / Schema",
+        "path": "config/fleet_spec.json",
+        "bytes": 1965,
+        "size": "1.9 KB",
+        "note": "车队部署与车型参数（L13 容量守卫读取）"
+      },
+      {
+        "group": "四层配置 / Schema",
+        "path": "config/demand_spec.json",
+        "bytes": 1680,
+        "size": "1.6 KB",
+        "note": "订单到达率与 5 类业务混合比"
+      },
+      {
+        "group": "四层配置 / Schema",
+        "path": "config/sim_spec.json",
+        "bytes": 1138,
+        "size": "1.1 KB",
+        "note": "tick / 电量 / 交通 / 故障 / 调度参数"
+      },
+      {
+        "group": "四层配置 / Schema",
+        "path": "config/cost_spec.json",
+        "bytes": 1378,
+        "size": "1.3 KB",
+        "note": "价格与成本科目（prices_source=demo）"
+      },
+      {
+        "group": "四层配置 / Schema",
+        "path": "config/layer_mapping.json",
+        "bytes": 776,
+        "size": "776 B",
+        "note": "DXF 图层 → 布局实体映射"
+      },
+      {
+        "group": "四层配置 / Schema",
+        "path": "config/integrations.json",
+        "bytes": 1634,
+        "size": "1.6 KB",
+        "note": "WMS 适配器注册表（仅环境变量名，无密钥）"
+      },
+      {
+        "group": "数据契约",
+        "path": "data/layout.json",
+        "bytes": 264148,
+        "size": "258.0 KB",
+        "note": "冻结布局基线（逐字节哈希可复核）"
+      },
+      {
+        "group": "数据契约",
+        "path": "data/paths.jsonl",
+        "bytes": 742761,
+        "size": "725.4 KB",
+        "note": "21 台 AGV 闭环关键帧"
+      },
+      {
+        "group": "数据契约",
+        "path": "data/events.jsonl",
+        "bytes": 7743,
+        "size": "7.6 KB",
+        "note": "作业事件流"
+      },
+      {
+        "group": "数据契约",
+        "path": "data/tasks.json",
+        "bytes": 15639,
+        "size": "15.3 KB",
+        "note": "订单任务与状态机"
+      },
+      {
+        "group": "数据契约",
+        "path": "data/slotting.json",
+        "bytes": 148914,
+        "size": "145.4 KB",
+        "note": "ABC / COI 货位分配结果"
+      },
+      {
+        "group": "数据契约",
+        "path": "data/routes.json",
+        "bytes": 176013,
+        "size": "171.9 KB",
+        "note": "A* 路网与路径"
+      },
+      {
+        "group": "数据契约",
+        "path": "data/cargo_state.json",
+        "bytes": 31328,
+        "size": "30.6 KB",
+        "note": "货物 IN_STOCK→LOADED→DELIVERED"
+      },
+      {
+        "group": "数据契约",
+        "path": "data/nav_grid.json",
+        "bytes": 53553,
+        "size": "52.3 KB",
+        "note": "0.5 m 导航栅格"
+      },
+      {
+        "group": "核心脚本",
+        "path": "scripts/spec_layout.py",
+        "bytes": 30525,
+        "size": "29.8 KB",
+        "note": "L1–L13 布局展开与校验"
+      },
+      {
+        "group": "核心脚本",
+        "path": "scripts/plan_paths.py",
+        "bytes": 17371,
+        "size": "17.0 KB",
+        "note": "闭环任务 + 8 向 A* + 几何避障"
+      },
+      {
+        "group": "核心脚本",
+        "path": "scripts/sim_engine.py",
+        "bytes": 45227,
+        "size": "44.2 KB",
+        "note": "tick 级离散事件仿真引擎"
+      },
+      {
+        "group": "核心脚本",
+        "path": "scripts/ledger.py",
+        "bytes": 11147,
+        "size": "10.9 KB",
+        "note": "事件溯源账本"
+      },
+      {
+        "group": "核心脚本",
+        "path": "scripts/pnl_report.py",
+        "bytes": 8655,
+        "size": "8.5 KB",
+        "note": "损益表 / 盈亏平衡 / 敏感性"
+      },
+      {
+        "group": "核心脚本",
+        "path": "scripts/validate.py",
+        "bytes": 37370,
+        "size": "36.5 KB",
+        "note": "A1–A40 独立验收"
+      },
+      {
+        "group": "核心脚本",
+        "path": "scripts/validate_sim.py",
+        "bytes": 17044,
+        "size": "16.6 KB",
+        "note": "S1–S9 真仿真验收"
+      },
+      {
+        "group": "核心脚本",
+        "path": "scripts/validate_pnl.py",
+        "bytes": 9508,
+        "size": "9.3 KB",
+        "note": "F1–F7 盈亏验收"
+      },
+      {
+        "group": "核心脚本",
+        "path": "scripts/build_dc.py",
+        "bytes": 25043,
+        "size": "24.5 KB",
+        "note": "Blender 程序化建模"
+      },
+      {
+        "group": "核心脚本",
+        "path": "scripts/animate.py",
+        "bytes": 4316,
+        "size": "4.2 KB",
+        "note": "Blender 关键帧动画"
+      },
+      {
+        "group": "核心脚本",
+        "path": "scripts/scenario_tools.py",
+        "bytes": 15322,
+        "size": "15.0 KB",
+        "note": "自定义场景 校验/试算/保存/运行"
+      },
+      {
+        "group": "核心脚本",
+        "path": "scripts/import_dxf.py",
+        "bytes": 8840,
+        "size": "8.6 KB",
+        "note": "零依赖 ASCII DXF 导入"
+      },
+      {
+        "group": "核心脚本",
+        "path": "scripts/lif.py",
+        "bytes": 7627,
+        "size": "7.4 KB",
+        "note": "自研 LIF 草稿导入导出"
+      },
+      {
+        "group": "核心脚本",
+        "path": "scripts/check_geometry.py",
+        "bytes": 3630,
+        "size": "3.5 KB",
+        "note": "线段-矩形穿货架校验"
+      },
+      {
+        "group": "核心脚本",
+        "path": "scripts/reservation_check.py",
+        "bytes": 5219,
+        "size": "5.1 KB",
+        "note": "时空预约冲突复核"
+      },
+      {
+        "group": "3D / 动画交付",
+        "path": "out/distribution_center.blend",
+        "bytes": 659874,
+        "size": "644.4 KB",
+        "note": "Blender 5.2 工程（914 对象）"
+      },
+      {
+        "group": "3D / 动画交付",
+        "path": "out/dc_preview.glb",
+        "bytes": 583176,
+        "size": "569.5 KB",
+        "note": "glTF 2.0 静态预览"
+      },
+      {
+        "group": "3D / 动画交付",
+        "path": "out/anim_dc.mp4",
+        "bytes": 940071,
+        "size": "918.0 KB",
+        "note": "21 车闭环作业动画"
+      },
+      {
+        "group": "3D / 动画交付",
+        "path": "out/renders/01_overview.png",
+        "bytes": 2248867,
+        "size": "2.14 MB",
+        "note": "1920×1080 总览渲染"
+      },
+      {
+        "group": "3D / 动画交付",
+        "path": "docs/assets/demo.gif",
+        "bytes": 881698,
+        "size": "861.0 KB",
+        "note": "演示动图（大文件，未内嵌至网页）"
+      },
+      {
+        "group": "报告 / 验收",
+        "path": "out/manifest.json",
+        "bytes": 11200,
+        "size": "10.9 KB",
+        "note": "58 个产物 + sidecar 哈希清单"
+      },
+      {
+        "group": "报告 / 验收",
+        "path": "out/sim_validation.json",
+        "bytes": 8587,
+        "size": "8.4 KB",
+        "note": "S1–S9 检查与负测试"
+      },
+      {
+        "group": "报告 / 验收",
+        "path": "out/pnl_validation.json",
+        "bytes": 13556,
+        "size": "13.2 KB",
+        "note": "F1–F7 检查与负测试"
+      },
+      {
+        "group": "报告 / 验收",
+        "path": "out/validate_report.json",
+        "bytes": 7259,
+        "size": "7.1 KB",
+        "note": "A1–A40 逐条结果"
+      },
+      {
+        "group": "报告 / 验收",
+        "path": "out/blend_audit.json",
+        "bytes": 1661,
+        "size": "1.6 KB",
+        "note": "Blender 场景审计"
+      },
+      {
+        "group": "报告 / 验收",
+        "path": "out/glb_report.json",
+        "bytes": 345,
+        "size": "345 B",
+        "note": "glTF 结构审计"
+      },
+      {
+        "group": "报告 / 验收",
+        "path": "out/geometry_report.json",
+        "bytes": 528,
+        "size": "528 B",
+        "note": "路径几何校验"
+      },
+      {
+        "group": "报告 / 验收",
+        "path": "out/pnl.md",
+        "bytes": 1555,
+        "size": "1.5 KB",
+        "note": "baseline 损益表（Markdown）"
+      },
+      {
+        "group": "开源交付 / 文档",
+        "path": "README.md",
+        "bytes": 8335,
+        "size": "8.1 KB",
+        "note": "Hero README 与能力边界"
+      },
+      {
+        "group": "开源交付 / 文档",
+        "path": "README.zh-CN.md",
+        "bytes": 17776,
+        "size": "17.4 KB",
+        "note": "中文说明"
+      },
+      {
+        "group": "开源交付 / 文档",
+        "path": "docs/PROJECT_REPORT.md",
+        "bytes": 102700,
+        "size": "100.3 KB",
+        "note": "项目报告"
+      },
+      {
+        "group": "开源交付 / 文档",
+        "path": "docs/COMPLETION_STATUS.md",
+        "bytes": 10392,
+        "size": "10.1 KB",
+        "note": "A/B/C/G 阶段实施状态"
+      },
+      {
+        "group": "开源交付 / 文档",
+        "path": "docs/GITHUB_REFERENCE_AUDIT.md",
+        "bytes": 13013,
+        "size": "12.7 KB",
+        "note": "16 个仓库许可证对照审计"
+      },
+      {
+        "group": "开源交付 / 文档",
+        "path": "docs/data-contracts.md",
+        "bytes": 3159,
+        "size": "3.1 KB",
+        "note": "数据契约说明"
+      },
+      {
+        "group": "开源交付 / 文档",
+        "path": "docs/cli.md",
+        "bytes": 2621,
+        "size": "2.6 KB",
+        "note": "CLI 命令手册"
+      },
+      {
+        "group": "开源交付 / 文档",
+        "path": "THIRD_PARTY_NOTICES.md",
+        "bytes": 9379,
+        "size": "9.2 KB",
+        "note": "第三方许可证声明"
+      },
+      {
+        "group": "开源交付 / 文档",
+        "path": "CHANGELOG.md",
+        "bytes": 8561,
+        "size": "8.4 KB",
+        "note": "版本记录"
+      },
+      {
+        "group": "开源交付 / 文档",
+        "path": "LICENSE",
+        "bytes": 1072,
+        "size": "1.0 KB",
+        "note": "MIT"
+      },
+      {
+        "group": "开源交付 / 文档",
+        "path": "pyproject.toml",
+        "bytes": 1658,
+        "size": "1.6 KB",
+        "note": "包元数据 / pytest / ruff"
+      },
+      {
+        "group": "开源交付 / 文档",
+        "path": ".github/workflows/ci.yml",
+        "bytes": 3142,
+        "size": "3.1 KB",
+        "note": "CI 流水线"
+      },
+      {
+        "group": "开源交付 / 文档",
+        "path": "console/server.py",
+        "bytes": 33558,
+        "size": "32.8 KB",
+        "note": "本地控制台服务"
+      },
+      {
+        "group": "开源交付 / 文档",
+        "path": "submission/index.html",
+        "bytes": 14225,
+        "size": "13.9 KB",
+        "note": "本作品页"
+      }
+    ],
+    "count": 57,
+    "groups": [
+      "四层配置 / Schema",
+      "数据契约",
+      "核心脚本",
+      "3D / 动画交付",
+      "报告 / 验收",
+      "开源交付 / 文档"
+    ],
+    "note": "文件大小为构建时实测；网页仅内嵌其中体积较小的媒体文件"
+  },
+  "contracts": [
+    {
+      "file": "data/layout.json",
+      "lines": 12272,
+      "bytes": 264148,
+      "size": "258.0 KB",
+      "fields": "binary / n/a"
+    },
+    {
+      "file": "data/config.json",
+      "lines": 227,
+      "bytes": 3858,
+      "size": "3.8 KB",
+      "fields": "binary / n/a"
+    },
+    {
+      "file": "data/nav_grid.json",
+      "lines": 249,
+      "bytes": 53553,
+      "size": "52.3 KB",
+      "fields": "binary / n/a"
+    },
+    {
+      "file": "data/slotting.json",
+      "lines": 6745,
+      "bytes": 148914,
+      "size": "145.4 KB",
+      "fields": "binary / n/a"
+    },
+    {
+      "file": "data/tasks.json",
+      "lines": 673,
+      "bytes": 15639,
+      "size": "15.3 KB",
+      "fields": "binary / n/a"
+    },
+    {
+      "file": "data/routes.json",
+      "lines": 14017,
+      "bytes": 176013,
+      "size": "171.9 KB",
+      "fields": "binary / n/a"
+    },
+    {
+      "file": "data/cargo_state.json",
+      "lines": 1335,
+      "bytes": 31328,
+      "size": "30.6 KB",
+      "fields": "binary / n/a"
+    },
+    {
+      "file": "data/paths.jsonl",
+      "lines": 5421,
+      "bytes": 742761,
+      "size": "725.4 KB",
+      "fields": [
+        "t",
+        "agent_id",
+        "x",
+        "y",
+        "theta",
+        "phase",
+        "event_id"
+      ]
+    },
+    {
+      "file": "data/events.jsonl",
+      "lines": 21,
+      "bytes": 7743,
+      "size": "7.6 KB",
+      "fields": [
+        "event_id",
+        "type",
+        "warehouse_id",
+        "sku",
+        "qty",
+        "from",
+        "to"
+      ]
+    }
+  ],
+  "kpi": [
+    {
+      "key": "orders_generated",
+      "value": 40,
+      "unit": "orders",
+      "definition": "Poisson arrivals",
+      "formula": "count(ORDER_ARRIVED)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "orders_completed",
+      "value": 25,
+      "unit": "orders",
+      "definition": "Delivered orders",
+      "formula": "count(TASK_COMPLETED)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "orders_lost",
+      "value": 0,
+      "unit": "orders",
+      "definition": "Orders dropped at queue cap",
+      "formula": "count(ORDER_LOST)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "throughput_orders_per_h",
+      "value": 25.0,
+      "unit": "orders/h",
+      "definition": "Measured throughput",
+      "formula": "orders_completed * 3600 / horizon_s",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "on_time_rate",
+      "value": 1.0,
+      "unit": "ratio",
+      "definition": "On-time share",
+      "formula": "count(tardiness_s=0)/completed",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "avg_tardiness_s",
+      "value": 0.0,
+      "unit": "s",
+      "definition": "Mean tardiness",
+      "formula": "mean(TASK_COMPLETED.tardiness_s)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "max_tardiness_s",
+      "value": 0.0,
+      "unit": "s",
+      "definition": "Max tardiness",
+      "formula": "max(TASK_COMPLETED.tardiness_s)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "distance_total_m",
+      "value": 1835.511,
+      "unit": "m",
+      "definition": "All three legs",
+      "formula": "sum(TASK_COMPLETED.legs_m)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "energy_kwh_total",
+      "value": 1.468411,
+      "unit": "kWh",
+      "definition": "Motion energy",
+      "formula": "sum(TASK_COMPLETED.energy_kwh)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "energy_per_order_kwh",
+      "value": 0.058736,
+      "unit": "kWh/order",
+      "definition": "Motion energy per order",
+      "formula": "energy_kwh_total/completed",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "charge_events",
+      "value": 1,
+      "unit": "events",
+      "definition": "Charging sessions started",
+      "formula": "count(CHARGE_START)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "fault_downtime_s",
+      "value": 0,
+      "unit": "s",
+      "definition": "Injected fault windows",
+      "formula": "sum(FAULT_START.until_s - t_s)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "recovery_s",
+      "value": 0,
+      "unit": "s",
+      "definition": "Window covered by fault ends",
+      "formula": "sum(FAULT_END.t_s - FAULT_START.t_s)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "replans",
+      "value": 0,
+      "unit": "events",
+      "definition": "Traffic replans",
+      "formula": "count(REPLAN)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "wait_conflicts",
+      "value": 11,
+      "unit": "events",
+      "definition": "Reservation waits",
+      "formula": "count(WAIT_CONFLICT)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "task_reassignments",
+      "value": 0,
+      "unit": "events",
+      "definition": "Fault/battery reassignments",
+      "formula": "count(TASK_REASSIGNED)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "multi_order_robots",
+      "value": 5,
+      "unit": "robots",
+      "definition": "Robots completing >=3 orders",
+      "formula": "count(completed>=3)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "max_orders_per_robot",
+      "value": 6,
+      "unit": "orders",
+      "definition": "Busiest robot",
+      "formula": "max(completed)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "availability",
+      "value": 1.0,
+      "unit": "ratio",
+      "definition": "Fleet availability",
+      "formula": "1 - downtime/(horizon*agents)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "idle_rate",
+      "value": 0.6175,
+      "unit": "ratio",
+      "definition": "Sampled vehicle-level idle share",
+      "formula": "sum(samples.idle_robots)/sum(samples.fleet)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "max_queue_depth",
+      "value": 3,
+      "unit": "orders",
+      "definition": "Peak waiting queue",
+      "formula": "max(samples.queue, max_queue_depth)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "agents",
+      "value": 21,
+      "unit": "robots",
+      "definition": "Fleet size actually simulated",
+      "formula": "len(robots)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "reservation_double_occupancy",
+      "value": 0,
+      "unit": "ticks",
+      "definition": "Cell occupied by two robots",
+      "formula": "count(duplicate cell owner per tick)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "strict_collisions",
+      "value": 0,
+      "unit": "samples",
+      "definition": "Separation violations (1 s sampling)",
+      "formula": "count(pair_distance < 2*AGV_RADIUS)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "min_pair_distance_m",
+      "value": 1.4617,
+      "unit": "m",
+      "definition": "Minimum sampled centre distance",
+      "formula": "min over all robot pairs at 1 s samples",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "sim_duration_s",
+      "value": 3600,
+      "unit": "s",
+      "definition": "Simulation horizon",
+      "formula": "sim_spec.horizon_s",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "wall_clock_s",
+      "value": 3.733,
+      "unit": "s",
+      "definition": "Wall clock",
+      "formula": "time.time() delta",
+      "source": "sim_engine measured"
+    }
+  ],
+  "events": {
+    "sample": [
+      {
+        "seq": 1,
+        "t_s": 101.119,
+        "type": "ORDER_ARRIVED",
+        "order_id": "ORD-00002",
+        "order_type": "OUTBOUND",
+        "warehouse": "W",
+        "priority": "P2"
+      },
+      {
+        "seq": 2,
+        "t_s": 101.2,
+        "type": "STATE_CHANGED",
+        "agent": "W-R06",
+        "from": "IDLE",
+        "to": "MOVING_PICK"
+      },
+      {
+        "seq": 3,
+        "t_s": 101.2,
+        "type": "TASK_ASSIGNED",
+        "agent": "W-R06",
+        "order_id": "ORD-00002",
+        "order_type": "OUTBOUND",
+        "pick_loc": "SHELF-W0227",
+        "drop_loc": "W-OU-04",
+        "priority": "P2"
+      },
+      {
+        "seq": 4,
+        "t_s": 110.0,
+        "type": "ENERGY_TICK",
+        "window_s": 10.0,
+        "idle_kwh": 0.00250139,
+        "motion_kwh": 0.01068,
+        "charge_kwh": 0.0,
+        "cumulative_out_kwh": 0.01318139,
+        "cumulative_in_kwh": 0.0
+      },
+      {
+        "seq": 5,
+        "t_s": 112.4,
+        "type": "STATE_CHANGED",
+        "agent": "W-R06",
+        "from": "MOVING_PICK",
+        "to": "PICKING"
+      },
+      {
+        "seq": 6,
+        "t_s": 114.4,
+        "type": "PICK_DONE",
+        "agent": "W-R06",
+        "order_id": "ORD-00002",
+        "loc": "SHELF-W0227"
+      },
+      {
+        "seq": 7,
+        "t_s": 114.4,
+        "type": "STATE_CHANGED",
+        "agent": "W-R06",
+        "from": "PICKING",
+        "to": "MOVING_DROP"
+      },
+      {
+        "seq": 8,
+        "t_s": 118.877,
+        "type": "ORDER_ARRIVED",
+        "order_id": "ORD-00003",
+        "order_type": "OUTBOUND",
+        "warehouse": "W",
+        "priority": "P2"
+      },
+      {
+        "seq": 9,
+        "t_s": 118.9,
+        "type": "STATE_CHANGED",
+        "agent": "W-R02",
+        "from": "IDLE",
+        "to": "MOVING_PICK"
+      },
+      {
+        "seq": 10,
+        "t_s": 118.9,
+        "type": "TASK_ASSIGNED",
+        "agent": "W-R02",
+        "order_id": "ORD-00003",
+        "order_type": "OUTBOUND",
+        "pick_loc": "SHELF-W0022",
+        "drop_loc": "W-OU-04",
+        "priority": "P2"
+      },
+      {
+        "seq": 11,
+        "t_s": 120.0,
+        "type": "ENERGY_TICK",
+        "window_s": 10.0,
+        "idle_kwh": 0.00276111,
+        "motion_kwh": 0.01113137,
+        "charge_kwh": 0.0,
+        "cumulative_out_kwh": 0.02707387,
+        "cumulative_in_kwh": 0.0
+      },
+      {
+        "seq": 12,
+        "t_s": 123.0,
+        "type": "STATE_CHANGED",
+        "agent": "W-R02",
+        "from": "MOVING_PICK",
+        "to": "PICKING"
+      },
+      {
+        "seq": 13,
+        "t_s": 125.0,
+        "type": "PICK_DONE",
+        "agent": "W-R02",
+        "order_id": "ORD-00003",
+        "loc": "SHELF-W0022"
+      },
+      {
+        "seq": 14,
+        "t_s": 125.0,
+        "type": "STATE_CHANGED",
+        "agent": "W-R02",
+        "from": "PICKING",
+        "to": "MOVING_DROP"
+      }
+    ],
+    "total": 720,
+    "types": [
+      {
+        "type": "ENERGY_TICK",
+        "count": 350
+      },
+      {
+        "type": "STATE_CHANGED",
+        "count": 190
+      },
+      {
+        "type": "ORDER_ARRIVED",
+        "count": 40
+      },
+      {
+        "type": "TASK_ASSIGNED",
+        "count": 37
+      },
+      {
+        "type": "PICK_DONE",
+        "count": 35
+      },
+      {
+        "type": "DROP_DONE",
+        "count": 28
+      },
+      {
+        "type": "TASK_COMPLETED",
+        "count": 25
+      },
+      {
+        "type": "WAIT_CONFLICT",
+        "count": 11
+      },
+      {
+        "type": "BATTERY_CRITICAL",
+        "count": 1
+      },
+      {
+        "type": "CHARGE_START",
+        "count": 1
+      },
+      {
+        "type": "CHARGE_END",
+        "count": 1
+      },
+      {
+        "type": "RUN_SETTLED",
+        "count": 1
+      }
+    ]
+  },
+  "ledger": {
+    "sample": [
+      {
+        "source_event_seq": 4,
+        "run_id": "baseline/20261109T101840Z",
+        "t_s": 110.0,
+        "account": "Cost:Variable:Energy",
+        "amount": 0.011204,
+        "direction": "debit",
+        "order_id": null,
+        "cost_center": null,
+        "memo": "ENERGY_TICK",
+        "kwh": 0.013181390000000001
+      },
+      {
+        "source_event_seq": 11,
+        "run_id": "baseline/20261109T101840Z",
+        "t_s": 120.0,
+        "account": "Cost:Variable:Energy",
+        "amount": 0.011809,
+        "direction": "debit",
+        "order_id": null,
+        "cost_center": null,
+        "memo": "ENERGY_TICK",
+        "kwh": 0.01389248
+      },
+      {
+        "source_event_seq": 15,
+        "run_id": "baseline/20261109T101840Z",
+        "t_s": 130.0,
+        "account": "Cost:Variable:Energy",
+        "amount": 0.020642,
+        "direction": "debit",
+        "order_id": null,
+        "cost_center": null,
+        "memo": "ENERGY_TICK",
+        "kwh": 0.02428458
+      },
+      {
+        "source_event_seq": 16,
+        "run_id": "baseline/20261109T101840Z",
+        "t_s": 140.0,
+        "account": "Cost:Variable:Energy",
+        "amount": 0.022643,
+        "direction": "debit",
+        "order_id": null,
+        "cost_center": null,
+        "memo": "ENERGY_TICK",
+        "kwh": 0.026638890000000002
+      },
+      {
+        "source_event_seq": 17,
+        "run_id": "baseline/20261109T101840Z",
+        "t_s": 150.0,
+        "account": "Cost:Variable:Energy",
+        "amount": 0.022643,
+        "direction": "debit",
+        "order_id": null,
+        "cost_center": null,
+        "memo": "ENERGY_TICK",
+        "kwh": 0.026638890000000002
+      },
+      {
+        "source_event_seq": 18,
+        "run_id": "baseline/20261109T101840Z",
+        "t_s": 160.0,
+        "account": "Cost:Variable:Energy",
+        "amount": 0.022643,
+        "direction": "debit",
+        "order_id": null,
+        "cost_center": null,
+        "memo": "ENERGY_TICK",
+        "kwh": 0.026638890000000002
+      },
+      {
+        "source_event_seq": 19,
+        "run_id": "baseline/20261109T101840Z",
+        "t_s": 170.0,
+        "account": "Cost:Variable:Energy",
+        "amount": 0.022643,
+        "direction": "debit",
+        "order_id": null,
+        "cost_center": null,
+        "memo": "ENERGY_TICK",
+        "kwh": 0.026638890000000002
+      },
+      {
+        "source_event_seq": 20,
+        "run_id": "baseline/20261109T101840Z",
+        "t_s": 180.0,
+        "account": "Cost:Variable:Energy",
+        "amount": 0.022643,
+        "direction": "debit",
+        "order_id": null,
+        "cost_center": null,
+        "memo": "ENERGY_TICK",
+        "kwh": 0.026638890000000002
+      },
+      {
+        "source_event_seq": 26,
+        "run_id": "baseline/20261109T101840Z",
+        "t_s": 190.0,
+        "account": "Cost:Variable:Energy",
+        "amount": 0.007823,
+        "direction": "debit",
+        "order_id": null,
+        "cost_center": null,
+        "memo": "ENERGY_TICK",
+        "kwh": 0.00920397
+      },
+      {
+        "source_event_seq": 30,
+        "run_id": "baseline/20261109T101840Z",
+        "t_s": 200.0,
+        "account": "Cost:Variable:Energy",
+        "amount": 0.007889,
+        "direction": "debit",
+        "order_id": null,
+        "cost_center": null,
+        "memo": "ENERGY_TICK",
+        "kwh": 0.00928111
+      }
+    ],
+    "total": 405,
+    "accounts": [
+      {
+        "account": "Cost:Variable:Energy",
+        "count": 350
+      },
+      {
+        "account": "Cost:Variable:Consumables",
+        "count": 25
+      },
+      {
+        "account": "Revenue:PICK",
+        "count": 8
+      },
+      {
+        "account": "Revenue:INBOUND",
+        "count": 5
+      },
+      {
+        "account": "Revenue:TRANSFER",
+        "count": 5
+      },
+      {
+        "account": "Revenue:OUTBOUND",
+        "count": 5
+      },
+      {
+        "account": "Revenue:REPLENISH",
+        "count": 2
+      },
+      {
+        "account": "Cost:Fixed:Labor",
+        "count": 1
+      },
+      {
+        "account": "Cost:Fixed:Depreciation",
+        "count": 1
+      },
+      {
+        "account": "Cost:Fixed:Maintenance",
+        "count": 1
+      },
+      {
+        "account": "Cost:Fixed:Rent",
+        "count": 1
+      },
+      {
+        "account": "Cost:Fixed:IT",
+        "count": 1
+      }
+    ]
+  },
+  "scenario_specs": {
+    "builtin": [
+      {
+        "id": "baseline",
+        "name": "基线：单班 8 小时 / 45 单每小时 / 21 台 AGV",
+        "seed": 20261106,
+        "overrides": {
+          "demand.orders.per_hour": 45,
+          "fleet.deployment": "as_spec"
+        },
+        "disruptions": [],
+        "assertions": [
+          {
+            "metric": "strict_collisions",
+            "op": "==",
+            "value": 0
+          },
+          {
+            "metric": "on_time_rate",
+            "op": ">=",
+            "value": 0.95
+          },
+          {
+            "metric": "max_tardiness_s",
+            "op": "<=",
+            "value": 600
+          },
+          {
+            "metric": "event_coverage",
+            "op": "==",
+            "value": 1.0
+          },
+          {
+            "metric": "orders_generated",
+            "op": "==",
+            "value": 360
+          }
+        ]
+      },
+      {
+        "id": "dock_blocked",
+        "name": "月台封锁：1 个出库月台封 1800 s",
+        "seed": 20261106,
+        "overrides": {
+          "demand.orders.per_hour": 45,
+          "fleet.deployment": "as_spec"
+        },
+        "disruptions": [
+          {
+            "type": "dock_blocked",
+            "dock": "W-OU-02",
+            "duration_s": 1800
+          }
+        ],
+        "assertions": [
+          {
+            "metric": "reassigned",
+            "op": ">=",
+            "value": 1
+          },
+          {
+            "metric": "max_dock_queue",
+            "op": ">=",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "id": "holiday",
+        "name": "大促：135 单每小时 / 4 小时 / 35 台 AGV",
+        "seed": 20261106,
+        "overrides": {
+          "demand.orders.per_hour": 135,
+          "fleet.size": 35,
+          "demand.orders.mix": {
+            "INBOUND": 0.05,
+            "OUTBOUND": 0.55,
+            "PICK": 0.3,
+            "REPLENISH": 0.05,
+            "TRANSFER": 0.05
+          }
+        },
+        "disruptions": [],
+        "assertions": [
+          {
+            "metric": "max_dock_queue",
+            "op": "<=",
+            "value": 20
+          },
+          {
+            "metric": "throughput_orders_per_h",
+            "op": ">=",
+            "value": 120
+          },
+          {
+            "metric": "orders_generated",
+            "op": "==",
+            "value": 540
+          }
+        ]
+      },
+      {
+        "id": "layout_variant_f4",
+        "name": "布局变体：新增前置仓 F4 / 24 台 AGV",
+        "seed": 20261106,
+        "overrides": {
+          "demand.orders.per_hour": 45,
+          "fleet.size": 24
+        },
+        "disruptions": [],
+        "assertions": [
+          {
+            "metric": "layout_issues",
+            "op": "==",
+            "value": 0
+          },
+          {
+            "metric": "warehouses",
+            "op": "==",
+            "value": 5
+          },
+          {
+            "metric": "robots",
+            "op": "==",
+            "value": 24
+          }
+        ]
+      },
+      {
+        "id": "night",
+        "name": "夜班：10 单每小时 / 8 小时 / 12 台 AGV",
+        "seed": 20261106,
+        "overrides": {
+          "demand.orders.per_hour": 10,
+          "fleet.size": 12
+        },
+        "disruptions": [],
+        "assertions": [
+          {
+            "metric": "utilization",
+            "op": "<=",
+            "value": 0.4
+          },
+          {
+            "metric": "orders_generated",
+            "op": "==",
+            "value": 80
+          }
+        ]
+      },
+      {
+        "id": "peak",
+        "name": "高峰：90 单每小时 / 4 小时 / 28 台 AGV",
+        "seed": 20261106,
+        "overrides": {
+          "demand.orders.per_hour": 90,
+          "fleet.size": 28
+        },
+        "disruptions": [],
+        "assertions": [
+          {
+            "metric": "throughput_orders_per_h",
+            "op": ">=",
+            "value": "1.5*baseline:throughput_orders_per_h"
+          },
+          {
+            "metric": "utilization",
+            "op": ">=",
+            "value": "1.4*baseline:utilization"
+          },
+          {
+            "metric": "orders_generated",
+            "op": "==",
+            "value": 360
+          }
+        ]
+      },
+      {
+        "id": "robot_failure",
+        "name": "故障：45 单每小时 / 3 台车各停 600 s",
+        "seed": 20261106,
+        "overrides": {
+          "demand.orders.per_hour": 45,
+          "fleet.deployment": "as_spec"
+        },
+        "disruptions": [
+          {
+            "type": "robot_down",
+            "agent": "W-R01",
+            "start_s": 0,
+            "duration_s": 600
+          },
+          {
+            "type": "robot_down",
+            "agent": "W-R07",
+            "start_s": 600,
+            "duration_s": 600
+          },
+          {
+            "type": "robot_down",
+            "agent": "F1-R02",
+            "start_s": 1200,
+            "duration_s": 600
+          }
+        ],
+        "assertions": [
+          {
+            "metric": "fault_count",
+            "op": ">=",
+            "value": 3
+          },
+          {
+            "metric": "replans",
+            "op": ">=",
+            "value": 1
+          },
+          {
+            "metric": "strict_collisions",
+            "op": "==",
+            "value": 0
+          }
+        ]
+      },
+      {
+        "id": "scale_50",
+        "name": "规模测试：90 单每小时 / 4 小时 / 50 台 AGV",
+        "seed": 20261106,
+        "overrides": {
+          "demand.orders.per_hour": 90,
+          "fleet.size": 50
+        },
+        "disruptions": [],
+        "assertions": [
+          {
+            "metric": "fleet_size",
+            "op": "==",
+            "value": 50
+          },
+          {
+            "metric": "plan_wall_clock_s",
+            "op": "<",
+            "value": 300
+          }
+        ]
+      }
+    ],
+    "custom": [
+      "dad_peak"
+    ]
+  },
+  "checks": {
+    "A": [
+      {
+        "id": "A1 布局实体零重叠",
+        "status": "PASS",
+        "detail": "独立复算重叠=0；layout_audit issues=0 verdict=PASS"
+      },
+      {
+        "id": "A2 全部访问点在通道内且净距 >=0.5 m",
+        "status": "PASS",
+        "detail": "locations=441 异常=0 layout_audit warnings=0"
+      },
+      {
+        "id": "A3 出生点不在实体内且两两 >=1.5 m",
+        "status": "PASS",
+        "detail": "agents=21 异常=[]"
+      },
+      {
+        "id": "A4 AGV_RADIUS 下路径零穿越实体",
+        "status": "PASS",
+        "detail": "独立复算 5400 段命中=0；geometry radius=0.7296 min_clearance=1.05"
+      },
+      {
+        "id": "A5 全程在场：任意时刻两车中心距 >= 2×AGV_RADIUS",
+        "status": "PASS",
+        "detail": "threshold=1.4592 m；min_pair=1.5358 m at [53.15, 'W-R01', 'W-R03']；traffic issues=0；严格口径冲突=0；完成车离场=False"
+      },
+      {
+        "id": "A6 每台车首帧等于出生点（无瞬移）",
+        "status": "PASS",
+        "detail": "agents=21 不匹配=[]"
+      },
+      {
+        "id": "A7 所有移动段速度 ∈[0.8,1.5] m/s",
+        "status": "PASS",
+        "detail": "独立复算异常段=0；config speed=1.5"
+      },
+      {
+        "id": "A8 相邻关键帧 |Δθ| <=10°",
+        "status": "PASS",
+        "detail": "独立复算跳变=0；traffic HEADING_JUMP=0"
+      },
+      {
+        "id": "A9 frame_end 与视频帧数完整一致",
+        "status": "PASS",
+        "detail": "blend frame_end=942 render 1->942 frames=942/942 mp4=117.75s"
+      },
+      {
+        "id": "A10 事件/任务/货位/托盘引用完整可追溯",
+        "status": "PASS",
+        "detail": "events=21 坏=0 tasks=21 坏=0 slot坏=0 托盘=240/240"
+      },
+      {
+        "id": "A11 GLB/PNG/MP4 与 .blend 重开实测一致",
+        "status": "PASS",
+        "detail": "glb nodes=882 forbidden=[] DC_ROOT=True；png尺寸全对=True；objects 914/914 meshes 61/61"
+      },
+      {
+        "id": "A12 LICENSE / NOTICE 含 MIT 全文与资产哈希",
+        "status": "PASS",
+        "detail": "LICENSE=True NOTICE=True MIT段落=3 资产sha=e6bf591fa0a69038"
+      },
+      {
+        "id": "A13 行为证明：扰动产物后校验器真的失败",
+        "status": "PASS",
+        "detail": "负测试=7/7；逐例非0退出=True；其中 validate 行为用例=5/7；runner=True"
+      },
+      {
+        "id": "A14 从零复现所需文件齐备且计数自洽",
+        "status": "PASS",
+        "detail": "缺文件=[] 缺脚本=[]；layout.summary 无 path_samples=True；path_metrics.samples=5421 / paths=5421"
+      },
+      {
+        "id": "A15 订单 100% 执行且 5 种业务类型全部进视频",
+        "status": "PASS",
+        "detail": "executed 21/21 = 100.0%；pending 0；types=['INBOUND', 'OUTBOUND', 'PICK', 'REPLENISH', 'TRANSFER']"
+      },
+      {
+        "id": "A16 任务时间约束生效（start >= t_request，tardiness 可报告）",
+        "status": "PASS",
+        "detail": "违反释放时间=[]；on_time_rate=1.0；max_tardiness=0.0s；max_conflict_wait=19.5s"
+      },
+      {
+        "id": "A17 严格口径交通冲突归零（完成车全程在场）",
+        "status": "PASS",
+        "detail": "strict_violations=0；阈值=1.4592 m；semantics=STRICT / all agents present at all times; none leave scene"
+      },
+      {
+        "id": "A18 路线图语义：路数/迎头对/边缘间隙/时间-空间图/快照",
+        "status": "PASS",
+        "detail": "routes=21 segments=3444 head_on=0 edge_clearance=0.3204m central_cross_aisle_samples=128；09/10 尺寸=True/True"
+      },
+      {
+        "id": "A19 闭环作业数据链：HOME→PICK→DROP→HOME 且全程在场",
+        "status": "PASS",
+        "detail": "agents=21 异常=[]；pick_drop_stops=42；duration=117.62s"
+      },
+      {
+        "id": "A20 货物状态机与全程在场：托盘随车、库存可追溯、无隐藏 AGV",
+        "status": "PASS",
+        "detail": "cargos=21 loaded=21 delivered=21 transitions=42；.blend cargo=21/21 home_bays=21 agv_hidden=0"
+      },
+      {
+        "id": "A21 路线图闭环语义：首尾闭合 + 三段里程可复算",
+        "status": "PASS",
+        "detail": "closed=21/21；独立复算三段=[669.96, 521.37, 573.75]；route_report=[669.97, 521.39, 573.75]m；central_samples=128"
+      },
+      {
+        "id": "A22 四层配置与 schema 合法",
+        "status": "PASS",
+        "detail": "config_files=19 解析失败=[]；L1 issues=0；spec verdict=PASS"
+      },
+      {
+        "id": "A23 spec 展开确定性（两次 + 落盘一致）",
+        "status": "PASS",
+        "detail": "sha=483e82d69becd4cd / 483e82d69becd4cd / 483e82d69becd4cd"
+      },
+      {
+        "id": "A24 多布局审计：当前/F4/加宽 3 spec 全 PASS 且方案A降低互斥",
+        "status": "PASS",
+        "detail": "baseline={'issues': 0, 'mutex': 148, 'racks': 196, 'warehouses': 4}；F4={'issues': 0, 'mutex': 157, 'racks': 208, 'warehouses': 5}；wide={'issues': 0, 'mutex': 29, 'racks': 196, 'warehouses': 4}"
+      },
+      {
+        "id": "A25 baseline 场景可复现（独立重算 KPI）",
+        "status": "PASS",
+        "detail": "metrics=24 全部一致=True；seed=20261106"
+      },
+      {
+        "id": "A26 peak 吞吐 >=1.5×baseline 且断言可失败",
+        "status": "PASS",
+        "detail": "baseline=45.0 peak=90.0 ratio=2.000；断言=3"
+      },
+      {
+        "id": "A27 故障场景 fault_count>=3 且触发改派",
+        "status": "PASS",
+        "detail": "faults=3 replans=3 verdict=PASS"
+      },
+      {
+        "id": "A28 车队状态机无非法迁移",
+        "status": "PASS",
+        "detail": "transitions=147 独立复算非法=0"
+      },
+      {
+        "id": "A29 电量全程 >=reserve 且充电成对",
+        "status": "PASS",
+        "detail": "min_battery=53.986% reserve=5% 越界=0"
+      },
+      {
+        "id": "A30 所有车 start >= t_request",
+        "status": "PASS",
+        "detail": "agents=21 违反=[]"
+      },
+      {
+        "id": "A31 tardiness = max(0, t_end - deadline) 可报告",
+        "status": "PASS",
+        "detail": "不符合=[]；max_tardiness=0.0"
+      },
+      {
+        "id": "A32 每个 KPI 有 definition/formula/source",
+        "status": "PASS",
+        "detail": "kpis=25 缺字段=[] null无理由=[]"
+      },
+      {
+        "id": "A33 状态表数字由 JSON 生成（非手写）",
+        "status": "PASS",
+        "detail": "min_pair=1.5358 duration=117.62 clearance=1.05 均在状态表中"
+      },
+      {
+        "id": "A34 CSV 适配器输出 schema 合法且引用完整",
+        "status": "PASS",
+        "detail": "rows=24 引用错误=[]"
+      },
+      {
+        "id": "A35 50 车场景 plan_wall_clock <300 s",
+        "status": "PASS",
+        "detail": "fleet=50 wall_clock=0.042s"
+      },
+      {
+        "id": "A36 改 seed 后展开结果改变",
+        "status": "PASS",
+        "detail": "seed=20261106 sha=483e82d69becd4cd；seed+1 sha=bd4a353573dff088"
+      },
+      {
+        "id": "A37 负测试 >=12 且全部能失败",
+        "status": "PASS",
+        "detail": "reports=3 total=17 passed=17"
+      },
+      {
+        "id": "A38 参数表/场景表/故障排查文档齐全",
+        "status": "PASS",
+        "detail": "缺文档=[] 中文README三节=True 英文首页链接=True"
+      },
+      {
+        "id": "A39 新增数据源与依赖已登记许可",
+        "status": "PASS",
+        "detail": "NOTICE 含 UCI=True CC BY 4.0=True DESIGN_PLAN=True"
+      },
+      {
+        "id": "A40 全新空目录复现数据层（无 .venv）",
+        "status": "PASS",
+        "detail": "steps=9/9 identical=8/8"
+      }
+    ],
+    "S": [
+      {
+        "id": "S1",
+        "status": "PASS",
+        "detail": "determinism: two independent 900 s runs, 200 events each, byte-identical=True"
+      },
+      {
+        "id": "S2",
+        "status": "PASS",
+        "detail": "energy conservation: window sum vs terminal state: err_out=0.0001% err_in=0.0000% max soc residual=0.000001 kWh"
+      },
+      {
+        "id": "S2",
+        "status": "PASS",
+        "detail": "energy conservation: window sum vs terminal state: err_out=0.0000% err_in=0.0000% max soc residual=0.000001 kWh"
+      },
+      {
+        "id": "S2",
+        "status": "PASS",
+        "detail": "energy conservation: window sum vs terminal state: err_out=0.0000% err_in=0.0000% max soc residual=0.000001 kWh"
+      },
+      {
+        "id": "S2",
+        "status": "PASS",
+        "detail": "energy conservation: window sum vs terminal state: err_out=0.0001% err_in=0.0000% max soc residual=0.000001 kWh"
+      },
+      {
+        "id": "S2",
+        "status": "PASS",
+        "detail": "energy conservation: window sum vs terminal state: err_out=0.0005% err_in=0.0000% max soc residual=0.000000 kWh"
+      },
+      {
+        "id": "S2",
+        "status": "PASS",
+        "detail": "energy conservation: window sum vs terminal state: err_out=0.0001% err_in=0.0000% max soc residual=0.000000 kWh"
+      },
+      {
+        "id": "S2",
+        "status": "PASS",
+        "detail": "energy conservation: window sum vs terminal state: err_out=0.0000% err_in=0.0000% max soc residual=0.000000 kWh"
+      },
+      {
+        "id": "S2",
+        "status": "PASS",
+        "detail": "energy conservation: window sum vs terminal state: err_out=0.0002% err_in=0.0001% max soc residual=0.000001 kWh"
+      },
+      {
+        "id": "S3",
+        "status": "PASS",
+        "detail": "multi-order truth: busiest robot completed 6 orders, 5 robots >=3"
+      },
+      {
+        "id": "S4",
+        "status": "PASS",
+        "detail": "fault truth: 3 fault windows, 1 reassignments, 0 completions inside window"
+      },
+      {
+        "id": "S5",
+        "status": "PASS",
+        "detail": "charging truth: 7 sessions, 0 task events while charging, max displacement 0.0000 m"
+      },
+      {
+        "id": "S6",
+        "status": "PASS",
+        "detail": "traffic: 433650 sampled pairs checked at MIN_SEP=1.4592 m, 0 violations, engine collisions=0 double-occupancy=0"
+      },
+      {
+        "id": "S7",
+        "status": "PASS",
+        "detail": "scale: 50 distinct agent trajectories, sample cardinalities=[50], 30 agents actually moved (idle agents are reported honestly)"
+      },
+      {
+        "id": "S8",
+        "status": "PASS",
+        "detail": "KPI provenance: 27 metrics, 0 missing triplets, 0 recomputation mismatches"
+      },
+      {
+        "id": "X1",
+        "status": "PASS",
+        "detail": "baseline completed=25 collisions=0"
+      },
+      {
+        "id": "X2",
+        "status": "PASS",
+        "detail": "peak queue=8 vs baseline=3; throughput=58.0 vs 25.0"
+      },
+      {
+        "id": "X3",
+        "status": "PASS",
+        "detail": "night vehicle-level idle_rate=0.8336"
+      },
+      {
+        "id": "X4",
+        "status": "PASS",
+        "detail": "holiday mix shift max=0.266, types=5"
+      },
+      {
+        "id": "X5",
+        "status": "PASS",
+        "detail": "dock_blocked docks=['W-OU-02'] replans=1 forbidden drops=0"
+      },
+      {
+        "id": "X7",
+        "status": "PASS",
+        "detail": "scale_50 agents=50"
+      },
+      {
+        "id": "X8",
+        "status": "PASS",
+        "detail": "layout_variant_f4 collisions=0 completed=31"
+      }
+    ],
+    "F": [
+      {
+        "id": "baseline/F1",
+        "status": "PASS",
+        "detail": "pnl vs independent ledger aggregation: 0 mismatches"
+      },
+      {
+        "id": "baseline/F2",
+        "status": "PASS",
+        "detail": "posting traceability: 405 postings, 10 sampled revenue rows, 0 issues"
+      },
+      {
+        "id": "baseline/F4",
+        "status": "PASS",
+        "detail": "energy: events=2.740918 kWh ledger=2.740974 kWh state=2.740920 kWh, err=0.0020%/0.0001%"
+      },
+      {
+        "id": "baseline/F5",
+        "status": "PASS",
+        "detail": "breakeven=166 orders x 4.5368 contribution vs 750.73 fixed"
+      },
+      {
+        "id": "baseline/F6",
+        "status": "PASS",
+        "detail": "badge honesty: prices_source=demo, header contains 演示价格=True"
+      },
+      {
+        "id": "baseline/F3",
+        "status": "PASS",
+        "detail": "idempotency: re-posting added 0 rows (must be 0)"
+      },
+      {
+        "id": "dock_blocked/F1",
+        "status": "PASS",
+        "detail": "pnl vs independent ledger aggregation: 0 mismatches"
+      },
+      {
+        "id": "dock_blocked/F2",
+        "status": "PASS",
+        "detail": "posting traceability: 404 postings, 10 sampled revenue rows, 0 issues"
+      },
+      {
+        "id": "dock_blocked/F4",
+        "status": "PASS",
+        "detail": "energy: events=1.990444 kWh ledger=1.990531 kWh state=1.990443 kWh, err=0.0044%/0.0000%"
+      },
+      {
+        "id": "dock_blocked/F5",
+        "status": "PASS",
+        "detail": "breakeven=157 orders x 4.7878 contribution vs 750.73 fixed"
+      },
+      {
+        "id": "dock_blocked/F6",
+        "status": "PASS",
+        "detail": "badge honesty: prices_source=demo, header contains 演示价格=True"
+      },
+      {
+        "id": "dock_blocked/F3",
+        "status": "PASS",
+        "detail": "idempotency: re-posting added 0 rows (must be 0)"
+      },
+      {
+        "id": "holiday/F1",
+        "status": "PASS",
+        "detail": "pnl vs independent ledger aggregation: 0 mismatches"
+      },
+      {
+        "id": "holiday/F2",
+        "status": "PASS",
+        "detail": "posting traceability: 493 postings, 10 sampled revenue rows, 0 issues"
+      },
+      {
+        "id": "holiday/F4",
+        "status": "PASS",
+        "detail": "energy: events=5.243679 kWh ledger=5.243662 kWh state=5.243680 kWh, err=0.0003%/0.0000%"
+      },
+      {
+        "id": "holiday/F5",
+        "status": "PASS",
+        "detail": "breakeven=322 orders x 2.8047 contribution vs 902.24 fixed"
+      },
+      {
+        "id": "holiday/F6",
+        "status": "PASS",
+        "detail": "badge honesty: prices_source=demo, header contains 演示价格=True"
+      },
+      {
+        "id": "holiday/F3",
+        "status": "PASS",
+        "detail": "idempotency: re-posting added 0 rows (must be 0)"
+      },
+      {
+        "id": "layout_variant_f4/F1",
+        "status": "PASS",
+        "detail": "pnl vs independent ledger aggregation: 0 mismatches"
+      },
+      {
+        "id": "layout_variant_f4/F2",
+        "status": "PASS",
+        "detail": "posting traceability: 375 postings, 10 sampled revenue rows, 0 issues"
+      },
+      {
+        "id": "layout_variant_f4/F4",
+        "status": "PASS",
+        "detail": "energy: events=3.400808 kWh ledger=3.400789 kWh state=3.400805 kWh, err=0.0005%/0.0001%"
+      },
+      {
+        "id": "layout_variant_f4/F5",
+        "status": "PASS",
+        "detail": "breakeven=156 orders x 5.0245 contribution vs 783.20 fixed"
+      },
+      {
+        "id": "layout_variant_f4/F6",
+        "status": "PASS",
+        "detail": "badge honesty: prices_source=demo, header contains 演示价格=True"
+      },
+      {
+        "id": "layout_variant_f4/F3",
+        "status": "PASS",
+        "detail": "idempotency: re-posting added 0 rows (must be 0)"
+      },
+      {
+        "id": "night/F1",
+        "status": "PASS",
+        "detail": "pnl vs independent ledger aggregation: 0 mismatches"
+      },
+      {
+        "id": "night/F2",
+        "status": "PASS",
+        "detail": "posting traceability: 322 postings, 1 sampled revenue rows, 0 issues"
+      },
+      {
+        "id": "night/F4",
+        "status": "PASS",
+        "detail": "energy: events=0.659566 kWh ledger=0.659729 kWh state=0.659569 kWh, err=0.0248%/0.0005%"
+      },
+      {
+        "id": "night/F5",
+        "status": "PASS",
+        "detail": "breakeven=108 orders x 6.0892 contribution vs 653.34 fixed"
+      },
+      {
+        "id": "night/F6",
+        "status": "PASS",
+        "detail": "badge honesty: prices_source=demo, header contains 演示价格=True"
+      },
+      {
+        "id": "night/F3",
+        "status": "PASS",
+        "detail": "idempotency: re-posting added 0 rows (must be 0)"
+      },
+      {
+        "id": "peak/F1",
+        "status": "PASS",
+        "detail": "pnl vs independent ledger aggregation: 0 mismatches"
+      },
+      {
+        "id": "peak/F2",
+        "status": "PASS",
+        "detail": "posting traceability: 476 postings, 10 sampled revenue rows, 0 issues"
+      },
+      {
+        "id": "peak/F4",
+        "status": "PASS",
+        "detail": "energy: events=5.026511 kWh ledger=5.026516 kWh state=5.026514 kWh, err=0.0001%/0.0001%"
+      },
+      {
+        "id": "peak/F5",
+        "status": "PASS",
+        "detail": "breakeven=170 orders x 4.8867 contribution vs 826.49 fixed"
+      },
+      {
+        "id": "peak/F6",
+        "status": "PASS",
+        "detail": "badge honesty: prices_source=demo, header contains 演示价格=True"
+      },
+      {
+        "id": "peak/F3",
+        "status": "PASS",
+        "detail": "idempotency: re-posting added 0 rows (must be 0)"
+      },
+      {
+        "id": "robot_failure/F1",
+        "status": "PASS",
+        "detail": "pnl vs independent ledger aggregation: 0 mismatches"
+      },
+      {
+        "id": "robot_failure/F2",
+        "status": "PASS",
+        "detail": "posting traceability: 404 postings, 10 sampled revenue rows, 0 issues"
+      },
+      {
+        "id": "robot_failure/F4",
+        "status": "PASS",
+        "detail": "energy: events=2.606331 kWh ledger=2.606413 kWh state=2.606332 kWh, err=0.0031%/0.0000%"
+      },
+      {
+        "id": "robot_failure/F5",
+        "status": "PASS",
+        "detail": "breakeven=166 orders x 4.5369 contribution vs 750.73 fixed"
+      },
+      {
+        "id": "robot_failure/F6",
+        "status": "PASS",
+        "detail": "badge honesty: prices_source=demo, header contains 演示价格=True"
+      },
+      {
+        "id": "robot_failure/F3",
+        "status": "PASS",
+        "detail": "idempotency: re-posting added 0 rows (must be 0)"
+      },
+      {
+        "id": "scale_50/F1",
+        "status": "PASS",
+        "detail": "pnl vs independent ledger aggregation: 0 mismatches"
+      },
+      {
+        "id": "scale_50/F2",
+        "status": "PASS",
+        "detail": "posting traceability: 468 postings, 10 sampled revenue rows, 0 issues"
+      },
+      {
+        "id": "scale_50/F4",
+        "status": "PASS",
+        "detail": "energy: events=5.331425 kWh ledger=5.331421 kWh state=5.331436 kWh, err=0.0001%/0.0002%"
+      },
+      {
+        "id": "scale_50/F5",
+        "status": "PASS",
+        "detail": "breakeven=222 orders x 4.8161 contribution vs 1064.57 fixed"
+      },
+      {
+        "id": "scale_50/F6",
+        "status": "PASS",
+        "detail": "badge honesty: prices_source=demo, header contains 演示价格=True"
+      },
+      {
+        "id": "scale_50/F3",
+        "status": "PASS",
+        "detail": "idempotency: re-posting added 0 rows (must be 0)"
+      },
+      {
+        "id": "dc_project/F1",
+        "status": "PASS",
+        "detail": "pnl vs independent ledger aggregation: 0 mismatches"
+      },
+      {
+        "id": "dc_project/F2",
+        "status": "PASS",
+        "detail": "posting traceability: 48 postings, 10 sampled revenue rows, 0 issues"
+      },
+      {
+        "id": "dc_project/F4",
+        "status": "PASS",
+        "detail": "energy: events=1.446369 kWh ledger=1.446369 kWh state=1.446369 kWh, err=0.0000%/0.0000%"
+      },
+      {
+        "id": "dc_project/F5",
+        "status": "PASS",
+        "detail": "breakeven=114 orders x 6.5915 contribution vs 750.73 fixed"
+      },
+      {
+        "id": "dc_project/F6",
+        "status": "PASS",
+        "detail": "badge honesty: prices_source=demo, header contains 演示价格=True"
+      },
+      {
+        "id": "dc_project/F3",
+        "status": "PASS",
+        "detail": "idempotency: re-posting added 0 rows (must be 0)"
+      }
+    ],
+    "negative_sim": [
+      {
+        "case": "tamper ENERGY_TICK",
+        "target_check": "S2",
+        "tampered_run_status": "FAIL",
+        "status": "PASS",
+        "detail": "energy conservation: window sum vs terminal state: err_out=12769.4350% err_in=0.0000% max soc residual=0.000001 kWh"
+      },
+      {
+        "case": "delete TASK_REASSIGNED",
+        "target_check": "S4",
+        "tampered_run_status": "FAIL",
+        "status": "PASS",
+        "detail": "fault truth: 3 fault windows, 0 reassignments, 0 completions inside window"
+      },
+      {
+        "case": "collapse two agent positions",
+        "target_check": "S6",
+        "tampered_run_status": "FAIL",
+        "status": "PASS",
+        "detail": "traffic: 73290 sampled pairs checked at MIN_SEP=1.4592 m, 1 violations, engine collisions=0 double-occupancy=0"
+      },
+      {
+        "case": "forge a KPI value",
+        "target_check": "S8",
+        "tampered_run_status": "FAIL",
+        "status": "PASS",
+        "detail": "KPI provenance: 27 metrics, 0 missing triplets, 1 recomputation mismatches"
+      }
+    ],
+    "negative_pnl": [
+      {
+        "case": "forge a posting amount",
+        "target_check": "F1",
+        "tampered_status": "FAIL",
+        "status": "PASS",
+        "detail": "pnl vs independent ledger aggregation: 6 mismatches"
+      },
+      {
+        "case": "delete a source event",
+        "target_check": "F2",
+        "tampered_status": "FAIL",
+        "status": "PASS",
+        "detail": "posting traceability: 405 postings, 10 sampled revenue rows, 2 issues"
+      },
+      {
+        "case": "duplicate a posting",
+        "target_check": "F2",
+        "tampered_status": "FAIL",
+        "status": "PASS",
+        "detail": "posting traceability: 406 postings, 10 sampled revenue rows, 1 issues"
+      },
+      {
+        "case": "strip the demo-price badge",
+        "target_check": "F6",
+        "tampered_status": "FAIL",
+        "status": "PASS",
+        "detail": "badge honesty: prices_source=demo, header contains 演示价格=False"
+      }
+    ]
+  },
+  "media": {
+    "renders": [
+      {
+        "file": "assets/01_overview.webp",
+        "caption": "全场总览 · 一区域仓 + 三前置仓",
+        "bytes": 47498,
+        "size": "46.4 KB",
+        "resolution": "1920×1080"
+      },
+      {
+        "file": "assets/02_interior.webp",
+        "caption": "仓内视角 · 货架与通道",
+        "bytes": 110466,
+        "size": "107.9 KB",
+        "resolution": "1920×1080"
+      },
+      {
+        "file": "assets/03_dock.webp",
+        "caption": "月台与装卸门",
+        "bytes": 24292,
+        "size": "23.7 KB",
+        "resolution": "1920×1080"
+      },
+      {
+        "file": "assets/04_agv_route.webp",
+        "caption": "AGV 行驶路径与发光导引带",
+        "bytes": 70804,
+        "size": "69.1 KB",
+        "resolution": "1920×1080"
+      },
+      {
+        "file": "assets/05_slotting_heatmap.webp",
+        "caption": "ABC / COI 货位优化热力板",
+        "bytes": 49454,
+        "size": "48.3 KB",
+        "resolution": "1920×1080"
+      },
+      {
+        "file": "assets/06_corridor_check.webp",
+        "caption": "通道净距几何校验",
+        "bytes": 39276,
+        "size": "38.4 KB",
+        "resolution": "1920×1080"
+      },
+      {
+        "file": "assets/07_nav_plan.webp",
+        "caption": "路网与 A* 导航平面图",
+        "bytes": 73942,
+        "size": "72.2 KB",
+        "resolution": "1032×1104"
+      },
+      {
+        "file": "assets/08_corridor_plan_zoom.webp",
+        "caption": "通道局部放大 · 无穿货架",
+        "bytes": 42268,
+        "size": "41.3 KB",
+        "resolution": "1464×858"
+      },
+      {
+        "file": "assets/09_time_space.webp",
+        "caption": "时空预约 / 时间-空间图",
+        "bytes": 41454,
+        "size": "40.5 KB",
+        "resolution": "1400×900"
+      },
+      {
+        "file": "assets/10_snapshot_sequence.webp",
+        "caption": "作业时序快照序列",
+        "bytes": 54346,
+        "size": "53.1 KB",
+        "resolution": "1680×900"
+      }
+    ],
+    "binary": [
+      {
+        "file": "assets/anim_dc.mp4",
+        "note": "AGV 闭环作业动画（8 fps，942 帧编码）",
+        "bytes": 940071,
+        "size": "918.0 KB",
+        "exists": true
+      },
+      {
+        "file": "assets/dc_preview.glb",
+        "note": "glTF 静态场景预览（无动画，动画在 mp4 / .blend）",
+        "bytes": 583176,
+        "size": "569.5 KB",
+        "exists": true
+      },
+      {
+        "file": "assets/distribution_center.blend",
+        "note": "Blender 5.2 工程源文件（含 42 个动作）",
+        "bytes": 659874,
+        "size": "644.4 KB",
+        "exists": true
+      }
+    ],
+    "blend": {
+      "objects": 914,
+      "meshes": 61,
+      "materials": 36,
+      "cameras": 6,
+      "lights": 4,
+      "actions": 42,
+      "fps": 8,
+      "frames": 942,
+      "bbox": [
+        112.0,
+        114.0,
+        12.0
+      ],
+      "engine": "BLENDER_EEVEE",
+      "blender": "5.2.3 LTS"
+    },
+    "glb": {
+      "bytes": 583176,
+      "nodes": 882,
+      "meshes": 59,
+      "materials": 35,
+      "animations": 0,
+      "generator": "Khronos glTF Blender I/O v5.2.41"
+    },
+    "slotting": {
+      "skus": 240,
+      "shelf_locations": 392,
+      "assigned": 240,
+      "empty": 152,
+      "all_locations_have_status": true,
+      "abc_counts": {
+        "A": 96,
+        "B": 84,
+        "C": 60
+      },
+      "weighted_cost_current": 15.1821,
+      "weighted_cost_random": 40.5651,
+      "weighted_cost_optimized": 10.7176,
+      "improvement_vs_current_pct": 29.41,
+      "improvement_vs_random_pct": 73.58,
+      "gap_to_lower_bound": 0.0,
+      "hot_racks": 57,
+      "racks_with_heat_entry": 196
+    },
+    "path_planning": {
+      "method": "closed-loop task-driven 8-dir A* on 0.5 m grid (AGV_RADIUS inflated, no corner cutting, HOME-avoid soft cost) + arc-length timing + strict-presence staggering",
+      "reference": "WareTwin backend/app/sim/astar.py (source-reviewed)",
+      "grid": {
+        "cell_size_m": 0.5,
+        "cols": 224,
+        "rows": 228,
+        "agv_radius_m": 0.7296
+      },
+      "speed_mps": 1.5,
+      "omega_rad_s": 1.4,
+      "min_sep_m": 1.4592,
+      "agents": 21,
+      "tasks": 21,
+      "pending_events": 0,
+      "route_kind": "CLOSED_LOOP",
+      "loop_legs": [
+        "DEADHEAD_OUT",
+        "LOADED",
+        "DEADHEAD_BACK"
+      ],
+      "pick_drop_stops": 42,
+      "dwell_pick_s": 2.0,
+      "return_to_home": true,
+      "agents_present_whole_time": true,
+      "astar_failures": 0,
+      "total_path_m": 1765.08,
+      "avg_path_m": 84.05,
+      "duration_s": 117.62,
+      "fps": 8,
+      "samples": 5421,
+      "max_departure_t_s": 21.17,
+      "max_conflict_wait_s": 19.5,
+      "total_conflict_wait_s": 31.5,
+      "event_coverage": 1.0,
+      "event_types_executed": [
+        "INBOUND",
+        "OUTBOUND",
+        "PICK",
+        "REPLENISH",
+        "TRANSFER"
+      ],
+      "on_time_rate": 1.0,
+      "max_tardiness_s": 0.0,
+      "avg_tardiness_s": 0.0,
+      "speed_disclaimer": "all moving segments use exactly 1.50 m/s; dwell/rotate/park segments are stationary",
+      "path_to_euclid_ratio": 1.099
+    }
+  },
   "images": [
     "assets/01_overview.webp",
+    "assets/02_interior.webp",
     "assets/03_dock.webp",
     "assets/04_agv_route.webp",
     "assets/05_slotting_heatmap.webp",
+    "assets/06_corridor_check.webp",
     "assets/07_nav_plan.webp",
     "assets/08_corridor_plan_zoom.webp",
     "assets/09_time_space.webp",

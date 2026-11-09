@@ -80,6 +80,13 @@ are thin wrappers around the same `run.py` driver. See
 > [`submission/index.html`](submission/index.html) ·
 > [submission guide](submission/%E6%8F%90%E4%BA%A4%E8%AF%B4%E6%98%8E.md) ·
 > rebuild its data snapshot with `python scripts/build_submission.py`.
+>
+> The 9-tab app is a **complete project showcase**: an interactive software-3D twin
+> (rotatable / zoomable, real rack geometry driven by inlined keyframes),
+> project map with real deliverables and data contracts, Blender model/renders
+> (MP4 + downloadable `.blend` / `.glb` / 10 WebP), 8 scenarios, P&L ledger samples,
+> visual layout editor, and per-check A/S/F validation evidence. Dark/light themes,
+> no CDN, `file://` works. Published: <https://dc-twin-studio.app.workbuddy.host/?sharecode=SRGROMS4ZA>.
 
 Current measured numbers are always generated from JSON into
 [`out/CURRENT_STATUS.md`](out/CURRENT_STATUS.md); the prose in this README

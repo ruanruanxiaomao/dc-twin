@@ -111,23 +111,38 @@ python -m dc_twin.cli serve              # 控制台（默认 127.0.0.1:8765）
 
 ---
 
-## 7. 活动提交作品页（2026-11-09 追加）
+## 7. 活动提交作品页（2026-11-09，v0.4.0 完整展示版）
 
-针对活动表单「05 WorkBuddy 创作对话记录」，新增**零后端静态作品应用** `submission/`：
+针对活动表单「05 WorkBuddy 创作对话记录」，交付**零后端静态作品应用** `submission/`。
+目标从「提交一个页面」升级为「**一个链接看完整个项目**」：调研 → 配置 → 契约 → 路径算法 →
+Blender 3D → tick 仿真 → 账本盈亏 → 工具链 → 逐条验收 → 开源交付，全部有真实数据支撑。
 
 | 文件 | 作用 |
 |---|---|
-| `submission/index.html` / `style.css` / `app.js` | 7 个标签页：总览、实时孪生、场景实验室、运营盈亏、布局编辑、验收证据、提交材料 |
-| `submission/data.js` | 由 `scripts/build_submission.py` 从 `out/*.json` 与 `data/layout.json` 生成的内联真实数据快照（8 场景、9 损益运行、4 仓布局、**5421 条真实 AGV 关键帧降采样**） |
-| `submission/editor.js` | G1 可视化布局编辑器（拖拽 / 背景描图 / 校验 / 导出草稿） |
-| `submission/assets/*.webp` | 8 张 Blender 渲染图（共 416 KB） |
-| `submission/提交说明.md` | 作品简介、分享链接获取步骤、隐私检查清单、评审导览、复现命令 |
+| `submission/index.html` / `style.css` / `app.js` | **9 个标签页**：总览、项目全景、实时孪生、模型与渲染、场景实验室、运营盈亏、布局编辑、验收证据、提交材料；深/浅双主题，画布颜色随主题切换 |
+| `submission/twin3d.js` | **自研零依赖软件 3D 投影渲染器**：透视斜投影、面法向光照、画家算法深度排序、静态几何缓存；可拖拽旋转 / 滚轮缩放 / 4 种视角 / 跟随车辆 / 轨迹开关。非 Blender 实时视口，已如实标注 |
+| `submission/data.js` | `scripts/build_submission.py` 从 `out/*.json` + `data/layout.json` 生成：8 场景、9 损益运行、4 仓布局、**5421 条真实 AGV 关键帧**、6 环节架构、**57 个真实交付物**、9 个数据契约、27 项 KPI 定义、事件流 / 账本分录样例、A/S/F 逐条检查 |
+| `submission/editor.js` | G1 可视化 2D 布局编辑器（拖拽 / 背景描图 / 校验 / 导出草稿） |
+| `submission/assets/*` | **10 张** Blender 渲染 WebP + `anim_dc.mp4` + `dc_preview.glb` + `distribution_center.blend`（均可下载） |
+| `submission/提交说明.md` | 作品简介、分享链接步骤、隐私检查清单、9 页结构说明、评审导览、复现命令 |
+
+**本轮修掉的真实缺陷**（均由无头浏览器截图 / 独立诊断脚本发现）：
+
+1. `layout.json` 实体坐标是**全局绝对坐标**，3D 渲染器与旧 2D 视图都额外加了 `warehouse.origin`，
+   导致 F1/F2/F3 的货架/月台被推出场地外。
+2. 月台 `rect` 是 `[x0,y0,x1,y1]` **两角点**，被当成 `[x,y,宽,高]`，F3 月台被画成 106×96 m 的越界大斜面。
+3. `build_submission.sampled_paths()` 里 `chosen = pts` 是列表别名，追加相位变化点时污染原数组，
+   关键帧总数虚高 72（5493 vs 文件真实 5421 行）；改为 `list(pts)` 并加计数一致性测试。
+4. CSS 变量 `--cv-sky0` 与 JS 读取的 `--cv-sky-0` 命名不一致，导致画布背景 fallback 成灰色 `#888888`。
+5. 首屏用 `01_overview`（俯视图）显得像 2D，改用 `02_interior`（仓内透视）。
 
 特点：**不联网、不上传数据、无 CDN、无构建步骤**；`file://` 直接打开或静态托管均可。
-作品页明确标注「场景 KPI 与动画不是同一次运行」「演示价格不可用于真实决策」「LIF 非 VDA5050 认证」。
+作品页明确标注「软件 3D 投影 ≠ Blender 实时视口」「场景 KPI 与动画不是同一次运行」
+「演示价格不可用于真实决策」「LIF 非 VDA5050 认证」「布局编辑器为 2D」。
 **在线分享链接**：https://dc-twin-studio.app.workbuddy.host/?sharecode=SRGROMS4ZA
-（已回填 `submission/提交说明.md` §2 / §6；线上页面「作品信息」表保留占位文字，
-因为发布后不再改动已发布内容，避免线上/本地不一致。后续若要同步需重新发布。）
+（已回填 `提交说明.md` §2 / §6、页面「作品信息」表与 `CHANGELOG`；线上内容在重新发布后与本地一致。）
 
-G1/G2 补齐后的契约测试：`tests/test_stage_g.py`（DXF 样例导入 / 标定 / 乱图层拒绝、
-数据快照字段、静态资源引用完整性、无 CDN）。
+契约测试 `tests/test_stage_g.py` 共 **10 项**：DXF 样例导入 / 标定 / 乱图层拒绝、数据快照字段、
+完整展示快照字段、静态资源引用完整性、10 图 + 3 二进制资产存在、无 CDN、
+**关键帧计数与源文件行数一致**、**无个人绝对路径**、**实体坐标为全局绝对 + dock 为两角点**（回归防护）。
+另有 Node 模拟 DOM 冒烟（4 种相机预设 + 跟随 + 换肤）与 Edge 无头截图复核。

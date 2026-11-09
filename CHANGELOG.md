@@ -4,6 +4,46 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-11-09
+
+Turned the submission page into a **complete project showcase** with an interactive 3D twin.
+
+### Added
+
+- `submission/twin3d.js`: zero-dependency software 3D projection renderer —
+  perspective/oblique camera, per-face Lambert shading, painter's-algorithm depth
+  sorting, cached static geometry, orbit/zoom/preset/follow controls, AGV chassis
+  + carried pallet + status beacons + glowing trails. Renders all 196 racks as
+  real 3D boxes. Explicitly labelled as a browser visualisation, not a Blender viewport.
+- Three-view switcher (3D / top-down plan / Blender render), dark+light themes with
+  canvas colours read from CSS variables, and a second rotatable 3D model preview.
+- Two new tabs: **Project Map** (6-stage pipeline, four-layer config, data contracts,
+  searchable map of 57 real deliverables, CLI) and **Model & Renders** (MP4 player,
+  Blender audit stats, downloadable `.blend` / `.glb` / `.mp4`, 10 render gallery).
+- Evidence tab now shows A1–A40 / S1–S9 / F1–F7 check details, 27 KPI definitions
+  and a real simulation event stream; Ops shows ledger accounts and sample entries.
+- `build_submission.py` inlines all of the above from `out/*.json`, copies 10 WebP
+  renders + 3 binary assets, guards against absolute user paths in the public snapshot.
+- `tests/test_stage_g.py` extended to 10 contract tests, including regressions for
+  global entity coordinates, dock rect corner semantics, keyframe count and privacy.
+
+### Fixed
+
+- 3D/2D renderers double-applied `warehouse.origin` to already-global entity
+  coordinates (F1/F2/F3 racks and docks were projected outside the site).
+- Dock `rect` was read as `[x,y,w,h]` but is `[x0,y0,x1,y1]`; F3 produced a giant
+  off-canvas wedge. Both renderers now use corner semantics.
+- `sampled_paths()` aliased the source list and inflated `total_keyframes` by 72;
+  the count now matches `data/paths.jsonl` (5421) exactly.
+- `--cv-sky0` / `--cv-sky-0` variable mismatch made the canvas background grey.
+- Hero image replaced with the perspective interior render (`02_interior.webp`);
+  keyframe counts on the page are now read from the snapshot instead of hard-coded.
+
+### Changed
+
+- `submission/提交说明.md`, `docs/COMPLETION_STATUS.md`, README and this changelog
+  updated; published link recorded in the app's "作品信息" table as real data.
+
 ## [0.3.0] - 2026-11-09
 
 G1/G2 completed and a **zero-backend activity submission web app** added.

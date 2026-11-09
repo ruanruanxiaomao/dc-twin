@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,14 +16,19 @@
   </div>
   <nav class="nav" id="nav">
     <button data-tab="home" class="active">总览</button>
+    <button data-tab="map">项目全景</button>
     <button data-tab="twin">实时孪生</button>
+    <button data-tab="media">模型与渲染</button>
     <button data-tab="lab">场景实验室</button>
     <button data-tab="ops">运营盈亏</button>
     <button data-tab="editor">布局编辑</button>
     <button data-tab="proof">验收证据</button>
     <button data-tab="submit" class="nav-cta">提交材料</button>
   </nav>
-  <div class="badges" id="topBadges"></div>
+  <div class="topright">
+    <div class="badges" id="topBadges"></div>
+    <button class="theme-btn" id="btnTheme" title="切换深浅主题">浅色</button>
+  </div>
 </header>
 
 <main>
@@ -35,29 +40,81 @@
         <h1>从一张布局图纸<br>到<span> 可仿真 · 可算账 · 可定制 </span>的运营孪生</h1>
         <p id="heroDesc"></p>
         <div class="hero-actions">
-          <button class="btn primary" data-go="twin">进入实时孪生 <span>→</span></button>
-          <button class="btn ghost" data-go="proof">查看验收证据</button>
+          <button class="btn primary" data-go="twin">进入 3D 实时孪生 <span class="arrow">→</span></button>
+          <button class="btn ghost" data-go="map">浏览项目全景</button>
         </div>
         <div class="hero-note" id="heroNote"></div>
       </div>
       <div class="hero-visual">
-        <div class="hero-frame"><img id="heroImg" alt="配送中心 Blender 总览渲染"></div>
+        <div class="hero-frame">
+          <img id="heroImg" alt="配送中心 Blender 总览渲染">
+          <div class="hero-frame-tag">BLENDER 5.2 · EEVEE · 1920×1080</div>
+        </div>
         <div class="hero-stats" id="heroStats"></div>
       </div>
     </div>
-    <div class="section-title"><h2>四层能力，一条数据链</h2><p>每一步都对应磁盘上的真实文件，可独立复算</p></div>
+
+    <div class="section-title"><h2>一条数据链，六个环节</h2><p>每个环节都对应磁盘上的真实脚本与产物，可独立复算</p></div>
+    <div class="flow-strip" id="homeFlow"></div>
+
+    <div class="section-title"><h2>四层能力</h2><p>配置 → 仿真 → 账本 → 定制，全部开源可查</p></div>
     <div class="feature-grid" id="featureGrid"></div>
+
     <div class="section-title"><h2>3 分钟看懂这个作品</h2><p>建议按此顺序浏览，评审无需安装任何环境</p></div>
     <ol class="tour" id="tourList"></ol>
+  </section>
+
+  <!-- 项目全景 -->
+  <section class="pane" id="pane-map">
+    <div class="section-title"><h2>项目全景 · 从配置到交付</h2>
+      <p>下面每个方框都是主链中的真实脚本；输入 / 输出均为仓库内的实际文件</p></div>
+    <div class="arch-grid" id="archGrid"></div>
+
+    <div class="section-title"><h2>四层配置与单一真相源</h2>
+      <p>布局由 <code>layout_spec.json</code> 展开，任何改动都要过 L1–L13 校验</p></div>
+    <div class="spec-grid" id="specGrid"></div>
+
+    <div class="section-title"><h2>数据契约</h2><p>脚本之间以文件为接口，字段与行数均为实测</p></div>
+    <div class="card"><div class="table-wrap"><table id="contractTable"></table></div></div>
+
+    <div class="section-title"><h2>交付物地图</h2>
+      <p><span id="fileCount"></span> 个文件按组列出，体积为构建时实测；输入框可过滤</p></div>
+    <div class="card">
+      <div class="search-row"><input type="text" id="fileSearch" placeholder="搜索文件名或说明，例如 sim_engine / glb / 验收">
+        <div class="chip-row" id="fileChips"></div></div>
+      <div class="table-wrap file-table"><table id="fileTable"></table></div>
+    </div>
+
+    <div class="section-title"><h2>本地复现与命令行</h2><p>所有数字都可以用同一套命令重新生成</p></div>
+    <div class="card"><pre id="cliBox"></pre></div>
   </section>
 
   <!-- 实时孪生 -->
   <section class="pane" id="pane-twin">
     <div class="section-title"><h2>实时孪生 · 21 台 AGV 闭环作业</h2>
-      <p>画面由 <code>data/paths.jsonl</code> 的真实关键帧驱动（已内联），非示意动画</p></div>
+      <p id="twinSubtitle">立体场景由 <code>layout.json</code> 真实几何投影，运动来自 <code>paths.jsonl</code> 的关键帧</p></div>
     <div class="twin-wrap">
       <div class="canvas-card">
-        <canvas id="twinCanvas" width="1000" height="720"></canvas>
+        <div class="view-tabs" id="viewTabs">
+          <button data-view="3d" class="active">3D 立体</button>
+          <button data-view="flat">俯视平面</button>
+          <button data-view="render">Blender 渲染</button>
+        </div>
+        <div class="stage">
+          <canvas id="twinCanvas" width="1000" height="720"></canvas>
+          <canvas id="flatCanvas" width="1000" height="720" hidden></canvas>
+          <img id="renderView" alt="Blender 全场总览渲染" hidden>
+          <div class="stage-hud" id="twinHud"></div>
+          <div class="stage-tip">拖拽旋转 · 滚轮缩放 · 双击复位</div>
+        </div>
+        <div class="cam-row" id="camBtns">
+          <button data-cam="iso" class="active">等距</button>
+          <button data-cam="wide">广角</button>
+          <button data-cam="close">近景</button>
+          <button data-cam="top">俯视</button>
+          <button data-cam="follow">跟随 W-R01</button>
+          <button data-cam="path">显示/隐藏轨迹</button>
+        </div>
         <div class="canvas-legend" id="twinLegend"></div>
       </div>
       <aside class="twin-side">
@@ -80,11 +137,38 @@
     </div>
   </section>
 
+  <!-- 模型与渲染 -->
+  <section class="pane" id="pane-media">
+    <div class="section-title"><h2>Blender 3D 交付</h2>
+      <p>工程源文件、glTF、动画与 10 张 1920×1080 渲染图，均由脚本自动生成</p></div>
+    <div class="media-top">
+      <div class="card video-card">
+        <h3>闭环作业动画 · anim_dc.mp4</h3>
+        <video id="videoPlayer" controls loop preload="metadata" playsinline></video>
+        <div class="hint" id="videoNote"></div>
+      </div>
+      <div class="card">
+        <h3>可交互布局模型（本页软件 3D 投影）</h3>
+        <div class="stage small"><canvas id="modelCanvas" width="1000" height="720"></canvas></div>
+        <div class="hint" id="modelNote"></div>
+      </div>
+    </div>
+    <div class="stat-band" id="modelStats"></div>
+
+    <div class="section-title"><h2>可下载的工程资产</h2><p>点击即用浏览器下载，无需登录</p></div>
+    <div class="asset-list" id="assetList"></div>
+
+    <div class="section-title"><h2>渲染图集 · 10 张</h2><p>点击放大；图片由 EEVEE 渲染后转 WebP</p></div>
+    <div class="gallery" id="mediaGallery"></div>
+  </section>
+
   <!-- 场景实验室 -->
   <section class="pane" id="pane-lab">
     <div class="section-title"><h2>场景实验室 · 8 个场景真的跑过</h2>
       <p>KPI 全部来自 tick 级仿真事件流，可与解析近似值并列区分</p></div>
     <div class="scen-grid" id="scenGrid"></div>
+    <div class="section-title"><h2>内置场景配置</h2><p>覆盖参数、干扰事件与可失败断言，逐项来自 config/scenarios/*.json</p></div>
+    <div class="card"><div class="table-wrap"><table id="scenSpecTable"></table></div></div>
     <div class="section-title"><h2>自定义场景编排</h2>
       <p>在浏览器里排好参数，导出草稿到本地项目即可真跑</p></div>
     <div class="lab-layout">
@@ -108,6 +192,9 @@
     </div>
     <div class="card"><h3>9 个运行的利润对比</h3><div id="pnlChart"></div></div>
     <div class="card"><h3>敏感性（电价 / 单量 / 车数 ±20%）</h3><div id="sensitivity"></div></div>
+    <div class="card"><h3>账本科目与分录样例</h3>
+      <div class="two-col"><div id="ledgerAccounts"></div>
+        <div class="table-wrap small-table"><table id="ledgerTable"></table></div></div></div>
     <div class="card"><h3>运行明细</h3><div class="table-wrap"><table id="pnlTable"></table></div></div>
   </section>
 
@@ -141,6 +228,17 @@
   <section class="pane" id="pane-proof">
     <div class="section-title"><h2>验收证据 · 验证器必须能失败</h2><p>所有数字来自可独立复算的报告文件</p></div>
     <div class="proof-grid" id="proofGrid"></div>
+    <div class="section-title"><h2>逐条检查明细</h2><p>A / S / F 三个验证器的真实检查项与证据描述</p></div>
+    <div class="card">
+      <div class="check-tabs" id="checkTabs">
+        <button data-check="A" class="active">A1–A40</button>
+        <button data-check="S">S1–S9</button>
+        <button data-check="F">F1–F7</button>
+        <button data-check="K">27 项 KPI 定义</button>
+        <button data-check="E">仿真事件流</button>
+      </div>
+      <div class="table-wrap check-table"><table id="checkTable"></table></div>
+    </div>
     <div class="section-title"><h2>GitHub 开源对照</h2><p>许可证逐项核实，代码衍生与概念参照严格区分</p></div>
     <div class="card"><table id="githubTable"></table></div>
     <div class="section-title"><h2>Blender 渲染图集</h2><p>点击放大，10 张静帧由脚本自动生成</p></div>
@@ -154,7 +252,7 @@
     <div class="section-title"><h2>活动提交材料</h2><p>可直接复制进报名表；提交前请完成隐私检查</p></div>
     <div class="submit-grid">
       <div class="card"><h3>作品简介（可复制）</h3>
-        <textarea id="introBox" rows="9"></textarea>
+        <textarea id="introBox" rows="10"></textarea>
         <div class="row"><button class="btn primary" id="btnCopyIntro">复制简介</button>
           <span class="hint" id="copyMsg"></span></div>
       </div>
@@ -178,6 +276,7 @@
 
 <script src="data.js"></script>
 <script src="editor.js"></script>
+<script src="twin3d.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

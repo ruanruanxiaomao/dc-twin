@@ -94,18 +94,26 @@
     return issues;
   }
 
+  function readPal() {
+    const cs = getComputedStyle(document.documentElement);
+    const g = n => cs.getPropertyValue('--cv-' + n).trim() || '#888888';
+    return { sky1: g('sky-1'), grid: g('grid'), rack: g('rack'),
+      warehouseEdge: g('warehouse-edge'), labelInk: g('label-ink'), hud: g('hud'),
+      accent: g('accent'), home: g('home'), bad: g('bad'), amber: g('amber') };
+  }
+
   function draw() {
-    const c = state.ctx, W = state.W, H = state.H;
+    const c = state.ctx, W = state.W, H = state.H, P = readPal();
     c.clearRect(0, 0, W, H);
-    c.fillStyle = '#fbfcf9'; c.fillRect(0, 0, W, H);
+    c.fillStyle = P.sky1; c.fillRect(0, 0, W, H);
     const k = scaleK();
     const [sw, sh] = state.data.layout.size;
 
     // site border
     const [ox, oy] = worldToScreen(0, sh);
-    c.strokeStyle = '#d5ded6'; c.lineWidth = 1;
+    c.strokeStyle = P.grid; c.lineWidth = 1;
     c.strokeRect(ox, oy, sw * k, sh * k);
-    c.fillStyle = '#8d9b92'; c.font = '11px system-ui';
+    c.fillStyle = P.hud; c.font = '11px system-ui';
     c.fillText(sw + ' × ' + sh + ' m', ox + 4, oy - 6);
 
     // tracing background
@@ -119,19 +127,20 @@
     }
 
     // existing racks as reference (not editable)
-    c.fillStyle = '#dfe6df';
+    c.fillStyle = P.rack;
     state.data.layout.warehouses.forEach((w) => {
       w.racks.forEach((r) => {
-        const [x, y] = worldToScreen(w.origin[0] + r[0], w.origin[1] + r[1]);
+        // layout.json entity coordinates are global; origin is only the frame corner.
+        const [x, y] = worldToScreen(r[0], r[1]);
         c.fillRect(x, y - r[3] * k, Math.max(1, r[2] * k), Math.max(1, r[3] * k));
       });
     });
     // warehouse outlines
     state.data.layout.warehouses.forEach((w) => {
       const [x, y] = worldToScreen(w.origin[0], w.origin[1] + w.size[1]);
-      c.strokeStyle = '#b9c7bc'; c.setLineDash([5, 4]);
+      c.strokeStyle = P.warehouseEdge; c.setLineDash([5, 4]);
       c.strokeRect(x, y, w.size[0] * k, w.size[1] * k); c.setLineDash([]);
-      c.fillStyle = '#5d6d63'; c.font = 'bold 12px system-ui';
+      c.fillStyle = P.labelInk; c.font = 'bold 12px system-ui';
       c.fillText(w.id, x + 6, y + 16);
     });
 
@@ -140,22 +149,24 @@
     state.items.forEach((it) => {
       const bad = badIds.has(it.id);
       c.lineWidth = it.id === state.selected ? 3 : 1.5;
-      c.strokeStyle = bad ? '#c05252' : (it.id === state.selected ? '#1f513f' : '#9fb3a6');
-      c.fillStyle = bad ? 'rgba(192,82,82,.12)' : 'rgba(47,117,89,.10)';
+      c.strokeStyle = bad ? P.bad : (it.id === state.selected ? P.accent : P.home);
+      c.save(); c.globalAlpha = bad ? .16 : .12;
+      c.fillStyle = bad ? P.bad : P.accent;
       if (it.type === 'zone') {
         const [x, y] = worldToScreen(it.rect[0], it.rect[3]);
         const w = (it.rect[2] - it.rect[0]) * k, h = (it.rect[3] - it.rect[1]) * k;
-        c.fillRect(x, y, w, h); c.strokeRect(x, y, w, h);
-        c.fillStyle = '#42534b'; c.font = '10px system-ui'; c.fillText(it.id, x + 4, y + 12);
+        c.fillRect(x, y, w, h);
+        c.restore(); c.strokeRect(x, y, w, h);
+        c.fillStyle = P.labelInk; c.font = '10px system-ui'; c.fillText(it.id, x + 4, y + 12);
       } else {
         const [x, y] = worldToScreen(it.x, it.y);
         const r = it.type === 'rack' ? 9 : 6;
         c.beginPath();
         if (it.type === 'door') c.rect(x - r, y - 4, r * 2, 8);
         else c.arc(x, y, r, 0, Math.PI * 2);
-        c.fill(); c.stroke();
+        c.fill(); c.restore(); c.stroke();
         if (it.type === 'rack') {
-          c.fillStyle = '#42534b'; c.font = '9px system-ui'; c.fillText('货架排', x + 11, y + 3);
+          c.fillStyle = P.labelInk; c.font = '9px system-ui'; c.fillText('货架排', x + 11, y + 3);
         }
       }
     });
@@ -163,12 +174,12 @@
     // calibration points
     state.calibPoints.forEach((p, i) => {
       c.beginPath(); c.arc(p[0], p[1], 6, 0, Math.PI * 2);
-      c.fillStyle = '#c98b3a'; c.fill();
-      c.fillStyle = '#7a5a25'; c.font = 'bold 11px system-ui';
+      c.fillStyle = P.amber; c.fill();
+      c.fillStyle = P.labelInk; c.font = 'bold 11px system-ui';
       c.fillText('P' + (i + 1), p[0] + 9, p[1] - 6);
     });
     if (state.calibPoints.length === 2) {
-      c.strokeStyle = '#c98b3a'; c.setLineDash([4, 3]); c.beginPath();
+      c.strokeStyle = P.amber; c.setLineDash([4, 3]); c.beginPath();
       c.moveTo(...state.calibPoints[0]); c.lineTo(...state.calibPoints[1]); c.stroke();
       c.setLineDash([]);
     }
@@ -305,7 +316,11 @@
     return state.scaleMPerPx;
   }
 
+  function setPalette() { if (state.ctx) draw(); }
+  function redraw() { if (state.ctx) draw(); }
+
   const api = { init, reset, undo, setTool, setBackground, calibrate, draft,
+    setPalette, redraw,
     get issues() { return validate(); },
     get calibration() { return state.scaleMPerPx; },
     get calibPoints() { return state.calibPoints.length; },
