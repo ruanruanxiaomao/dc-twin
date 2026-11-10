@@ -5,7 +5,7 @@
 
 | 指标 | 当前值 |
 |---|---|
-| 生成时间 | 2026-11-10 23:26:45 |
+| 生成时间 | 2026-11-10 23:33:13 |
 | Blender | 5.2.3 LTS |
 | 布局来源 | config/layout_spec.json → spec_layout.py（L1–L13 PASS，issues=0 warnings=148；38 扇门） |
 | AP 互斥 | 148 对（WARN，两 AP <2R 不能同时占用）；预约表复核同时占用 0 次；加宽变体互斥 29 对 |

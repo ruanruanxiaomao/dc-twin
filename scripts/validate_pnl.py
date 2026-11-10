@@ -17,6 +17,14 @@ import sys
 import tempfile
 from pathlib import Path
 
+# Windows 的管道控制台默认不是 UTF-8，中文报告会直接 UnicodeEncodeError。
+# 这里强制 UTF-8 并允许替换，保证 CI（以及 GBK 控制台）都能跑完。
+try:
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+except Exception:
+    pass
+
 ROOT = Path(__file__).resolve().parent.parent
 OUT, CONFIG = ROOT / "out", ROOT / "config"
 sys.path.insert(0, str(ROOT / "scripts"))

@@ -13,6 +13,14 @@ import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+# Windows 管道控制台默认非 UTF-8（cp1252/GBK），中文报告会 UnicodeEncodeError。
+# 强制 UTF-8 + replace，保证 CI 与本地 GBK 控制台都能跑完。
+try:
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+except Exception:
+    pass
+
 ROOT = Path(__file__).resolve().parent.parent
 DATA, OUT = ROOT / "data", ROOT / "out"
 sys.path.insert(0, str(ROOT / "scripts"))

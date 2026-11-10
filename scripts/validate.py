@@ -20,6 +20,14 @@ DATA, OUT = os.path.join(ROOT, 'data'), os.path.join(ROOT, 'out')
 sys.path.insert(0, os.path.dirname(__file__))
 from geometry import AGV_RADIUS, MIN_SEP, obstacle_rects, seg_hits_rect, inflate
 
+# Windows 管道控制台默认非 UTF-8（cp1252/GBK），中文报告会 UnicodeEncodeError。
+# 强制 UTF-8 + replace，保证 CI 与本地 GBK 控制台都能跑完。
+try:
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+except Exception:
+    pass
+
 R = []
 FLAGS = {}          # set by the __main__ CLI (--tier / --json / --junit / --check)
 

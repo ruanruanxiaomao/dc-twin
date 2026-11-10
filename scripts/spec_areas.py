@@ -38,6 +38,15 @@ CONFIG = os.path.join(ROOT, 'config')
 DATA = os.path.join(ROOT, 'data')
 OUT = os.path.join(ROOT, 'out')
 
+# Windows 管道控制台默认非 UTF-8（cp1252/GBK），中文报告会 UnicodeEncodeError。
+# 强制 UTF-8 + replace，保证 CI 与本地 GBK 控制台都能跑完。
+try:
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+except Exception:
+    pass
+
+
 KINDS = {'RECEIVING', 'QA', 'STAGING_IN', 'STORAGE', 'PICK_FACE', 'REPLENISH',
          'SORTING', 'PACKING', 'VAS', 'STAGING_OUT', 'RETURNS',
          'EMPTY_CONTAINER', 'BATTERY', 'MAINTENANCE', 'OFFICE'}

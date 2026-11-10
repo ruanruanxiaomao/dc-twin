@@ -18,6 +18,9 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         python: ["3.11", "3.13"]
     timeout-minutes: 15
+    env:
+      # Windows runner 的默认代码页不是 UTF-8，中文报告会 encode 失败
+      PYTHONIOENCODING: utf-8
     steps:
       - uses: actions/checkout@v4
 
