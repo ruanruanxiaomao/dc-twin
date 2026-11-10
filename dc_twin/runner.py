@@ -26,6 +26,8 @@ DATA_CHAIN = [
     ("scripts/layout_audit.py", (), "python"),
     ("scripts/nav_grid.py", (), "python"),
     ("scripts/spec_areas.py", ("--quiet",), "python"),   # 功能区 L23–L26（需 nav_grid 判 AP）
+    ("scripts/check_process.py", ("--quiet",), "python"),  # 过程配置 L14–L22（产出 process_report）
+
     ("scripts/optimize_slotting.py", (), "python"),
     ("scripts/gen_tasks.py", (), "python"),
     ("scripts/plan_paths.py", (), "python"),

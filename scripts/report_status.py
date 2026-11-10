@@ -15,8 +15,12 @@ OUT, DATA, CONFIG = (os.path.join(ROOT, 'out'), os.path.join(ROOT, 'data'),
                      os.path.join(ROOT, 'config'))
 
 
-def j(*parts):
-    return json.load(open(os.path.join(*parts), encoding='utf-8'))
+def j(*parts, default=None):
+    """读 JSON；文件不存在时返回 default（数据链没有 Blender 产物时要用）。"""
+    p = os.path.join(*parts)
+    if not os.path.exists(p):
+        return {} if default is None else default
+    return json.load(open(p, encoding='utf-8'))
 
 
 def n(v, default='n/a'):
@@ -36,7 +40,7 @@ def main():
     cargo = j(DATA, 'cargo_state.json')
     nav = j(DATA, 'nav_grid.json')
     L = j(DATA, 'layout.json')
-    vr = j(OUT, 'validate_report.json')
+    vr = j(OUT, 'validate_report.json', default=[])
     neg = j(OUT, 'negative_tests.json')
     neg_spec = j(OUT, 'spec_negative_tests.json')
     neg_scen = j(OUT, 'scenario_negative_tests.json')
@@ -86,7 +90,13 @@ def main():
     for p in spec_files:
         base = os.path.splitext(os.path.basename(p))[0]
         spec_tags.append(base.replace('layout_spec', '').lstrip('_') or '当前')
-    spec_line = '%d 个布局 spec（%s）全部审计 PASS' % (len(spec_files), ' / '.join(spec_tags))
+    # 多布局审计报告只有跑过 spec_layout 的多变体步骤才存在；缺失时不能替它说 PASS
+    audited = len(variants) if isinstance(variants, dict) else 0
+    spec_line = ('%d 个布局 spec（%s）；本次审计 %d 个变体，均 PASS'
+                 % (len(spec_files), ' / '.join(spec_tags), audited)
+                 if audited else
+                 '%d 个布局 spec（%s）；本次仅审计当前 spec（多变体报告缺失）'
+                 % (len(spec_files), ' / '.join(spec_tags)))
 
     # 用户自选功能区的扩仓变体：存在才报，不存在如实说"未生成"
     v_spec_p = os.path.join(CONFIG, 'layout_spec_areas.json')
@@ -104,16 +114,20 @@ def main():
     else:
         variant_line = '未生成（python scripts/build_variant.py --build）'
 
-    passed = sum(1 for r in vr if r['status'] == 'PASS')
-    neg_total = sum(x['total'] for x in (neg, neg_spec, neg_scen))
-    neg_pass = sum(x['passed'] for x in (neg, neg_spec, neg_scen))
+    # 数据链（CI）没有 Blender 产物：如实写"未构建"，不编数字也不崩
+    has3d = all(bool(x) for x in (br, ba, ar, rr))
+    has_val = bool(vr)
+    passed = sum(1 for r in vr if r.get('status') == 'PASS')
+    # 负测试报告可能缺失（只跑数据链时），缺就记 0 而不是崩
+    neg_total = sum(x.get('total', 0) for x in (neg, neg_spec, neg_scen))
+    neg_pass = sum(x.get('passed', 0) for x in (neg, neg_spec, neg_scen))
     Ls = L['summary']
     home_n = sum(1 for w in L['warehouses'] for l in w['locations']
                  if l['kind'] == 'HOME')
     ts = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     rows = [
         ('生成时间', ts),
-        ('Blender', br['blender']),
+        ('Blender', br.get('blender') or '未构建（本次未跑 Blender 链）'),
         ('布局来源', 'config/layout_spec.json → spec_layout.py（L1–L13 PASS，'
                      'issues=%s warnings=%s；%s 扇门）'
          % (len(spec_rep['issues']), len(spec_rep['warnings']),
@@ -121,7 +135,8 @@ def main():
         ('AP 互斥', '%s 对（WARN，两 AP <2R 不能同时占用）；'
                     '预约表复核同时占用 %s 次；加宽变体互斥 %s 对'
          % (spec_rep['mutex_pairs'], resv['mutex_simultaneous_occupations'],
-            variants['layout_spec_wide']['mutex'])),
+            variants.get('layout_spec_wide', {}).get('mutex', 'n/a')
+            if isinstance(variants, dict) else 'n/a')),
         ('四层配置', 'layout_spec / fleet_spec / demand_spec / %d 个 scenarios + %d 份 schema；'
                      '%s'
          % (len(scenario_specs), len(schema_files), spec_line)),
@@ -161,8 +176,10 @@ def main():
          % (pm['total_path_m'], pm['avg_path_m'], pm['samples'],
             pm.get('path_to_euclid_ratio'))),
         ('时间', '仿真 %s s / 视频 %s s / %s 帧 @%s fps'
-         % (pm['duration_s'], n(ar['mp4'].get('duration_s')),
-            rr['frames_rendered'], rr['fps'])),
+         % (pm['duration_s'],
+            n((ar.get('mp4') or {}).get('duration_s')) if has3d else '未构建',
+            rr.get('frames_rendered', '未构建') if has3d else '未构建',
+            rr.get('fps', '-') if has3d else '-')),
         ('调度', 'on_time_rate=%s / max_tardiness=%s s / max_conflict_wait=%s s'
          % (pm.get('on_time_rate'), pm.get('max_tardiness_s'),
             pm.get('max_conflict_wait_s'))),
@@ -178,18 +195,20 @@ def main():
          % (cargo['summary']['orders'], cargo['summary']['loaded'],
             cargo['summary']['delivered'], cargo['summary']['state_transitions'],
             cargo['summary']['shelf_locations_changed'], ba.get('cargo_objects'))),
-        ('.blend', '%s objects / %s meshes / %s materials / %s actions'
-         '（构建报告 %s/%s/%s，重开实测一致）；HOME 待命位 %s；隐藏 AGV=%s'
-         % (ba['objects'], ba['meshes'], ba['materials'], ba['actions'],
-            br['objects'], br['meshes'], br['materials'],
-            ba.get('home_bays'), ba.get('agv_with_hide_render_keyframe'))),
-        ('GLB', '%s 节点 / %s meshes / %s materials / %s animations；'
-         '禁用节点=%s；DC_ROOT=%s'
-         % (ar['glb']['nodes'], ar['glb']['meshes'], ar['glb']['materials'],
-            ar['glb']['animations'], ar['glb']['forbidden_nodes'],
-            ar['glb']['has_DC_ROOT'])),
+        ('.blend', ('%s objects / %s meshes / %s materials / %s actions'
+                    '（构建报告 %s/%s/%s，重开实测一致）；HOME 待命位 %s；隐藏 AGV=%s'
+                    % (ba['objects'], ba['meshes'], ba['materials'], ba['actions'],
+                       br['objects'], br['meshes'], br['materials'],
+                       ba.get('home_bays'), ba.get('agv_with_hide_render_keyframe')))
+         if has3d else '未构建（本次未跑 Blender 链）'),
+        ('GLB', ('%s 节点 / %s meshes / %s materials / %s animations；'
+                 '禁用节点=%s；DC_ROOT=%s'
+                 % (ar['glb']['nodes'], ar['glb']['meshes'], ar['glb']['materials'],
+                    ar['glb']['animations'], ar['glb']['forbidden_nodes'],
+                    ar['glb']['has_DC_ROOT']))
+         if has3d else '未构建（本次未跑 Blender 链）'),
         ('图像', '6 张 3D 静帧 + 2 张 2D 闭环路线图 + 时间-空间图 + 快照序列；'
-         '尺寸全对=%s' % ar['all_png_sizes_ok']),
+         '尺寸全对=%s' % (ar.get('all_png_sizes_ok') if has3d else '未构建')),
         ('路线图', 'closed_loops=%s / routes=%s / segments=%s / head_on=%s / '
          'edge_clearance=%s m / 中央主通道采样=%s'
          % (route.get('closed_loops'), route['routes'], route['segments_07'],
@@ -204,9 +223,10 @@ def main():
          % (csv_rep['rows_out'], csv_rep['verdict'], clean['steps_run'],
             clean['steps_total'],
             sum(1 for v in clean['files'].values() if v['identical']))),
-        ('验收', '%d/%d PASS（A1–A%d）；负测试 %d/%d（%d 个测试文件）'
-         % (passed, len(vr), len(vr), neg_pass, neg_total,
-            sum(1 for x in (neg, neg_spec, neg_scen) if x))),
+        ('验收', ('%d/%d PASS（A1–A%d）；负测试 %d/%d（%d 个测试文件）'
+                  % (passed, len(vr), len(vr), neg_pass, neg_total,
+                     sum(1 for x in (neg, neg_spec, neg_scen) if x)))
+         if has_val else '未运行（本次只跑数据链，见 data tier）'),
         ('开源交付层', 'dc CLI 7 命令 / 31 步链（data 11 · scenarios 16 · full 31）；'
                        '输出契约 sidecar %s 份 / manifest %s 个产物；'
                        '静态 Demo %s 个场景 · %s 台车'

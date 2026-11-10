@@ -24,7 +24,7 @@ def test_doctor_collect_is_pass_and_has_checks():
 
 def test_scopes_have_expected_step_counts_and_are_ordered():
     assert set(runner.SCOPES) == {"data", "scenarios", "full"}
-    assert len(runner.SCOPES["data"]) == 11
+    assert len(runner.SCOPES["data"]) == 13   # + spec_areas / check_process
     assert len(runner.SCOPES["scenarios"]) > len(runner.SCOPES["data"])
     assert len(runner.SCOPES["full"]) > len(runner.SCOPES["scenarios"])
     full = runner.build_steps("full", None)

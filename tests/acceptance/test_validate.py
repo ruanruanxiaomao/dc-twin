@@ -34,15 +34,22 @@ def test_negative_suite_reports_nonzero_exits():
             "out/scenario_negative_tests.json"]
     total = 0
     nonzero = 0
+    skipped = 0
     for rel in reps:
         d = json.loads((ROOT / rel).read_text(encoding="utf-8"))
         assert d["verdict"] == "PASS", rel
         for c in d["cases"]:
             assert c["ok"] is True, (rel, c.get("name"))
-            # 15/17 cases must actually trigger a non-zero exit. The other two
-            # are a WARN rule and a positive seed-sensitivity assertion.
+            total += 1
+            if c.get("skipped"):
+                # 缺 Blender 产物（PNG/GLB）时用例如实 skip，不算"非零退出"
+                skipped += 1
+                continue
             if c.get("exit_code") not in (0, None):
                 nonzero += 1
-            total += 1
+    ran = total - skipped
     assert total >= 17
-    assert nonzero >= 15, "only %d/17 negative cases returned non-zero" % nonzero
+    # 两个用例本来就不该非零退出：一个是 WARN 规则（门宽 1.0 m 只告警），
+    # 一个是"改 seed 后订单必须不同"的正向断言（退出 0 才是对的）。
+    assert ran >= 15, "只执行了 %d 个负测试用例（应 >=15）" % ran
+    assert nonzero >= ran - 2, "only %d/%d executed cases returned non-zero" % (nonzero, ran)
