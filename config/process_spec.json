@@ -1,0 +1,385 @@
+{
+  "schema_version": "1.1",
+  "meta": {
+    "owner": "process engineering",
+    "source": "DC_MASTER_PLAN §12.7 / §13.6",
+    "grade": "assumption",
+    "note": "工位产能与工时全部是 assumption，不是实测。tick 引擎尚未消费本文件（见 README 已知限制），本文件当前用于校验、参数治理与后续 M1-02 接线。",
+    "units": "秒 / 件 / 人"
+  },
+  "shifts": [
+    {
+      "id": "DAY",
+      "start_s": 0,
+      "end_s": 28800,
+      "breaks": [
+        [
+          14400,
+          1800
+        ]
+      ]
+    },
+    {
+      "id": "NIGHT",
+      "start_s": 28800,
+      "end_s": 57600,
+      "breaks": []
+    }
+  ],
+  "resources": [
+    {
+      "id": "PERSON-PICK-01",
+      "kind": "PERSON",
+      "count": 8,
+      "role": "PICKER",
+      "cost_per_h": 35.0
+    },
+    {
+      "id": "PERSON-PACK-01",
+      "kind": "PERSON",
+      "count": 4,
+      "role": "PACKER",
+      "cost_per_h": 35.0
+    },
+    {
+      "id": "FORKLIFT-01",
+      "kind": "FORKLIFT",
+      "count": 2,
+      "speed_mps": 1.2,
+      "capacity_kg": 1500,
+      "cost_per_h": 55.0
+    },
+    {
+      "id": "TOTE-01",
+      "kind": "TOTE",
+      "count": 500,
+      "turnover_per_day": 3
+    }
+  ],
+  "stations": [
+    {
+      "id": "W-PACK-01",
+      "warehouse": "W",
+      "kind": "PACKING",
+      "parallel_slots": 2,
+      "service_time_s": {
+        "dist": "lognormal",
+        "mean": 95,
+        "cv": 0.35
+      },
+      "setup_s": 12,
+      "buffer": {
+        "capacity": 8,
+        "policy": "FIFO"
+      },
+      "staffing": {
+        "resource": "PERSON-PACK-01",
+        "per_slot": 1
+      },
+      "shifts": [
+        "DAY",
+        "NIGHT"
+      ],
+      "reliability": {
+        "mttf_h": 400,
+        "mttr_min": 15
+      }
+    },
+    {
+      "id": "W-PACK-02",
+      "warehouse": "W",
+      "kind": "PACKING",
+      "parallel_slots": 2,
+      "service_time_s": {
+        "dist": "lognormal",
+        "mean": 95,
+        "cv": 0.35
+      },
+      "setup_s": 12,
+      "buffer": {
+        "capacity": 8,
+        "policy": "FIFO"
+      },
+      "staffing": {
+        "resource": "PERSON-PACK-01",
+        "per_slot": 1
+      },
+      "shifts": [
+        "DAY",
+        "NIGHT"
+      ],
+      "reliability": {
+        "mttf_h": 400,
+        "mttr_min": 15
+      }
+    },
+    {
+      "id": "W-SORT-01",
+      "warehouse": "W",
+      "kind": "SORTING",
+      "parallel_slots": 1,
+      "service_time_s": {
+        "dist": "lognormal",
+        "mean": 40,
+        "cv": 0.3
+      },
+      "setup_s": 0,
+      "buffer": {
+        "capacity": 12,
+        "policy": "FIFO"
+      },
+      "staffing": {
+        "resource": "PERSON-PICK-01",
+        "per_slot": 1
+      },
+      "shifts": [
+        "DAY",
+        "NIGHT"
+      ],
+      "reliability": {
+        "mttf_h": 600,
+        "mttr_min": 20
+      }
+    },
+    {
+      "id": "F1-PACK-01",
+      "warehouse": "F1",
+      "kind": "PACKING",
+      "parallel_slots": 1,
+      "service_time_s": {
+        "dist": "lognormal",
+        "mean": 110,
+        "cv": 0.4
+      },
+      "setup_s": 12,
+      "buffer": {
+        "capacity": 4,
+        "policy": "FIFO"
+      },
+      "staffing": {
+        "resource": "PERSON-PACK-01",
+        "per_slot": 1
+      },
+      "shifts": [
+        "DAY"
+      ],
+      "reliability": {
+        "mttf_h": 400,
+        "mttr_min": 15
+      }
+    },
+    {
+      "id": "F2-PACK-01",
+      "warehouse": "F2",
+      "kind": "PACKING",
+      "parallel_slots": 1,
+      "service_time_s": {
+        "dist": "lognormal",
+        "mean": 110,
+        "cv": 0.4
+      },
+      "setup_s": 12,
+      "buffer": {
+        "capacity": 4,
+        "policy": "FIFO"
+      },
+      "staffing": {
+        "resource": "PERSON-PACK-01",
+        "per_slot": 1
+      },
+      "shifts": [
+        "DAY"
+      ],
+      "reliability": {
+        "mttf_h": 400,
+        "mttr_min": 15
+      }
+    },
+    {
+      "id": "F3-PACK-01",
+      "warehouse": "F3",
+      "kind": "PACKING",
+      "parallel_slots": 1,
+      "service_time_s": {
+        "dist": "lognormal",
+        "mean": 110,
+        "cv": 0.4
+      },
+      "setup_s": 12,
+      "buffer": {
+        "capacity": 4,
+        "policy": "FIFO"
+      },
+      "staffing": {
+        "resource": "PERSON-PACK-01",
+        "per_slot": 1
+      },
+      "shifts": [
+        "DAY"
+      ],
+      "reliability": {
+        "mttf_h": 400,
+        "mttr_min": 15
+      }
+    }
+  ],
+  "process_steps": [
+    {
+      "from": "DOCK_IN",
+      "to": "STG_IN",
+      "resource": "FORKLIFT-01",
+      "time_s": 180,
+      "yield": 0.995
+    },
+    {
+      "from": "STG_IN",
+      "to": "SHELF",
+      "resource": "AGV",
+      "time_s": 240,
+      "yield": 1.0
+    },
+    {
+      "from": "SHELF",
+      "to": "PICK_FACE",
+      "resource": "PERSON-PICK-01",
+      "time_s": 45,
+      "yield": 0.999
+    },
+    {
+      "from": "PICK_FACE",
+      "to": "SORT",
+      "resource": "AGV",
+      "time_s": 90,
+      "yield": 1.0
+    },
+    {
+      "from": "SORT",
+      "to": "PACK",
+      "resource": "AGV",
+      "time_s": 60,
+      "yield": 1.0
+    },
+    {
+      "from": "PACK",
+      "to": "STG_OUT",
+      "resource": "AGV",
+      "time_s": 60,
+      "yield": 1.0
+    },
+    {
+      "from": "STG_OUT",
+      "to": "DOCK_OUT",
+      "resource": "FORKLIFT-01",
+      "time_s": 150,
+      "yield": 1.0
+    }
+  ],
+  "nodes": [
+    {
+      "id": "DOCK_IN",
+      "kind": "RECEIVING",
+      "warehouse": "W",
+      "capacity": 6,
+      "next": [
+        "STG_IN"
+      ],
+      "area": "W-RCV-01"
+    },
+    {
+      "id": "STG_IN",
+      "kind": "STAGING_IN",
+      "warehouse": "W",
+      "capacity": 24,
+      "buffer_policy": "FIFO",
+      "next": [
+        "SHELF"
+      ],
+      "area": "W-STGIN-01"
+    },
+    {
+      "id": "SHELF",
+      "kind": "STORAGE",
+      "warehouse": "W",
+      "capacity": 392,
+      "next": [
+        "PICK_FACE"
+      ]
+    },
+    {
+      "id": "PICK_FACE",
+      "kind": "PICKING",
+      "warehouse": "W",
+      "capacity": 300,
+      "next": [
+        "SORT"
+      ],
+      "area": "W-FWD-01"
+    },
+    {
+      "id": "SORT",
+      "kind": "SORTING",
+      "warehouse": "W",
+      "capacity": 12,
+      "station": "W-SORT-01",
+      "next": [
+        "PACK"
+      ],
+      "area": "W-SORT-EXT"
+    },
+    {
+      "id": "PACK",
+      "kind": "PACKING",
+      "warehouse": "W",
+      "capacity": 4,
+      "station": "W-PACK-01",
+      "next": [
+        "STG_OUT"
+      ],
+      "area": "W-PACK-03"
+    },
+    {
+      "id": "STG_OUT",
+      "kind": "STAGING_OUT",
+      "warehouse": "W",
+      "capacity": 12,
+      "buffer_policy": "FIFO",
+      "next": [
+        "DOCK_OUT"
+      ],
+      "area": "W-STGOUT-01"
+    },
+    {
+      "id": "DOCK_OUT",
+      "kind": "SHIPPING",
+      "warehouse": "W",
+      "capacity": 6,
+      "next": []
+    },
+    {
+      "id": "FWD_IN",
+      "kind": "RECEIVING",
+      "warehouse": "F1",
+      "capacity": 2,
+      "next": [
+        "FWD_PACK"
+      ]
+    },
+    {
+      "id": "FWD_PACK",
+      "kind": "PACKING",
+      "warehouse": "F1",
+      "capacity": 1,
+      "station": "F1-PACK-01",
+      "next": [
+        "FWD_OUT"
+      ]
+    },
+    {
+      "id": "FWD_OUT",
+      "kind": "SHIPPING",
+      "warehouse": "F1",
+      "capacity": 2,
+      "next": []
+    }
+  ]
+}

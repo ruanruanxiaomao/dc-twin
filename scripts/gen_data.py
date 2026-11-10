@@ -26,7 +26,9 @@ DATA = os.path.join(ROOT, 'data')
 CFG = json.load(open(os.path.join(DATA, 'config.json'), encoding='utf-8'))
 RNG = random.Random(CFG['seed'])
 N_SKUS = 240
-SPEC = os.path.join(ROOT, 'config', 'layout_spec.json')
+# 布局来源默认是主 spec；用变体跑（build_variant.py 生成的扩仓版）时由 DC_LAYOUT_SPEC 覆盖。
+# 这是"用户自选功能区 → 跑出自己仓"的唯一开关，其余步骤都读派生出的 data/layout.json。
+SPEC = os.environ.get('DC_LAYOUT_SPEC') or os.path.join(ROOT, 'config', 'layout_spec.json')
 FLEET_SPEC = os.path.join(ROOT, 'config', 'fleet_spec.json')
 SPEC_LAYOUT = os.path.join(os.path.dirname(__file__), 'spec_layout.py')
 

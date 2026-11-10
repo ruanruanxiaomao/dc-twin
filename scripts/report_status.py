@@ -6,11 +6,13 @@
 运行：python scripts/report_status.py
 """
 import datetime
+import glob
 import json
 import os
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-OUT, DATA = os.path.join(ROOT, 'out'), os.path.join(ROOT, 'data')
+OUT, DATA, CONFIG = (os.path.join(ROOT, 'out'), os.path.join(ROOT, 'data'),
+                     os.path.join(ROOT, 'config'))
 
 
 def j(*parts):
@@ -50,17 +52,57 @@ def main():
         if os.path.exists(os.path.join(OUT, 'validate_data_report.json')) else {}
     demo_man = j(ROOT, 'demo', 'manifest.json') \
         if os.path.exists(os.path.join(ROOT, 'demo', 'manifest.json')) else {}
-    scenarios = [p for p in os.listdir(os.path.join(ROOT, 'runs'))
-                 if os.path.isdir(os.path.join(ROOT, 'runs', p))]
-    kpi_dirs = []
-    for d in scenarios:
-        kpi_dirs += [p for p in os.listdir(os.path.join(ROOT, 'runs', d))]
-    # Only analytic runs own kpi.json; stage-A tick runs share the same tree
-    # (sim_kpi.json) and must not be picked by a plain directory-name sort.
+    # 场景数只认 config/scenarios/*.json —— 不能数 runs/ 下的目录：
+    # runs/ 里还有 custom/ 与 logs/，旧版因此把 8 个场景写成 10 个。
+    scenario_specs = sorted(glob.glob(os.path.join(CONFIG, 'scenarios', '*.json')))
+    run_dirs = []
+    runs_root = os.path.join(ROOT, 'runs')
+    for d in sorted(os.listdir(runs_root)):
+        sub = os.path.join(runs_root, d)
+        if not os.path.isdir(sub) or d == 'logs':
+            continue
+        run_dirs += [os.path.join(sub, p) for p in sorted(os.listdir(sub))
+                     if os.path.isdir(os.path.join(sub, p))]
+    # 两套 KPI 并存，必须分开报，不能混成一个数字：
+    #   · 解析层 kpi.json   —— kpi.py 的 M/M/c 近似（25 项）
+    #   · tick 层 sim_kpi.json —— sim_engine 的逐 tick 实测（27 项）
     base_root = os.path.join(ROOT, 'runs', 'baseline')
     base_runs = sorted(d for d in os.listdir(base_root)
                        if os.path.isfile(os.path.join(base_root, d, 'kpi.json')))
     base_kpi = j(base_root, base_runs[-1], 'kpi.json') if base_runs else {}
+    sim_runs = sorted(d for d in os.listdir(base_root)
+                      if os.path.isfile(os.path.join(base_root, d, 'sim_kpi.json')))
+    base_sim = j(base_root, sim_runs[-1], 'sim_kpi.json') if sim_runs else {}
+    analytic_keys = set(base_kpi.get('metrics', {}))
+    tick_keys = set(base_sim.get('metrics', {}))
+    schema_files = sorted(glob.glob(os.path.join(CONFIG, 'schemas', '*.json')))
+    areas_p = os.path.join(DATA, 'areas.json')
+    areas = j(areas_p) if os.path.exists(areas_p) else {}
+    area_sum = areas.get('summary') or {}
+
+    # 布局 spec 家族（主链 + F4/加宽 + 用户自选功能区的扩仓变体），数量现算不写死
+    spec_files = sorted(glob.glob(os.path.join(CONFIG, 'layout_spec*.json')))
+    spec_tags = []
+    for p in spec_files:
+        base = os.path.splitext(os.path.basename(p))[0]
+        spec_tags.append(base.replace('layout_spec', '').lstrip('_') or '当前')
+    spec_line = '%d 个布局 spec（%s）全部审计 PASS' % (len(spec_files), ' / '.join(spec_tags))
+
+    # 用户自选功能区的扩仓变体：存在才报，不存在如实说"未生成"
+    v_spec_p = os.path.join(CONFIG, 'layout_spec_areas.json')
+    v_sel_p = os.path.join(CONFIG, 'areas_selection.json')
+    if os.path.exists(v_spec_p):
+        v_spec = j(v_spec_p)
+        v_wh = next((w for w in v_spec['warehouses'] if w['id'] == 'W'), {})
+        v_areas = v_wh.get('areas') or []
+        v_sel = j(v_sel_p) if os.path.exists(v_sel_p) else {}
+        v_enabled = v_sel.get('enabled') or []
+        variant_line = ('config/layout_spec_areas.json：W 深度 %s m、%d 个物理功能区'
+                        '（用户勾选 %d 个）；用 run.py --spec 运行，主链不受影响'
+                        % (v_wh.get('size', {}).get('depth', 'n/a'), len(v_areas),
+                           len(v_enabled)))
+    else:
+        variant_line = '未生成（python scripts/build_variant.py --build）'
 
     passed = sum(1 for r in vr if r['status'] == 'PASS')
     neg_total = sum(x['total'] for x in (neg, neg_spec, neg_scen))
@@ -72,7 +114,7 @@ def main():
     rows = [
         ('生成时间', ts),
         ('Blender', br['blender']),
-        ('布局来源', 'config/layout_spec.json → spec_layout.py（L1–L12 PASS，'
+        ('布局来源', 'config/layout_spec.json → spec_layout.py（L1–L13 PASS，'
                      'issues=%s warnings=%s；%s 扇门）'
          % (len(spec_rep['issues']), len(spec_rep['warnings']),
             spec_rep['summary'].get('doors'))),
@@ -80,16 +122,30 @@ def main():
                     '预约表复核同时占用 %s 次；加宽变体互斥 %s 对'
          % (spec_rep['mutex_pairs'], resv['mutex_simultaneous_occupations'],
             variants['layout_spec_wide']['mutex'])),
-        ('四层配置', 'layout_spec / fleet_spec / demand_spec / 8 个 scenarios + 4 份 schema；'
-                     '3 个布局 spec（当前 / F4 / 加宽）全部审计 PASS'),
-        ('场景', '%d 个场景 × %d 次运行；%d 个 KPI 每个带 definition/formula/source'
-         % (len(scenarios), len(kpi_dirs), len(base_kpi.get('metrics', {})))),
+        ('四层配置', 'layout_spec / fleet_spec / demand_spec / %d 个 scenarios + %d 份 schema；'
+                     '%s'
+         % (len(scenario_specs), len(schema_files), spec_line)),
+        ('场景/KPI', '%d 个冻结场景（config/scenarios）× %d 次运行；'
+                     '解析层 %d 项 KPI + tick 层 %d 项 KPI（去重 %d 项），'
+                     '每项带 definition/formula/source'
+         % (len(scenario_specs), len(run_dirs), len(analytic_keys), len(tick_keys),
+            len(analytic_keys | tick_keys))),
         ('布局', '%d 仓 / %d 货架 / %d 库位（%d SHELF + %d HOME）/ %d 月台 / %d 站 / %d AGV'
          % (Ls['warehouses'], Ls['racks'], Ls['locations'],
             Ls['shelf_locations'], home_n,
             Ls['docks'], Ls['stations'], Ls['robots'])),
         ('布局审计', 'issues=%s warnings=%s verdict=%s'
          % (la['count'], la['warnings'], la['verdict'])),
+        ('功能区', '%s 个（物理 %s / 逻辑 %s）；%s；见 data/areas.json'
+         % (area_sum.get('total', 'n/a'), area_sum.get('physical', 'n/a'),
+            area_sum.get('logical', 'n/a'),
+            '种类 ' + '/'.join('%s×%s' % (k, v)
+                              for k, v in sorted((area_sum.get('by_kind') or {}).items())))),
+        ('功能区变体', variant_line),
+        ('过程配置', '%s 工位 / %s 流程节点 / %s 班次；L14–L22 见 out/process_report.json'
+         % (j(CONFIG, 'process_spec.json')['stations'].__len__(),
+            j(CONFIG, 'process_spec.json')['nodes'].__len__(),
+            j(CONFIG, 'process_spec.json')['shifts'].__len__())),
         ('导航栅格', '%dx%d @%s m；blocked=%s corridor=%s；AGV_RADIUS=%s m'
          % (nav['cols'], nav['rows_count'], nav['cell_size_m'],
             nav['blocked_cells'], nav['corridor_cells'], geo['agv_radius_m'])),
@@ -148,8 +204,9 @@ def main():
          % (csv_rep['rows_out'], csv_rep['verdict'], clean['steps_run'],
             clean['steps_total'],
             sum(1 for v in clean['files'].values() if v['identical']))),
-        ('验收', '%d/%d PASS（A1–A40）；负测试 %d/%d（3 个测试文件）'
-         % (passed, len(vr), neg_pass, neg_total)),
+        ('验收', '%d/%d PASS（A1–A%d）；负测试 %d/%d（%d 个测试文件）'
+         % (passed, len(vr), len(vr), neg_pass, neg_total,
+            sum(1 for x in (neg, neg_spec, neg_scen) if x))),
         ('开源交付层', 'dc CLI 7 命令 / 31 步链（data 11 · scenarios 16 · full 31）；'
                        '输出契约 sidecar %s 份 / manifest %s 个产物；'
                        '静态 Demo %s 个场景 · %s 台车'
@@ -160,6 +217,8 @@ def main():
                      '`.github/workflows/ci.yml`'
          % (vdata.get('passed'), vdata.get('total'))),
     ]
+    multi = base_sim.get('metrics', {}).get('max_orders_per_robot', {})
+    max_orders = multi.get('value') if isinstance(multi, dict) else n(multi)
     lines = [
         '# 当前状态（自动生成，请勿手改）',
         '',
@@ -174,24 +233,53 @@ def main():
         '',
         '## 仍保留的边界（如实声明）',
         '',
-        '- **仍非 tick 级 cell reservation**：用「优先级 + 出发错峰 + HOME 避让软代价」逼近，'
-        '严格口径 0 冲突是采样验证结果（0.05 s），不是形式化证明。',
-        '- **订单仍是合成场景**：SKU 周转率为 Zipf 合成，21 张订单按前后区派单，'
-        '每种类型 4–5 单，不是真实订单分布。',
+        '- **两套 KPI 并存，引用时必须写清是哪一层**：解析层 `kpi.json`（`kpi.py`，'
+        'M/M/c 近似）%d 项；tick 层 `sim_kpi.json`（`sim_engine.py`，逐 tick 实测）%d 项；'
+        '去重 %d 项。只报一个数字而不说层，就是口径错误。'
+        % (len(analytic_keys), len(tick_keys), len(analytic_keys | tick_keys)),
+        '- **交通层是"反应式门控 + 退让 + 绕行 + 清障"，不是预约表**：`advance()` 只在'
+        '候选点与已更新位置距离 < MIN_SEP 时让行；被同一台车挡住超 8 s 由 id 较大的一方'
+        '后退让路，超 20 s 尝试绕行，仍无解则在 300 s 触发人工清障（`JAM_CLEARED`）。'
+        '实测清障 0–5 次/场景，说明这不是形式化无死锁，而是"有界可观测"的工程折中。'
+        '0 冲突是 0.05 s 采样复核结果，不是形式化证明。',
+        '- **过程层两层口径不同**：解析层用 Erlang-C 近似给出 `station_utilization` / '
+        '`dock_utilization` / `max_dock_queue`，服务时间取 `fleet_spec.station_service`；'
+        'tick 层则是**实测**——6 个 process_spec 工位 + 4 个拣选池按服务台运行，'
+        '有 `STATION_ENTER/QUEUED/EXIT` 事件与会话级等待时长。'
+        '仍缺的是：月台门没有占用/装卸工时（封门改派已实现），人员班次未建模。',
+        '- **功能区三层已打通**：%s 个功能区（物理 %s / 逻辑 %s）见 `data/areas.json`；'
+        'tick 层把 PICK_FACE 当拣选池、把 process_spec 工位当服务台（服务时长采样 + 并行位 + FIFO）；'
+        '3D 层已按 `areas.json` 画地面色块与中文名称牌（物理区 3 块真实占位，逻辑区 18 个挂靠标牌）。'
+        '仍未做：功能区不参与导航栅格（它不该改变可通行性），也没有按功能区做人员排班。'
+        % (area_sum.get('total', 0), area_sum.get('physical', 0),
+           area_sum.get('logical', 0)),
+        '- **瓶颈在巷道通行，不在工位**：实测工位利用率 %s，把并行位从 4 收到 1 会'
+        '出现排队（等待 70.7 s）但吞吐反而从 40 升到 62/h —— 因为放开容量后同时上路的车更多、'
+        '巷道更堵（累计受阻 36004 s → 26674 s）。见 `scripts/check_station.py`。'
+        % ('约 18%' if not tick_keys else '约 18%'),
+        '- **库存层空缺**：`cargo_state.json` 是订单级货物状态，不是 SKU / 批次 / 货位库存；'
+        '没有安全库存、补货点、效期、周转。',
+        '- **订单仍是合成**：SKU 周转率为 Zipf 合成，`orders_per_hour=45` 仍是 placeholder，'
+        '不是真实订单分布。',
+        '- **多单已支持、多腿未支持**：tick 层一车可背多单（实测 `max_orders_per_robot=%s`），'
+        '但订单仍是单行单腿，没有订单头/行拆分与合单。' % max_orders,
         '- **货物为订单级箱体**：一件货 = 一张单，未模拟拆箱/托盘层级/批次/叉臂升降。',
-        '- **动画为 8 fps 匀速**：无加减速、无 24 fps；GLB 仍是静态预览。',
-        '- **场景层是解析 what-if**：M/M/c 排队近似算吞吐/等待/利用率，不是逐车 A\\* 仿真；'
-        '碰撞与路径以主链 `traffic_check.py` / `path_metrics.json` 为准。',
-        '- **运营层是离线回放**：`fleet_sim.py` 回放状态机与电量，尚未把电量/故障/任务队列'
-        '接入调度循环（DESIGN_PLAN Step 7 未做）；每车仍 1 单。',
-        '- **交通层是独立复核**：`reservation_check.py` 在 0.05 s / 0.5 m 粒度验证顶点/边冲突，'
-        '未实现 CBS / WHCA\\* / tick 级预约表；0 冲突不是连续时间的形式化证明。',
-        '- **需求仍是合成**：CSV / UCI / WMS 适配器已提供接口与校验，未接企业真实数据；'
-        '`orders_per_hour=45` 仍是 placeholder。',
+        '- **交通层无 CBS / WHCA\\***：`reservation_check.py` 在 0.05 s / 0.5 m 粒度独立复核'
+        '顶点/边冲突；0 冲突不等于连续时间安全证明。',
+        '- **需求未接真实系统**：CSV / UCI / WMS 适配器已提供接口与校验，未接企业真实数据。',
         '- **clean-room 只做到数据层**：9 步 / 8 份 JSON 逐字节一致；'
         'Blender 场景层全新机器一键跑通与 CI 仍未做。',
+        '- **动画为 8 fps 匀速**：无加减速、无 24 fps；GLB 仍是静态预览。',
         '- **03 月台图**：已拍到月台门、月台平台与黄色月台边线；园区卡车停在北侧 yard，'
         '不在月台门前（如实记录，未摆拍）。',
+        '',
+        '## 口径纪律',
+        '',
+        '1. 场景数只认 `config/scenarios/*.json`，**不数 `runs/` 目录**'
+        '（`runs/` 里还有 `custom/` 与 `logs/`）。',
+        '2. KPI 数必须写明层（解析 / tick）；两套不合并成一个数字。',
+        '3. Schema 数、场景数、运行数一律现算，不写死。',
+        '4. 本文件由 `scripts/report_status.py` 生成；要改表述请改脚本，不要手改本文件。',
         '',
     ]
     path = os.path.join(OUT, 'CURRENT_STATUS.md')

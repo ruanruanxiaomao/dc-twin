@@ -10,7 +10,8 @@ import os
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 DATA = os.path.join(ROOT, 'data')
-CFG = json.load(open(os.path.join(DATA, 'config.json'), encoding='utf-8'))
+import scene_config
+CFG = scene_config.load()
 AGV = CFG['agv']
 
 AMR_LENGTH = AGV['length_m']

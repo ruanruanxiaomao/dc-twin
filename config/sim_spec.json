@@ -3,7 +3,7 @@
   "engine": "tick",
   "tick_s": 0.1,
   "horizon_s": 3600,
-  "seed": 42,
+  "seed": 20261106,
   "traffic": {
     "level": "L1_reservation",
     "replan_window_s": 10,
@@ -32,6 +32,7 @@
   "meta": {
     "source": "COMPLETION_PLAN.md §3.4 (WareTwin tick constants, re-calibrated)",
     "horizon_note": "3600 s at 1.5 m/s real time; idle periods are skipped by event-driven tick jumps (no time compression)",
-    "degradation": "none; D4 (1800 s) not activated"
+    "degradation": "none; D4 (1800 s) not activated",
+    "seed_note": "Single seed source: site.seed in layout_spec (20261106). Scenario files override via their own seed field; this value is only the fallback for scenarios that do not declare one."
   }
 }

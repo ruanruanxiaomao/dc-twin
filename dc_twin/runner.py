@@ -25,6 +25,7 @@ DATA_CHAIN = [
     ("scripts/gen_data.py", (), "python"),
     ("scripts/layout_audit.py", (), "python"),
     ("scripts/nav_grid.py", (), "python"),
+    ("scripts/spec_areas.py", ("--quiet",), "python"),   # 功能区 L23–L26（需 nav_grid 判 AP）
     ("scripts/optimize_slotting.py", (), "python"),
     ("scripts/gen_tasks.py", (), "python"),
     ("scripts/plan_paths.py", (), "python"),
@@ -64,7 +65,13 @@ ACCEPT_CHAIN = [
     ("tests/run_all_negative.py", (), "python"),
     ("scripts/validate.py", (), "python"),
     ("scripts/validate_data.py", (), "python"),
-    ("scripts/report_status.py", (), "python"),
+    ("scripts/check_process.py", (), "python"),      # 过程配置 L14–L22
+    ("scripts/spec_areas.py", ("--quiet",), "python"),  # 功能区 L23–L26（验收阶段再核一次）
+    ("scripts/check_studio.py", ("--quiet",), "python"),  # 驾驶舱 ↔ 生成器 ↔ 变体 spec 三方一致
+    ("scripts/check_station.py", ("--quiet",), "python"),  # 工位排队可证伪（并行位 4→1）
+    ("scripts/check_deadlock.py", ("--quiet",), "python"),  # 死锁退让可证伪（关闭退让必须更差）
+    ("scripts/report_status.py", (), "python"),      # 先重生成状态，再做口径比对
+    ("scripts/check_doc_drift.py", (), "python"),    # 文档口径守卫
     ("scripts/export_demo.py", (), "python"),
     ("scripts/manifest.py", (), "python"),   # last: hashes must cover every report above
 ]
@@ -115,21 +122,38 @@ def set_seed(seed: int) -> None:
     print(">> seed set to %s in config.json and config/layout_spec.json" % seed, flush=True)
 
 
-def build_steps(scope: str, scenario: str | None):
-    steps = list(SCOPES[scope])
+def build_steps(scope: str, scenario: str | None, spec: str | None = None):
+    steps = [list(s) for s in SCOPES[scope]]
+    if spec:
+        # 变体布局（如 build_variant.py 生成的扩仓版）：只换 spec 路径，
+        # 其余步骤仍读派生出的 data/layout.json，链路不变。
+        for i, (script, args, kind) in enumerate(steps):
+            if script == 'scripts/spec_layout.py':
+                a = list(args)
+                if '--spec' in a:
+                    a[a.index('--spec') + 1] = spec
+                steps[i] = [script, tuple(a), kind]
     if scope in ("scenarios", "full") and scenario and scenario != "config/scenarios/baseline.json":
         steps.insert(len(DATA_CHAIN) + 1,
-                     ("scripts/scenario_run.py", ("--scenario", scenario), "python"))
-    return steps
+                     ["scripts/scenario_run.py", ("--scenario", scenario), "python"])
+    return [tuple(s) for s in steps]
 
 
 def run(scope: str = "data", scenario: str | None = None, dry_run: bool = False,
         quiet: bool = False, seed: int | None = None, out: str | None = None,
-        preview: bool = False) -> int:
+        preview: bool = False, spec: str | None = None) -> int:
     paths.ensure_dirs()
     if seed is not None and not dry_run:
         set_seed(seed)
-    steps = build_steps(scope, scenario)
+    if spec:
+        # 变体布局：gen_data 等步骤通过环境变量读取，避免改动每个脚本的默认值
+        os.environ["DC_LAYOUT_SPEC"] = str(Path(spec).resolve())
+        print(">> layout spec = %s（变体）" % spec, flush=True)
+        scene = paths.DATA / "scene_variant.json"
+        if scene.exists():
+            os.environ["DC_SCENE_CONFIG"] = str(scene)
+            print(">> scene config = data/scene_variant.json（扩仓后园区已挪位）", flush=True)
+    steps = build_steps(scope, scenario, spec)
     if preview and scope == "full":
         os.environ["DC_RENDER_PREVIEW"] = "1"
     blender = paths.blender_exe()
@@ -189,8 +213,10 @@ def main(argv=None) -> int:
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--quiet", action="store_true")
     ap.add_argument("--preview", action="store_true", help="low-resolution render preview")
+    ap.add_argument("--spec", default=None,
+                    help="变体布局 spec，如 config/layout_spec_areas.json（用户自选功能区后生成）")
     a = ap.parse_args(argv)
-    return run(a.scope, a.scenario, a.dry_run, a.quiet, a.seed, a.out, a.preview)
+    return run(a.scope, a.scenario, a.dry_run, a.quiet, a.seed, a.out, a.preview, a.spec)
 
 
 if __name__ == "__main__":

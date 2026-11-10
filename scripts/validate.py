@@ -235,14 +235,19 @@ def main():
     ntc_txt = open(notice, encoding='utf-8').read() if exists(notice) else ''
     asset = os.path.join(ROOT, 'assets', 'cargotwin_assets.glb')
     sha = hashlib.sha256(open(asset, 'rb').read()).hexdigest() if exists(asset) else ''
+    # 项目自身 v3.8 起改用 Apache-2.0（用户指定），第三方资产仍为 MIT：
+    # 所以 A12 要同时核验"自己的许可证"和"别人的许可证还留着"。
+    own_lic = (lic_txt.count('Apache License') >= 1
+               and 'Version 2.0' in lic_txt)
+    tpl_lic = ntc_txt.count('MIT License') >= 2
     ok12 = (exists(lic) and exists(notice)
-            and lic_txt.count('MIT License') >= 1
-            and ntc_txt.count('MIT License') >= 2
+            and own_lic and tpl_lic
             and 'Zihan Wang' in ntc_txt and 'Wayne Chou' in ntc_txt
             and sha[:16] in ntc_txt and len(sha) == 64)
-    check('A12 LICENSE / NOTICE 含 MIT 全文与资产哈希', ok12,
-          'LICENSE=%s NOTICE=%s MIT段落=%s 资产sha=%s'
-          % (exists(lic), exists(notice), ntc_txt.count('MIT License'), sha[:16]))
+    check('A12 自身 Apache-2.0 + 第三方 MIT 全文与资产哈希', ok12,
+          'LICENSE=%s NOTICE=%s 自身Apache=%s 第三方MIT段落=%s 资产sha=%s'
+          % (exists(lic), exists(notice), own_lic, ntc_txt.count('MIT License'),
+             sha[:16]))
 
     # A13 行为测试（OPEN_SOURCE_PLAN §4.2）：不再读取本文件源码里的字符串自证，
     # 而是核验 7 个破坏性用例真的让校验器/生成器返回非 0 退出码。
@@ -446,8 +451,14 @@ def main():
                                          sort_keys=True).encode('utf-8')).hexdigest()
 
     CFG = os.path.join(ROOT, 'config')
-    spec = jload(os.path.join(CFG, 'layout_spec.json'))
     spec_rep = jload(os.path.join(OUT, 'spec_layout_report.json'))
+    # 布局来源以「本次运行实际用的 spec」为准：报告里记了路径，变体（用户自选功能区的
+    # 扩仓版）也能被同一套 A1–A40 验。写死 layout_spec.json 会让 A23 在变体上误报。
+    spec_rel = (spec_rep.get('spec') or 'config/layout_spec.json').replace('\\', '/')
+    spec_path = spec_rel if os.path.isabs(spec_rel) else os.path.join(ROOT, spec_rel)
+    if not os.path.exists(spec_path):
+        spec_path = os.path.join(CFG, 'layout_spec.json')
+    spec = jload(spec_path)
 
     # A22 spec / 四层配置 schema 合法
     cfg_files = ['layout_spec.json', 'fleet_spec.json', 'demand_spec.json',
@@ -485,7 +496,10 @@ def main():
 
     # A24 多布局审计（当前 / F4 / 加宽）
     variants = {}
-    for name in ('layout_spec', 'layout_spec_f4', 'layout_spec_wide'):
+    vnames = ['layout_spec', 'layout_spec_f4', 'layout_spec_wide']
+    if os.path.exists(os.path.join(CFG, 'layout_spec_areas.json')):
+        vnames.append('layout_spec_areas')     # 用户自选功能区的扩仓变体
+    for name in vnames:
         s = jload(os.path.join(CFG, name + '.json'))
         lay = spec_layout.expand(s)
         iss, wrn, mtx, radius = spec_layout.validate(lay, s)
@@ -500,7 +514,7 @@ def main():
     with open(os.path.join(OUT, 'spec_layout_variants.json'), 'w',
               encoding='utf-8') as f:
         json.dump(variants, f, ensure_ascii=False, indent=2)
-    check('A24 多布局审计：当前/F4/加宽 3 spec 全 PASS 且方案A降低互斥', ok24,
+    check('A24 多布局审计：%d 个 spec 全 PASS 且加宽方案降低互斥' % len(vnames), ok24,
           'baseline=%s；F4=%s；wide=%s' %
           (variants['layout_spec'], variants['layout_spec_f4'],
            variants['layout_spec_wide']))

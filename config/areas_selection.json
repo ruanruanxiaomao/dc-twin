@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0",
+  "preset": "ecommerce",
+  "warehouse": "W",
+  "expand": {
+    "mode": "north",
+    "target_depth_m": 88.0,
+    "north_aisle_m": 2.0
+  },
+  "placement": {
+    "x_margin_m": 4.0,
+    "gap_m": 2.0,
+    "band_start_offset_m": 2.0
+  },
+  "enabled": [
+    "RCV-01",
+    "QA-01",
+    "STGIN-01",
+    "FWD-01",
+    "REP-01",
+    "SORT-EXT",
+    "PACK-03",
+    "PACK-04",
+    "VAS-01",
+    "STGOUT-01",
+    "RET-01",
+    "EMP-01",
+    "BATT-01"
+  ]
+}

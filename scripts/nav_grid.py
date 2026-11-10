@@ -14,6 +14,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
+import scene_config
 from geometry import AGV_RADIUS, obstacle_rects, inflate
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -75,7 +76,7 @@ def load_grid():
 
 def main():
     layout = json.load(open(os.path.join(DATA, 'layout.json'), encoding='utf-8'))
-    cfg = json.load(open(os.path.join(DATA, 'config.json'), encoding='utf-8'))
+    cfg = scene_config.load()
     g = build(layout, cfg)
     rows = [''.join('1' if g.cells[r * g.cols + c] == 0 else '0'
                     for c in range(g.cols)) for r in range(g.rows)]

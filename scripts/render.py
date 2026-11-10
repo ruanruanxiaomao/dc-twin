@@ -20,6 +20,8 @@ BLEND = os.path.join(OUT, 'distribution_center.blend')
 CFG = json.load(open(os.path.join(ROOT, 'data', 'config.json'), encoding='utf-8'))
 # `dc run --preview` / CI smoke: 1 low-resolution still, no 942-frame sequence.
 PREVIEW = os.environ.get('DC_RENDER_PREVIEW') == '1'
+# 只重出 6 张静帧、跳过 942 帧动画：改了场景几何（如功能区）但动画没变时用
+STILLS_ONLY = os.environ.get('DC_RENDER_STILLS') == '1'
 
 CAMS = [
     ('CAM_overview', '01_overview.png'),
@@ -97,9 +99,11 @@ def main():
         print('RENDER_OK', fname, shots[-1]['bytes'], 'frame', frame)
 
     frame_start, frame_end = scene.frame_start, scene.frame_end
-    if PREVIEW:
-        n = 0
-        print('RENDER_PREVIEW_OK skipped frame sequence')
+    if PREVIEW or STILLS_ONLY:
+        # 已有帧序列不删，直接沿用（动画几何没变的前提下是等价的）
+        n = len(glob.glob(os.path.join(OUT, 'frames', 'f_*.png')))
+        print('RENDER_PREVIEW_OK skipped frame sequence' if PREVIEW
+              else 'RENDER_STILLS_OK kept %d existing frames' % n)
     else:
         scene.render.resolution_x = CFG['render']['anim_width']
         scene.render.resolution_y = CFG['render']['anim_height']

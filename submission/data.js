@@ -1,5 +1,5 @@
 window.DC_SUBMISSION = {
-  "generated_at": "2026-11-09T11:44:01+00:00",
+  "generated_at": "2026-11-10T15:20:03+00:00",
   "project": {
     "name": "配送中心数字孪生 · DC Twin Studio",
     "tagline": "从一张布局图纸，到可仿真、可算账、可定制的运营孪生",
@@ -26034,19 +26034,19 @@ window.DC_SUBMISSION = {
       "name": "基线：单班 8 小时 / 45 单每小时 / 21 台 AGV",
       "metrics": {
         "orders_generated": 40,
-        "orders_completed": 25,
+        "orders_completed": 29,
         "orders_lost": 0,
-        "throughput_orders_per_h": 25.0,
-        "charge_events": 1,
+        "throughput_orders_per_h": 29.0,
+        "charge_events": 3,
         "task_reassignments": 0,
-        "replans": 0,
+        "replans": 198,
         "fault_downtime_s": 0,
-        "idle_rate": 0.6175,
-        "max_queue_depth": 3,
+        "idle_rate": 0.8106,
+        "max_queue_depth": 7,
         "agents": 21,
         "strict_collisions": 0,
-        "min_pair_distance_m": 1.4617,
-        "multi_order_robots": 5,
+        "min_pair_distance_m": 1.4722,
+        "multi_order_robots": 4,
         "availability": 1.0
       }
     },
@@ -26055,19 +26055,19 @@ window.DC_SUBMISSION = {
       "name": "月台封锁：1 个出库月台封 1800 s",
       "metrics": {
         "orders_generated": 46,
-        "orders_completed": 24,
+        "orders_completed": 34,
         "orders_lost": 0,
-        "throughput_orders_per_h": 24.0,
-        "charge_events": 2,
+        "throughput_orders_per_h": 34.0,
+        "charge_events": 3,
         "task_reassignments": 0,
-        "replans": 1,
+        "replans": 295,
         "fault_downtime_s": 0,
-        "idle_rate": 0.6551,
-        "max_queue_depth": 11,
+        "idle_rate": 0.7867,
+        "max_queue_depth": 4,
         "agents": 21,
         "strict_collisions": 0,
-        "min_pair_distance_m": 1.4779,
-        "multi_order_robots": 4,
+        "min_pair_distance_m": 1.4722,
+        "multi_order_robots": 5,
         "availability": 1.0
       }
     },
@@ -26076,19 +26076,19 @@ window.DC_SUBMISSION = {
       "name": "大促：135 单每小时 / 4 小时 / 35 台 AGV",
       "metrics": {
         "orders_generated": 122,
-        "orders_completed": 52,
-        "orders_lost": 27,
-        "throughput_orders_per_h": 52.0,
-        "charge_events": 4,
-        "task_reassignments": 0,
-        "replans": 0,
+        "orders_completed": 68,
+        "orders_lost": 26,
+        "throughput_orders_per_h": 68.0,
+        "charge_events": 5,
+        "task_reassignments": 1,
+        "replans": 663,
         "fault_downtime_s": 0,
-        "idle_rate": 0.5144,
+        "idle_rate": 0.6638,
         "max_queue_depth": 12,
         "agents": 35,
         "strict_collisions": 0,
-        "min_pair_distance_m": 1.4661,
-        "multi_order_robots": 8,
+        "min_pair_distance_m": 1.4601,
+        "multi_order_robots": 11,
         "availability": 1.0
       }
     },
@@ -26097,19 +26097,19 @@ window.DC_SUBMISSION = {
       "name": "布局变体：新增前置仓 F4 / 24 台 AGV",
       "metrics": {
         "orders_generated": 40,
-        "orders_completed": 31,
+        "orders_completed": 27,
         "orders_lost": 0,
-        "throughput_orders_per_h": 31.0,
-        "charge_events": 3,
+        "throughput_orders_per_h": 27.0,
+        "charge_events": 4,
         "task_reassignments": 0,
-        "replans": 0,
+        "replans": 198,
         "fault_downtime_s": 0,
-        "idle_rate": 0.8431,
-        "max_queue_depth": 3,
+        "idle_rate": 0.8147,
+        "max_queue_depth": 7,
         "agents": 24,
         "strict_collisions": 0,
-        "min_pair_distance_m": 1.5071,
-        "multi_order_robots": 4,
+        "min_pair_distance_m": 1.4722,
+        "multi_order_robots": 3,
         "availability": 1.0
       }
     },
@@ -26118,18 +26118,18 @@ window.DC_SUBMISSION = {
       "name": "夜班：10 单每小时 / 8 小时 / 12 台 AGV",
       "metrics": {
         "orders_generated": 9,
-        "orders_completed": 1,
+        "orders_completed": 3,
         "orders_lost": 0,
-        "throughput_orders_per_h": 1.0,
+        "throughput_orders_per_h": 3.0,
         "charge_events": 2,
         "task_reassignments": 0,
         "replans": 0,
         "fault_downtime_s": 0,
-        "idle_rate": 0.8336,
+        "idle_rate": 0.9851,
         "max_queue_depth": 6,
         "agents": 12,
         "strict_collisions": 0,
-        "min_pair_distance_m": 1.6063,
+        "min_pair_distance_m": 2.4833,
         "multi_order_robots": 0,
         "availability": 1.0
       }
@@ -26139,19 +26139,19 @@ window.DC_SUBMISSION = {
       "name": "高峰：90 单每小时 / 4 小时 / 28 台 AGV",
       "metrics": {
         "orders_generated": 83,
-        "orders_completed": 58,
+        "orders_completed": 59,
         "orders_lost": 0,
-        "throughput_orders_per_h": 58.0,
-        "charge_events": 3,
-        "task_reassignments": 0,
-        "replans": 0,
+        "throughput_orders_per_h": 59.0,
+        "charge_events": 5,
+        "task_reassignments": 2,
+        "replans": 151,
         "fault_downtime_s": 0,
-        "idle_rate": 0.6571,
-        "max_queue_depth": 8,
+        "idle_rate": 0.7119,
+        "max_queue_depth": 10,
         "agents": 28,
         "strict_collisions": 0,
-        "min_pair_distance_m": 1.4698,
-        "multi_order_robots": 8,
+        "min_pair_distance_m": 1.4598,
+        "multi_order_robots": 10,
         "availability": 1.0
       }
     },
@@ -26160,19 +26160,19 @@ window.DC_SUBMISSION = {
       "name": "故障：45 单每小时 / 3 台车各停 600 s",
       "metrics": {
         "orders_generated": 40,
-        "orders_completed": 24,
+        "orders_completed": 28,
         "orders_lost": 0,
-        "throughput_orders_per_h": 24.0,
-        "charge_events": 1,
+        "throughput_orders_per_h": 28.0,
+        "charge_events": 3,
         "task_reassignments": 1,
-        "replans": 0,
+        "replans": 178,
         "fault_downtime_s": 1800.0,
-        "idle_rate": 0.6072,
-        "max_queue_depth": 3,
+        "idle_rate": 0.8199,
+        "max_queue_depth": 8,
         "agents": 21,
         "strict_collisions": 0,
-        "min_pair_distance_m": 1.4617,
-        "multi_order_robots": 5,
+        "min_pair_distance_m": 1.4722,
+        "multi_order_robots": 4,
         "availability": 0.97619
       }
     },
@@ -26181,276 +26181,276 @@ window.DC_SUBMISSION = {
       "name": "规模测试：90 单每小时 / 4 小时 / 50 台 AGV",
       "metrics": {
         "orders_generated": 83,
-        "orders_completed": 54,
-        "orders_lost": 0,
-        "throughput_orders_per_h": 54.0,
-        "charge_events": 7,
-        "task_reassignments": 0,
-        "replans": 0,
+        "orders_completed": 35,
+        "orders_lost": 8,
+        "throughput_orders_per_h": 35.0,
+        "charge_events": 8,
+        "task_reassignments": 5,
+        "replans": 674,
         "fault_downtime_s": 0,
-        "idle_rate": 0.7492,
-        "max_queue_depth": 4,
+        "idle_rate": 0.6906,
+        "max_queue_depth": 12,
         "agents": 50,
         "strict_collisions": 0,
-        "min_pair_distance_m": 1.4698,
-        "multi_order_robots": 7,
+        "min_pair_distance_m": 1.4594,
+        "multi_order_robots": 3,
         "availability": 1.0
       }
     }
   ],
   "pnl": [
     {
-      "run_id": "baseline/20261109T101840Z",
+      "run_id": "baseline/20261110T150340Z",
       "engine": "sim",
       "prices_source": "demo",
-      "revenue": 119.5,
-      "variable": 6.079828,
+      "revenue": 145.2,
+      "variable": 7.768153,
       "fixed": 750.732496,
-      "profit": -637.312324,
-      "orders": 25,
-      "breakeven": 166,
-      "per_order_profit": -25.492493,
+      "profit": -613.300649,
+      "orders": 29,
+      "breakeven": 159,
+      "per_order_profit": -21.148298,
       "sensitivity": {
         "energy_tariff_pm20": {
-          "low": -636.846358,
-          "base": -637.312324,
-          "high": -637.77829,
+          "low": -612.617018,
+          "base": -613.300649,
+          "high": -613.98428,
           "note": "电价 -20% / +20%"
         },
         "order_volume_pm20": {
-          "low": -660.462324,
-          "base": -637.312324,
-          "high": -614.162324,
+          "low": -641.470649,
+          "base": -613.300649,
+          "high": -585.130649,
           "note": "单量 -20% / +20%，固定成本不变"
         },
         "fleet_pm2": {
-          "low": -615.668488,
-          "base": -637.312324,
-          "high": -658.95616,
+          "low": -591.656813,
+          "base": -613.300649,
+          "high": -634.944485,
           "note": "车数 -2 / +2，只影响折旧与维护"
         }
       }
     },
     {
-      "run_id": "dock_blocked/20261109T101844Z",
+      "run_id": "dock_blocked/20261110T150343Z",
       "engine": "sim",
       "prices_source": "demo",
-      "revenue": 120.2,
-      "variable": 5.291951,
+      "revenue": 168.7,
+      "variable": 7.719745,
       "fixed": 750.732496,
-      "profit": -635.824447,
-      "orders": 24,
-      "breakeven": 157,
-      "per_order_profit": -26.492685,
+      "profit": -589.752241,
+      "orders": 34,
+      "breakeven": 159,
+      "per_order_profit": -17.345654,
       "sensitivity": {
         "energy_tariff_pm20": {
-          "low": -635.486057,
-          "base": -635.824447,
-          "high": -636.162837,
+          "low": -589.228292,
+          "base": -589.752241,
+          "high": -590.27619,
           "note": "电价 -20% / +20%"
         },
         "order_volume_pm20": {
-          "low": -659.144447,
-          "base": -635.824447,
-          "high": -612.504447,
+          "low": -622.472241,
+          "base": -589.752241,
+          "high": -557.032241,
           "note": "单量 -20% / +20%，固定成本不变"
         },
         "fleet_pm2": {
-          "low": -614.180611,
-          "base": -635.824447,
-          "high": -657.468283,
+          "low": -568.108405,
+          "base": -589.752241,
+          "high": -611.396077,
           "note": "车数 -2 / +2，只影响折旧与维护"
         }
       }
     },
     {
-      "run_id": "holiday/20261109T101847Z",
+      "run_id": "holiday/20261110T150345Z",
       "engine": "sim",
       "prices_source": "demo",
-      "revenue": 293.1,
-      "variable": 147.257113,
+      "revenue": 386.9,
+      "variable": 147.308571,
       "fixed": 902.239345,
-      "profit": -756.396458,
-      "orders": 52,
-      "breakeven": 322,
-      "per_order_profit": -14.546086,
+      "profit": -662.647916,
+      "orders": 68,
+      "breakeven": 257,
+      "per_order_profit": -9.744822,
       "sensitivity": {
         "energy_tariff_pm20": {
-          "low": -755.505035,
-          "base": -756.396458,
-          "high": -757.287881,
+          "low": -661.226202,
+          "base": -662.647916,
+          "high": -664.06963,
           "note": "电价 -20% / +20%"
         },
         "order_volume_pm20": {
-          "low": -786.456458,
-          "base": -756.396458,
-          "high": -726.336458,
+          "low": -711.987916,
+          "base": -662.647916,
+          "high": -613.307916,
           "note": "单量 -20% / +20%，固定成本不变"
         },
         "fleet_pm2": {
-          "low": -734.752622,
-          "base": -756.396458,
-          "high": -778.040294,
+          "low": -641.00408,
+          "base": -662.647916,
+          "high": -684.291752,
           "note": "车数 -2 / +2，只影响折旧与维护"
         }
       }
     },
     {
-      "run_id": "layout_variant_f4/20261109T101855Z",
+      "run_id": "layout_variant_f4/20261110T150354Z",
       "engine": "sim",
       "prices_source": "demo",
-      "revenue": 163.3,
-      "variable": 7.540671,
+      "revenue": 137.1,
+      "variable": 7.758243,
       "fixed": 783.198249,
-      "profit": -627.43892,
-      "orders": 31,
-      "breakeven": 156,
-      "per_order_profit": -20.239965,
+      "profit": -653.856492,
+      "orders": 27,
+      "breakeven": 164,
+      "per_order_profit": -24.216907,
       "sensitivity": {
         "energy_tariff_pm20": {
-          "low": -626.860786,
-          "base": -627.43892,
-          "high": -628.017054,
+          "low": -653.114843,
+          "base": -653.856492,
+          "high": -654.598141,
           "note": "电价 -20% / +20%"
         },
         "order_volume_pm20": {
-          "low": -659.16892,
-          "base": -627.43892,
-          "high": -595.70892,
+          "low": -680.466492,
+          "base": -653.856492,
+          "high": -627.246492,
           "note": "单量 -20% / +20%，固定成本不变"
         },
         "fleet_pm2": {
-          "low": -605.795084,
-          "base": -627.43892,
-          "high": -649.082756,
+          "low": -632.212656,
+          "base": -653.856492,
+          "high": -675.500328,
           "note": "车数 -2 / +2，只影响折旧与维护"
         }
       }
     },
     {
-      "run_id": "night/20261109T101857Z",
+      "run_id": "night/20261110T150357Z",
       "engine": "sim",
       "prices_source": "demo",
-      "revenue": 6.8,
-      "variable": 0.71077,
+      "revenue": 20.4,
+      "variable": 1.20658,
       "fixed": 653.335236,
-      "profit": -647.246006,
-      "orders": 1,
-      "breakeven": 108,
-      "per_order_profit": -647.246006,
+      "profit": -634.141816,
+      "orders": 3,
+      "breakeven": 103,
+      "per_order_profit": -211.380605,
       "sensitivity": {
         "energy_tariff_pm20": {
-          "low": -647.133852,
-          "base": -647.246006,
-          "high": -647.35816,
+          "low": -633.9905,
+          "base": -634.141816,
+          "high": -634.293132,
           "note": "电价 -20% / +20%"
         },
         "order_volume_pm20": {
-          "low": -648.576006,
-          "base": -647.246006,
-          "high": -645.916006,
+          "low": -638.131816,
+          "base": -634.141816,
+          "high": -630.151816,
           "note": "单量 -20% / +20%，固定成本不变"
         },
         "fleet_pm2": {
-          "low": -625.60217,
-          "base": -647.246006,
-          "high": -668.889842,
+          "low": -612.49798,
+          "base": -634.141816,
+          "high": -655.785652,
           "note": "车数 -2 / +2，只影响折旧与维护"
         }
       }
     },
     {
-      "run_id": "peak/20261109T101858Z",
+      "run_id": "peak/20261110T150358Z",
       "engine": "sim",
       "prices_source": "demo",
-      "revenue": 296.4,
-      "variable": 12.972539,
+      "revenue": 297.7,
+      "variable": 15.376471,
       "fixed": 826.485921,
-      "profit": -543.05846,
-      "orders": 58,
-      "breakeven": 170,
-      "per_order_profit": -9.363077,
+      "profit": -544.162392,
+      "orders": 59,
+      "breakeven": 173,
+      "per_order_profit": -9.223091,
       "sensitivity": {
         "energy_tariff_pm20": {
-          "low": -542.203952,
-          "base": -543.05846,
-          "high": -543.912968,
+          "low": -542.857098,
+          "base": -544.162392,
+          "high": -545.467686,
           "note": "电价 -20% / +20%"
         },
         "order_volume_pm20": {
-          "low": -600.59846,
-          "base": -543.05846,
-          "high": -485.51846,
+          "low": -601.932392,
+          "base": -544.162392,
+          "high": -486.392392,
           "note": "单量 -20% / +20%，固定成本不变"
         },
         "fleet_pm2": {
-          "low": -521.414624,
-          "base": -543.05846,
-          "high": -564.702296,
+          "low": -522.518556,
+          "base": -544.162392,
+          "high": -565.806228,
           "note": "车数 -2 / +2，只影响折旧与维护"
         }
       }
     },
     {
-      "run_id": "robot_failure/20261109T101904Z",
+      "run_id": "robot_failure/20261110T150408Z",
       "engine": "sim",
       "prices_source": "demo",
-      "revenue": 114.7,
-      "variable": 5.815451,
+      "revenue": 141.4,
+      "variable": 7.554288,
       "fixed": 750.732496,
-      "profit": -641.847947,
-      "orders": 24,
-      "breakeven": 166,
-      "per_order_profit": -26.743664,
+      "profit": -616.886784,
+      "orders": 28,
+      "breakeven": 158,
+      "per_order_profit": -22.031671,
       "sensitivity": {
         "energy_tariff_pm20": {
-          "low": -641.404857,
-          "base": -641.847947,
-          "high": -642.291037,
+          "low": -616.215926,
+          "base": -616.886784,
+          "high": -617.557642,
           "note": "电价 -20% / +20%"
         },
         "order_volume_pm20": {
-          "low": -664.067947,
-          "base": -641.847947,
-          "high": -619.627947,
+          "low": -644.326784,
+          "base": -616.886784,
+          "high": -589.446784,
           "note": "单量 -20% / +20%，固定成本不变"
         },
         "fleet_pm2": {
-          "low": -620.204111,
-          "base": -641.847947,
-          "high": -663.491783,
+          "low": -595.242948,
+          "base": -616.886784,
+          "high": -638.53062,
           "note": "车数 -2 / +2，只影响折旧与维护"
         }
       }
     },
     {
-      "run_id": "scale_50/20261109T101908Z",
+      "run_id": "scale_50/20261110T150411Z",
       "engine": "sim",
       "prices_source": "demo",
-      "revenue": 272.7,
-      "variable": 12.631708,
+      "revenue": 183.5,
+      "variable": 54.005508,
       "fixed": 1064.568112,
-      "profit": -804.49982,
-      "orders": 54,
-      "breakeven": 222,
-      "per_order_profit": -14.898145,
+      "profit": -935.07362,
+      "orders": 35,
+      "breakeven": 288,
+      "per_order_profit": -26.716389,
       "sensitivity": {
         "energy_tariff_pm20": {
-          "low": -803.593478,
-          "base": -804.49982,
-          "high": -805.406162,
+          "low": -933.322518,
+          "base": -935.07362,
+          "high": -936.824722,
           "note": "电价 -20% / +20%"
         },
         "order_volume_pm20": {
-          "low": -857.41982,
-          "base": -804.49982,
-          "high": -751.57982,
+          "low": -962.72362,
+          "base": -935.07362,
+          "high": -907.42362,
           "note": "单量 -20% / +20%，固定成本不变"
         },
         "fleet_pm2": {
-          "low": -782.855984,
-          "base": -804.49982,
-          "high": -826.143656,
+          "low": -913.429784,
+          "base": -935.07362,
+          "high": -956.717456,
           "note": "车数 -2 / +2，只影响折旧与维护"
         }
       }
@@ -26489,9 +26489,9 @@ window.DC_SUBMISSION = {
     }
   ],
   "compare": {
-    "baseline": -637.312324,
-    "peak": -543.05846,
-    "delta": 94.25
+    "baseline": -613.300649,
+    "peak": -544.162392,
+    "delta": 69.14
   },
   "validation": {
     "A": {
@@ -26602,8 +26602,8 @@ window.DC_SUBMISSION = {
       {
         "group": "四层配置 / Schema",
         "path": "config/layout_spec.json",
-        "bytes": 18021,
-        "size": "17.6 KB",
+        "bytes": 33322,
+        "size": "32.5 KB",
         "note": "布局真相源：4 仓、196 货架、441 库位、38 扇门"
       },
       {
@@ -26623,8 +26623,8 @@ window.DC_SUBMISSION = {
       {
         "group": "四层配置 / Schema",
         "path": "config/sim_spec.json",
-        "bytes": 1138,
-        "size": "1.1 KB",
+        "bytes": 1380,
+        "size": "1.3 KB",
         "note": "tick / 电量 / 交通 / 故障 / 调度参数"
       },
       {
@@ -26714,15 +26714,15 @@ window.DC_SUBMISSION = {
       {
         "group": "核心脚本",
         "path": "scripts/plan_paths.py",
-        "bytes": 17371,
-        "size": "17.0 KB",
+        "bytes": 17768,
+        "size": "17.4 KB",
         "note": "闭环任务 + 8 向 A* + 几何避障"
       },
       {
         "group": "核心脚本",
         "path": "scripts/sim_engine.py",
-        "bytes": 45227,
-        "size": "44.2 KB",
+        "bytes": 65647,
+        "size": "64.1 KB",
         "note": "tick 级离散事件仿真引擎"
       },
       {
@@ -26742,8 +26742,8 @@ window.DC_SUBMISSION = {
       {
         "group": "核心脚本",
         "path": "scripts/validate.py",
-        "bytes": 37370,
-        "size": "36.5 KB",
+        "bytes": 39098,
+        "size": "38.2 KB",
         "note": "A1–A40 独立验收"
       },
       {
@@ -26763,8 +26763,8 @@ window.DC_SUBMISSION = {
       {
         "group": "核心脚本",
         "path": "scripts/build_dc.py",
-        "bytes": 25043,
-        "size": "24.5 KB",
+        "bytes": 31313,
+        "size": "30.6 KB",
         "note": "Blender 程序化建模"
       },
       {
@@ -26812,15 +26812,15 @@ window.DC_SUBMISSION = {
       {
         "group": "3D / 动画交付",
         "path": "out/distribution_center.blend",
-        "bytes": 659874,
-        "size": "644.4 KB",
+        "bytes": 640463,
+        "size": "625.5 KB",
         "note": "Blender 5.2 工程（914 对象）"
       },
       {
         "group": "3D / 动画交付",
         "path": "out/dc_preview.glb",
-        "bytes": 583176,
-        "size": "569.5 KB",
+        "bytes": 612696,
+        "size": "598.3 KB",
         "note": "glTF 2.0 静态预览"
       },
       {
@@ -26833,8 +26833,8 @@ window.DC_SUBMISSION = {
       {
         "group": "3D / 动画交付",
         "path": "out/renders/01_overview.png",
-        "bytes": 2248867,
-        "size": "2.14 MB",
+        "bytes": 2255554,
+        "size": "2.15 MB",
         "note": "1920×1080 总览渲染"
       },
       {
@@ -26847,43 +26847,43 @@ window.DC_SUBMISSION = {
       {
         "group": "报告 / 验收",
         "path": "out/manifest.json",
-        "bytes": 11200,
-        "size": "10.9 KB",
+        "bytes": 12051,
+        "size": "11.8 KB",
         "note": "58 个产物 + sidecar 哈希清单"
       },
       {
         "group": "报告 / 验收",
         "path": "out/sim_validation.json",
-        "bytes": 8587,
+        "bytes": 8600,
         "size": "8.4 KB",
         "note": "S1–S9 检查与负测试"
       },
       {
         "group": "报告 / 验收",
         "path": "out/pnl_validation.json",
-        "bytes": 13556,
+        "bytes": 13561,
         "size": "13.2 KB",
         "note": "F1–F7 检查与负测试"
       },
       {
         "group": "报告 / 验收",
         "path": "out/validate_report.json",
-        "bytes": 7259,
+        "bytes": 7289,
         "size": "7.1 KB",
         "note": "A1–A40 逐条结果"
       },
       {
         "group": "报告 / 验收",
         "path": "out/blend_audit.json",
-        "bytes": 1661,
+        "bytes": 1663,
         "size": "1.6 KB",
         "note": "Blender 场景审计"
       },
       {
         "group": "报告 / 验收",
         "path": "out/glb_report.json",
-        "bytes": 345,
-        "size": "345 B",
+        "bytes": 346,
+        "size": "346 B",
         "note": "glTF 结构审计"
       },
       {
@@ -26903,15 +26903,15 @@ window.DC_SUBMISSION = {
       {
         "group": "开源交付 / 文档",
         "path": "README.md",
-        "bytes": 8335,
-        "size": "8.1 KB",
+        "bytes": 10647,
+        "size": "10.4 KB",
         "note": "Hero README 与能力边界"
       },
       {
         "group": "开源交付 / 文档",
         "path": "README.zh-CN.md",
-        "bytes": 17776,
-        "size": "17.4 KB",
+        "bytes": 19122,
+        "size": "18.7 KB",
         "note": "中文说明"
       },
       {
@@ -26924,8 +26924,8 @@ window.DC_SUBMISSION = {
       {
         "group": "开源交付 / 文档",
         "path": "docs/COMPLETION_STATUS.md",
-        "bytes": 10392,
-        "size": "10.1 KB",
+        "bytes": 12374,
+        "size": "12.1 KB",
         "note": "A/B/C/G 阶段实施状态"
       },
       {
@@ -26959,29 +26959,29 @@ window.DC_SUBMISSION = {
       {
         "group": "开源交付 / 文档",
         "path": "CHANGELOG.md",
-        "bytes": 8561,
-        "size": "8.4 KB",
+        "bytes": 10910,
+        "size": "10.7 KB",
         "note": "版本记录"
       },
       {
         "group": "开源交付 / 文档",
         "path": "LICENSE",
-        "bytes": 1072,
-        "size": "1.0 KB",
+        "bytes": 11546,
+        "size": "11.3 KB",
         "note": "MIT"
       },
       {
         "group": "开源交付 / 文档",
         "path": "pyproject.toml",
-        "bytes": 1658,
-        "size": "1.6 KB",
+        "bytes": 1731,
+        "size": "1.7 KB",
         "note": "包元数据 / pytest / ruff"
       },
       {
         "group": "开源交付 / 文档",
         "path": ".github/workflows/ci.yml",
-        "bytes": 3142,
-        "size": "3.1 KB",
+        "bytes": 4200,
+        "size": "4.1 KB",
         "note": "CI 流水线"
       },
       {
@@ -27102,7 +27102,7 @@ window.DC_SUBMISSION = {
     },
     {
       "key": "orders_completed",
-      "value": 25,
+      "value": 29,
       "unit": "orders",
       "definition": "Delivered orders",
       "formula": "count(TASK_COMPLETED)",
@@ -27118,7 +27118,7 @@ window.DC_SUBMISSION = {
     },
     {
       "key": "throughput_orders_per_h",
-      "value": 25.0,
+      "value": 29.0,
       "unit": "orders/h",
       "definition": "Measured throughput",
       "formula": "orders_completed * 3600 / horizon_s",
@@ -27150,7 +27150,7 @@ window.DC_SUBMISSION = {
     },
     {
       "key": "distance_total_m",
-      "value": 1835.511,
+      "value": 3205.703,
       "unit": "m",
       "definition": "All three legs",
       "formula": "sum(TASK_COMPLETED.legs_m)",
@@ -27158,7 +27158,7 @@ window.DC_SUBMISSION = {
     },
     {
       "key": "energy_kwh_total",
-      "value": 1.468411,
+      "value": 2.564563,
       "unit": "kWh",
       "definition": "Motion energy",
       "formula": "sum(TASK_COMPLETED.energy_kwh)",
@@ -27166,7 +27166,7 @@ window.DC_SUBMISSION = {
     },
     {
       "key": "energy_per_order_kwh",
-      "value": 0.058736,
+      "value": 0.088433,
       "unit": "kWh/order",
       "definition": "Motion energy per order",
       "formula": "energy_kwh_total/completed",
@@ -27174,7 +27174,7 @@ window.DC_SUBMISSION = {
     },
     {
       "key": "charge_events",
-      "value": 1,
+      "value": 3,
       "unit": "events",
       "definition": "Charging sessions started",
       "formula": "count(CHARGE_START)",
@@ -27198,7 +27198,7 @@ window.DC_SUBMISSION = {
     },
     {
       "key": "replans",
-      "value": 0,
+      "value": 198,
       "unit": "events",
       "definition": "Traffic replans",
       "formula": "count(REPLAN)",
@@ -27206,7 +27206,7 @@ window.DC_SUBMISSION = {
     },
     {
       "key": "wait_conflicts",
-      "value": 11,
+      "value": 300,
       "unit": "events",
       "definition": "Reservation waits",
       "formula": "count(WAIT_CONFLICT)",
@@ -27222,7 +27222,7 @@ window.DC_SUBMISSION = {
     },
     {
       "key": "multi_order_robots",
-      "value": 5,
+      "value": 4,
       "unit": "robots",
       "definition": "Robots completing >=3 orders",
       "formula": "count(completed>=3)",
@@ -27230,7 +27230,7 @@ window.DC_SUBMISSION = {
     },
     {
       "key": "max_orders_per_robot",
-      "value": 6,
+      "value": 4,
       "unit": "orders",
       "definition": "Busiest robot",
       "formula": "max(completed)",
@@ -27246,7 +27246,7 @@ window.DC_SUBMISSION = {
     },
     {
       "key": "idle_rate",
-      "value": 0.6175,
+      "value": 0.8106,
       "unit": "ratio",
       "definition": "Sampled vehicle-level idle share",
       "formula": "sum(samples.idle_robots)/sum(samples.fleet)",
@@ -27254,7 +27254,7 @@ window.DC_SUBMISSION = {
     },
     {
       "key": "max_queue_depth",
-      "value": 3,
+      "value": 7,
       "unit": "orders",
       "definition": "Peak waiting queue",
       "formula": "max(samples.queue, max_queue_depth)",
@@ -27286,10 +27286,106 @@ window.DC_SUBMISSION = {
     },
     {
       "key": "min_pair_distance_m",
-      "value": 1.4617,
+      "value": 1.4722,
       "unit": "m",
       "definition": "Minimum sampled centre distance",
       "formula": "min over all robot pairs at 1 s samples",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "stations_defined",
+      "value": 10,
+      "unit": "stations",
+      "definition": "process_spec 工位接入 tick 的数量",
+      "formula": "count(process_spec.stations)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "station_served",
+      "value": 39,
+      "unit": "visits",
+      "definition": "工位服务次数",
+      "formula": "count(STATION_ENTER)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "station_service_mean_s",
+      "value": 75.814,
+      "unit": "s",
+      "definition": "工位实测平均服务时长",
+      "formula": "sum(service_s)/count(STATION_ENTER)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "station_utilization",
+      "value": 0.0821,
+      "unit": "ratio",
+      "definition": "工位占用率（服务时长 / 工位数×时长）",
+      "formula": "sum(service_s)/(stations*horizon_s)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "station_queue_wait_avg_s",
+      "value": 4.7,
+      "unit": "s",
+      "definition": "排队进入服务的平均等待（未排队的单不计入）",
+      "formula": "sum(waited_s)/count(waited_s)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "station_queue_max",
+      "value": 1,
+      "unit": "robots",
+      "definition": "单工位最长队列",
+      "formula": "max(STATION_QUEUED.queue_len)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "deadlock_yields",
+      "value": 271,
+      "unit": "times",
+      "definition": "死锁退让次数（被同一台车挡住超阈值后主动后退）",
+      "formula": "count(DEADLOCK_YIELD)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "deadlock_detours",
+      "value": 198,
+      "unit": "times",
+      "definition": "为绕开停驶车辆而重新规划的路线数",
+      "formula": "count(REPLAN.reason=deadlock_detour)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "blocked_time_total_s",
+      "value": 8357.9,
+      "unit": "s",
+      "definition": "全员累计受阻时长（退让/绕行生效后会显著下降）",
+      "formula": "sum(robot.blocked_total)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "jam_clears",
+      "value": 0,
+      "unit": "times",
+      "definition": "人工清障次数（单向窄巷顶死，退让与绕行都无解）",
+      "formula": "count(JAM_CLEARED)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "max_blocked_s",
+      "value": 30.1,
+      "unit": "s",
+      "definition": "单台车最长连续受阻时长（死锁不退让时会非常大）",
+      "formula": "max(robot.blocked_s)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "energy_guard_charges",
+      "value": 3,
+      "unit": "times",
+      "definition": "因电量不足以跑完行程而就地充电的次数",
+      "formula": "count(CHARGE_START.mode=energy_guard)",
       "source": "sim_engine measured"
     },
     {
@@ -27302,7 +27398,7 @@ window.DC_SUBMISSION = {
     },
     {
       "key": "wall_clock_s",
-      "value": 3.733,
+      "value": 2.86,
       "unit": "s",
       "definition": "Wall clock",
       "formula": "time.time() delta",
@@ -27360,22 +27456,15 @@ window.DC_SUBMISSION = {
       },
       {
         "seq": 6,
-        "t_s": 114.4,
-        "type": "PICK_DONE",
+        "t_s": 112.4,
+        "type": "STATION_ENTER",
         "agent": "W-R06",
-        "order_id": "ORD-00002",
-        "loc": "SHELF-W0227"
+        "station": "@PICK:W",
+        "service_s": 60.2612,
+        "queue": 0
       },
       {
         "seq": 7,
-        "t_s": 114.4,
-        "type": "STATE_CHANGED",
-        "agent": "W-R06",
-        "from": "PICKING",
-        "to": "MOVING_DROP"
-      },
-      {
-        "seq": 8,
         "t_s": 118.877,
         "type": "ORDER_ARRIVED",
         "order_id": "ORD-00003",
@@ -27384,7 +27473,7 @@ window.DC_SUBMISSION = {
         "priority": "P2"
       },
       {
-        "seq": 9,
+        "seq": 8,
         "t_s": 118.9,
         "type": "STATE_CHANGED",
         "agent": "W-R02",
@@ -27392,7 +27481,7 @@ window.DC_SUBMISSION = {
         "to": "MOVING_PICK"
       },
       {
-        "seq": 10,
+        "seq": 9,
         "t_s": 118.9,
         "type": "TASK_ASSIGNED",
         "agent": "W-R02",
@@ -27403,18 +27492,18 @@ window.DC_SUBMISSION = {
         "priority": "P2"
       },
       {
-        "seq": 11,
+        "seq": 10,
         "t_s": 120.0,
         "type": "ENERGY_TICK",
         "window_s": 10.0,
         "idle_kwh": 0.00276111,
-        "motion_kwh": 0.01113137,
+        "motion_kwh": 0.00429137,
         "charge_kwh": 0.0,
-        "cumulative_out_kwh": 0.02707387,
+        "cumulative_out_kwh": 0.02023387,
         "cumulative_in_kwh": 0.0
       },
       {
-        "seq": 12,
+        "seq": 11,
         "t_s": 123.0,
         "type": "STATE_CHANGED",
         "agent": "W-R02",
@@ -27422,66 +27511,97 @@ window.DC_SUBMISSION = {
         "to": "PICKING"
       },
       {
-        "seq": 13,
-        "t_s": 125.0,
-        "type": "PICK_DONE",
+        "seq": 12,
+        "t_s": 123.0,
+        "type": "STATION_ENTER",
         "agent": "W-R02",
-        "order_id": "ORD-00003",
-        "loc": "SHELF-W0022"
+        "station": "@PICK:W",
+        "service_s": 39.0288,
+        "queue": 0
+      },
+      {
+        "seq": 13,
+        "t_s": 130.0,
+        "type": "ENERGY_TICK",
+        "window_s": 10.0,
+        "idle_kwh": 0.00263889,
+        "motion_kwh": 0.00352569,
+        "charge_kwh": 0.0,
+        "cumulative_out_kwh": 0.02639845,
+        "cumulative_in_kwh": 0.0
       },
       {
         "seq": 14,
-        "t_s": 125.0,
-        "type": "STATE_CHANGED",
-        "agent": "W-R02",
-        "from": "PICKING",
-        "to": "MOVING_DROP"
+        "t_s": 140.0,
+        "type": "ENERGY_TICK",
+        "window_s": 10.0,
+        "idle_kwh": 0.00263889,
+        "motion_kwh": 0.0,
+        "charge_kwh": 0.0,
+        "cumulative_out_kwh": 0.02903733,
+        "cumulative_in_kwh": 0.0
       }
     ],
-    "total": 720,
+    "total": 1557,
     "types": [
       {
         "type": "ENERGY_TICK",
-        "count": 350
+        "count": 348
+      },
+      {
+        "type": "WAIT_CONFLICT",
+        "count": 300
+      },
+      {
+        "type": "DEADLOCK_YIELD",
+        "count": 271
+      },
+      {
+        "type": "REPLAN",
+        "count": 198
       },
       {
         "type": "STATE_CHANGED",
-        "count": 190
+        "count": 191
       },
       {
         "type": "ORDER_ARRIVED",
         "count": 40
       },
       {
+        "type": "STATION_ENTER",
+        "count": 39
+      },
+      {
+        "type": "STATION_EXIT",
+        "count": 39
+      },
+      {
         "type": "TASK_ASSIGNED",
-        "count": 37
+        "count": 33
       },
       {
         "type": "PICK_DONE",
-        "count": 35
+        "count": 31
       },
       {
         "type": "DROP_DONE",
-        "count": 28
+        "count": 30
       },
       {
         "type": "TASK_COMPLETED",
-        "count": 25
-      },
-      {
-        "type": "WAIT_CONFLICT",
-        "count": 11
-      },
-      {
-        "type": "BATTERY_CRITICAL",
-        "count": 1
+        "count": 29
       },
       {
         "type": "CHARGE_START",
-        "count": 1
+        "count": 3
       },
       {
         "type": "CHARGE_END",
+        "count": 3
+      },
+      {
+        "type": "STATION_QUEUED",
         "count": 1
       },
       {
@@ -27494,7 +27614,7 @@ window.DC_SUBMISSION = {
     "sample": [
       {
         "source_event_seq": 4,
-        "run_id": "baseline/20261109T101840Z",
+        "run_id": "baseline/20261110T150340Z",
         "t_s": 110.0,
         "account": "Cost:Variable:Energy",
         "amount": 0.011204,
@@ -27505,81 +27625,93 @@ window.DC_SUBMISSION = {
         "kwh": 0.013181390000000001
       },
       {
-        "source_event_seq": 11,
-        "run_id": "baseline/20261109T101840Z",
+        "source_event_seq": 10,
+        "run_id": "baseline/20261110T150340Z",
         "t_s": 120.0,
         "account": "Cost:Variable:Energy",
-        "amount": 0.011809,
+        "amount": 0.005995,
         "direction": "debit",
         "order_id": null,
         "cost_center": null,
         "memo": "ENERGY_TICK",
-        "kwh": 0.01389248
+        "kwh": 0.00705248
+      },
+      {
+        "source_event_seq": 13,
+        "run_id": "baseline/20261110T150340Z",
+        "t_s": 130.0,
+        "account": "Cost:Variable:Energy",
+        "amount": 0.00524,
+        "direction": "debit",
+        "order_id": null,
+        "cost_center": null,
+        "memo": "ENERGY_TICK",
+        "kwh": 0.00616458
+      },
+      {
+        "source_event_seq": 14,
+        "run_id": "baseline/20261110T150340Z",
+        "t_s": 140.0,
+        "account": "Cost:Variable:Energy",
+        "amount": 0.002243,
+        "direction": "debit",
+        "order_id": null,
+        "cost_center": null,
+        "memo": "ENERGY_TICK",
+        "kwh": 0.00263889
       },
       {
         "source_event_seq": 15,
-        "run_id": "baseline/20261109T101840Z",
-        "t_s": 130.0,
+        "run_id": "baseline/20261110T150340Z",
+        "t_s": 150.0,
         "account": "Cost:Variable:Energy",
-        "amount": 0.020642,
+        "amount": 0.002243,
         "direction": "debit",
         "order_id": null,
         "cost_center": null,
         "memo": "ENERGY_TICK",
-        "kwh": 0.02428458
+        "kwh": 0.00263889
       },
       {
         "source_event_seq": 16,
-        "run_id": "baseline/20261109T101840Z",
-        "t_s": 140.0,
-        "account": "Cost:Variable:Energy",
-        "amount": 0.022643,
-        "direction": "debit",
-        "order_id": null,
-        "cost_center": null,
-        "memo": "ENERGY_TICK",
-        "kwh": 0.026638890000000002
-      },
-      {
-        "source_event_seq": 17,
-        "run_id": "baseline/20261109T101840Z",
-        "t_s": 150.0,
-        "account": "Cost:Variable:Energy",
-        "amount": 0.022643,
-        "direction": "debit",
-        "order_id": null,
-        "cost_center": null,
-        "memo": "ENERGY_TICK",
-        "kwh": 0.026638890000000002
-      },
-      {
-        "source_event_seq": 18,
-        "run_id": "baseline/20261109T101840Z",
+        "run_id": "baseline/20261110T150340Z",
         "t_s": 160.0,
         "account": "Cost:Variable:Energy",
-        "amount": 0.022643,
+        "amount": 0.002243,
         "direction": "debit",
         "order_id": null,
         "cost_center": null,
         "memo": "ENERGY_TICK",
-        "kwh": 0.026638890000000002
-      },
-      {
-        "source_event_seq": 19,
-        "run_id": "baseline/20261109T101840Z",
-        "t_s": 170.0,
-        "account": "Cost:Variable:Energy",
-        "amount": 0.022643,
-        "direction": "debit",
-        "order_id": null,
-        "cost_center": null,
-        "memo": "ENERGY_TICK",
-        "kwh": 0.026638890000000002
+        "kwh": 0.00263889
       },
       {
         "source_event_seq": 20,
-        "run_id": "baseline/20261109T101840Z",
+        "run_id": "baseline/20261110T150340Z",
+        "t_s": 170.0,
+        "account": "Cost:Variable:Energy",
+        "amount": 0.010403,
+        "direction": "debit",
+        "order_id": null,
+        "cost_center": null,
+        "memo": "ENERGY_TICK",
+        "kwh": 0.012238889999999999
+      },
+      {
+        "source_event_seq": 24,
+        "run_id": "baseline/20261110T150340Z",
         "t_s": 180.0,
+        "account": "Cost:Variable:Energy",
+        "amount": 0.019991,
+        "direction": "debit",
+        "order_id": null,
+        "cost_center": null,
+        "memo": "ENERGY_TICK",
+        "kwh": 0.02351889
+      },
+      {
+        "source_event_seq": 25,
+        "run_id": "baseline/20261110T150340Z",
+        "t_s": 190.0,
         "account": "Cost:Variable:Energy",
         "amount": 0.022643,
         "direction": "debit",
@@ -27589,59 +27721,43 @@ window.DC_SUBMISSION = {
         "kwh": 0.026638890000000002
       },
       {
-        "source_event_seq": 26,
-        "run_id": "baseline/20261109T101840Z",
-        "t_s": 190.0,
-        "account": "Cost:Variable:Energy",
-        "amount": 0.007823,
-        "direction": "debit",
-        "order_id": null,
-        "cost_center": null,
-        "memo": "ENERGY_TICK",
-        "kwh": 0.00920397
-      },
-      {
-        "source_event_seq": 30,
-        "run_id": "baseline/20261109T101840Z",
+        "source_event_seq": 29,
+        "run_id": "baseline/20261110T150340Z",
         "t_s": 200.0,
         "account": "Cost:Variable:Energy",
-        "amount": 0.007889,
+        "amount": 0.028289,
         "direction": "debit",
         "order_id": null,
         "cost_center": null,
         "memo": "ENERGY_TICK",
-        "kwh": 0.00928111
+        "kwh": 0.03328111
       }
     ],
-    "total": 405,
+    "total": 411,
     "accounts": [
       {
         "account": "Cost:Variable:Energy",
-        "count": 350
+        "count": 348
       },
       {
         "account": "Cost:Variable:Consumables",
-        "count": 25
+        "count": 29
       },
       {
-        "account": "Revenue:PICK",
+        "account": "Revenue:OUTBOUND",
         "count": 8
       },
       {
         "account": "Revenue:INBOUND",
-        "count": 5
+        "count": 8
+      },
+      {
+        "account": "Revenue:PICK",
+        "count": 7
       },
       {
         "account": "Revenue:TRANSFER",
-        "count": 5
-      },
-      {
-        "account": "Revenue:OUTBOUND",
-        "count": 5
-      },
-      {
-        "account": "Revenue:REPLENISH",
-        "count": 2
+        "count": 6
       },
       {
         "account": "Cost:Fixed:Labor",
@@ -27970,12 +28086,12 @@ window.DC_SUBMISSION = {
       {
         "id": "A11 GLB/PNG/MP4 与 .blend 重开实测一致",
         "status": "PASS",
-        "detail": "glb nodes=882 forbidden=[] DC_ROOT=True；png尺寸全对=True；objects 914/914 meshes 61/61"
+        "detail": "glb nodes=924 forbidden=[] DC_ROOT=True；png尺寸全对=True；objects 977/977 meshes 103/103"
       },
       {
-        "id": "A12 LICENSE / NOTICE 含 MIT 全文与资产哈希",
+        "id": "A12 自身 Apache-2.0 + 第三方 MIT 全文与资产哈希",
         "status": "PASS",
-        "detail": "LICENSE=True NOTICE=True MIT段落=3 资产sha=e6bf591fa0a69038"
+        "detail": "LICENSE=True NOTICE=True 自身Apache=True 第三方MIT段落=3 资产sha=e6bf591fa0a69038"
       },
       {
         "id": "A13 行为证明：扰动产物后校验器真的失败",
@@ -28025,7 +28141,7 @@ window.DC_SUBMISSION = {
       {
         "id": "A22 四层配置与 schema 合法",
         "status": "PASS",
-        "detail": "config_files=19 解析失败=[]；L1 issues=0；spec verdict=PASS"
+        "detail": "config_files=20 解析失败=[]；L1 issues=0；spec verdict=PASS"
       },
       {
         "id": "A23 spec 展开确定性（两次 + 落盘一致）",
@@ -28033,7 +28149,7 @@ window.DC_SUBMISSION = {
         "detail": "sha=483e82d69becd4cd / 483e82d69becd4cd / 483e82d69becd4cd"
       },
       {
-        "id": "A24 多布局审计：当前/F4/加宽 3 spec 全 PASS 且方案A降低互斥",
+        "id": "A24 多布局审计：4 个 spec 全 PASS 且加宽方案降低互斥",
         "status": "PASS",
         "detail": "baseline={'issues': 0, 'mutex': 148, 'racks': 196, 'warehouses': 4}；F4={'issues': 0, 'mutex': 157, 'racks': 208, 'warehouses': 5}；wide={'issues': 0, 'mutex': 29, 'racks': 196, 'warehouses': 4}"
       },
@@ -28090,7 +28206,7 @@ window.DC_SUBMISSION = {
       {
         "id": "A35 50 车场景 plan_wall_clock <300 s",
         "status": "PASS",
-        "detail": "fleet=50 wall_clock=0.042s"
+        "detail": "fleet=50 wall_clock=0.041s"
       },
       {
         "id": "A36 改 seed 后展开结果改变",
@@ -28122,32 +28238,7 @@ window.DC_SUBMISSION = {
       {
         "id": "S1",
         "status": "PASS",
-        "detail": "determinism: two independent 900 s runs, 200 events each, byte-identical=True"
-      },
-      {
-        "id": "S2",
-        "status": "PASS",
-        "detail": "energy conservation: window sum vs terminal state: err_out=0.0001% err_in=0.0000% max soc residual=0.000001 kWh"
-      },
-      {
-        "id": "S2",
-        "status": "PASS",
-        "detail": "energy conservation: window sum vs terminal state: err_out=0.0000% err_in=0.0000% max soc residual=0.000001 kWh"
-      },
-      {
-        "id": "S2",
-        "status": "PASS",
-        "detail": "energy conservation: window sum vs terminal state: err_out=0.0000% err_in=0.0000% max soc residual=0.000001 kWh"
-      },
-      {
-        "id": "S2",
-        "status": "PASS",
-        "detail": "energy conservation: window sum vs terminal state: err_out=0.0001% err_in=0.0000% max soc residual=0.000001 kWh"
-      },
-      {
-        "id": "S2",
-        "status": "PASS",
-        "detail": "energy conservation: window sum vs terminal state: err_out=0.0005% err_in=0.0000% max soc residual=0.000000 kWh"
+        "detail": "determinism: two independent 900 s runs, 260 events each, byte-identical=True"
       },
       {
         "id": "S2",
@@ -28157,17 +28248,42 @@ window.DC_SUBMISSION = {
       {
         "id": "S2",
         "status": "PASS",
+        "detail": "energy conservation: window sum vs terminal state: err_out=0.0000% err_in=0.0000% max soc residual=0.000001 kWh"
+      },
+      {
+        "id": "S2",
+        "status": "PASS",
         "detail": "energy conservation: window sum vs terminal state: err_out=0.0000% err_in=0.0000% max soc residual=0.000000 kWh"
       },
       {
         "id": "S2",
         "status": "PASS",
-        "detail": "energy conservation: window sum vs terminal state: err_out=0.0002% err_in=0.0001% max soc residual=0.000001 kWh"
+        "detail": "energy conservation: window sum vs terminal state: err_out=0.0001% err_in=0.0000% max soc residual=0.000000 kWh"
+      },
+      {
+        "id": "S2",
+        "status": "PASS",
+        "detail": "energy conservation: window sum vs terminal state: err_out=0.0001% err_in=0.0000% max soc residual=0.000000 kWh"
+      },
+      {
+        "id": "S2",
+        "status": "PASS",
+        "detail": "energy conservation: window sum vs terminal state: err_out=0.0000% err_in=0.0000% max soc residual=0.000001 kWh"
+      },
+      {
+        "id": "S2",
+        "status": "PASS",
+        "detail": "energy conservation: window sum vs terminal state: err_out=0.0000% err_in=0.0000% max soc residual=0.000001 kWh"
+      },
+      {
+        "id": "S2",
+        "status": "PASS",
+        "detail": "energy conservation: window sum vs terminal state: err_out=0.0001% err_in=0.0000% max soc residual=0.000001 kWh"
       },
       {
         "id": "S3",
         "status": "PASS",
-        "detail": "multi-order truth: busiest robot completed 6 orders, 5 robots >=3"
+        "detail": "multi-order truth: busiest robot completed 4 orders, 4 robots >=3"
       },
       {
         "id": "S4",
@@ -28177,7 +28293,7 @@ window.DC_SUBMISSION = {
       {
         "id": "S5",
         "status": "PASS",
-        "detail": "charging truth: 7 sessions, 0 task events while charging, max displacement 0.0000 m"
+        "detail": "charging truth: 8 sessions, 0 task events while charging, max displacement 0.0000 m"
       },
       {
         "id": "S6",
@@ -28187,27 +28303,27 @@ window.DC_SUBMISSION = {
       {
         "id": "S7",
         "status": "PASS",
-        "detail": "scale: 50 distinct agent trajectories, sample cardinalities=[50], 30 agents actually moved (idle agents are reported honestly)"
+        "detail": "scale: 50 distinct agent trajectories, sample cardinalities=[50], 34 agents actually moved (idle agents are reported honestly)"
       },
       {
         "id": "S8",
         "status": "PASS",
-        "detail": "KPI provenance: 27 metrics, 0 missing triplets, 0 recomputation mismatches"
+        "detail": "KPI provenance: 39 metrics, 0 missing triplets, 0 recomputation mismatches"
       },
       {
         "id": "X1",
         "status": "PASS",
-        "detail": "baseline completed=25 collisions=0"
+        "detail": "baseline completed=29 collisions=0"
       },
       {
         "id": "X2",
         "status": "PASS",
-        "detail": "peak queue=8 vs baseline=3; throughput=58.0 vs 25.0"
+        "detail": "peak queue=10 vs baseline=7; throughput=59.0 vs 29.0"
       },
       {
         "id": "X3",
         "status": "PASS",
-        "detail": "night vehicle-level idle_rate=0.8336"
+        "detail": "night vehicle-level idle_rate=0.9851"
       },
       {
         "id": "X4",
@@ -28217,7 +28333,7 @@ window.DC_SUBMISSION = {
       {
         "id": "X5",
         "status": "PASS",
-        "detail": "dock_blocked docks=['W-OU-02'] replans=1 forbidden drops=0"
+        "detail": "dock_blocked docks=['W-OU-02'] replans=295 forbidden drops=0"
       },
       {
         "id": "X7",
@@ -28227,7 +28343,7 @@ window.DC_SUBMISSION = {
       {
         "id": "X8",
         "status": "PASS",
-        "detail": "layout_variant_f4 collisions=0 completed=31"
+        "detail": "layout_variant_f4 collisions=0 completed=27"
       }
     ],
     "F": [
@@ -28239,17 +28355,17 @@ window.DC_SUBMISSION = {
       {
         "id": "baseline/F2",
         "status": "PASS",
-        "detail": "posting traceability: 405 postings, 10 sampled revenue rows, 0 issues"
+        "detail": "posting traceability: 411 postings, 10 sampled revenue rows, 0 issues"
       },
       {
         "id": "baseline/F4",
         "status": "PASS",
-        "detail": "energy: events=2.740918 kWh ledger=2.740974 kWh state=2.740920 kWh, err=0.0020%/0.0001%"
+        "detail": "energy: events=4.021326 kWh ledger=4.021356 kWh state=4.021322 kWh, err=0.0008%/0.0001%"
       },
       {
         "id": "baseline/F5",
         "status": "PASS",
-        "detail": "breakeven=166 orders x 4.5368 contribution vs 750.73 fixed"
+        "detail": "breakeven=159 orders x 4.7390 contribution vs 750.73 fixed"
       },
       {
         "id": "baseline/F6",
@@ -28269,17 +28385,17 @@ window.DC_SUBMISSION = {
       {
         "id": "dock_blocked/F2",
         "status": "PASS",
-        "detail": "posting traceability: 404 postings, 10 sampled revenue rows, 0 issues"
+        "detail": "posting traceability: 422 postings, 10 sampled revenue rows, 0 issues"
       },
       {
         "id": "dock_blocked/F4",
         "status": "PASS",
-        "detail": "energy: events=1.990444 kWh ledger=1.990531 kWh state=1.990443 kWh, err=0.0044%/0.0000%"
+        "detail": "energy: events=3.082006 kWh ledger=3.082053 kWh state=3.082006 kWh, err=0.0015%/0.0000%"
       },
       {
         "id": "dock_blocked/F5",
         "status": "PASS",
-        "detail": "breakeven=157 orders x 4.7878 contribution vs 750.73 fixed"
+        "detail": "breakeven=159 orders x 4.7347 contribution vs 750.73 fixed"
       },
       {
         "id": "dock_blocked/F6",
@@ -28299,17 +28415,17 @@ window.DC_SUBMISSION = {
       {
         "id": "holiday/F2",
         "status": "PASS",
-        "detail": "posting traceability: 493 postings, 10 sampled revenue rows, 0 issues"
+        "detail": "posting traceability: 524 postings, 10 sampled revenue rows, 0 issues"
       },
       {
         "id": "holiday/F4",
         "status": "PASS",
-        "detail": "energy: events=5.243679 kWh ledger=5.243662 kWh state=5.243680 kWh, err=0.0003%/0.0000%"
+        "detail": "energy: events=8.363055 kWh ledger=8.363025 kWh state=8.363055 kWh, err=0.0004%/0.0000%"
       },
       {
         "id": "holiday/F5",
         "status": "PASS",
-        "detail": "breakeven=322 orders x 2.8047 contribution vs 902.24 fixed"
+        "detail": "breakeven=257 orders x 3.5234 contribution vs 902.24 fixed"
       },
       {
         "id": "holiday/F6",
@@ -28329,17 +28445,17 @@ window.DC_SUBMISSION = {
       {
         "id": "layout_variant_f4/F2",
         "status": "PASS",
-        "detail": "posting traceability: 375 postings, 10 sampled revenue rows, 0 issues"
+        "detail": "posting traceability: 407 postings, 10 sampled revenue rows, 0 issues"
       },
       {
         "id": "layout_variant_f4/F4",
         "status": "PASS",
-        "detail": "energy: events=3.400808 kWh ledger=3.400789 kWh state=3.400805 kWh, err=0.0005%/0.0001%"
+        "detail": "energy: events=4.362650 kWh ledger=4.362639 kWh state=4.362646 kWh, err=0.0003%/0.0001%"
       },
       {
         "id": "layout_variant_f4/F5",
         "status": "PASS",
-        "detail": "breakeven=156 orders x 5.0245 contribution vs 783.20 fixed"
+        "detail": "breakeven=164 orders x 4.7904 contribution vs 783.20 fixed"
       },
       {
         "id": "layout_variant_f4/F6",
@@ -28359,17 +28475,17 @@ window.DC_SUBMISSION = {
       {
         "id": "night/F2",
         "status": "PASS",
-        "detail": "posting traceability: 322 postings, 1 sampled revenue rows, 0 issues"
+        "detail": "posting traceability: 308 postings, 3 sampled revenue rows, 0 issues"
       },
       {
         "id": "night/F4",
         "status": "PASS",
-        "detail": "energy: events=0.659566 kWh ledger=0.659729 kWh state=0.659569 kWh, err=0.0248%/0.0005%"
+        "detail": "energy: events=0.889972 kWh ledger=0.890094 kWh state=0.889971 kWh, err=0.0137%/0.0001%"
       },
       {
         "id": "night/F5",
         "status": "PASS",
-        "detail": "breakeven=108 orders x 6.0892 contribution vs 653.34 fixed"
+        "detail": "breakeven=103 orders x 6.3978 contribution vs 653.34 fixed"
       },
       {
         "id": "night/F6",
@@ -28389,17 +28505,17 @@ window.DC_SUBMISSION = {
       {
         "id": "peak/F2",
         "status": "PASS",
-        "detail": "posting traceability: 476 postings, 10 sampled revenue rows, 0 issues"
+        "detail": "posting traceability: 478 postings, 10 sampled revenue rows, 0 issues"
       },
       {
         "id": "peak/F4",
         "status": "PASS",
-        "detail": "energy: events=5.026511 kWh ledger=5.026516 kWh state=5.026514 kWh, err=0.0001%/0.0001%"
+        "detail": "energy: events=7.678215 kWh ledger=7.678201 kWh state=7.678216 kWh, err=0.0002%/0.0000%"
       },
       {
         "id": "peak/F5",
         "status": "PASS",
-        "detail": "breakeven=170 orders x 4.8867 contribution vs 826.49 fixed"
+        "detail": "breakeven=173 orders x 4.7851 contribution vs 826.49 fixed"
       },
       {
         "id": "peak/F6",
@@ -28419,17 +28535,17 @@ window.DC_SUBMISSION = {
       {
         "id": "robot_failure/F2",
         "status": "PASS",
-        "detail": "posting traceability: 404 postings, 10 sampled revenue rows, 0 issues"
+        "detail": "posting traceability: 410 postings, 10 sampled revenue rows, 0 issues"
       },
       {
         "id": "robot_failure/F4",
         "status": "PASS",
-        "detail": "energy: events=2.606331 kWh ledger=2.606413 kWh state=2.606332 kWh, err=0.0031%/0.0000%"
+        "detail": "energy: events=3.946183 kWh ledger=3.946221 kWh state=3.946183 kWh, err=0.0010%/0.0000%"
       },
       {
         "id": "robot_failure/F5",
         "status": "PASS",
-        "detail": "breakeven=166 orders x 4.5369 contribution vs 750.73 fixed"
+        "detail": "breakeven=158 orders x 4.7802 contribution vs 750.73 fixed"
       },
       {
         "id": "robot_failure/F6",
@@ -28449,17 +28565,17 @@ window.DC_SUBMISSION = {
       {
         "id": "scale_50/F2",
         "status": "PASS",
-        "detail": "posting traceability: 468 postings, 10 sampled revenue rows, 0 issues"
+        "detail": "posting traceability: 438 postings, 10 sampled revenue rows, 0 issues"
       },
       {
         "id": "scale_50/F4",
         "status": "PASS",
-        "detail": "energy: events=5.331425 kWh ledger=5.331421 kWh state=5.331436 kWh, err=0.0001%/0.0002%"
+        "detail": "energy: events=10.300618 kWh ledger=10.300598 kWh state=10.300626 kWh, err=0.0002%/0.0001%"
       },
       {
         "id": "scale_50/F5",
         "status": "PASS",
-        "detail": "breakeven=222 orders x 4.8161 contribution vs 1064.57 fixed"
+        "detail": "breakeven=288 orders x 3.6998 contribution vs 1064.57 fixed"
       },
       {
         "id": "scale_50/F6",
@@ -28508,7 +28624,7 @@ window.DC_SUBMISSION = {
         "target_check": "S2",
         "tampered_run_status": "FAIL",
         "status": "PASS",
-        "detail": "energy conservation: window sum vs terminal state: err_out=12769.4350% err_in=0.0000% max soc residual=0.000001 kWh"
+        "detail": "energy conservation: window sum vs terminal state: err_out=8653.8706% err_in=0.0000% max soc residual=0.000000 kWh"
       },
       {
         "case": "delete TASK_REASSIGNED",
@@ -28522,14 +28638,14 @@ window.DC_SUBMISSION = {
         "target_check": "S6",
         "tampered_run_status": "FAIL",
         "status": "PASS",
-        "detail": "traffic: 73290 sampled pairs checked at MIN_SEP=1.4592 m, 1 violations, engine collisions=0 double-occupancy=0"
+        "detail": "traffic: 72870 sampled pairs checked at MIN_SEP=1.4592 m, 1 violations, engine collisions=0 double-occupancy=0"
       },
       {
         "case": "forge a KPI value",
         "target_check": "S8",
         "tampered_run_status": "FAIL",
         "status": "PASS",
-        "detail": "KPI provenance: 27 metrics, 0 missing triplets, 1 recomputation mismatches"
+        "detail": "KPI provenance: 39 metrics, 0 missing triplets, 1 recomputation mismatches"
       }
     ],
     "negative_pnl": [
@@ -28545,14 +28661,14 @@ window.DC_SUBMISSION = {
         "target_check": "F2",
         "tampered_status": "FAIL",
         "status": "PASS",
-        "detail": "posting traceability: 405 postings, 10 sampled revenue rows, 2 issues"
+        "detail": "posting traceability: 411 postings, 10 sampled revenue rows, 2 issues"
       },
       {
         "case": "duplicate a posting",
         "target_check": "F2",
         "tampered_status": "FAIL",
         "status": "PASS",
-        "detail": "posting traceability: 406 postings, 10 sampled revenue rows, 1 issues"
+        "detail": "posting traceability: 412 postings, 10 sampled revenue rows, 1 issues"
       },
       {
         "case": "strip the demo-price badge",
@@ -28568,43 +28684,43 @@ window.DC_SUBMISSION = {
       {
         "file": "assets/01_overview.webp",
         "caption": "全场总览 · 一区域仓 + 三前置仓",
-        "bytes": 47498,
-        "size": "46.4 KB",
+        "bytes": 48588,
+        "size": "47.4 KB",
         "resolution": "1920×1080"
       },
       {
         "file": "assets/02_interior.webp",
         "caption": "仓内视角 · 货架与通道",
-        "bytes": 110466,
-        "size": "107.9 KB",
+        "bytes": 109418,
+        "size": "106.9 KB",
         "resolution": "1920×1080"
       },
       {
         "file": "assets/03_dock.webp",
         "caption": "月台与装卸门",
-        "bytes": 24292,
-        "size": "23.7 KB",
+        "bytes": 23356,
+        "size": "22.8 KB",
         "resolution": "1920×1080"
       },
       {
         "file": "assets/04_agv_route.webp",
         "caption": "AGV 行驶路径与发光导引带",
-        "bytes": 70804,
-        "size": "69.1 KB",
+        "bytes": 69674,
+        "size": "68.0 KB",
         "resolution": "1920×1080"
       },
       {
         "file": "assets/05_slotting_heatmap.webp",
         "caption": "ABC / COI 货位优化热力板",
-        "bytes": 49454,
-        "size": "48.3 KB",
+        "bytes": 46160,
+        "size": "45.1 KB",
         "resolution": "1920×1080"
       },
       {
         "file": "assets/06_corridor_check.webp",
         "caption": "通道净距几何校验",
-        "bytes": 39276,
-        "size": "38.4 KB",
+        "bytes": 39268,
+        "size": "38.3 KB",
         "resolution": "1920×1080"
       },
       {
@@ -28647,22 +28763,22 @@ window.DC_SUBMISSION = {
       {
         "file": "assets/dc_preview.glb",
         "note": "glTF 静态场景预览（无动画，动画在 mp4 / .blend）",
-        "bytes": 583176,
-        "size": "569.5 KB",
+        "bytes": 612696,
+        "size": "598.3 KB",
         "exists": true
       },
       {
         "file": "assets/distribution_center.blend",
         "note": "Blender 5.2 工程源文件（含 42 个动作）",
-        "bytes": 659874,
-        "size": "644.4 KB",
+        "bytes": 640463,
+        "size": "625.5 KB",
         "exists": true
       }
     ],
     "blend": {
-      "objects": 914,
-      "meshes": 61,
-      "materials": 36,
+      "objects": 977,
+      "meshes": 103,
+      "materials": 48,
       "cameras": 6,
       "lights": 4,
       "actions": 42,
@@ -28677,10 +28793,10 @@ window.DC_SUBMISSION = {
       "blender": "5.2.3 LTS"
     },
     "glb": {
-      "bytes": 583176,
-      "nodes": 882,
-      "meshes": 59,
-      "materials": 35,
+      "bytes": 612696,
+      "nodes": 924,
+      "meshes": 101,
+      "materials": 47,
       "animations": 0,
       "generator": "Khronos glTF Blender I/O v5.2.41"
     },

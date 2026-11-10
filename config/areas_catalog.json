@@ -1,0 +1,520 @@
+{
+  "schema_version": "1.0",
+  "meta": {
+    "note": "功能区模板库。用户从这张菜单里挑自己要的功能区，build_variant.py 据此生成扩仓变体。size 是建议占地（米），可被 selection 覆盖。",
+    "placement": "默认放在 W 仓北侧扩展带（原 100x70 → 100x88），按 priority 降序货架式排布"
+  },
+  "templates": [
+    {
+      "template": "RCV-01",
+      "kind": "RECEIVING",
+      "name": "收货暂存",
+      "group": "入库",
+      "size": [
+        12,
+        6
+      ],
+      "priority": 100,
+      "capacity": {
+        "pallet_positions": 24,
+        "tote_positions": 0
+      },
+      "process": {
+        "service_time_s": {
+          "dist": "lognormal",
+          "mean": 300,
+          "cv": 0.3
+        },
+        "parallel_slots": 2,
+        "resources": [
+          {
+            "kind": "PERSON",
+            "count": 2
+          },
+          {
+            "kind": "FORKLIFT",
+            "count": 1
+          }
+        ],
+        "buffer": {
+          "capacity": 24,
+          "policy": "FIFO"
+        }
+      },
+      "constraints": {
+        "temp_c": [
+          15,
+          30
+        ],
+        "hazmat": false
+      }
+    },
+    {
+      "template": "QA-01",
+      "kind": "QA",
+      "name": "验收/质检",
+      "group": "入库",
+      "size": [
+        8,
+        6
+      ],
+      "priority": 95,
+      "capacity": {
+        "inspection_benches": 2,
+        "quarantine_positions": 4
+      },
+      "process": {
+        "service_time_s": {
+          "dist": "lognormal",
+          "mean": 900,
+          "cv": 0.35
+        },
+        "parallel_slots": 2,
+        "resources": [
+          {
+            "kind": "PERSON",
+            "count": 2
+          }
+        ],
+        "buffer": {
+          "capacity": 6,
+          "policy": "FIFO"
+        },
+        "pass_rate": 0.98
+      },
+      "constraints": {
+        "temp_c": [
+          15,
+          30
+        ],
+        "hazmat": false
+      }
+    },
+    {
+      "template": "STGIN-01",
+      "kind": "STAGING_IN",
+      "name": "入库暂存",
+      "group": "入库",
+      "size": [
+        10,
+        6
+      ],
+      "priority": 90,
+      "capacity": {
+        "pallet_positions": 24
+      },
+      "process": {
+        "buffer": {
+          "capacity": 24,
+          "policy": "FIFO"
+        },
+        "max_dwell_min": 240
+      },
+      "constraints": {
+        "temp_c": [
+          15,
+          30
+        ],
+        "hazmat": false
+      }
+    },
+    {
+      "template": "FWD-01",
+      "kind": "PICK_FACE",
+      "name": "前拣选区",
+      "group": "拣选",
+      "size": [
+        12,
+        6
+      ],
+      "priority": 85,
+      "capacity": {
+        "sku_positions": 300,
+        "tote_positions": 60
+      },
+      "process": {
+        "service_time_s": {
+          "dist": "lognormal",
+          "mean": 45,
+          "cv": 0.4
+        },
+        "parallel_slots": 4,
+        "resources": [
+          {
+            "kind": "PERSON",
+            "count": 4
+          }
+        ],
+        "wave_period_s": 1800
+      },
+      "constraints": {
+        "temp_c": [
+          15,
+          30
+        ],
+        "hazmat": false
+      }
+    },
+    {
+      "template": "REP-01",
+      "kind": "REPLENISH",
+      "name": "补货站",
+      "group": "拣选",
+      "size": [
+        6,
+        6
+      ],
+      "priority": 70,
+      "capacity": {
+        "replenish_positions": 4
+      },
+      "process": {
+        "service_time_s": {
+          "dist": "lognormal",
+          "mean": 180,
+          "cv": 0.3
+        },
+        "parallel_slots": 1,
+        "resources": [
+          {
+            "kind": "FORKLIFT",
+            "count": 1
+          }
+        ],
+        "buffer": {
+          "capacity": 8,
+          "policy": "FIFO"
+        }
+      },
+      "constraints": {
+        "temp_c": [
+          15,
+          30
+        ],
+        "hazmat": false
+      }
+    },
+    {
+      "template": "SORT-EXT",
+      "kind": "SORTING",
+      "name": "分拣扩展（滑道）",
+      "group": "出库",
+      "size": [
+        10,
+        6
+      ],
+      "priority": 88,
+      "capacity": {
+        "chutes": 8,
+        "sort_rate_pcs_per_h": 1200
+      },
+      "process": {
+        "service_time_s": {
+          "dist": "lognormal",
+          "mean": 40,
+          "cv": 0.3
+        },
+        "parallel_slots": 8,
+        "resources": [
+          {
+            "kind": "PERSON",
+            "count": 2
+          }
+        ],
+        "mis_sort_rate": 0.001
+      },
+      "constraints": {
+        "temp_c": [
+          15,
+          30
+        ],
+        "hazmat": false
+      }
+    },
+    {
+      "template": "PACK-03",
+      "kind": "PACKING",
+      "name": "包装区 A",
+      "group": "出库",
+      "size": [
+        8,
+        6
+      ],
+      "priority": 92,
+      "capacity": {
+        "stations": 2
+      },
+      "process": {
+        "service_time_s": {
+          "dist": "lognormal",
+          "mean": 90,
+          "cv": 0.35
+        },
+        "parallel_slots": 2,
+        "resources": [
+          {
+            "kind": "PERSON",
+            "count": 2
+          }
+        ],
+        "buffer": {
+          "capacity": 8,
+          "policy": "FIFO"
+        }
+      },
+      "constraints": {
+        "temp_c": [
+          15,
+          30
+        ],
+        "hazmat": false
+      }
+    },
+    {
+      "template": "PACK-04",
+      "kind": "PACKING",
+      "name": "包装区 B",
+      "group": "出库",
+      "size": [
+        8,
+        6
+      ],
+      "priority": 91,
+      "capacity": {
+        "stations": 2
+      },
+      "process": {
+        "service_time_s": {
+          "dist": "lognormal",
+          "mean": 90,
+          "cv": 0.35
+        },
+        "parallel_slots": 2,
+        "resources": [
+          {
+            "kind": "PERSON",
+            "count": 2
+          }
+        ],
+        "buffer": {
+          "capacity": 8,
+          "policy": "FIFO"
+        }
+      },
+      "constraints": {
+        "temp_c": [
+          15,
+          30
+        ],
+        "hazmat": false
+      }
+    },
+    {
+      "template": "VAS-01",
+      "kind": "VAS",
+      "name": "增值服务",
+      "group": "出库",
+      "size": [
+        8,
+        6
+      ],
+      "priority": 60,
+      "capacity": {
+        "workstations": 2
+      },
+      "process": {
+        "service_time_s": {
+          "dist": "lognormal",
+          "mean": 300,
+          "cv": 0.4
+        },
+        "parallel_slots": 2,
+        "resources": [
+          {
+            "kind": "PERSON",
+            "count": 2
+          }
+        ],
+        "buffer": {
+          "capacity": 4,
+          "policy": "FIFO"
+        }
+      },
+      "constraints": {
+        "temp_c": [
+          15,
+          30
+        ],
+        "hazmat": false
+      }
+    },
+    {
+      "template": "STGOUT-01",
+      "kind": "STAGING_OUT",
+      "name": "出库暂存",
+      "group": "出库",
+      "size": [
+        12,
+        6
+      ],
+      "priority": 86,
+      "capacity": {
+        "lanes": 8,
+        "pallet_positions": 12
+      },
+      "process": {
+        "service_time_s": {
+          "dist": "fixed",
+          "mean": 120
+        },
+        "parallel_slots": 2,
+        "buffer": {
+          "capacity": 12,
+          "policy": "FIFO"
+        },
+        "max_dwell_min": 30
+      },
+      "constraints": {
+        "temp_c": [
+          15,
+          30
+        ],
+        "hazmat": false
+      }
+    },
+    {
+      "template": "RET-01",
+      "kind": "RETURNS",
+      "name": "退货处理",
+      "group": "逆向",
+      "size": [
+        10,
+        6
+      ],
+      "priority": 65,
+      "capacity": {
+        "workstations": 4,
+        "quarantine_positions": 4
+      },
+      "process": {
+        "service_time_s": {
+          "dist": "lognormal",
+          "mean": 600,
+          "cv": 0.4
+        },
+        "parallel_slots": 4,
+        "resources": [
+          {
+            "kind": "PERSON",
+            "count": 2
+          }
+        ],
+        "buffer": {
+          "capacity": 8,
+          "policy": "FIFO"
+        }
+      },
+      "constraints": {
+        "temp_c": [
+          15,
+          30
+        ],
+        "hazmat": false
+      }
+    },
+    {
+      "template": "EMP-01",
+      "kind": "EMPTY_CONTAINER",
+      "name": "空托盘/周转箱",
+      "group": "支持",
+      "size": [
+        8,
+        5
+      ],
+      "priority": 55,
+      "capacity": {
+        "pallet_positions": 40,
+        "tote_positions": 60
+      },
+      "process": {
+        "buffer": {
+          "capacity": 100,
+          "policy": "FIFO"
+        }
+      },
+      "constraints": {
+        "temp_c": [
+          15,
+          30
+        ],
+        "hazmat": false
+      }
+    },
+    {
+      "template": "BATT-01",
+      "kind": "BATTERY",
+      "name": "电池间/换电",
+      "group": "支持",
+      "size": [
+        8,
+        5
+      ],
+      "priority": 50,
+      "capacity": {
+        "charging_slots": 8,
+        "swap_positions": 2
+      },
+      "process": {
+        "service_time_s": {
+          "dist": "fixed",
+          "mean": 1800
+        },
+        "parallel_slots": 8,
+        "fire_zone": true
+      },
+      "constraints": {
+        "temp_c": [
+          10,
+          30
+        ],
+        "hazmat": true
+      }
+    },
+    {
+      "template": "MNT-01",
+      "kind": "MAINTENANCE",
+      "name": "维修/备件",
+      "group": "支持",
+      "size": [
+        8,
+        5
+      ],
+      "priority": 40,
+      "capacity": {
+        "bays": 2,
+        "spare_positions": 6
+      },
+      "process": {
+        "service_time_s": {
+          "dist": "lognormal",
+          "mean": 3600,
+          "cv": 0.5
+        },
+        "parallel_slots": 2,
+        "resources": [
+          {
+            "kind": "PERSON",
+            "count": 1
+          }
+        ]
+      },
+      "constraints": {
+        "temp_c": [
+          15,
+          30
+        ],
+        "hazmat": false
+      }
+    }
+  ]
+}

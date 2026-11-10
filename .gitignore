@@ -11,6 +11,14 @@ tests/_tmp_spec/
 *.bak
 data/config.bak.json
 
+# 一次运行 = 一个产物包（scripts/run_bundle.py 生成，体积大、可重建）
+artifacts/
+
+# 扩仓变体的派生数据（scripts/build_variant.py 可重建；spec 本身要提交）
+data/scene_variant.json
+data/areas_variant.json
+out/variant/
+
 # Python / tooling
 __pycache__/
 *.py[cod]

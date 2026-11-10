@@ -47,6 +47,33 @@ jobs:
           python scripts/report_status.py
           python scripts/manifest.py
 
+      - name: Doc drift guard (status doc vs artifacts vs plan copy)
+        run: |
+          python scripts/check_doc_drift.py --self-test
+          python scripts/check_doc_drift.py
+
+      - name: Process config guard (L14-L22)
+        run: |
+          python scripts/check_process.py --self-test
+          python scripts/check_process.py
+
+      - name: Functional area guard (L23-L26)
+        run: |
+          python scripts/spec_areas.py --self-test
+          python scripts/spec_areas.py
+
+      - name: Area variant guard (cockpit ↔ generator ↔ spec)
+        run: |
+          python scripts/build_variant.py --build
+          python scripts/check_studio.py --self-test
+          python scripts/check_studio.py
+
+      - name: Station queue guard (slots 4 -> 1 must queue)
+        run: python scripts/check_station.py
+
+      - name: Deadlock yield guard (yield off must be worse)
+        run: python scripts/check_deadlock.py
+
       - name: pytest (no Blender)
         run: pytest -m "not blender" --cov=dc_twin --cov-report=term-missing
 

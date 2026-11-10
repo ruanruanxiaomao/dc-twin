@@ -1,0 +1,321 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "process_spec.schema.json",
+  "title": "process_spec",
+  "description": "工位产能、服务时间、缓冲、班次、资源与流程节点。由 scripts/check_process.py 做语义校验（L14–L22）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "shifts",
+    "resources",
+    "stations",
+    "nodes"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+$"
+    },
+    "meta": {
+      "type": "object"
+    },
+    "shifts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "start_s",
+          "end_s"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "start_s": {
+            "type": "number",
+            "minimum": 0
+          },
+          "end_s": {
+            "type": "number",
+            "minimum": 1
+          },
+          "breaks": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "resources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "id",
+          "kind",
+          "count"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "enum": [
+              "PERSON",
+              "FORKLIFT",
+              "TOTE",
+              "PALLET",
+              "AGV",
+              "CONVEYOR",
+              "OTHER"
+            ]
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "cost_per_h": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "stations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "parallel_slots",
+          "service_time_s",
+          "buffer"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "warehouse": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "PACKING",
+              "SORTING",
+              "VAS",
+              "QA",
+              "RECEIVING",
+              "SHIPPING"
+            ]
+          },
+          "parallel_slots": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 64
+          },
+          "service_time_s": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "dist",
+              "mean"
+            ],
+            "properties": {
+              "dist": {
+                "enum": [
+                  "fixed",
+                  "lognormal",
+                  "normal",
+                  "exponential",
+                  "triangular"
+                ]
+              },
+              "mean": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "cv": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 2
+              }
+            }
+          },
+          "setup_s": {
+            "type": "number",
+            "minimum": 0
+          },
+          "buffer": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "capacity",
+              "policy"
+            ],
+            "properties": {
+              "capacity": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "policy": {
+                "enum": [
+                  "FIFO",
+                  "LIFO",
+                  "FEFO",
+                  "PRIORITY"
+                ]
+              }
+            }
+          },
+          "staffing": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "resource": {
+                "type": "string"
+              },
+              "per_slot": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 4
+              }
+            }
+          },
+          "shifts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "reliability": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "mttf_h": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "mttr_min": {
+                "type": "number",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "capacity",
+          "next"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "enum": [
+              "RECEIVING",
+              "QA",
+              "STAGING_IN",
+              "STORAGE",
+              "PICKING",
+              "SORTING",
+              "PACKING",
+              "VAS",
+              "STAGING_OUT",
+              "SHIPPING",
+              "RETURNS"
+            ]
+          },
+          "warehouse": {
+            "type": "string"
+          },
+          "capacity": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "buffer_policy": {
+            "enum": [
+              "FIFO",
+              "LIFO",
+              "FEFO",
+              "PRIORITY"
+            ]
+          },
+          "station": {
+            "type": "string"
+          },
+          "area": {
+            "type": "string",
+            "description": "功能区 id，见 data/areas.json"
+          },
+          "next": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "process_steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "from",
+          "to",
+          "time_s"
+        ],
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "resource": {
+            "type": "string"
+          },
+          "time_s": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "yield": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 1
+          }
+        }
+      }
+    }
+  }
+}

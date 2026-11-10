@@ -95,6 +95,7 @@ data/     config.json（L6 渲染/坐标）· layout.json · skus.json · events
 scripts/  spec_layout.py · demand_source.py · scenario_run.py · kpi.py
           fleet_sim.py · reservation_check.py · adapters/（csv/uci/wms）
           + 原有 20 个数据/校验/场景/渲染/解析脚本
+dc_studio/ 桌面驾驶舱（Tkinter，只读）· desktop_app.pyw · 启动驾驶舱.bat
 docs/     ENTERPRISE_SETUP.md · PARAMETER_GUIDE.md · REAL_DATA_SOURCES.md
 assets/   cargotwin_assets.glb（MIT，见 THIRD_PARTY_NOTICES.md）
 out/      distribution_center.blend · dc_preview.glb · anim_dc.mp4
@@ -184,7 +185,7 @@ tests/    4 个负测试脚本，共 17 个能失败的用例
 
 ## 9. 第三方与许可
 
-本项目自身使用 MIT（`LICENSE`）。第三方资产 / 衍生代码的版权声明与 MIT 全文见 `THIRD_PARTY_NOTICES.md`（cargoTwin、WareTwin）。资产哈希：
+本项目自身使用 **Apache License 2.0**（`LICENSE`，署名见 `NOTICE`）。第三方资产 / 衍生代码的版权声明与各自许可证见 `THIRD_PARTY_NOTICES.md`（cargoTwin、WareTwin 仍为 MIT）。资产哈希：
 
 ```
 cargotwin_assets.glb  sha256 e6bf591fa0a69038bb9ccf782b43a1a2489d3e768637232edfc6647628fd0584
@@ -239,4 +240,20 @@ python console\server.py        # 默认 http://127.0.0.1:8765/
 （`t` 秒、`sel` 车辆、`view` 2d/3d、`cam` iso/top/close、`tab` 面板、`play=1` 自动播放）。
 
 **接口**：`GET /api/bootstrap`（汇总）、`GET /api/paths`（按车关键帧）、`POST /api/config`（写参数）、`POST /api/run`（启动重跑）、`GET /api/job?since=N`（增量日志）、`POST /api/cancel`。
+
+## 11. 桌面驾驶舱（DC Twin Studio）
+
+如果连浏览器都不想开，用桌面应用：双击 `启动驾驶舱.bat`，或运行 `python desktop_app.pyw`。纯本地、只读、不联网，Pillow 只用于缩略图（缺失自动降级）。
+
+| 工作台 | 看什么 | 快捷键 |
+|---|---|---|
+| 总览 | 规模、能力雷达、验收健康度、场景吞吐、渲染图廊 | `Ctrl+1` |
+| 布局沙盘 | 2D 俯视、5 个楼层、10 个图层、AGV 时间轴回放 | `Ctrl+2` |
+| **功能区** | **勾选你的配送中心要哪些功能区，实时看占地/深度/产能，一键生成扩仓变体并跑** | `Ctrl+3` |
+| 场景实验室 | 8 个场景的实测 KPI 与损益、对比基线 | `Ctrl+4` |
+| KPI 指标 | 27 + 25 项指标的定义/公式/来源 + 跨场景对比 | `Ctrl+5` |
+| 计划书 | 内置 Markdown 阅读器（目录、搜索、字号） | `Ctrl+6` |
+| 工具箱 | 数据链/场景链/测试、控制台、Blender、GLB、实时日志 | `Ctrl+7` |
+
+完整的 v3.5 计划书（现状审计 + 自审核对表 + 字段字典 + 参数总表 + 功能区方案 + 完整性核查 + 风险登记册）见 [`docs/DC_MASTER_PLAN.md`](docs/DC_MASTER_PLAN.md)。
 

@@ -5,7 +5,7 @@
 **Blender-based digital twin for a 4-warehouse distribution center with 21 AGVs,
 closed-loop A\* tasks, a reproducible data chain and 40 independent acceptance checks.**
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](pyproject.toml)
 [![Blender 5.2](https://img.shields.io/badge/Blender-5.2-orange.svg)](docs/getting-started.md)
 [![Acceptance 40/40](https://img.shields.io/badge/acceptance-40%2F40-brightgreen.svg)](out/CURRENT_STATUS.md)
@@ -55,6 +55,43 @@ dc run --scope full       # full 31-step chain, requires Blender 5.2 (~2-5 min)
 `http://127.0.0.1:8765/`. On Windows `.\run_all.ps1`, on POSIX `bash run.sh`,
 are thin wrappers around the same `run.py` driver. See
 [getting started](docs/getting-started.md) and the [CLI reference](docs/cli.md).
+
+### Desktop cockpit (DC Twin Studio)
+
+Double-click `启动驾驶舱.bat` (or run `python desktop_app.pyw`) to open a
+zero-backend Tkinter cockpit: overview, a 2D layout sandbox with AGV replay,
+an **area picker** (tick which functional areas your DC needs and watch
+footprint / depth / throughput update live), the 8-scenario lab, a searchable
+KPI dictionary, an in-app Markdown reader and a toolbox that streams the
+existing pipeline. It reads local artefacts only — no server, no network, no
+writes unless you press a run button.
+
+### 3D follows the functional areas
+
+`build_dc.py` reads `data/areas.json` and draws what actually occupies floor:
+the 3 physical areas get coloured floor pads, a dark outline and a bilingual
+name plate (CJK font auto-detected, ASCII fallback), while the 18 logical areas
+get a small anchor tag instead of a fake rectangle — a pick face *is* the rack
+face plus an aisle, so drawing a box there would be a lie.
+
+![3D functional areas](assets/areas_3d_zoom.png)
+
+### Pick your own functional areas
+
+```bash
+python scripts/build_variant.py --list          # 14 area templates
+python scripts/build_variant.py --preset ecommerce
+python scripts/build_variant.py --build         # writes config/layout_spec_areas.json
+python run.py --scope scenarios --spec config/layout_spec_areas.json
+```
+
+W grows 100×70 → 100×88 m to win a northern 18 m working band; the 441 storage
+locations, docks, stations and racks stay untouched, so A1–A40 still hold.
+13 physical areas (704 m²) land on real floor at the default *ecommerce*
+preset. The main chain (`config/layout_spec.json` → `data/layout.json`) is
+never modified — the variant is a second, side-by-side spec. Selecting areas
+in the cockpit does exactly the same thing, and writes only
+`config/areas_selection.json`.
 
 ---
 
@@ -129,6 +166,8 @@ Every arrow is a real file on disk; see [data contracts](docs/data-contracts.md)
 | [Scenarios & enterprise setup](docs/ENTERPRISE_SETUP.md) | Running what-if scenarios, deployment notes |
 | [Real data sources](docs/REAL_DATA_SOURCES.md) | CSV / UCI Retail / WMS adapters and licensing |
 | [Open-source plan](docs/OPEN_SOURCE_PLAN.md) | The assessment that produced this release |
+| [DC expansion plan](docs/DC_EXPANSION_PLAN.md) | Area taxonomy, GitHub reference audit, gap analysis, tunables, user customization and phased roadmap (Chinese) |
+| [Master plan v2.0](docs/DC_MASTER_PLAN.md) | Full plan: domain model, field-level data dictionary, parameter tables, 57-day backlog, A41–A60 acceptance, risk register (Chinese) |
 | [Full project report](docs/PROJECT_REPORT.md) | Historical stage-by-stage record (Chinese, from the course project) |
 | [Third-party notices](THIRD_PARTY_NOTICES.md) | cargoTwin MIT assets, Three.js, UCI CC BY 4.0 |
 
@@ -157,4 +196,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md), [CHANGELOG.md](CHANGELOG.md),
 configured in this local repository yet, so none of the badges above pretend
 to point at a live CI.
 
-Licensed under [MIT](LICENSE). Synthetic sample data contains no real customer data.
+Licensed under the [Apache License 2.0](LICENSE); attribution notices in [NOTICE](NOTICE). Synthetic sample data contains no real customer data.

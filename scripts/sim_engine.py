@@ -18,6 +18,7 @@ import glob
 import heapq
 import json
 import math
+import os
 import sys
 import time
 from pathlib import Path
@@ -25,11 +26,25 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 CONFIG, DATA, OUT, RUNS = ROOT / "config", ROOT / "data", ROOT / "out", ROOT / "runs"
 
+# 死锁退让参数：被同一台车挡住这么久，且我方 id 更大，就后退让路。
+# DC_YIELD_AFTER_S 给守卫做对照实验（调成很大即等于"关闭退让"）。
+YIELD_AFTER_S = float(os.environ.get("DC_YIELD_AFTER_S", "8"))
+# 绕行阈值：被同一台车挡这么久还没让开（对方可能是停着的 IDLE/充电车），
+# 就重新规划一条绕开它的路线。退让解决面对面，绕行解决"前面停着一台车"。
+DETOUR_AFTER_S = 20.0
+DETOUR_COOLDOWN_S = 30.0      # 同一台车的绕行重试间隔
+# 兜底阈值：单向窄巷里迎面顶死时，退让与绕行都无解（没有第二条路）。
+# 真实仓库中这是"呼叫人工把车挪开"。这里做成显式事件并计数，而不是假装没有。
+JAM_CLEAR_AFTER_S = 300.0
+YIELD_BACK_M = 1.5
+
 EVENT_TYPES = (
     "ORDER_ARRIVED", "ORDER_LOST", "TASK_ASSIGNED", "TASK_REASSIGNED",
     "STATE_CHANGED", "PICK_DONE", "DROP_DONE", "TASK_COMPLETED",
     "CHARGE_START", "CHARGE_END", "BATTERY_CRITICAL", "FAULT_START", "FAULT_END",
     "DOCK_BLOCKED", "DOCK_REOPENED", "REPLAN", "WAIT_CONFLICT", "ENERGY_TICK",
+    "STATION_ENTER", "STATION_QUEUED", "STATION_EXIT", "DEADLOCK_YIELD",
+    "JAM_CLEARED",
     "RUN_SETTLED",
 )
 
@@ -203,6 +218,17 @@ class Robot:
         self.wait_s = 0.0
         self.fault_until = 0.0
         self.charging_since = None
+        # 工位占用/排队（M1-02）：station 非空表示正占着一个工位
+        self.station = None
+        self.next_station_state = None
+        self.queued_since = 0.0
+        # 死锁退让：blocked_by 记录当前挡路的车，blocked_s 累计被同一台车挡住的时长
+        self.blocked_by = None
+        self.blocked_s = 0.0
+        self.yields = 0
+        self.detours = 0
+        self.blocked_total = 0.0      # 累计受阻时长（跨机器人求和后更有区分度）
+        self.detour_try_t = -1e9      # 上次尝试绕行的时刻（冷却用）
         self.completed = 0
         self.distance_m = 0.0
         self.energy_out = 0.0
@@ -250,17 +276,55 @@ class Robot:
             step = min(self.speed * dt_s, max(0.0, self.route_len - self.arc))
             if step <= 1e-9:
                 return 0.0
+            # 电量硬约束：没有电就走不了。以前是 soc 夹到 0 但照常行驶，
+            # 会让"能量守恒"残差凭空多出来（0.157 kWh 就是这么来的）。
+            if self.cons > 0:
+                step = min(step, max(0.0, self.soc) / self.cons)
+                if step <= 1e-9:
+                    return 0.0
             target_arc = self.arc + step
             cand = self.point_at(target_arc)
             blocked = next((oid for oid, opos in positions.items()
                             if oid != self.id and math.dist(cand, opos) < min_sep - 1e-6), None)
             if blocked is not None:
                 self.wait_s += dt_s
+                self.blocked_total += dt_s
+                if blocked == self.blocked_by:
+                    self.blocked_s += dt_s
+                else:
+                    self.blocked_by, self.blocked_s = blocked, dt_s
                 if self.wait_s <= dt_s * 1.5:
                     log.emit(t, "WAIT_CONFLICT", agent=self.id,
                              cell=list(world.to_cell(cand)), blocked_by=blocked)
+
+                # ---- 死锁退让 ----
+                # 纯反应式距离门控在窄巷道会让你等我、我等你，双方永远不动。
+                # 规则：被同一台车挡住超过 YIELD_AFTER 秒，且**我方 id 较大**（确定性
+                # 仲裁，避免两边同时退让来回抖），就沿自己的路线后退让出空间。
+                # 退让只在“后方同样满足最小间距”时执行，不会撞上第三台车。
+                if self.blocked_s >= YIELD_AFTER_S and self.id > blocked:
+                    back_arc = max(0.0, self.arc - YIELD_BACK_M)
+                    if back_arc < self.arc - 1e-9:
+                        back_pt = self.point_at(back_arc)
+                        clear = all(
+                            oid == self.id or math.dist(back_pt, opos) >= min_sep - 1e-6
+                            for oid, opos in positions.items())
+                        if clear:
+                            moved = self.arc - back_arc
+                            self.arc = back_arc
+                            self.pos = back_pt
+                            self.distance_m += moved
+                            self.energy_out += moved * self.cons
+                            self.soc = max(0.0, self.soc - moved * self.cons)
+                            self.yields += 1
+                            self.blocked_s = 0.0
+                            self.blocked_by = None
+                            log.emit(t, "DEADLOCK_YIELD", agent=self.id,
+                                     yielded_to=blocked, back_m=round(moved, 3))
+                            return -moved
                 return 0.0
             self.wait_s = 0.0
+            self.blocked_by, self.blocked_s = None, 0.0
             self.arc = target_arc
             self.pos = cand
             self.distance_m += step
@@ -274,6 +338,8 @@ class Robot:
 
 
 class Simulation:
+    station_slots_override = None       # 验证排队用：把所有工位并行位强制为 N
+
     def __init__(self, scenario_path, sim_spec, fleet, demand, layout, grid, cfg, out_dir=None):
         self.sc = jload(scenario_path)
         self.spec = copy.deepcopy(sim_spec)
@@ -284,6 +350,9 @@ class Simulation:
         self.horizon = self.spec["horizon_s"]
         self.seed = self.sc.get("seed", self.spec["seed"])
         self.rng = Mulberry32(self.seed)
+        # 服务时长采样用独立随机流：否则会打乱订单到达序列，
+        # 让"只改了过程层"变成"整个需求分布都变了"，无法归因。
+        self.svc_rng = Mulberry32((self.seed ^ 0x9E3779B9) & 0xFFFFFFFF)
         self.model = fleet["models"][0]
         self.reserve_pct = self.spec["dispatch"]["battery_reserve_pct"]
         self.critical_pct = self.spec["battery"]["critical_pct"]
@@ -304,6 +373,10 @@ class Simulation:
         self.queue = []
         self.reserved = {}
         self.blocked_docks = set()
+        self.stations = self._load_stations()
+        if Simulation.station_slots_override:
+            for v in self.stations.values():
+                v["slots"] = int(Simulation.station_slots_override)
         self.faults = self._disruptions()
         self.metrics = {}
         self.samples = []
@@ -318,7 +391,225 @@ class Simulation:
         self._last_motion = 0.0
         self._last_energy_in = 0.0
         self.max_queue_depth = 0
+        # 死锁与电量守卫的可观测计数（要给 KPI 与守卫看，不能只存在日志里）
+        self.yield_n = 0
+        self.detour_n = 0
+        self.jam_clear_n = 0
+        self.max_blocked_s = 0.0
+        self._max_blocked_agent = None
+        self.energy_guard_n = 0
         self.wall0 = time.time()
+
+    # ---------- 工位层（M1-02）：process_spec 的服务时间真的进 tick ----------
+    def _load_stations(self):
+        """把 process_spec 的工位读成"服务台"：容量 + 服务时间分布。
+
+        id 与 data/layout.json 的 PACKING/SORTING 库位完全同名（已核对），
+        所以可以直接用订单的 pick_loc/drop_loc 查表，不需要额外映射表。
+        缺文件时返回空字典 → 引擎退回旧的固定 dwell 行为，旧产物仍可复现。
+        """
+        path = CONFIG / "process_spec.json"
+        if not path.exists():
+            return {}
+        try:
+            ps = jload(path)
+        except Exception:
+            return {}
+        out = {}
+        for st in ps.get("stations", []):
+            # process_spec.stations 是扁平结构：service_time_s / parallel_slots /
+            # buffer 都在工位对象本层（不是嵌套在 process 里）。
+            svc = st.get("service_time_s") or {}
+            mean = svc.get("mean")
+            if not mean or mean <= 0:
+                continue
+            out[st["id"]] = {
+                "mean": float(mean),
+                "cv": float(svc.get("cv", 0.0) or 0.0),
+                "slots": max(1, int(st.get("parallel_slots") or 1)),
+                "buffer": int((st.get("buffer") or {}).get("capacity") or 0),
+                "busy": 0,
+                "queue": [],
+                "served": 0,
+                "busy_s": 0.0,
+                "wait_sum": 0.0,
+                "wait_n": 0,
+                "qmax": 0,
+            }
+
+        # 拣选池：SHELF 取货没有独立工位（392 个货架），但拣选人力是共享资源。
+        # 用 data/areas.json 的 PICK_FACE 区（W 有 4 个并行位 / 45 s）当服务台，
+        # 这样"每次取货都要占一个拣选位"就能被排队与利用率真实反映。
+        areas_path = DATA / "areas.json"
+        if areas_path.exists():
+            try:
+                for a in jload(areas_path).get("areas", []):
+                    if a.get("kind") != "PICK_FACE":
+                        continue
+                    proc = a.get("process") or {}
+                    svc = proc.get("service_time_s") or {}
+                    mean = svc.get("mean")
+                    wid = a.get("warehouse") or str(a.get("id", "")).split("-")[0]
+                    if not mean or not wid:
+                        continue
+                    out["@PICK:" + wid] = {
+                        "mean": float(mean),
+                        "cv": float(svc.get("cv", 0.0) or 0.0),
+                        "slots": max(1, int(proc.get("parallel_slots") or 1)),
+                        "buffer": int((proc.get("buffer") or {}).get("capacity") or 0),
+                        "busy": 0, "queue": [], "served": 0, "busy_s": 0.0,
+                        "wait_sum": 0.0, "wait_n": 0, "qmax": 0,
+                    }
+            except Exception:
+                pass
+        return out
+
+    def _station_id(self, r, next_state):
+        """订单点位 → 服务台 id。精确工位优先，否则拣选单落到本仓拣选池。"""
+        if not r.order:
+            return None
+        loc = r.order["pick_loc"] if next_state == "PICKING" else r.order["drop_loc"]
+        if loc in self.stations:
+            return loc
+        wid = r.order.get("warehouse")
+        if next_state == "PICKING" and wid and ("@PICK:" + wid) in self.stations:
+            return "@PICK:" + wid
+        return None
+
+    def _sample_service(self, st):
+        """对数正态采样（mean/cv 参数化）。cv=0 时退化为确定值。"""
+        mean, cv = st["mean"], st["cv"]
+        if cv <= 1e-9:
+            return mean
+        sig2 = math.log(1.0 + cv * cv)
+        mu = math.log(mean) - 0.5 * sig2
+        u1 = max(self.svc_rng.next(), 1e-12)
+        u2 = self.svc_rng.next()
+        z = math.sqrt(-2.0 * math.log(u1)) * math.cos(2.0 * math.pi * u2)
+        return max(1e-3, math.exp(mu + math.sqrt(sig2) * z))
+
+    def _clear_jam(self, r, t):
+        """把顶死的车挪到最近的空闲待命点（模拟人工清障）。
+
+        只在"退让 + 绕行都失败"且已顶死 5 分钟时触发，一次运行通常 0–2 次。
+        选点要求：距其他所有车 >= min_sep，避免清障本身造成碰撞。
+        """
+        others = [(o.id, o.pos) for o in self.robots.values() if o.id != r.id]
+        homes = [l["access_point"] for l in self.world.by_kind.get(r.wid, {}).get("HOME", [])]
+        cands = sorted(homes, key=lambda p: math.dist(p, r.pos))
+        spot = next((p for p in cands
+                     if all(math.dist(p, q) >= self.min_sep for _, q in others)), None)
+        if spot is None:
+            return
+        old = [round(v, 2) for v in r.pos]
+        self._release_order(r, t, "JAM_CLEAR")
+        r.pos = tuple(spot)
+        r.route, r.arc, r.route_len = [], 0.0, 0.0
+        r.blocked_s = 0.0
+        r.blocked_by = None
+        r.set_state("IDLE", self.log, t)
+        self.jam_clear_n += 1
+        self.log.emit(t, "JAM_CLEARED", agent=r.id, blocked_by=None,
+                      from_pos=old, to_pos=[round(v, 2) for v in spot],
+                      reason="single_lane_head_on")
+
+    def _leg_goal(self, r):
+        """当前这一段行程的终点（绕行时用）。"""
+        if r.state == "MOVING_PICK" and r.order:
+            return r.order["pick_xy"]
+        if r.state == "MOVING_DROP" and r.order:
+            return r.order["drop_xy"]
+        if r.state == "RETURNING":
+            return r.home
+        return None
+
+    def _station_of(self, r):
+        if not r.order:
+            return None
+        loc = r.order["pick_loc"] if r.state == "MOVING_PICK" else r.order["drop_loc"]
+        return self.stations.get(loc)
+
+    def _enter_station(self, r, t, next_state):
+        """到达工位点：有空位就服务，没空位就排队（真的会等）。"""
+        loc = self._station_id(r, next_state)
+        st = self.stations.get(loc) if loc else None
+        if st is None:                      # 无工位定义 → 旧行为
+            r.station = None
+            r.set_state(next_state, self.log, t)
+            r.dwell_until = t + self.dwell
+            return
+
+        if st["busy"] < st["slots"]:
+            st["busy"] += 1
+            st["served"] += 1
+            r.station = loc
+            dur = self._sample_service(st)
+            st["busy_s"] += dur
+            r.set_state(next_state, self.log, t)
+            r.dwell_until = t + dur
+            st["qmax"] = max(st["qmax"], len(st["queue"]))
+            self.log.emit(t, "STATION_ENTER", agent=r.id, station=loc,
+                          service_s=round(dur, 4), queue=len(st["queue"]))
+            return
+
+        r.station = None
+        r.next_station_state = next_state
+        r.queued_since = t
+        st["queue"].append(r.id)
+        st["qmax"] = max(st["qmax"], len(st["queue"]))
+        r.set_state("WAITING", self.log, t)
+        self.log.emit(t, "STATION_QUEUED", agent=r.id, station=loc,
+                      queue_len=len(st["queue"]), slots=st["slots"])
+
+    def _station_retry(self, r, t):
+        """排队中的机器人每 tick 争一次：严格 FIFO，前一个没进就不许插队。"""
+        if not r.order or not r.next_station_state:
+            return
+        next_state = r.next_station_state
+        loc = self._station_id(r, next_state)
+        st = self.stations.get(loc) if loc else None
+        if st is None:
+            r.set_state(next_state, self.log, t)
+            r.dwell_until = t + self.dwell
+            return
+        if not st["queue"] or st["queue"][0] != r.id:
+            return
+        if st["busy"] >= st["slots"]:
+            return
+        st["queue"].pop(0)
+        st["busy"] += 1
+        st["served"] += 1
+        waited = max(0.0, t - r.queued_since)
+        st["wait_sum"] += waited
+        st["wait_n"] += 1
+        dur = self._sample_service(st)
+        st["busy_s"] += dur
+        r.station = loc
+        r.next_station_state = None
+        r.set_state(next_state, self.log, t)
+        r.dwell_until = t + dur
+        self.log.emit(t, "STATION_ENTER", agent=r.id, station=loc,
+                      service_s=round(dur, 4), queue=len(st["queue"]),
+                      waited_s=round(waited, 4))
+
+    def _release_station(self, r, t):
+        if not r.station:
+            return
+        st = self.stations.get(r.station)
+        if st and st["busy"] > 0:
+            st["busy"] -= 1
+        self.log.emit(t, "STATION_EXIT", agent=r.id, station=r.station)
+        r.station = None
+
+    def _drop_from_queue(self, r):
+        if not r.next_station_state:
+            return
+        next_state = r.next_station_state
+        loc = self._station_id(r, next_state)
+        st = self.stations.get(loc) if loc else None
+        if st and r.id in st["queue"]:
+            st["queue"].remove(r.id)
+        r.next_station_state = None
 
     def _fleet_size(self):
         for key in ("fleet.size", "fleet.deployment"):
@@ -409,6 +700,16 @@ class Simulation:
                 "reassignments": 0}
 
     # ---------- dispatch ----------
+    def _start_charge(self, r, t, mode="opportunistic_inplace"):
+        """就地充电（项目原有的 opportunistic 模式），抽出来给两处复用。"""
+        if r.state == "CHARGING":
+            return
+        r.set_state("CHARGING", self.log, t)
+        r.charging_since = t
+        self.log.emit(t, "CHARGE_START", agent=r.id, soc_pct=round(r.soc_pct, 3),
+                      charger_id=getattr(r, "charger_id", "inplace"), mode=mode,
+                      pos=[round(v, 2) for v in r.pos])
+
     def _replan_blocked_docks(self, t, order):
         """A blocked dock is a real obstacle: reroute delivery to an open one."""
         if order["drop_loc"] not in self.blocked_docks:
@@ -456,6 +757,17 @@ class Simulation:
                     self.world.astar(order["drop_xy"], r.home)]
             if any(p is None for p in legs):
                 continue
+            # 派单要算得动：三段行程总长 × 单位电耗。以前只看当前 soc ≥ 20%，
+            # 而 20% 只够跑 400 m，一趟 500 m 的活必然半路没电。
+            trip_m = sum(math.dist(p[i], p[i + 1])
+                         for p in legs for i in range(len(p) - 1))
+            need_kwh = trip_m * r.cons
+            avail_kwh = r.soc - self.reserve_pct / 100.0 * r.cap
+            if need_kwh > avail_kwh:
+                self._start_charge(r, t, mode="energy_guard")
+                self.energy_guard_n += 1
+                continue
+
             r.order = order
             r.legs = legs
             r.leg = 0
@@ -476,6 +788,8 @@ class Simulation:
     def _release_order(self, r, t, reason):
         if not r.order:
             return
+        self._drop_from_queue(r)
+        self._release_station(r, t)
         o = r.order
         o["reassignments"] += 1
         self.queue.append(o)
@@ -675,6 +989,9 @@ class Simulation:
             if r.fault_until <= t:
                 r.set_state("IDLE", self.log, t)
             return
+        if r.state == "WAITING":
+            self._station_retry(r, t)
+            return
         if r.state in ("PICKING", "DROPPING"):
             self._dwell_step(r, t)
         if r.state == "CHARGING":
@@ -693,26 +1010,54 @@ class Simulation:
             if r.soc_pct < self.critical_pct:
                 self.log.emit(t, "BATTERY_CRITICAL", agent=r.id,
                               soc_pct=round(r.soc_pct, 3))
-                r.set_state("CHARGING", self.log, t)
-                r.charging_since = t
-                self.log.emit(t, "CHARGE_START", agent=r.id,
-                              soc_pct=round(r.soc_pct, 3),
-                              charger_id=getattr(r, "charger_id", "inplace"),
-                              mode="opportunistic_inplace",
-                              pos=[round(v, 2) for v in r.pos])
+                self._start_charge(r, t)
                 return
+        before = r.yields
+        before_d = r.detours
         r.advance(dt, t, self.log, self.world, positions, self.min_sep)
+        if r.yields != before:
+            self.yield_n += r.yields - before
+        if r.blocked_s >= JAM_CLEAR_AFTER_S:
+            self._clear_jam(r, t)
+            return
+
+        if r.blocked_s > self.max_blocked_s:
+            self.max_blocked_s = r.blocked_s
+            self._max_blocked_agent = (r.id, r.state, r.blocked_by,
+                                       [round(v, 2) for v in r.pos])
+
+        # ---- 绕行：退让解决"面对面"，绕行解决"前方停着一辆车" ----
+        if (r.blocked_s >= DETOUR_AFTER_S and r.blocked_by in positions
+                and r.state in ("MOVING_PICK", "MOVING_DROP", "RETURNING")
+                and t - r.detour_try_t >= DETOUR_COOLDOWN_S):
+            # 冷却很关键：A* 目标不可达时会扫完整个栅格，若每 tick 都试一次，
+            # 28 台车 × 7200 tick 直接把仿真拖死（这一步踩过）。
+            r.detour_try_t = t
+            goal = self._leg_goal(r)
+            if goal is not None:
+                avoid = {self.world.to_cell(positions[r.blocked_by])}
+                p_new = self.world.astar(r.pos, goal, avoid)
+                if p_new and len(p_new) >= 2:
+                    r.route = p_new
+                    r.route_len = sum(math.dist(p_new[i], p_new[i + 1])
+                                      for i in range(len(p_new) - 1))
+                    r.arc = 0.0
+                    r.blocked_s = 0.0
+                    r.detours += 1
+                    self.log.emit(t, "REPLAN", agent=r.id, reason="deadlock_detour",
+                                  avoid=str(r.blocked_by),
+                                  remaining_m=round(r.route_len, 2))
+        if r.detours != before_d:
+            self.detour_n += r.detours - before_d
         if r.state in ("MOVING_PICK", "MOVING_DROP", "RETURNING", "TO_CHARGER") \
                 and r.arc >= r.route_len - 1e-6:
             self._arrive(r, t)
 
     def _arrive(self, r, t):
         if r.state == "MOVING_PICK":
-            r.set_state("PICKING", self.log, t)
-            r.dwell_until = t + self.dwell
+            self._enter_station(r, t, "PICKING")
         elif r.state == "MOVING_DROP":
-            r.set_state("DROPPING", self.log, t)
-            r.dwell_until = t + self.dwell
+            self._enter_station(r, t, "DROPPING")
         elif r.state == "RETURNING":
             o = r.order
             self.log.emit(t, "TASK_COMPLETED", agent=r.id, order_id=o["order_id"],
@@ -733,6 +1078,7 @@ class Simulation:
 
     def _dwell_step(self, r, t):
         if r.state in ("PICKING", "DROPPING") and t >= r.dwell_until:
+            self._release_station(r, t)
             if r.state == "PICKING":
                 self.log.emit(t, "PICK_DONE", agent=r.id,
                               order_id=r.order["order_id"], loc=r.order["pick_loc"])
@@ -830,6 +1176,59 @@ class Simulation:
         m["min_pair_distance_m"] = M(round(self.min_pair_m, 4), "m",
                                      "Minimum sampled centre distance",
                                      "min over all robot pairs at 1 s samples")
+        # ---- 工位层（M1-02）：服务时间与排队是实测的，不是公式推的 ----
+        st_total = len(self.stations)
+        st_served = sum(v["served"] for v in self.stations.values())
+        st_busy_s = sum(v["busy_s"] for v in self.stations.values())
+        st_wait_n = sum(v["wait_n"] for v in self.stations.values())
+        st_wait_s = sum(v["wait_sum"] for v in self.stations.values())
+        st_qmax = max([v["qmax"] for v in self.stations.values()] + [0])
+        st_service_mean = (st_busy_s / st_served) if st_served else 0.0
+        st_util = (st_busy_s / (st_total * self.horizon)) if st_total and self.horizon else 0.0
+        m["stations_defined"] = M(st_total, "stations",
+                                  "process_spec 工位接入 tick 的数量",
+                                  "count(process_spec.stations)")
+        m["station_served"] = M(st_served, "visits", "工位服务次数",
+                                "count(STATION_ENTER)")
+        m["station_service_mean_s"] = M(round(st_service_mean, 3), "s",
+                                        "工位实测平均服务时长",
+                                        "sum(service_s)/count(STATION_ENTER)")
+        m["station_utilization"] = M(round(st_util, 4), "ratio",
+                                     "工位占用率（服务时长 / 工位数×时长）",
+                                     "sum(service_s)/(stations*horizon_s)")
+        m["station_queue_wait_avg_s"] = M(
+            round(st_wait_s / st_wait_n, 3) if st_wait_n else 0.0, "s",
+            "排队进入服务的平均等待（未排队的单不计入）",
+            "sum(waited_s)/count(waited_s)")
+        m["station_queue_max"] = M(st_qmax, "robots", "单工位最长队列",
+                                   "max(STATION_QUEUED.queue_len)")
+        m["deadlock_yields"] = M(self.yield_n, "times",
+                                 "死锁退让次数（被同一台车挡住超阈值后主动后退）",
+                                 "count(DEADLOCK_YIELD)")
+        if os.environ.get("DC_DEBUG_BLOCK"):
+            for rr in self.robots.values():
+                if rr.blocked_s > 60:
+                    bb = self.robots.get(rr.blocked_by)
+                    print("BLOCKED", rr.id, rr.state, "by", rr.blocked_by,
+                          (bb.state if bb else "-"),
+                          "for %.0fs" % rr.blocked_s,
+                          "pos", [round(v, 2) for v in rr.pos], flush=True)
+        m["deadlock_detours"] = M(self.detour_n, "times",
+                                  "为绕开停驶车辆而重新规划的路线数",
+                                  "count(REPLAN.reason=deadlock_detour)")
+        m["blocked_time_total_s"] = M(
+            round(sum(r.blocked_total for r in self.robots.values()), 2), "s",
+            "全员累计受阻时长（退让/绕行生效后会显著下降）",
+            "sum(robot.blocked_total)")
+        m["jam_clears"] = M(self.jam_clear_n, "times",
+                            "人工清障次数（单向窄巷顶死，退让与绕行都无解）",
+                            "count(JAM_CLEARED)")
+        m["max_blocked_s"] = M(round(self.max_blocked_s, 3), "s",
+                               "单台车最长连续受阻时长（死锁不退让时会非常大）",
+                               "max(robot.blocked_s)")
+        m["energy_guard_charges"] = M(self.energy_guard_n, "times",
+                                      "因电量不足以跑完行程而就地充电的次数",
+                                      "count(CHARGE_START.mode=energy_guard)")
         m["sim_duration_s"] = M(self.horizon, "s", "Simulation horizon", "sim_spec.horizon_s")
         m["wall_clock_s"] = M(round(wall_s, 3), "s", "Wall clock", "time.time() delta")
         return {"schema_version": "1.0", "kind": "sim_kpi", "engine": "sim",
@@ -875,6 +1274,8 @@ def run_one(scenario_path, args, sim_spec, fleet, demand, layout, grid, cfg, out
 def main(argv=None):
     ap = argparse.ArgumentParser(description="tick-level warehouse simulation")
     ap.add_argument("--scenario", default="config/scenarios/baseline.json")
+    ap.add_argument("--station-slots", type=int, default=None,
+                    help="把工位并行位强制为该值（验证排队会真的发生）")
     ap.add_argument("--all", action="store_true", help="run all 8 frozen scenarios")
     ap.add_argument("--include-custom", action="store_true",
                     help="also run user scenarios from config/scenarios/custom/")
@@ -892,6 +1293,8 @@ def main(argv=None):
     layout = jload(DATA / "layout.json")
     grid = jload(DATA / "nav_grid.json")
     cfg = jload(DATA / "config.json")
+    if args.station_slots:
+        Simulation.station_slots_override = args.station_slots
     scenarios = (sorted(glob.glob(str(CONFIG / "scenarios" / "*.json")))
                  if args.all else [str(ROOT / args.scenario)])
     if args.all and args.include_custom:

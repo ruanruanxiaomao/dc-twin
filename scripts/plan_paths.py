@@ -29,7 +29,8 @@ sys.path.insert(0, os.path.dirname(__file__))
 from nav_grid import load_grid
 from geometry import AGV_RADIUS, MIN_SEP, SPEED
 
-CFG = json.load(open(os.path.join(DATA, 'config.json'), encoding='utf-8'))
+import scene_config
+CFG = scene_config.load()
 LAYOUT = json.load(open(os.path.join(DATA, 'layout.json'), encoding='utf-8'))
 TASKS = json.load(open(os.path.join(DATA, 'tasks.json'), encoding='utf-8'))
 GRID = load_grid()

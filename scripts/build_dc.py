@@ -17,7 +17,12 @@ import json
 import math
 import os
 import random
+import sys
 from mathutils import Vector
+
+# Blender 的 -P 不会把脚本目录放进 sys.path（cwd 是项目根），
+# 所以同目录的 scene_config 必须显式加进来。踩过一次，别删。
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 DATA = os.path.join(ROOT, 'data')
@@ -26,7 +31,8 @@ ASSET_GLB = os.path.join(ROOT, 'assets', 'cargotwin_assets.glb')
 BLEND = os.path.join(OUT, 'distribution_center.blend')
 
 LAYOUT = json.load(open(os.path.join(DATA, 'layout.json'), encoding='utf-8'))
-CFG = json.load(open(os.path.join(DATA, 'config.json'), encoding='utf-8'))
+import scene_config
+CFG = scene_config.load()
 RNG = random.Random(LAYOUT['seed'])
 COUNTS = {}
 
@@ -510,6 +516,140 @@ def build_dynamic_cargo():
     COUNTS['home_bays'] = m
 
 
+# ---------------------------------------------------------------- 功能区（v3.8）
+# data/areas.json 是功能区唯一真相（spec_areas.py 展开 + L23–L26 校验）。
+# 3D 只做"看得见"的那一层：物理区画地面色块 + 边界 + 名称牌；逻辑区没有独立地面，
+# 只在挂靠点放一块小标牌——不画假的矩形，免得评审以为逻辑区也占了地。
+AREA_COLORS = {
+    'RECEIVING': '#2f80ed', 'QA': '#9b51e0', 'STAGING_IN': '#56ccf2',
+    'STORAGE': '#4f9d69', 'PICK_FACE': '#27ae60', 'REPLENISH': '#f2994a',
+    'SORTING': '#eb5757', 'PACKING': '#f2c94c', 'VAS': '#bb6bd9',
+    'STAGING_OUT': '#6fcf97', 'RETURNS': '#e07a5f', 'EMPTY_CONTAINER': '#828282',
+    'BATTERY': '#c0392b', 'MAINTENANCE': '#4f4f4f', 'OFFICE': '#bdbdbd',
+}
+for _k, _v in AREA_COLORS.items():
+    PALETTE.setdefault('area_' + _k.lower(), _v)
+PALETTE.setdefault('area_edge', '#1f2937')
+PALETTE.setdefault('area_text', '#0b1220')
+
+AREAS_PATH = os.path.join(DATA, 'areas.json')
+AREAS = json.load(open(AREAS_PATH, encoding='utf-8')) if os.path.exists(AREAS_PATH) else {'areas': []}
+
+# Blender 自带字体没有中日韩字形，中文标签会变成空框；能加载系统中文字体就用中文。
+AREA_FONTS = (
+    'C:/Windows/Fonts/msyh.ttc', 'C:/Windows/Fonts/msyhl.ttc',
+    'C:/Windows/Fonts/simhei.ttf', 'C:/Windows/Fonts/simsun.ttc',
+    '/System/Library/Fonts/PingFang.ttc',
+    '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',
+)
+_FONT = {'tried': False, 'font': None}
+
+
+def area_font():
+    if _FONT['tried']:
+        return _FONT['font']
+    _FONT['tried'] = True
+    for fp in AREA_FONTS:
+        if not os.path.exists(fp):
+            continue
+        try:
+            _FONT['font'] = bpy.data.fonts.load(fp, check_existing=True)
+            break
+        except Exception:
+            continue
+    return _FONT['font']
+
+
+def anchor_centers():
+    """挂靠点 id -> 平面中心（布局坐标）。逻辑区靠它定位标牌。"""
+    out = {}
+    for wh in LAYOUT['warehouses']:
+        for z in wh.get('zones', []):
+            pts = z.get('polygon') or []
+            if len(pts) >= 4:
+                out[z['id']] = (sum(p[0] for p in pts) / len(pts),
+                                sum(p[1] for p in pts) / len(pts))
+        for r in wh.get('racks', []):
+            x, _y, zz = r['position']
+            out[r['id']] = (x + r['size'][0] / 2, zz + r['size'][2] / 2)
+        for d in wh.get('docks', []):
+            x0, z0, x1, z1 = d['rect']
+            out[d['id']] = ((x0 + x1) / 2, (z0 + z1) / 2)
+        for st in wh.get('stations', []):
+            x0, z0, x1, z1 = st['rect']
+            out[st['id']] = ((x0 + x1) / 2, (z0 + z1) / 2)
+        for ch in wh.get('charging_stations', []) or []:
+            ap = ch.get('access_point') or ch.get('position')
+            if ap:
+                out[ch['id']] = (ap[0], ap[1])
+    return out
+
+
+def text_label(name, body, cx, cz, size, coll, z=0.06):
+    cu = bpy.data.curves.new(name, type='FONT')
+    cu.body = body
+    cu.size = size
+    cu.align_x = 'CENTER'
+    cu.align_y = 'CENTER'
+    cu.extrude = 0.0
+    f = area_font()
+    if f:
+        cu.font = f
+    cu.materials.append(material('area_text'))
+    o = bpy.data.objects.new(name, cu)
+    coll.objects.link(o)
+    o.location = (cx, cz, z)
+    return o
+
+
+def build_functional_areas():
+    """把 21 个功能区画进 3D：物理区真实占位，逻辑区只放挂靠标牌。"""
+    centers = anchor_centers()
+    c = collection('AREAS')
+    n_phys = n_logi = n_label = 0
+    has_cjk = area_font() is not None
+    for a in AREAS.get('areas', []):
+        kind = a.get('kind', 'STORAGE')
+        key = 'area_' + kind.lower()
+        if key not in PALETTE:
+            key = 'area_storage'
+        aid = a['id']
+        if a.get('rect'):
+            x0, z0, x1, z1 = a['rect']
+            # 边界（深色底 + 内缩 0.12 m 的色块），避免和地面 5S 黄线糊在一起
+            plane('AREA_EDGE_' + aid, x0, z0, x1, z1, 0.034, 'area_edge', c)
+            plane('AREA_' + aid, x0 + 0.12, z0 + 0.12, x1 - 0.12, z1 - 0.12,
+                  0.038, key, c)
+            w, d = x1 - x0, z1 - z0
+            size = max(0.7, min(1.8, min(w, d) * 0.16))
+            body = '%s\n%s' % (aid, a.get('name', kind)) if has_cjk else aid
+            text_label('AREA_TXT_' + aid, body, (x0 + x1) / 2, (z0 + z1) / 2,
+                       size, c, z=0.05)
+            n_phys += 1
+            n_label += 1
+            continue
+
+        # 逻辑区：只放一块 1.4×0.8 m 的标牌，位置取挂靠点中心
+        ctr = centers.get(a.get('anchor'))
+        if not ctr:
+            continue
+        cx, cz = ctr
+        plane('AREA_TAG_' + aid, cx - 0.7, cz - 0.4, cx + 0.7, cz + 0.4,
+              0.041, key, c)
+        plane('AREA_TAGEDGE_' + aid, cx - 0.76, cz - 0.46, cx + 0.76, cz + 0.46,
+              0.039, 'area_edge', c)
+        text_label('AREA_TAG_TXT_' + aid, aid, cx, cz, 0.30, c, z=0.055)
+        n_logi += 1
+        n_label += 1
+
+    COUNTS['areas_total'] = len(AREAS.get('areas', []))
+    COUNTS['areas_physical_drawn'] = n_phys
+    COUNTS['areas_logical_tags'] = n_logi
+    COUNTS['area_labels'] = n_label
+    COUNTS['area_cjk_font'] = bool(has_cjk)
+    return n_phys, n_logi
+
+
 def build_lights_cameras():
     c = collection('LIGHTS_CAMERAS')
     world = bpy.context.scene.world or bpy.data.worlds.new('World')
@@ -572,6 +712,7 @@ def main():
     build_ground_and_buildings(assets, coll_ground, None)
     build_racks_and_cargo(assets)
     build_docks_conveyors(assets)
+    build_functional_areas()
     build_vehicles(assets)
     build_route_lines()
     build_nav_corridors()

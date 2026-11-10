@@ -6,61 +6,61 @@
     {
       "file": "01_overview.webp",
       "source": "01_overview.png",
-      "bytes": 47498,
+      "bytes": 48588,
       "width": 1600,
       "height": 900,
       "quality": 82,
-      "source_sha256": "53b6fcabeb5d29171c212405802233eba588ce5bab06ca8207a09e817e79a489",
+      "source_sha256": "859fd19fe5bdb367566751a29ef18e861506eca469ced31b71296423598a75bf",
       "hero": true
     },
     {
       "file": "02_interior.webp",
       "source": "02_interior.png",
-      "bytes": 110466,
+      "bytes": 109418,
       "width": 1600,
       "height": 900,
       "quality": 82,
-      "source_sha256": "d9f58f8800b445d05e31ae97163c546c019329d528231bb9843af9a189de53a6",
+      "source_sha256": "53ace8e63a674c7cadecfaac6550554822d26b92f24725a668d7f2477b0ff123",
       "hero": false
     },
     {
       "file": "03_dock.webp",
       "source": "03_dock.png",
-      "bytes": 24292,
+      "bytes": 23356,
       "width": 1600,
       "height": 900,
       "quality": 82,
-      "source_sha256": "d87fe44c1cd27152a1da327c6bed89c6002f4d7c9392e015d98fe68c59d1965f",
+      "source_sha256": "b59016ac7161606906f7d1368deb4a4bab4f53db2d325bf8236993fc3257e5d5",
       "hero": true
     },
     {
       "file": "04_agv_route.webp",
       "source": "04_agv_route.png",
-      "bytes": 70804,
+      "bytes": 69674,
       "width": 1600,
       "height": 900,
       "quality": 82,
-      "source_sha256": "b72d8abade9255bf1c1097dafbb8968de52e49661e68aaf03cf845b5b2595a4d",
+      "source_sha256": "6d0f3a29f5e42f4c27de2db60876100a3bbf4a430c4ec0f44d74838b54ceb6ee",
       "hero": false
     },
     {
       "file": "05_slotting_heatmap.webp",
       "source": "05_slotting_heatmap.png",
-      "bytes": 49454,
+      "bytes": 46160,
       "width": 1600,
       "height": 900,
       "quality": 82,
-      "source_sha256": "beca8193d01ab2e347edc73e3ad1c97823a78fae6152efd40ddfdba8f73f9fd4",
+      "source_sha256": "e2ec23c7cffa7e48d0259514e4ac3b0a6d40368b70cef13775fc7c9a392b5079",
       "hero": true
     },
     {
       "file": "06_corridor_check.webp",
       "source": "06_corridor_check.png",
-      "bytes": 39276,
+      "bytes": 39268,
       "width": 1600,
       "height": 900,
       "quality": 82,
-      "source_sha256": "74da20e37389325a34bab950dad5a25e29e03ee57240e9a4eef7433d4e6dfbbe",
+      "source_sha256": "a578132dd4a230a7df0ce866c5b010d779b5412e7e71becf77ad08901afdef2a",
       "hero": false
     },
     {
@@ -113,5 +113,5 @@
     "duration_s": 4.0,
     "source_sha256": "42c3b1319a9825ab94348b6b2b52759b9a6dca1c06180668e87a70e4b6332b2f"
   },
-  "total_bytes": 1435498
+  "total_bytes": 1430172
 }
