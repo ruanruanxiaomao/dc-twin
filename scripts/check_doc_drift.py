@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import glob
+import re
 import hashlib
 import json
 import os
@@ -86,7 +87,9 @@ def facts():
 def expected_fragments(f):
     return [
         '%d 个冻结场景' % f['scenarios'],
-        '%d 次运行' % f['runs'],
+        # 运行次数是**快照**：CI 从空 runs/ 起跑，提交里的数字不可能对上。
+        # 所以只校验格式存在，不校验数值——数值断言会把"可复现"变成"必须同一台机器"。
+
         '%d 份 schema' % f['schemas'],
         '解析层 %d 项' % f['analytic'],
         'tick 层 %d 项' % f['tick'],
@@ -104,8 +107,12 @@ def check_text(text, f):
     for frag in expected_fragments(f):
         if frag not in text:
             problems.append('缺少应有数字：%r（产物已变，状态文档未重生成？）' % frag)
+    if not re.search(r'\d+ 次运行', text):
+        problems.append('缺少「N 次运行」的计数表述（运营规模这一段被删了？）')
     if '## 口径纪律' not in text:
         problems.append('缺少「口径纪律」小节')
+    if 'runs' in f:
+        notes.append('运行次数为快照值（当前产物 %d 次），不做数值断言' % f['runs'])
     return problems, notes
 
 

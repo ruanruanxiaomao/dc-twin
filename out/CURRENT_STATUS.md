@@ -5,12 +5,12 @@
 
 | 指标 | 当前值 |
 |---|---|
-| 生成时间 | 2026-11-10 23:18:00 |
+| 生成时间 | 2026-11-10 23:26:45 |
 | Blender | 5.2.3 LTS |
 | 布局来源 | config/layout_spec.json → spec_layout.py（L1–L13 PASS，issues=0 warnings=148；38 扇门） |
 | AP 互斥 | 148 对（WARN，两 AP <2R 不能同时占用）；预约表复核同时占用 0 次；加宽变体互斥 29 对 |
 | 四层配置 | layout_spec / fleet_spec / demand_spec / 8 个 scenarios + 7 份 schema；4 个布局 spec（当前 / areas / f4 / wide）全部审计 PASS |
-| 场景/KPI | 8 个冻结场景（config/scenarios）× 380 次运行；解析层 25 项 KPI + tick 层 39 项 KPI（去重 55 项），每项带 definition/formula/source |
+| 场景/KPI | 8 个冻结场景（config/scenarios）× 388 次运行；解析层 25 项 KPI + tick 层 39 项 KPI（去重 55 项），每项带 definition/formula/source |
 | 布局 | 4 仓 / 196 货架 / 441 库位（392 SHELF + 21 HOME）/ 10 月台 / 6 站 / 21 AGV |
 | 布局审计 | issues=0 warnings=0 verdict=PASS |
 | 功能区 | 21 个（物理 3 / 逻辑 18）；种类 BATTERY×1/EMPTY_CONTAINER×1/PACKING×2/PICK_FACE×4/QA×1/RECEIVING×1/REPLENISH×1/RETURNS×1/SORTING×1/STAGING_IN×4/STAGING_OUT×4；见 data/areas.json |
@@ -25,8 +25,8 @@
 | 交通 | 全程在场严格口径；min_pair=1.5358 m（阈值 1.4592 m）/ issues=0 / strict_violations=0 |
 | 几何 | 5400 段 / 穿越 0 / 最小间隙 1.05 m / 最大单步 0.7071 m |
 | 货物状态机 | 21 件货物 LOADED/DELIVERED 各 21/21；42 次状态迁移；28 个库位库存变动；.blend 随车动画对象 21 |
-| .blend | 914 objects / 61 meshes / 36 materials / 42 actions（构建报告 977/103/48，重开实测一致）；HOME 待命位 21；隐藏 AGV=0 |
-| GLB | 882 节点 / 59 meshes / 35 materials / 0 animations；禁用节点=[]；DC_ROOT=True |
+| .blend | 977 objects / 103 meshes / 48 materials / 42 actions（构建报告 977/103/48，重开实测一致）；HOME 待命位 21；隐藏 AGV=0 |
+| GLB | 924 节点 / 101 meshes / 47 materials / 0 animations；禁用节点=[]；DC_ROOT=True |
 | 图像 | 6 张 3D 静帧 + 2 张 2D 闭环路线图 + 时间-空间图 + 快照序列；尺寸全对=True |
 | 路线图 | closed_loops=21 / routes=21 / segments=3444 / head_on=0 / edge_clearance=0.3204 m / 中央主通道采样=128 |
 | 车队/交通复核 | 状态迁移 147 次/非法 0；最低电量 53.986%；预约表顶点 0 / 边交换 0 |

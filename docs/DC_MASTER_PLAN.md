@@ -2819,6 +2819,7 @@ self.soc = max(0.0, self.soc - step * self.cons)   # soc 夹到 0
 |---|---|---|---|
 | **Blender 里 `import scene_config` 直接崩** | `ModuleNotFoundError`，`.blend` 从 v3.4 之后就没再生成过 | Blender 的 `-P` 不把脚本目录放进 `sys.path`，而 cwd 是项目根 | 在 `build_dc.py` 顶部 `sys.path.insert(0, dirname(__file__))` |
 | 静帧渲染必须连 942 帧动画一起跑 | 只想更新几何时要等整段动画 | `render.py` 只有"全跑"和"1 张低清预览"两档 | 新增 `DC_RENDER_STILLS=1`：只出 6 张静帧并沿用已有帧序列 |
+| **CI 首次跑就红**：`scenario_run.py` 无条件读 `out/build_report.json` | `FileNotFoundError`，data 链在 Ubuntu/Windows × 3.11/3.13 四格全挂 | 该文件只有跑过 Blender 才存在，而 CI 只跑数据链 | 改为 `_blender_version()`：文件缺失时如实写 `data_only`，不伪造版本号 |
 
 `DC_RENDER_STILLS=1` 实测 6 张静帧 **7.5 s**，动画帧一行没重算。
 
@@ -2853,7 +2854,18 @@ check_doc_drift.py    DRIFT_OK
 build_report.json     areas_total=21 · physical=3 · logical_tags=18 · cjk_font=true
 ```
 
-### 28.6 v3.8 边界
+### 28.6 开源仓库
+
+| 项 | 值 |
+|---|---|
+| 地址 | https://github.com/ruanruanxiaomao/dc-twin |
+| 可见性 | public |
+| 许可证 | Apache-2.0（GitHub 已识别 `spdx_id: Apache-2.0`） |
+| 首次推送 | 246 个文件；最大单文件 1.2 MB（`console/static/vendor/three.module.js`） |
+| topics | digital-twin / warehouse-simulation / agv / discrete-event-simulation / blender / python / tkinter |
+| CI | 2 OS × 2 Python（3.11 / 3.13）；含 8 个守卫与 data 层 12 项验收 |
+
+### 28.7 v3.8 边界
 
 - **动画没有重渲**：942 帧仍是 11-08 的帧序列，`.blend` 里的功能区不会出现在 `anim_dc.mp4` 中（静帧已更新）。重渲约需整段动画时间。
 - **功能区不进导航栅格**：这是有意的——功能区是作业分区，不该改变可通行性；地面标线也可能压在通道上。
