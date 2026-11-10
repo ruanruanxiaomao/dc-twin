@@ -3,12 +3,15 @@
 ![Four-warehouse distribution center rendered in Blender](docs/assets/01_overview.webp)
 
 **Blender-based digital twin for a 4-warehouse distribution center with 21 AGVs,
-closed-loop A\* tasks, a reproducible data chain and 40 independent acceptance checks.**
+closed-loop A\* tasks, 21 validated functional areas, a tick-level station
+queue layer, a reproducible data chain, 39 measured tick KPIs and 40 independent
+acceptance checks.**
 
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](pyproject.toml)
 [![Blender 5.2](https://img.shields.io/badge/Blender-5.2-orange.svg)](docs/getting-started.md)
 [![Acceptance 40/40](https://img.shields.io/badge/acceptance-40%2F40-brightgreen.svg)](out/CURRENT_STATUS.md)
+[![CI](https://github.com/ruanruanxiaomao/dc-twin/actions/workflows/ci.yml/badge.svg)](https://github.com/ruanruanxiaomao/dc-twin/actions/workflows/ci.yml)
 
 **English** · [简体中文](README.zh-CN.md) · [Live static demo](demo/index.html)
 
