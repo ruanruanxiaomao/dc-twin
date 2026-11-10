@@ -32,6 +32,17 @@ RUNS = os.path.join(ROOT, 'runs')
 OUT = os.path.join(ROOT, 'out')
 
 
+def _blender_version():
+    """Blender 版本：只跑数据链时如实写 data_only，而不是伪造一个版本号。"""
+    p = os.path.join(OUT, 'build_report.json')
+    if not os.path.exists(p):
+        return 'data_only'
+    try:
+        return jload(p).get('blender', 'n/a')
+    except Exception:
+        return 'unreadable'
+
+
 def jload(p):
     return json.load(open(p, encoding='utf-8'))
 
@@ -134,8 +145,9 @@ def run_one(scenario_file, verbose=True):
                        'sha256': sha(p)}
                    for k, p in (('layout_spec', spec_path), ('fleet_spec', fleet_path),
                                 ('demand_spec', demand_path), ('scenario', scenario_file))},
+        # build_report.json 只有跑了 Blender 链才存在；data-only 的 CI 不该因此崩。
         'versions': {'python': sys.version.split()[0],
-                     'blender': jload(os.path.join(OUT, 'build_report.json')).get('blender', 'n/a')},
+                     'blender': _blender_version()},
         'git_commit': subprocess.run(['git', 'rev-parse', '--short', 'HEAD'],
                                      cwd=ROOT, capture_output=True, text=True).stdout.strip(),
         'layout_issues': len(issues), 'layout_warnings': len(warnings),
