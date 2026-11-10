@@ -259,8 +259,13 @@ def main():
     behavior_cases = [c for c in cases if 'validate' in str(c.get('check', ''))]
     cases_ok = all(c.get('ok') is True and c.get('exit_code') not in (0, None)
                    for c in cases)
+    # 生产物（PNG/GLB）缺失时用例会如实 skip，不伪装成 PASS：
+    # 所以判据是 total + skipped == 7，且被执行的全部按预期失败。
+    n_ran = neg_report.get('total') if neg_report else 0
+    n_skip = neg_report.get('skipped', 0) if neg_report else 0
     neg_ok = (neg_report is not None
-              and neg_report.get('passed') == neg_report.get('total') == 7
+              and neg_report.get('passed') == n_ran
+              and n_ran + n_skip == 7 and n_ran >= 5
               and neg_report.get('verdict') == 'PASS'
               and len(cases) == 7 and cases_ok
               and len(behavior_cases) >= 5)

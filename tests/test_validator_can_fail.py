@@ -31,6 +31,17 @@ def rebuild_reports():
         run(s)
 
 
+def skip(name, reason):
+    """产物不存在（只跑数据链、没有 Blender）时跳过，并如实记为 skip。
+
+    跳过不是通过：汇总里单列 skipped，A13 也要求 total + skipped == 7。
+    """
+    CASES.append({'name': name, 'check': '-', 'exit_code': None,
+                  'expected': 'nonzero', 'ok': True, 'skipped': True,
+                  'reason': reason})
+    return True
+
+
 def case(name, path, break_fn, check_script, pre=None):
     """返回 True 表示校验器确实报错（期望行为）。"""
     bak = path + '.neg_bak'
@@ -110,15 +121,25 @@ def main():
          layout, break_layout, 'scripts/layout_audit.py')
     case('2 两台车轨迹重合 -> traffic_check 必须失败',
          paths, break_traffic, 'scripts/traffic_check.py')
-    case('3 08 图换成小尺寸空白 PNG -> validate 必须失败',
-         png08, break_png, 'scripts/validate.py', pre='scripts/parse_artifacts.py')
+    if os.path.exists(png08):
+        case('3 08 图换成小尺寸空白 PNG -> validate 必须失败',
+             png08, break_png, 'scripts/validate.py',
+             pre='scripts/parse_artifacts.py')
+    else:
+        skip('3 08 图换成小尺寸空白 PNG -> validate 必须失败',
+             '缺 out/renders/08_*.png（本次未跑 Blender 链）')
     case('4 删除 LICENSE -> validate 必须失败',
          lic, hide, 'scripts/validate.py')
     restore_hidden(lic)
     case('5 path_metrics.samples 改成 777 -> validate 必须失败',
          metrics, break_metrics, 'scripts/validate.py')
-    case('6 GLB 截断到 10 KB -> validate 必须失败',
-         glb, break_glb, 'scripts/validate.py', pre='scripts/parse_artifacts.py')
+    if os.path.exists(glb):
+        case('6 GLB 截断到 10 KB -> validate 必须失败',
+             glb, break_glb, 'scripts/validate.py',
+             pre='scripts/parse_artifacts.py')
+    else:
+        skip('6 GLB 截断到 10 KB -> validate 必须失败',
+             '缺 out/dc_preview.glb（本次未跑 Blender 链）')
     case('7 删除 THIRD_PARTY_NOTICES.md -> validate 必须失败',
          notice, hide, 'scripts/validate.py')
     restore_hidden(notice)
@@ -128,16 +149,23 @@ def main():
     # 里留下 FAIL 记录。必须在全部文件恢复后再跑一次干净的 validate，
     # 否则后续 report_status.py 会把「19/21」当成当前验收结论写进状态表。
     run('scripts/validate.py')
-    passed = sum(1 for c in CASES if c['ok'])
-    out = {'total': len(CASES), 'passed': passed, 'cases': CASES,
-           'verdict': 'PASS' if passed == len(CASES) else 'FAIL'}
+    ran = [c for c in CASES if not c.get('skipped')]
+    skipped = [c for c in CASES if c.get('skipped')]
+    passed = sum(1 for c in ran if c['ok'])
+    out = {'total': len(ran), 'passed': passed, 'skipped': len(skipped),
+           'cases': CASES,
+           'verdict': 'PASS' if passed == len(ran) else 'FAIL'}
     with open(os.path.join(OUT, 'negative_tests.json'), 'w', encoding='utf-8') as f:
         json.dump(out, f, ensure_ascii=False, indent=2)
     for c in CASES:
+        if c.get('skipped'):
+            print('[SKIP] %s (%s)' % (c['name'], c.get('reason', '')))
+            continue
         print('[%s] %s (exit=%s)' %
               ('OK' if c['ok'] else 'BROKEN', c['name'], c['exit_code']))
-    print('NEGATIVE_TESTS', passed, '/', len(CASES))
-    sys.exit(0 if passed == len(CASES) else 1)
+    print('NEGATIVE_TESTS', passed, '/', len(ran),
+          ('skipped %d' % len(skipped)) if skipped else '')
+    sys.exit(0 if passed == len(ran) else 1)
 
 
 if __name__ == '__main__':
