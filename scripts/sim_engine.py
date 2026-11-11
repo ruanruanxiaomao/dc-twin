@@ -42,7 +42,8 @@ EVENT_TYPES = (
     "ORDER_ARRIVED", "ORDER_LOST", "TASK_ASSIGNED", "TASK_REASSIGNED",
     "STATE_CHANGED", "PICK_DONE", "DROP_DONE", "TASK_COMPLETED",
     "CHARGE_START", "CHARGE_END", "BATTERY_CRITICAL", "FAULT_START", "FAULT_END",
-    "DOCK_BLOCKED", "DOCK_REOPENED", "REPLAN", "WAIT_CONFLICT", "ENERGY_TICK",
+    "DOCK_BLOCKED", "DOCK_REOPENED", "DOCK_REFUSED", "DOCK_RESERVED",
+    "DOCK_HANDOFF", "REPLAN", "WAIT_CONFLICT", "ENERGY_TICK",
     "STATION_ENTER", "STATION_QUEUED", "STATION_EXIT", "DEADLOCK_YIELD",
     "JAM_CLEARED",
     "RUN_SETTLED",
@@ -339,6 +340,7 @@ class Robot:
 
 class Simulation:
     station_slots_override = None       # 验证排队用：把所有工位并行位强制为 N
+    dock_slots_override = None          # 同上，但只改月台门（工位不动）
 
     def __init__(self, scenario_path, sim_spec, fleet, demand, layout, grid, cfg,
                  out_dir=None, external_orders=None):
@@ -375,9 +377,23 @@ class Simulation:
         self.reserved = {}
         self.blocked_docks = set()
         self.stations = self._load_stations()
+        # 两个覆盖项互不干扰：做"工位产能"对照实验时，不该顺手把月台门也改小，
+        # 否则观察到的排队分不清是工位堵的还是月台堵的。
         if Simulation.station_slots_override:
             for v in self.stations.values():
+                if v.get("kind") == "DOCK":
+                    continue
                 v["slots"] = int(Simulation.station_slots_override)
+        if Simulation.dock_slots_override:
+            for v in self.stations.values():
+                if v.get("kind") == "DOCK":
+                    n = max(1, int(Simulation.dock_slots_override))
+                    v["slots"] = n
+                    # 门的时间窗数组必须跟着改：只改 slots 不改数组，容量约束会
+                    # 悄悄留在装载时的门数上（三组对照实验曾因此给出完全相同的
+                    # 队列数字，等于这个开关没生效）。
+                    cur = list(v.get("door_free_at") or [])
+                    v["door_free_at"] = (cur + [0.0] * n)[:n]
         self.faults = self._disruptions()
         # 外部订单流（企业 CSV / WMS 适配器产出）：给了就不再合成订单。
         # 这样"真实数据接入"才是真的跑一遍，而不是拿 CSV 生成个差不多的泊松。
@@ -429,6 +445,7 @@ class Simulation:
             if not mean or mean <= 0:
                 continue
             out[st["id"]] = {
+                "kind": st.get("kind") or "STATION",
                 "mean": float(mean),
                 "cv": float(svc.get("cv", 0.0) or 0.0),
                 "slots": max(1, int(st.get("parallel_slots") or 1)),
@@ -458,6 +475,7 @@ class Simulation:
                     if not mean or not wid:
                         continue
                     out["@PICK:" + wid] = {
+                        "kind": "PICKING",
                         "mean": float(mean),
                         "cv": float(svc.get("cv", 0.0) or 0.0),
                         "slots": max(1, int(proc.get("parallel_slots") or 1)),
@@ -467,7 +485,78 @@ class Simulation:
                     }
             except Exception:
                 pass
+        self._load_docks(out)
         return out
+
+    def _dock_times(self):
+        """装卸工时直接取 process_spec 的 DOCK_IN/DOCK_OUT 段，不另抄一份数字。
+
+        过程规格里已经写着"叉车卸一车 180 s、装一车 150 s"，在引擎里再写一遍
+        就必然两边漂移（这正是 check_claims 一直在防的那类问题）。
+        """
+        times = {"INBOUND": 180.0, "OUTBOUND": 150.0}   # 无过程规格时的兜底
+        cv = 0.2
+        path = CONFIG / "process_spec.json"
+        if not path.exists():
+            return times, cv
+        try:
+            ps = jload(path)
+        except Exception:
+            return times, cv
+        conf = ps.get("docks") or {}
+        if conf.get("cv") is not None:
+            cv = float(conf["cv"])
+        for step in ps.get("process_steps") or []:
+            t = step.get("time_s")
+            if not t:
+                continue
+            if step.get("from") == "DOCK_IN":
+                times["INBOUND"] = float(t)
+            elif step.get("to") == "DOCK_OUT":
+                times["OUTBOUND"] = float(t)
+        return times, cv
+
+    def _dock_slot(self, st, t):
+        """找一扇此刻空着的门；没有返回 None。"""
+        for i, free_at in enumerate(st["door_free_at"]):
+            if free_at <= t + 1e-9:
+                return i
+        return None
+
+    def _load_docks(self, out):
+        """月台门 = 服务台：并行位就是这区的实际门数。
+
+        以前月台只有"能被封"这一个行为：车到了、停 dwell、走人，装卸从来不需要
+        时间，也不需要占用一扇门。于是 5 扇门和 1 扇门在仿真里毫无区别，月台
+        永远不是瓶颈。这里让每次装卸真的占一扇门、真的花 150–180 s，门外没位
+        就排队——和工位走同一套 STATION_ENTER/QUEUED/EXIT 事件。
+        """
+        times, cv = self._dock_times()
+        for wid, wh in self.world.warehouses.items():
+            for dk in wh.get("docks") or []:
+                did = dk.get("id")
+                if not did:
+                    continue
+                kind = (dk.get("kind") or "OUTBOUND").upper()
+                mean = times.get(kind, times["OUTBOUND"])
+                doors = len(dk.get("doors") or [])
+                out[did] = {
+                    "kind": "DOCK",
+                    "dock_kind": kind,
+                    "warehouse": wid,
+                    # 门是"时间窗"资源：一次装卸占用 150–180 s，期间这扇门不能再
+                    # 接一单。用空闲时刻数组表示，而不是让车在门口干等——车在门口
+                    # 干等会把 1.5 m 宽的月台走廊堵死（实测 peak 59→35 单）。
+                    "door_free_at": [0.0] * max(1, len(dk.get("doors") or [])),
+                    "mean": float(mean),
+                    "cv": float(cv),
+                    "slots": max(1, doors),     # 一扇门一个并行位
+                    "doors": max(1, doors),
+                    "buffer": 0,
+                    "busy": 0, "queue": [], "served": 0, "busy_s": 0.0,
+                    "wait_sum": 0.0, "wait_n": 0, "qmax": 0,
+                    "closed": False,            # 封锁时置位：门外排队的人要改派
+                }
 
     def _station_id(self, r, next_state):
         """订单点位 → 服务台 id。精确工位优先，否则拣选单落到本仓拣选池。"""
@@ -539,6 +628,21 @@ class Simulation:
         """到达工位点：有空位就服务，没空位就排队（真的会等）。"""
         loc = self._station_id(r, next_state)
         st = self.stations.get(loc) if loc else None
+        if st is not None and st.get("kind") == "DOCK" and not st.get("closed"):
+            # 门已在派单时占好：这里只做交接（把货放到门口），不占门、不排队。
+            r.station = None
+            r.set_state(next_state, self.log, t)
+            r.dwell_until = t + self.dwell
+            self.log.emit(t, "DOCK_HANDOFF", agent=r.id, dock=loc,
+                          order_id=(r.order or {}).get("order_id"))
+            return
+        if st is not None and st.get("closed"):
+            # 门被封锁：真实现场是让车改走别的门，而不是在门口排到封锁解除。
+            # 订单退回队列，_assign 里的 _replan_blocked_docks 会换一个开着的门。
+            self.log.emit(t, "DOCK_REFUSED", agent=r.id, dock=loc,
+                          order_id=(r.order or {}).get("order_id"))
+            self._release_order(r, t, "DOCK_BLOCKED")
+            return
         if st is None:                      # 无工位定义 → 旧行为
             r.station = None
             r.set_state(next_state, self.log, t)
@@ -577,6 +681,11 @@ class Simulation:
         if st is None:
             r.set_state(next_state, self.log, t)
             r.dwell_until = t + self.dwell
+            return
+        if st.get("closed"):
+            self.log.emit(t, "DOCK_REFUSED", agent=r.id, dock=loc,
+                          order_id=(r.order or {}).get("order_id"))
+            self._release_order(r, t, "DOCK_BLOCKED")
             return
         if not st["queue"] or st["queue"][0] != r.id:
             return
@@ -744,6 +853,25 @@ class Simulation:
         for order in list(self.queue):
             if not self._replan_blocked_docks(t, order):
                 continue
+            # 月台订单先要一扇门：没有空门就留在派单队列里等，**不要**先开过去
+            # 在门口排队——那条走廊只有一条车道，车停在那里会堵死整片月台。
+            dock_req = None
+            for key in ("pick_loc", "drop_loc"):
+                st = self.stations.get(order[key])
+                if st and st.get("kind") == "DOCK":
+                    dock_req = (key, st)
+                    break
+            dock_slot = None
+            if dock_req is not None:
+                key, st = dock_req
+                dock_slot = self._dock_slot(st, t)
+                if dock_slot is None:
+                    if order["order_id"] not in st["queue"]:
+                        st["queue"].append(order["order_id"])
+                        st["qmax"] = max(st["qmax"], len(st["queue"]))
+                    if order.get("dock_wait_since") is None:
+                        order["dock_wait_since"] = t
+                    continue
             cand = [r for r in idle if r.wid == order["warehouse"]]
             if not cand:
                 continue
@@ -773,6 +901,29 @@ class Simulation:
                 self._start_charge(r, t, mode="energy_guard")
                 self.energy_guard_n += 1
                 continue
+
+            if dock_req is not None:
+                key, st = dock_req
+                dur = self._sample_service(st)
+                # 从"预计到达门口"开始占用，到装卸完成为止
+                travel = (sum(math.dist(legs[0][i], legs[0][i + 1])
+                              for i in range(len(legs[0]) - 1))
+                          + sum(math.dist(legs[1][i], legs[1][i + 1])
+                                for i in range(len(legs[1]) - 1))) / max(r.speed, 1e-6)
+                st["door_free_at"][dock_slot] = t + travel + dur
+                st["served"] += 1
+                st["busy_s"] += dur
+                if order["order_id"] in st["queue"]:
+                    st["queue"].remove(order["order_id"])
+                if order.get("dock_wait_since") is not None:
+                    st["wait_sum"] += max(0.0, t - order["dock_wait_since"])
+                    st["wait_n"] += 1
+                    order["dock_wait_since"] = None
+                order["dock_slot"] = dock_slot
+                self.log.emit(t, "DOCK_RESERVED", agent=r.id, dock=order[key],
+                              order_id=order["order_id"], door=dock_slot,
+                              service_s=round(dur, 4),
+                              free_at=round(st["door_free_at"][dock_slot], 3))
 
             r.order = order
             r.legs = legs
@@ -974,6 +1125,16 @@ class Simulation:
                 f["was_active"] = True
                 if f["type"] == "robot_down":
                     r = self.robots.get(f["agent"])
+                    # agent="ANY_BUSY"：砸当前正在执行任务的车。故障场景要证明的
+                    # 是"任务被打断→改派"，砸中一台闲置车什么也证明不了；没有车
+                    # 在干活时这一 tick 不生效（was_active 不置位，下一 tick 重试），
+                    # 而不是凭空记一条故障。
+                    if f["agent"] == "ANY_BUSY":
+                        pool = [x for x in self.robots.values()
+                                if x.order is not None and x.state not in ("FAULT", "CHARGING")]
+                        if not pool:
+                            continue
+                        r = min(pool, key=lambda x: x.id)
                     # "preempt_busy": a scenario-owned policy (declared in the
                     # scenario JSON) that moves the fault onto a same-warehouse
                     # robot with an order in flight, so task preemption is a
@@ -995,6 +1156,11 @@ class Simulation:
                                       until_s=f["end"], **extra)
                 elif f["type"] == "dock_blocked":
                     self.blocked_docks.add(f["dock"])
+                    # 已经占用着门的车照常装完（门里那台车不会凭空消失），
+                    # 但门外排队的和之后到达的必须改派。
+                    st = self.stations.get(f["dock"])
+                    if st is not None:
+                        st["closed"] = True
                     self.log.emit(t, "DOCK_BLOCKED", dock=f["dock"], until_s=f["end"])
             elif not active and f["was_active"]:
                 f["was_active"] = False
@@ -1006,6 +1172,9 @@ class Simulation:
                         self.log.emit(t, "FAULT_END", agent=r.id)
                 elif f["type"] == "dock_blocked":
                     self.blocked_docks.discard(f["dock"])
+                    st = self.stations.get(f["dock"])
+                    if st is not None:
+                        st["closed"] = False
                     self.log.emit(t, "DOCK_REOPENED", dock=f["dock"])
 
     def _robot_step(self, r, t, positions):
@@ -1130,6 +1299,10 @@ class Simulation:
         replans = [e for e in ev if e["type"] == "REPLAN"]
         waits = [e for e in ev if e["type"] == "WAIT_CONFLICT"]
         reassign = [e for e in ev if e["type"] == "TASK_REASSIGNED"]
+        dock_blocks = [e for e in ev if e["type"] == "DOCK_BLOCKED"]
+        dock_handoff = [e for e in ev if e["type"] == "DOCK_HANDOFF"]
+        dock_refused = [e for e in ev if e["type"] == "DOCK_REFUSED"]
+        dock_reroutes = [e for e in replans if e.get("reason") == "dock_blocked"]
         dist = sum(sum(e["legs_m"].values()) for e in done)
         energy = sum(e["energy_kwh"] for e in done)
         tardy = [e["tardiness_s"] for e in done]
@@ -1202,12 +1375,15 @@ class Simulation:
                                      "Minimum sampled centre distance",
                                      "min over all robot pairs at 1 s samples")
         # ---- 工位层（M1-02）：服务时间与排队是实测的，不是公式推的 ----
-        st_total = len(self.stations)
-        st_served = sum(v["served"] for v in self.stations.values())
-        st_busy_s = sum(v["busy_s"] for v in self.stations.values())
-        st_wait_n = sum(v["wait_n"] for v in self.stations.values())
-        st_wait_s = sum(v["wait_sum"] for v in self.stations.values())
-        st_qmax = max([v["qmax"] for v in self.stations.values()] + [0])
+        # 月台也走同一套服务台机制，但指标分开统计：混在一起算利用率，
+        # "工位利用率"会被 38 扇月台门稀释成毫无意义的小数。
+        srv = [v for v in self.stations.values() if v.get("kind") != "DOCK"]
+        st_total = len(srv)
+        st_served = sum(v["served"] for v in srv)
+        st_busy_s = sum(v["busy_s"] for v in srv)
+        st_wait_n = sum(v["wait_n"] for v in srv)
+        st_wait_s = sum(v["wait_sum"] for v in srv)
+        st_qmax = max([v["qmax"] for v in srv] + [0])
         st_service_mean = (st_busy_s / st_served) if st_served else 0.0
         st_util = (st_busy_s / (st_total * self.horizon)) if st_total and self.horizon else 0.0
         m["stations_defined"] = M(st_total, "stations",
@@ -1227,6 +1403,46 @@ class Simulation:
             "sum(waited_s)/count(waited_s)")
         m["station_queue_max"] = M(st_qmax, "robots", "单工位最长队列",
                                    "max(STATION_QUEUED.queue_len)")
+
+        # ---- 月台层（v4.7）：装卸真的占门、真的花时间、门外真的会排队 ----
+        dk = [v for v in self.stations.values() if v.get("kind") == "DOCK"]
+        dk_doors = sum(v["slots"] for v in dk)
+        dk_served = sum(v["served"] for v in dk)
+        dk_busy_s = sum(v["busy_s"] for v in dk)
+        dk_wait_n = sum(v["wait_n"] for v in dk)
+        dk_wait_s = sum(v["wait_sum"] for v in dk)
+        dk_qmax = max([v["qmax"] for v in dk] + [0])
+        m["docks_defined"] = M(len(dk), "docks", "接入 tick 的月台区数",
+                               "count(layout.warehouses[].docks)")
+        m["dock_doors"] = M(dk_doors, "doors", "月台门总数（一扇门一个并行位）",
+                            "sum(len(dock.doors))")
+        m["dock_served"] = M(dk_served, "visits", "月台装卸次数（进即占用一门）",
+                             "count(STATION_ENTER.station in docks)")
+        m["dock_service_mean_s"] = M(
+            round(dk_busy_s / dk_served, 3) if dk_served else 0.0, "s",
+            "月台实测平均装卸时长（进=卸货/装货，来源 process_steps）",
+            "sum(service_s)/count(STATION_ENTER.station in docks)")
+        m["dock_utilization"] = M(
+            round(dk_busy_s / (dk_doors * self.horizon), 4) if dk_doors and self.horizon else 0.0,
+            "ratio", "月台门占用率（装卸时长 / 门数×时长）",
+            "sum(service_s)/(sum(doors)*horizon_s)")
+        m["dock_queue_wait_avg_s"] = M(
+            round(dk_wait_s / dk_wait_n, 3) if dk_wait_n else 0.0, "s",
+            "门外排队进入装卸的平均等待（没排队的单不计入）",
+            "sum(waited_s)/count(waited_s where station in docks)")
+        m["dock_queue_max"] = M(dk_qmax, "orders", "单个月台区最长等门订单数",
+                                "max(queue_len where station in docks)")
+        m["dock_handoffs"] = M(len(dock_handoff), "visits",
+                               "AGV 在门口实际完成交接的次数",
+                               "count(DOCK_HANDOFF)")
+        m["dock_blocked_events"] = M(len(dock_blocks), "times", "月台封锁事件数",
+                                     "count(DOCK_BLOCKED)")
+        m["dock_refused"] = M(len(dock_refused), "times",
+                              "因门被封锁而被劝返改派的到达/排队次数",
+                              "count(DOCK_REFUSED)")
+        m["dock_reroutes"] = M(len(dock_reroutes), "times",
+                               "因封锁把落货点改到别的门的次数",
+                               "count(REPLAN.reason=dock_blocked)")
         m["deadlock_yields"] = M(self.yield_n, "times",
                                  "死锁退让次数（被同一台车挡住超阈值后主动后退）",
                                  "count(DEADLOCK_YIELD)")
@@ -1351,6 +1567,8 @@ def main(argv=None):
     ap.add_argument("--scenario", default="config/scenarios/baseline.json")
     ap.add_argument("--station-slots", type=int, default=None,
                     help="把工位并行位强制为该值（验证排队会真的发生）")
+    ap.add_argument("--dock-slots", type=int, default=None,
+                    help="把每个月的门数强制为该值（验证月台排队会真的发生）")
     ap.add_argument("--all", action="store_true", help="run all 8 frozen scenarios")
     ap.add_argument("--include-custom", action="store_true",
                     help="also run user scenarios from config/scenarios/custom/")
@@ -1359,6 +1577,8 @@ def main(argv=None):
     ap.add_argument("--quiet", action="store_true")
     ap.add_argument("--events", default=None,
                     help="外部订单事件 JSONL（CSV/WMS 适配器产出）；给了就不再合成需求")
+    ap.add_argument("--no-index", action="store_true",
+                    help="不写 out/sim_index.json（试点运行不该顶替 8 场景索引）")
     ap.add_argument("--out-dir", default=None,
                     help="write runs and index under this directory (for determinism tests)")
     args = ap.parse_args(argv)
@@ -1372,6 +1592,7 @@ def main(argv=None):
     cfg = jload(DATA / "config.json")
     if args.station_slots:
         Simulation.station_slots_override = args.station_slots
+    Simulation.dock_slots_override = getattr(args, "dock_slots", None)
     scenarios = (sorted(glob.glob(str(CONFIG / "scenarios" / "*.json")))
                  if args.all else [str(ROOT / args.scenario)])
     if args.all and args.include_custom:
@@ -1383,8 +1604,9 @@ def main(argv=None):
            "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
            "engine": "sim", "runs": runs}
     idx_dir = base if base else OUT
-    jdump(idx_dir / "sim_index.json", idx)
-    if not base:
+    if not getattr(args, "no_index", False):
+        jdump(idx_dir / "sim_index.json", idx)
+    if not base and not getattr(args, "no_index", False):
         jdump(OUT / "sim_latest.json", {"kind": "sim_latest", "run_dir": runs[-1]["run_dir"],
                                         "run_id": runs[-1]["run_id"],
                                         "scenario": runs[-1]["scenario"]})

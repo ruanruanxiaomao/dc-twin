@@ -34,13 +34,17 @@ METRICS = [
     "strict_collisions", "reservation_double_occupancy", "min_pair_distance_m",
     "station_served", "station_utilization", "deadlock_yields", "deadlock_detours",
     "jam_clears", "availability", "idle_rate", "sim_duration_s",
+    # 月台层（v4.7）：装卸次数与占用率一并冻结，否则"月台接进来了"没法防回退
+    "dock_served", "dock_doors", "dock_utilization", "dock_service_mean_s",
+    "dock_queue_max", "dock_queue_wait_avg_s",
 ]
 
 #: 计数类：必须精确相等，容差为 0
 INT_METRICS = {"orders_generated", "orders_completed", "orders_lost", "charge_events",
                "wait_conflicts", "task_reassignments", "max_queue_depth",
                "strict_collisions", "reservation_double_occupancy", "station_served",
-               "deadlock_yields", "deadlock_detours", "jam_clears"}
+               "deadlock_yields", "deadlock_detours", "jam_clears",
+               "dock_served", "dock_doors", "dock_queue_max"}
 
 TOL = 1e-6          # 浮点的相对容差
 

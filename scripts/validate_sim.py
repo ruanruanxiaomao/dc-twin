@@ -115,17 +115,43 @@ def charge_windows(events):
     return fault_windows(events, "CHARGE_START", "CHARGE_END")
 
 
+ACTIVE_STATES = {"MOVING_PICK", "PICKING", "MOVING_DROP", "DROPPING",
+                 "RETURNING", "WAITING", "TO_CHARGER"}
+
+
+def state_at(ev, agent, t):
+    """某台车在 t 时刻的状态（取 t 之前最后一条状态事件）。"""
+    st = "IDLE"
+    for e in ev:
+        # 严格早于窗口起点：故障那一刻本身会发一条 →FAULT，用 <= 会把"在途中"
+        # 覆盖成 FAULT，于是所有窗口都被判成"没打断任何任务"。
+        if e["type"] == "STATE_CHANGED" and e.get("agent") == agent and e["t_s"] < t:
+            st = e.get("to") or st
+    return st
+
+
 def check_s4(run):
+    """故障窗口：窗口内不许有完工；**真的打断在途任务**时必须改派。
+
+    以前这里硬要求 reassignments > 0，等于默认"故障一定砸在干活的车身上"。接上
+    月台门之后派单更保守（没门先等），故障时刻该仓常常一台车都没在执行任务——
+    实测 40 单/小时、12 台车时单车占用只有约 12%，三条故障里能砸中 0 条是正常的。
+    把"必须改派"写成断言，只会让校验依赖运气；改派机制本身由
+    tests/test_fault_preempt.py 确定性地验证。
+    """
     ev = run["events"]
     wins = fault_windows(ev)
     reass = [e for e in ev if e["type"] == "TASK_REASSIGNED"]
     inside = [e for e in ev if e["type"] == "TASK_COMPLETED"
               and any(a == e.get("agent") and s <= e["t_s"] < t for a, s, t in wins)]
-    good = bool(wins) and bool(reass) and not inside
+    busy = [w for w in wins if state_at(ev, w[0], w[1]) in ACTIVE_STATES]
+    good = bool(wins) and not inside and (not busy or bool(reass))
     return (ok if good else fail)(
-        "S4", "fault truth: %d fault windows, %d reassignments, %d completions inside window"
-        % (len(wins), len(reass), len(inside)),
-        windows=len(wins), reassignments=len(reass), completions_in_window=len(inside))
+        "S4", "fault truth: %d windows (%d hit a moving robot), %d reassignments, "
+              "%d completions inside window"
+        % (len(wins), len(busy), len(reass), len(inside)),
+        windows=len(wins), interrupted=len(busy),
+        reassignments=len(reass), completions_in_window=len(inside))
 
 
 # ---------------------------------------------------------------- S5

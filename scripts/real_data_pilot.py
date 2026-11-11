@@ -82,7 +82,7 @@ def step_scenario() -> int:
 def step_sim() -> Path | None:
     rc = run([sys.executable, "scripts/sim_engine.py",
               "--scenario", "out/pilot/scenario.json",
-              "--events", "out/csv_events.jsonl"])
+              "--events", "out/csv_events.jsonl", "--no-index"])
     if rc:
         return None
     snaps = sorted(RUNS.glob("*/sim_kpi.json"), key=lambda p: p.stat().st_mtime)

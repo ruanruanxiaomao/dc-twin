@@ -365,7 +365,9 @@ def media_meta():
 def _kpi_n() -> int:
     """tick 层 KPI 数量从产物里数，不写死——写死就会和文档一起过期。"""
     import glob as _glob
-    files = sorted(_glob.glob(str(ROOT / "runs" / "*" / "*" / "sim_kpi.json")))
+    files = sorted(_glob.glob(str(ROOT / "runs" / "baseline" / "*" / "sim_kpi.json")))
+    if not files:
+        files = sorted(_glob.glob(str(ROOT / "runs" / "*" / "*" / "sim_kpi.json")))
     if not files:
         return 0
     try:
@@ -377,6 +379,10 @@ def _kpi_n() -> int:
 def snapshot():
     layout = jload(ROOT / "data" / "layout.json")
     sim = jload(OUT / "sim_index.json")
+    # 只取 8 个冻结场景：runs/pilot_csv 是"真实订单试点"的证据，不是场景之一。
+    # 不滤掉的话最新一次运行会顶替整个场景列表（曾出现 scenarios=1、全是 pilot）。
+    frozen = {q.stem for q in (ROOT / "config" / "scenarios").glob("*.json")}
+    sim["runs"] = [r for r in sim.get("runs", []) if r.get("scenario") in frozen]
     pnl_idx = jload(OUT / "pnl_index.json")
     sv = jload(OUT / "sim_validation.json")
     pv = jload(OUT / "pnl_validation.json")

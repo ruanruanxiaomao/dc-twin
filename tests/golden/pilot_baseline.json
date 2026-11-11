@@ -15,8 +15,8 @@
     "energy_per_order_kwh": 0.067498,
     "charge_events": 3,
     "max_queue_depth": 0,
-    "station_utilization": 0.0626,
+    "station_utilization": 0.0437,
     "strict_collisions": 0,
-    "min_pair_distance_m": 2.8317
+    "min_pair_distance_m": 2.8286
   }
 }

@@ -1,20 +1,20 @@
 {
   "schema_version": "1.0",
   "kind": "webapp_snapshot",
-  "generated_at": "2026-11-11T14:40:36+00:00",
-  "commit": "7886b33",
+  "generated_at": "2026-11-11T15:36:02+00:00",
+  "commit": "4670d48",
   "glb": "out/dc_preview.glb",
   "api": {
-    "bootstrap": 218983,
+    "bootstrap": 218984,
     "paths": 189961,
-    "scenarios": 4253,
+    "scenarios": 4267,
     "pnl": 309,
     "ledger": 47,
     "schema": 1596,
     "cost-spec": 1950,
     "scenario/template": 652,
     "status": 16430,
-    "kpi": 12074,
+    "kpi": 14170,
     "areas": 10639,
     "areas/catalog": 3507,
     "areas/variant": 10390
@@ -33,16 +33,16 @@
       "sha256": "ac5bb7febd4773c28854f66a4c22f8eb7faa067aa319038aca37dbb66792cab8"
     },
     "api/bootstrap.json": {
-      "bytes": 218983,
-      "sha256": "3b00e164d3a6f71e062f2f4f9a475645c6696ae806f4b2e663e7306d0daaf8b0"
+      "bytes": 218984,
+      "sha256": "5cfc90aeeff8108a4daa40e02ba8295cc5971bfecab2dcddf48bd8e0084a5c9e"
     },
     "api/cost-spec.json": {
       "bytes": 1950,
       "sha256": "ce6694c23eb109a17ee3b0396731e5a6962be51344635b41684d829fe66cbf2b"
     },
     "api/kpi.json": {
-      "bytes": 12074,
-      "sha256": "6fc5171d253b48cf81ff65efbe9bc70bf5530e1dfc12ab468a144031765d915e"
+      "bytes": 14170,
+      "sha256": "f604b4f224191024ca4cb3ac1c1f5dfcfafbe2a7d7bf6c4ee84b95e0fbe6266d"
     },
     "api/ledger.json": {
       "bytes": 47,
@@ -53,20 +53,20 @@
       "sha256": "18ae982358843659bbce69e5e30b769def90451ed841f44d7cb0c8c4e167c1a8"
     },
     "api/plan.html": {
-      "bytes": 360702,
-      "sha256": "3019ca2eed61a22f39aaa02623cfbb7467ebc8440c303bd85f8339f91aaba369"
+      "bytes": 369266,
+      "sha256": "8a1f8c2bc075607e5b4327afcf752b834dda845a13232cfa7a3014f91f243b52"
     },
     "api/pnl.json": {
       "bytes": 309,
-      "sha256": "49c4e2913cdc4a4fb8e818125eedb67b6ab49242ac154ee900ebcef315f66246"
+      "sha256": "b14c292add9f625539ef202973069b8a115e844b054dc8d6ecf354776c2e694c"
     },
     "api/scenario/template.json": {
       "bytes": 652,
       "sha256": "baa51553d5b9b5461986e55cd598ded84a337a00c3e583f3551721a5d9221da1"
     },
     "api/scenarios.json": {
-      "bytes": 4253,
-      "sha256": "8eef3621b2caca6a45eb41d2cc8ef3c112640bacd46e9102802504dc9882bb9e"
+      "bytes": 4267,
+      "sha256": "33a6ee64b210a5f27397aea28142e41e8848d6d8bd246caac2b5aa9834e73989"
     },
     "api/schema.json": {
       "bytes": 1596,
@@ -74,7 +74,7 @@
     },
     "api/status.json": {
       "bytes": 16430,
-      "sha256": "ca8363267ab5c5ad9435b5fa407a7e92cb64a6efc9da6714628702249357f4e4"
+      "sha256": "b844feba976a1f9cc32e6b719c87ee3c1c111afd686376622b8fcf4d712ec82d"
     },
     "app.js": {
       "bytes": 46561,
@@ -127,7 +127,7 @@
   },
   "counts": {
     "files": 26,
-    "bytes": 3234808
+    "bytes": 3245483
   },
   "note": "静态快照：/api/* 已冻结为 api/*.json，POST 一律拒绝"
 }

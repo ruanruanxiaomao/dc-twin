@@ -34,6 +34,30 @@ If pywebview/WebView2 is unavailable it falls back to an Edge/Chrome `--app`
 window, then to the default browser. `启动驾驶舱_Tk经典版.bat` still opens the
 legacy Tk cockpit.
 
+## Docks have a duration now
+
+A dock used to be blockable and nothing else: an AGV arrived, waited 2 s and left,
+so five doors and one door were the same simulation. `sim_engine.py` now loads each
+dock zone as a time-window resource — an (un)load occupies a door for 150 s
+outbound / 180 s inbound, read from `process_spec.process_steps` — with parallel
+slots equal to the layout's real door count (10 zones, 38 doors).
+
+No free door means the order waits in the dispatch queue rather than driving to the
+apron, which keeps the single-lane dock corridor clear. New events
+`DOCK_RESERVED` / `DOCK_HANDOFF` / `DOCK_REFUSED` and 11 `dock_*` metrics make it
+auditable:
+
+```bash
+python scripts/check_dock.py     # event-level recompute + 1-vs-8-door contrast
+python -m pytest tests/test_dock_queue.py tests/test_fault_preempt.py -q
+```
+
+Measured on the baseline: 23 transfers, 163.5 s mean, **2.8% door occupancy**, no
+queue — the dock has ~36x headroom, so the constraint in this layout is aisle
+traffic, not doors. Under 300 outbound orders/h the contrast is sharp: 1 door per
+zone gives a 19-order queue and 355 s of waiting (15 completed), 8 doors gives no
+queue and 28 completed.
+
 ## Reproduce from scratch
 
 ```bash

@@ -100,7 +100,11 @@ def test_submission_full_showcase_snapshot():
     assert len(d["architecture"]) == 6
     assert d["deliverables"]["count"] >= 50
     assert len(d["contracts"]) >= 8
-    assert len(d["kpi"]) == 39   # tick 层 39 项
+    # tick 层指标数从产物取：写死 39 会在指标增加后变成假失败
+    import glob
+    last = sorted(glob.glob(str(ROOT / "runs" / "baseline" / "*" / "sim_kpi.json")))[-1]
+    want = len(json.loads(Path(last).read_text(encoding="utf-8"))["metrics"])
+    assert len(d["kpi"]) == want
     assert d["events"]["total"] > 100 and d["events"]["sample"]
     assert d["ledger"]["total"] > 100 and d["ledger"]["sample"]
     assert len(d["checks"]["A"]) == 40

@@ -98,9 +98,32 @@ def stale_patterns(f: dict) -> list[tuple[str, str]]:
     ]
 
 
+#: 数字型断言：(正则, facts 键, 说法)。匹配到就把数字和实际值比，不等就报。
+#: 加这一层的理由：指标数从 39 改到 50 时，正则表只认特定组合，文档里的旧数字
+#: 直接漏过去了——"口径守卫"必须能自己发现新出现的数字说法。
+NUMERIC_CLAIMS = [
+    (r"(?<![\d.])(\d+)\s*项\s*(?:tick|measured|实测)", "kpi_tick", "tick 层指标数"),
+    # 验收只认静态那条（A1–A21）。不在这里比数字：文档里 "A1–A3" 这类**子区间**
+    # 是合法的阶段划分，按总数去比会全是误报。
+]
+
+
+def numeric_claims(line: str, f: dict) -> list[str]:
+    out = []
+    for pat, key, label in NUMERIC_CLAIMS:
+        for m in re.finditer(pat, line):
+            want = f.get(key)
+            got = int(m.group(1))
+            if want and got != int(want):
+                out.append("%s 应为 %s，文档写的是 %d" % (label, want, got))
+    return out
+
+
 def scan_lines(lines, f: dict, name: str = "<text>") -> list[str]:
     problems = []
     for i, line in enumerate(lines, 1):
+        for why in numeric_claims(line, f):
+            problems.append("%s:%d  %s\n        命中：%s" % (name, i, why, line.strip()[:110]))
         for pat, why in stale_patterns(f):
             # "不是 tick 级时空预约"这种**否认句**本身是诚实的，不该被判为过度宣称
             if "时空预约" in pat and re.search(r"不是|没有|并非", line):

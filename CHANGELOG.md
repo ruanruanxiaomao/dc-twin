@@ -4,6 +4,51 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2026-11-11
+
+Docks finally have a duration and an occupancy. Before this, a dock only had one
+behaviour — it could be blocked — and five doors were indistinguishable from one.
+
+### Added
+
+- Docks are loaded as time-window resources: an (un)load occupies a door for
+  150 s outbound / 180 s inbound, taken from `process_spec.process_steps`
+  (`STG_OUT→DOCK_OUT`, `DOCK_IN→STG_IN`) rather than copied into the engine.
+  Parallel slots equal the layout's real door count (10 zones, 38 doors).
+- No free door means the order waits in the dispatch queue instead of driving to
+  the apron: `DOCK_RESERVED` / `DOCK_HANDOFF` / `DOCK_REFUSED`, plus 11 `dock_*`
+  metrics (tick layer 39 → 50).
+- `scripts/check_dock.py`: recomputes transfers, mean service time, utilization
+  and handoffs from events, then runs a capacity contrast (1 vs 8 doors per zone,
+  300 outbound orders/h) where queueing and waiting must appear and then clear.
+- `tests/test_dock_queue.py` (8) and `tests/test_fault_preempt.py` (3).
+
+### Fixed
+
+- `--dock-slots` changed `slots` but not the door time-window array, so 1/2/8
+  doors produced byte-identical queue and throughput numbers — the switch looked
+  like it worked while doing nothing.
+- `_door_points` spread targets along the apron wall; the apron sits behind a
+  single-lane corridor, so five targets were worse than one (baseline 38 → 31).
+
+### Changed
+
+- S4 no longer demands a reassignment from every fault: a fault that lands on an
+  idle robot interrupts nothing, which is a real observation at 12% fleet
+  utilization. It still forbids completions inside a window and still requires a
+  reassignment when the fault hit a moving robot. The scenario now targets
+  `agent: "ANY_BUSY"` so it exercises failure handling instead of luck.
+- `kpi_baseline.py` freezes 30 metrics per scenario (was 24), 8 × 30 = 240.
+- `check_claims.py` gained a numeric rule: any "N 项 tick/measured" must equal the
+  measured count, because the regex table missed 39 → 50 in two documents.
+
+### Notes
+
+Given the apron corridor, an AGV that waits the whole 150 s at the door blocks
+the lane (measured: peak 59 → 35 completed). The model therefore reserves the
+door at dispatch and keeps the AGV handoff short; a truck-entity model with
+appointments is the next step, not part of this one.
+
 ## [0.9.0] - 2026-11-11
 
 The functional areas got bodies. Until now 21 areas rendered as 3 floor slabs and

@@ -75,10 +75,14 @@ def plan_runs(keep_bundles: int) -> list[Path]:
                        key=lambda p: p.stat().st_mtime)
         if not snaps:
             continue
+        # 三类各自保一套：最新 / 最新含 tick 指标 / 最新含解析层指标。
+        # 只保"最新 + 最新含 sim_kpi"曾把带 kpi.json 的那套删掉，验收链的
+        # A25/A26/A27/A32/A35 立刻红——清理脚本不该删掉验收要用的证据。
         keep = {snaps[-1]}
-        tick = [p for p in snaps if (p / "sim_kpi.json").exists()]
-        if tick:
-            keep.add(tick[-1])
+        for name in ("sim_kpi.json", "kpi.json"):
+            has = [p for p in snaps if (p / name).exists()]
+            if has:
+                keep.add(has[-1])
         out.extend(p for p in snaps if p not in keep)
     return out
 
