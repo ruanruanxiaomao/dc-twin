@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
   "kind": "webapp_snapshot",
-  "generated_at": "2026-11-11T00:53:03+00:00",
-  "commit": "4f9efa3",
+  "generated_at": "2026-11-11T01:33:54+00:00",
+  "commit": "c74871c",
   "glb": "out/dc_preview.glb",
   "api": {
-    "bootstrap": 218924,
+    "bootstrap": 218923,
     "paths": 189961,
     "scenarios": 4253,
     "pnl": 89,
@@ -23,8 +23,8 @@
       "sha256": "ce2775aacb5de71122a1451af437f01169f5556f4fccfc5cff71767ce665234c"
     },
     "api/bootstrap.json": {
-      "bytes": 218924,
-      "sha256": "9b0fd188bc91ef52e52c6d4c897ce8490f748827e144c9f833774cb9c9a3f6bb"
+      "bytes": 218923,
+      "sha256": "d3a4bc42fff0298fe5d16530396f174a82eb6e48ef3232d840ef4e8af2a64df1"
     },
     "api/cost-spec.json": {
       "bytes": 1950,
@@ -43,8 +43,8 @@
       "sha256": "18ae982358843659bbce69e5e30b769def90451ed841f44d7cb0c8c4e167c1a8"
     },
     "api/plan.html": {
-      "bytes": 321830,
-      "sha256": "74771303b5a289a7a8cf475eb7a2ea4fd560983d8e5262c06fe3d2349077db7d"
+      "bytes": 330598,
+      "sha256": "f474feb40609dea3108d6cc94e520d94c2040acee45f360c6df8dbcc037decaf"
     },
     "api/pnl.json": {
       "bytes": 89,
@@ -113,7 +113,7 @@
   },
   "counts": {
     "files": 23,
-    "bytes": 2937304
+    "bytes": 2946071
   },
   "note": "静态快照：/api/* 已冻结为 api/*.json，POST 一律拒绝"
 }

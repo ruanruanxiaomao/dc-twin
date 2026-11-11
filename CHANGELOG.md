@@ -4,6 +4,33 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-11-11
+
+Shipped as a **Windows application** and trimmed the workspace by ~1 GB.
+
+### Added
+
+- `scripts/build_exe.py`: PyInstaller onedir build (`dist/DC Twin/DC Twin.exe`).
+  The window, the web UI and the Python runtime go inside; `out/`, `data/`,
+  `runs/`, `scripts/`, `dc_twin/` stay beside the exe so artefacts remain visible
+  and the pipeline can still be re-run.
+- `scripts/check_exe.py`: external verification of a build — 19 read-only
+  endpoints, a real 10-step data-chain rerun, scenario save/delete, a headless
+  3D screenshot, and an assertion that the server's root is the exe directory.
+- `scripts/clean.py`: workspace cleanup with a dry-run default (frames, old run
+  snapshots, stale artefact bundles, caches).
+- `console/server.py` frozen branch: `ROOT` becomes the exe directory, `STATIC`
+  follows it, and `find_python()` looks for a real interpreter instead of
+  handing scripts to the GUI executable.
+- `dc_app.pyw` redirects stdout/stderr to a temp log when launched without a
+  console and shows a message box on fatal errors.
+
+### Changed
+
+- Plan document raised to v4.1 (§31 covers packaging, verification and cleanup).
+- Archived screenshots moved to `assets/`; temporary screenshots and build
+  work directories removed.
+
 ## [0.4.0] - 2026-11-09
 
 Turned the submission page into a **complete project showcase** with an interactive 3D twin.

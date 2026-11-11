@@ -34,6 +34,32 @@ If pywebview/WebView2 is unavailable it falls back to an Edge/Chrome `--app`
 window, then to the default browser. `启动驾驶舱_Tk经典版.bat` still opens the
 legacy Tk cockpit.
 
+## Windows app (one exe, no Python needed to look)
+
+![Packaged app, 3D view](assets/exe_3d.png)
+
+```bash
+python scripts/build_exe.py          # → dist/DC Twin/DC Twin.exe   (~72 MB folder)
+python scripts/build_exe.py --clean  # same, wiping the old build first
+```
+
+`dist/DC Twin/` is a PyInstaller **onedir** build: the UI and the Python runtime
+live inside `_internal/`, while `out/`, `data/`, `runs/` sit next to the exe so
+the model, the renders and the reports stay visible and writable. Double-click
+`DC Twin.exe` and you get the same ten-pane window as `dc_app.pyw`.
+
+Re-running the pipeline from the packaged app still needs a real interpreter
+(`DC_PYTHON`, a `.venv`, or `python` on PATH) and, for the Blender steps,
+`blender.exe`. When either is missing the run log says which one — it does not
+fail silently.
+
+Verify a build end to end (endpoints + a real 10-step rerun + scenario save/delete
++ a headless 3D screenshot):
+
+```bash
+python scripts/check_exe.py --ops --shot out/exe_3d.png
+```
+
 ## Open the 3D twin in a browser
 
 ![3D web console](assets/webapp_3d.png)

@@ -1,6 +1,6 @@
 # 配送中心数字孪生 · 完整建设计划书
 
-> **版本**：v4.0（单窗口客户端：驾驶舱与控制台合并） · 2026-11-11  
+> **版本**：v4.1（打包为 Windows 应用 + 工作区瘦身） · 2026-11-11  
 > **审计对象**：`C:\Users\OYC\Desktop\blender\dc_project`（Blender 5.2 + Python 3.10+，区域仓 W + 前置仓 F1/F2/F3）  
 > **文档定位**：从“现状审计”到“可落地实施”的一体化计划书；既给评审看结论，也给开发看字段、参数、任务与验收。  
 > **配套工具**：`dc_project/desktop_app.pyw`（DC Twin Studio 桌面驾驶舱，本计划书第 11 章）  
@@ -43,7 +43,7 @@
 |---|---|---|
 | 前置 | 阅读指南、执行摘要、目录 | 结论先行 |
 | 第一部分 | 第 0–10 章 | 现状审计、DC 必备能力、GitHub 调研、缺口、参数、自定义、路线图、验收、风险、附录 |
-| 第二部分 | 第 11–30 章 | v2.0 增补：桌面驾驶舱、字段级数据字典、参数总表、自定义矩阵、Backlog、测试计划、风险登记册、术语表、仓库速查、交付清单；v3.0 增补：单人最小路径；v3.2 增补：产物包与工作区约定；v3.3 增补：功能区建模方案；v3.4 增补：用户自选功能区（方案 A）；v3.5 增补：勾选式界面与完整性核查；v3.6 增补：过程层进 tick 与界面重做；v3.7 增补：三仓拣选与死锁修复；v3.8 增补：3D 功能区与许可；v3.9 增补：浏览器 3D 控制台；v4.0 增补：单窗口客户端 |
+| 第二部分 | 第 11–31 章 | v2.0 增补：桌面驾驶舱、字段级数据字典、参数总表、自定义矩阵、Backlog、测试计划、风险登记册、术语表、仓库速查、交付清单；v3.0 增补：单人最小路径；v3.2 增补：产物包与工作区约定；v3.3 增补：功能区建模方案；v3.4 增补：用户自选功能区（方案 A）；v3.5 增补：勾选式界面与完整性核查；v3.6 增补：过程层进 tick 与界面重做；v3.7 增补：三仓拣选与死锁修复；v3.8 增补：3D 功能区与许可；v3.9 增补：浏览器 3D 控制台；v4.0 增补：单窗口客户端；v4.1 增补：Windows 应用打包 |
 | 附录 | A–E | 配置片段、GitHub 检索复现、术语、**D 复核命令集**、**E 答辩问答** |
 
 ---
@@ -130,6 +130,7 @@
 - 28. 3D 功能区落地与开源许可（v3.8 新增）
 - 29. 浏览器 3D 控制台与 Pages 发布（v3.9 新增）
 - 30. 单窗口客户端：两套界面合并（v4.0 新增）
+- 31. 打包为 Windows 应用与工作区瘦身（v4.1 新增）
 
 **附录**
 
@@ -2223,6 +2224,7 @@ python -m pytest -q -m "not blender"
 | v3.8 | 2026-11-10 | **3D 功能区 + 许可切换**：`build_dc.py` 读 `areas.json` 画 3 个物理区色块（深色边界 + 中文名称牌）与 18 个逻辑区挂靠标牌，自动探测中文字体；修两个故障（Blender `-P` 缺 `sys.path` 导致 `import scene_config` 崩溃、静帧渲染被迫连带 942 帧动画）；新增 `DC_RENDER_STILLS=1`；许可证 MIT→**Apache-2.0** + `NOTICE`，A12 改为双查；重出 blend/GLB/6 张静帧/submission/dist；`validate 40/40`；新增 §28 |
 | v3.9 | 2026-11-11 | **浏览器 3D 控制台 + Pages**：修 `console/__init__.py` 缺失（`-m console.server` 原来必挂）并把驾驶舱入口改成"探活 → 打开 → 失败降级静态快照"；新增 `scripts/build_webapp.py`（冻结 9 个接口到 `docs/app/api/*.json` + fetch 垫片 + 相对路径重写）与 `scripts/serve_webapp.py`；新增守卫 `scripts/check_webapp.py`（W1–W4 + 3 反例）并接入 CI 与全量验收链；GitHub Pages 发布 `docs/`；新增 §29 |
 | v4.0 | 2026-11-11 | **单窗口客户端**：新增 `dc_app.pyw`（进程内起服务 + pywebview 原生窗口 + 原生菜单 + 退出即释放端口，降级 `--app` 窗口/浏览器）；Web 控制台补 **指标 / 功能区 / 计划书** 三页（`/api/kpi`、`/api/areas`、`/api/plan.html`）；新增 `scripts/md2html.py`（零依赖 Markdown→HTML，145 表/219KB）；守卫加 W5；`启动驾驶舱.bat` 指向新入口，Tk 版另存；新增 §30 |
+| v4.1 | 2026-11-11 | **Windows 应用 + 工作区瘦身**：新增 `scripts/build_exe.py`（PyInstaller onedir，界面进包/数据留盘）与 `scripts/check_exe.py`（19 只读接口 + 数据链重跑 + 场景写删 + 无头 3D 截图 + 根目录断言）；`console/server.py` 增加 frozen 分支与 `find_python()` 降级；`dc_app.pyw` 在无 stdout 时重定向日志并弹窗报错；新增 `scripts/clean.py`（默认预览）把工作区 1.2 GB 压到 154 MB；新增 §31 |
 
 ---
 
@@ -3048,6 +3050,114 @@ Pages 上没人跑 Python，断链的表现是"转圈"或"面板空白"，CI 完
 
 ---
 
+## 31. 打包为 Windows 应用与工作区瘦身（v4.1）
+
+### 31.1 为什么要打包
+
+v4.0 的入口仍是 `python dc_app.pyw`：对开发机没问题，对"发给别人看"就不成立——
+对方要装 Python、装 pywebview、在正确的目录里执行命令。打包解决的是**交付形态**，
+不是功能：双击一个 exe，看到的就是同一个界面。
+
+### 31.2 选了 onedir，不选 onefile
+
+| 维度 | onedir（采用） | onefile |
+|---|---|---|
+| 启动 | 0.6 s（实测） | 每次解包 40–70 MB，3–5 s |
+| WebView2 | `_internal/` 里 DLL 路径稳定 | 解包到临时目录，DLL 加载偶发失败 |
+| 杀软 | 正常 | 单文件自解压更易误报 |
+| 产物可见 | `out/` 就在 exe 旁边 | 全塞进一个文件，用户找不到模型 |
+
+代价是"一个文件夹"，所以最后压成 `dist/DC-Twin-win64.zip`（36 MB）分发。
+
+### 31.3 目录约定：界面进包，数据留盘
+
+```
+dist/DC Twin/
+  DC Twin.exe          双击即开（--windowed，无控制台）
+  _internal/           Python 运行时 + pywebview + WebView2 互操作 DLL
+  console/static/      前端（three.js、10 个页签）
+  data/ out/ runs/     可写产物：模型、渲染图、KPI、路径
+  scripts/ dc_twin/    重跑用的源码
+  config/ docs/        配置与计划书
+```
+
+关键一条：**`ROOT` 必须指向 exe 同级，不能是 `__file__` 的父目录**。
+打包后 `__file__` 在临时解包目录，若不改，`out/` 会被写到那里，用户既看不到、
+重启也没了。`console/server.py` 里的处理：
+
+```python
+FROZEN = bool(getattr(sys, "frozen", False))
+if FROZEN:
+    ROOT = Path(os.environ.get("DC_ROOT") or Path(sys.executable).resolve().parent)
+    STATIC = ROOT / "console" / "static"
+```
+
+`DC_ROOT` 保留给自检用（`check_exe.py` 显式指定，避免误读开发目录）。
+
+### 31.4 打包后最容易坏的三处
+
+| 坑 | 表现 | 处理 |
+|---|---|---|
+| `sys.executable` 变成 exe 自己 | 重跑时"执行脚本"变成再开一个窗口，接口仍返回 200 | `find_python()` 在 frozen 下另找解释器（`DC_PYTHON` → `.venv` → PATH，跳过 WindowsApps 别名），找不到就在日志里说明原因 |
+| `--windowed` 没有 stdout | `print()` 抛异常；崩溃时无任何提示 | 启动时把流重定向到 `%TEMP%/dc_twin_app.log`，致命错误弹 `MessageBoxW` |
+| 快照只按 mtime 取最新 | 指标页空白（拿到的是只有 `kpi.json` 的旧式快照，没有 `sim_kpi.json`） | 打包脚本对每个场景**两类各保一套** |
+
+### 31.5 自检脚本 `check_exe.py`
+
+界面里点一圈只能证明"我点了"，所以自检直接从外部打接口：
+
+| 组 | 内容 |
+|---|---|
+| 只读 | 19 个：首页、bootstrap、paths、kpi、areas、plan、schema、status、scenarios、template、pnl、ledger、cost-spec、GLB、layout |
+| 写操作（`--ops`） | `POST /api/run`（数据链 10 步）→ 轮询到 `ok`；`POST /api/scenario/save` → `delete` |
+| 结构 | GLB 头必须是 `glTF`；计划书 > 50 KB 且含 `<h2>`；kpi 必须 tick ≥30 且解析 ≥20 |
+| 根目录 | `/api/bootstrap` 的 `env.root` 必须等于 exe 同级 |
+| 3D | 无头 Edge 截图（独立 `--user-data-dir`，否则实例复用时静默不写文件） |
+
+### 31.6 实测
+
+| 项 | 结果 |
+|---|---|
+| 打包 | `dist/DC Twin/` 72 MB，330 个数据文件，PyInstaller 33 s |
+| exe | 5.7 MB（`DC Twin.exe`），双击后 7 s 内服务就绪、窗口可用 |
+| 自检 | 19 个只读接口全 OK；`POST /api/run` 10 步 **12 s** 返回 `ok`；场景另存/删除 OK；`env.root` 指向 exe 同级 |
+| 3D | 无头截图 266 KB：4 仓 + 货架 + 分区色块 + 21 台 AGV，顶栏 `验收 40/40 · AGV 21 · 订单 21 张` |
+| 环境探测 | `blender=C:\Program Files\Blender Foundation\Blender 5.2\blender.exe`、`python=…python.exe` 均自动找到 |
+
+### 31.7 工作区瘦身
+
+打包顺带做了一次清理，口径是"**能一条命令重建的删，能证明结论的留**"：
+
+| 删除 | 体积 | 理由 |
+|---|---|---|
+| `out/frames/`（942 帧 PNG） | 654 MB | mp4 已编码，重渲即得 |
+| `runs/` 历史快照（372 个） | 239 MB | 界面只读最新；每场景留最新 + 最新含 `sim_kpi.json` 的一套 |
+| `artifacts/` 旧产物包（5 套） | 53 MB | 运行快照包，`run_bundle.py` 可重建；留最新 1 套 |
+| `dist/release/` | 16 MB | v3.7 的旧交付包，已被 exe 取代 |
+| `build/`（PyInstaller 工作目录） | 18 MB | 下次打包自动重建 |
+| 临时截图 17 张 + 缓存/备份 | 5 MB | `tab_*`、`final_*`、`.pytest_cache`、`__pycache__` |
+
+结果：**1.2 GB → 154 MB**。清理后立刻重跑守卫，确认没有删错：
+
+```
+report_status OK(29 行) · manifest OK(62 产物) · validate 40/40
+validate_data 12/12  · check_process PASS · check_webapp WEBAPP_OK · pytest 43 passed
+```
+
+清理脚本 `scripts/clean.py` 默认只预览，`--apply` 才动手——删数据这种事不该一口气做完。
+
+### 31.8 v4.1 边界
+
+- **重跑仍要本机 Python**：exe 里只有界面与运行时，`scripts/*.py` 需要解释器；
+  没有就在重跑日志里明说，不会静默失败。
+- **Blender 步骤仍要本机 Blender**：`full` 档要建模+渲染，机器上没有 blender.exe 时
+  在第 11 步停下并报出原因（前 10 步照常完成）。
+- **没有代码签名**：首次运行 Windows 可能弹 SmartScreen 警告（"更多信息 → 仍要运行"）。
+- **只打了 Windows**：macOS/Linux 用 `python dc_app.pyw` 或 `python -m console.server`。
+- **`runs/` 只带最新快照**：界面看得到当前状态，看不到历史趋势（要历史就回仓库）。
+
+---
+
 ## 附录 D · 复核命令集（v3.0 新增）
 
 > 全部命令在 `dc_project/` 下执行，Git Bash 或 PowerShell 均可（`python` 指 3.10+）。每条都给出**期望输出**，输出不符即为文档过期。这是本计划书“可核查”的落地形式。
@@ -3087,6 +3197,9 @@ Pages 上没人跑 Python，断链的表现是"转圈"或"面板空白"，CI 完
 | **D-31** | 证明快照守卫会失败 | `python scripts/check_webapp.py --self-test` | 3 个反例按预期 FAIL，`WEBAPP_SELFTEST OK` |
 | **D-32** | 单窗口客户端能否启动 | `python dc_app.pyw --no-window` 后 `curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8765/?view=3d` | `200`；窗口模式见 `启动驾驶舱.bat` |
 | **D-33** | 计划书 HTML 是否存在 | `python scripts/check_webapp.py 2>&1 | grep -E "WEBAPP_OK|W5"` | `WEBAPP_OK files=23 api=11`；缺 plan.html 时 W5 报错 |
+| **D-34** | 打包产物能否启动并对外服务 | `python scripts/check_exe.py` | 19 个接口全 `OK`，`EXE_OK` |
+| **D-35** | 打包版能否真正写盘/重跑 | `python scripts/check_exe.py --ops` | 数据链 10 步 12 s 返回 `ok`；场景另存/删除 OK |
+| **D-36** | 工作区有多少可重建垃圾 | `python scripts/clean.py` | 1.2 GB → 154 MB（407 项）；加 `--apply` 才删 |
 
 **D-7 的同步命令**（母本在工作区根，仓库只放副本）：
 

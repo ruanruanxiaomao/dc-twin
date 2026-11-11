@@ -25,14 +25,17 @@ import argparse
 import os
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 import webbrowser
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-if str(HERE) not in sys.path:
-    sys.path.insert(0, str(HERE))
+# 打包后 `__file__` 在临时解包目录里，产物与源码同级于 exe，不在那儿。
+APP_DIR = Path(sys.executable).resolve().parent if getattr(sys, "frozen", False) else HERE
+if str(APP_DIR) not in sys.path:
+    sys.path.insert(0, str(APP_DIR))
 
 TITLE = "配送中心数字孪生 · DC Twin"
 
@@ -91,8 +94,8 @@ def _menu(window, url_base: str):
         ("操作", [
             ("重跑场景链", lambda: js("switchTab('params')")),
             ("产物目录", lambda: subprocess.Popen(
-                ["explorer", str(HERE / "out")] if os.name == "nt"
-                else ["open", str(HERE / "out")])),
+                ["explorer", str(APP_DIR / "out")] if os.name == "nt"
+                else ["open", str(APP_DIR / "out")])),
             ("重新载入", lambda: window.load_url(url_base)),
         ]),
         ("帮助", [
@@ -126,7 +129,7 @@ def run_app_window(url: str, width: int, height: int) -> int:
         webbrowser.open(url)
         print("已用默认浏览器打开：%s" % url)
         return 0
-    profile = HERE / ".webprofile"
+    profile = Path(tempfile.gettempdir()) / "dc_twin_webprofile"   # 别在应用目录里拉屎
     cmd = [exe, "--app=%s" % url, "--window-size=%d,%d" % (width, height),
            "--user-data-dir=%s" % profile, "--no-first-run",
            "--no-default-browser-check"]
@@ -166,5 +169,43 @@ def main(argv=None) -> int:
         httpd.shutdown()
 
 
+def _ensure_streams():
+    """窗口模式（pythonw / --windowed exe）没有 stdout，`print()` 会直接抛。
+
+    把输出重定向到一个临时日志：既不会因为打印而崩，出问题时还能翻到原因。
+    """
+    if sys.stdout is not None and sys.stderr is not None:
+        return None
+    log = Path(tempfile.gettempdir()) / "dc_twin_app.log"
+    f = open(log, "a", encoding="utf-8", buffering=1)
+    if sys.stdout is None:
+        sys.stdout = f
+    if sys.stderr is None:
+        sys.stderr = f
+    print("\n--- %s ---" % time.strftime("%Y-%m-%d %H:%M:%S"))
+    return f
+
+
+def _fatal(exc: BaseException) -> None:
+    """双击启动失败时必须看得见，否则就是"点了没反应"。"""
+    import traceback
+    tb = traceback.format_exc()
+    print(tb, file=sys.stderr)
+    try:
+        import ctypes
+        ctypes.windll.user32.MessageBoxW(
+            None,
+            "启动失败：\n\n%s\n\n完整日志：%s"
+            % (str(exc)[:600], Path(tempfile.gettempdir()) / "dc_twin_app.log"),
+            "DC Twin", 0x10)
+    except Exception:                              # 非 Windows 或没有 ctypes
+        pass
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    _LOG = _ensure_streams()
+    try:
+        sys.exit(main())
+    except BaseException as exc:                   # noqa: BLE001
+        _fatal(exc)
+        sys.exit(1)

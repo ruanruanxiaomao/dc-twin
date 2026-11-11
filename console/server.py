@@ -26,8 +26,17 @@ from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 
 HERE = Path(__file__).resolve().parent
-ROOT = HERE.parent
-STATIC = HERE / "static"
+
+# 打包（PyInstaller）后 `__file__` 落在临时解包目录里，不能用来定位产物：
+# 代码在 exe 的归档里，但 data/out/runs/scripts 必须留在 **exe 同级目录**，
+# 因为重跑时要写盘，而且用户要能直接看到 out/ 里的模型与渲染图。
+FROZEN = bool(getattr(sys, "frozen", False))
+if FROZEN:
+    ROOT = Path(os.environ.get("DC_ROOT") or Path(sys.executable).resolve().parent)
+    STATIC = ROOT / "console" / "static"
+else:
+    ROOT = HERE.parent
+    STATIC = HERE / "static"
 DATA = ROOT / "data"
 OUT = ROOT / "out"
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -39,13 +48,26 @@ PORT = int(os.environ.get("DC_CONSOLE_PORT", "8765"))
 # ---------------------------------------------------------------- 子进程环境
 
 def find_python():
-    venv = ROOT / ".venv" / "Scripts" / "python.exe"
-    if venv.exists():
-        return str(venv)
-    venv2 = ROOT / ".venv" / "bin" / "python"
-    if venv2.exists():
-        return str(venv2)
-    return sys.executable
+    """找一个能跑 scripts/*.py 的解释器。
+
+    打包版里 `sys.executable` 是 **这个 GUI 应用自己**，拿它去执行脚本只会再开
+    一个窗口（甚至因为参数不认识直接退出），所以必须另找真实解释器；找不到就
+    返回空串，让重跑报出可读的原因，而不是抛一堆看不懂的 traceback。
+    """
+    env = os.environ.get("DC_PYTHON", "").strip()
+    if env and Path(env).exists():
+        return env
+    for venv in (ROOT / ".venv" / "Scripts" / "python.exe",
+                 ROOT / ".venv" / "bin" / "python"):
+        if venv.exists():
+            return str(venv)
+    if not FROZEN:
+        return sys.executable
+    for name in ("python.exe", "python3.exe", "python", "python3"):
+        found = shutil.which(name)
+        if found and "WindowsApps" not in found:      # 商店别名会弹应用商店
+            return found
+    return ""
 
 
 def find_blender():
@@ -150,7 +172,7 @@ class Job:
                 "steps": [{"key": k, "label": lb} for k, _a, lb in self.steps],
                 "elapsed": round((self.finished or time.time()) - self.started, 1),
                 "returncode": self.returncode,
-                "lines": [l for l in self.lines if l["i"] >= since],
+                "lines": [ln for ln in self.lines if ln["i"] >= since],
                 "next": len(self.lines),
             }
 
@@ -169,6 +191,13 @@ def run_job(scope):
     env["PYTHONUTF8"] = "1"
 
     job.log("启动重跑：" + SCOPE_LABEL.get(scope, scope), level="head")
+    if scope in ("data", "full") and not PY:
+        job.log("未找到可用的 Python 解释器，无法执行 scripts/*.py。\n"
+                "打包版需要一个本机 Python：把 DC_PYTHON 设为 python.exe 的完整路径，"
+                "或让 python 在 PATH 里，然后重开应用。", level="error")
+        job.status = "failed"
+        job.finished = time.time()
+        return
     if scope in ("data", "full"):
         job.log("Python: %s" % PY)
     if scope == "full":
