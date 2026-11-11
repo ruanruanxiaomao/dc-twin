@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
   "kind": "webapp_snapshot",
-  "generated_at": "2026-11-11T14:23:46+00:00",
-  "commit": "a2bde1f",
+  "generated_at": "2026-11-11T14:40:36+00:00",
+  "commit": "7886b33",
   "glb": "out/dc_preview.glb",
   "api": {
-    "bootstrap": 218961,
+    "bootstrap": 218983,
     "paths": 189961,
     "scenarios": 4253,
     "pnl": 309,
@@ -13,7 +13,7 @@
     "schema": 1596,
     "cost-spec": 1950,
     "scenario/template": 652,
-    "status": 16408,
+    "status": 16430,
     "kpi": 12074,
     "areas": 10639,
     "areas/catalog": 3507,
@@ -33,8 +33,8 @@
       "sha256": "ac5bb7febd4773c28854f66a4c22f8eb7faa067aa319038aca37dbb66792cab8"
     },
     "api/bootstrap.json": {
-      "bytes": 218961,
-      "sha256": "76b6772ebff392e2c0521087295cbc12227b3aadb0600be382d1872b34f3f7d4"
+      "bytes": 218983,
+      "sha256": "3b00e164d3a6f71e062f2f4f9a475645c6696ae806f4b2e663e7306d0daaf8b0"
     },
     "api/cost-spec.json": {
       "bytes": 1950,
@@ -53,8 +53,8 @@
       "sha256": "18ae982358843659bbce69e5e30b769def90451ed841f44d7cb0c8c4e167c1a8"
     },
     "api/plan.html": {
-      "bytes": 357052,
-      "sha256": "822ca01fc5764e18a2bab86f543d346a083d9b98e551baae2df749d1bfca8453"
+      "bytes": 360702,
+      "sha256": "3019ca2eed61a22f39aaa02623cfbb7467ebc8440c303bd85f8339f91aaba369"
     },
     "api/pnl.json": {
       "bytes": 309,
@@ -73,8 +73,8 @@
       "sha256": "7aa4be2e3e9e2d729b2f629dd8754bc9fb0a7e82575844772edeab9dac5fc46c"
     },
     "api/status.json": {
-      "bytes": 16408,
-      "sha256": "e1562223447bb2a8b6305a495179cad0e03693a568d08938103aec681c648e5e"
+      "bytes": 16430,
+      "sha256": "ca8363267ab5c5ad9435b5fa407a7e92cb64a6efc9da6714628702249357f4e4"
     },
     "app.js": {
       "bytes": 46561,
@@ -93,8 +93,8 @@
       "sha256": "f533ceae0d92fc8698691573fb94255c5af5a668bb1e03cb13f30a173c0a5e95"
     },
     "out/dc_preview.glb": {
-      "bytes": 806620,
-      "sha256": "7fccf4753afd1257a9cba4f5f84dfc9a397232f9e1aa0cae8ba6b4ae9b17efef"
+      "bytes": 830524,
+      "sha256": "1f0f8a330ccb3ec3afedb5c68649b24f3002b15ac8fbddff574e8af2f2ea0caf"
     },
     "snapshot.js": {
       "bytes": 3595,
@@ -127,7 +127,7 @@
   },
   "counts": {
     "files": 26,
-    "bytes": 3207210
+    "bytes": 3234808
   },
   "note": "静态快照：/api/* 已冻结为 api/*.json，POST 一律拒绝"
 }

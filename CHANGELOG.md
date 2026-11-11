@@ -4,6 +4,34 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2026-11-11
+
+The functional areas got bodies. Until now 21 areas rendered as 3 floor slabs and
+18 name tags, so a receiving zone and a returns zone looked identical.
+
+### Added
+
+- `build_area_props()`: five prop archetypes driven by area kind — pallet stacks
+  (pallet + staggered cartons + straps), workbenches (top, legs, cartons), pick
+  shelves (posts, 3 levels, totes), sorting chutes (bed, side plates, tote) and
+  battery cabinets (body + indicator). 16 groups / 128 meshes.
+- Physical areas spread their props along the work band instead of stacking them
+  in the middle; logical areas search for the nearest free spot (12 directions x
+  4 radii) that stays inside a warehouse and clear of every solid.
+
+### Fixed
+
+- Placement used to test only the four corners of a prop's rectangle. F1's pick
+  shelf ended up straddling a rack row (corners outside, body inside). Switched
+  to AABB intersection; a read-back check over the .blend now reports
+  `PROP_OVERLAP 0` against racks, docks and stations.
+
+### Changed
+
+- Scene 1327 -> 1455 objects, GLB 806 -> 830 KB, stills and the 942-frame video
+  re-baked; validate 40/40 unchanged (props do not enter the nav grid, locations
+  or acceptance counts).
+
 ## [0.8.0] - 2026-11-11
 
 Real orders can now drive the tick engine, and CI proves it every run.

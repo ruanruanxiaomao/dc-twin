@@ -740,6 +740,197 @@ def build_functional_areas():
     return n_phys, n_logi
 
 
+# ------------------------------------------------- 功能区实体（v4.6）
+# 之前 21 个区只有 3 块地板和 18 个小标牌，远看等于没有。这里给每个区配"作业家具"：
+# 收货/暂存=托盘堆，质检/包装=工作台+纸箱，拣选=料架，分拣=滑道，电池=充电柜。
+# 规矩：不新增假占地。物理区在家具摆进 rect 内；逻辑区先找最近的空地（避开货架/
+# 月台/工位），找不到就只保留标牌——宁可少画，也不要把设备摞在货架上。
+
+AREA_SOLIDS = None
+
+
+def _area_solids():
+    """所有"不能压"的实体：货架、月台、工位、障碍物（含仓库内柱）。"""
+    global AREA_SOLIDS
+    if AREA_SOLIDS is not None:
+        return AREA_SOLIDS
+    rects = []
+    for wh in LAYOUT['warehouses']:
+        for r in wh.get('racks', []):
+            x, _h, z = r['position']
+            rl, _rh, rd = r['size']
+            rects.append((x - rl / 2, z - rd / 2, x + rl / 2, z + rd / 2))
+        for key in ('docks', 'stations', 'obstacles'):
+            for it in wh.get(key, []) or []:
+                rc = it.get('rect')
+                if rc:
+                    rects.append(tuple(rc))
+    AREA_SOLIDS = rects
+    return rects
+
+
+def _inside(x, z, rc, margin=0.0):
+    return (rc[0] - margin <= x <= rc[2] + margin
+            and rc[1] - margin <= z <= rc[3] + margin)
+
+
+def _warehouse_at(x, z):
+    for wh in LAYOUT['warehouses']:
+        ox, oz = wh['origin']
+        if (ox <= x <= ox + wh['size']['width']
+                and oz <= z <= oz + wh['size']['depth']):
+            return wh
+    return None
+
+
+def _free_spot(cx, cz, half=1.2):
+    """在挂靠点附近找一块不压实体的空地；找不到返回 None。"""
+    solids = _area_solids()
+    cands = [(0.0, 0.0)]
+    for rad in (1.6, 2.4, 3.4, 4.6):
+        for k in range(12):
+            a = k * math.pi / 6
+            cands.append((rad * math.cos(a), rad * math.sin(a)))
+    for dx, dz in cands:
+        x, z = cx + dx, cz + dz
+        if _warehouse_at(x, z) is None:
+            continue
+        rect = (x - half, z - half, x + half, z + half)
+        # 必须做**矩形相交**判断。只测四个角会漏掉"横跨在货架上"的情况：
+        # 之前 F1 的拣选料架就是这样架在货架排上的（角在排外，身子压着排）。
+        if any(_rect_overlap(rect, r) for r in solids):
+            continue
+        return x, z
+    return None
+
+
+def _rect_overlap(a, b, margin=0.0):
+    return not (a[2] + margin <= b[0] or b[2] + margin <= a[0]
+                or a[3] + margin <= b[1] or b[3] + margin <= a[1])
+
+
+def _pallet_stack(name, x, z, coll, layers=3):
+    """托盘 + 纸箱堆：每层留 2 cm 缝、尺寸略变，避免糊成一个米色柱子。"""
+    box(name + '_PALLET', (x, z, 0.075), (1.2, 1.0, 0.15), 'rack_deck', coll)
+    w, d = 1.0, 0.82
+    for i in range(layers):
+        hz = 0.15 + i * 0.44
+        # 交替缩一点，远看才有"一箱一箱"的层次
+        sw = w if i % 2 == 0 else w * 0.88
+        sd = d if i % 2 == 0 else d * 0.9
+        box('%s_BOX%d' % (name, i), (x, z, hz + 0.20),
+            (sw, sd, 0.38), 'crate', coll)
+        box('%s_STRAP%d' % (name, i), (x, z, hz + 0.20),
+            (sw * 0.16, sd * 1.02, 0.39), 'line_yellow', coll)
+    return 1 + layers * 2
+
+
+def _bench(name, x, z, coll, w=1.8, d=0.8, rot=0.0):
+    """工作台：台面 + 4 条腿 + 台面两个纸箱。"""
+    box(name + '_TOP', (x, z, 0.86), (w, d, 0.08), 'rack_deck', coll, rot)
+    for sx in (-1, 1):
+        for sz in (-1, 1):
+            box('%s_LEG%s%s' % (name, 'A' if sx < 0 else 'B', 'A' if sz < 0 else 'B'),
+                (x + sx * (w / 2 - 0.08), z + sz * (d / 2 - 0.08), 0.42),
+                (0.08, 0.08, 0.84), 'steel', coll, rot)
+    box(name + '_BIN', (x - w * 0.22, z, 1.08), (0.42, 0.42, 0.36), 'crate', coll, rot)
+    box(name + '_BIN2', (x + w * 0.18, z, 1.04), (0.34, 0.34, 0.28), 'crate', coll, rot)
+    return 7
+
+
+def _shelf(name, x, z, coll, rot=0.0):
+    """拣选料架：立柱 + 3 层板 + 每层两个周转箱。"""
+    w, d, h = 1.9, 0.65, 2.0
+    for sx in (-1, 1):
+        for sz in (-1, 1):
+            box('%s_POST%s%s' % (name, 'A' if sx < 0 else 'B', 'A' if sz < 0 else 'B'),
+                (x + sx * (w / 2 - 0.05), z + sz * (d / 2 - 0.05), h / 2),
+                (0.07, 0.07, h), 'rack_frame', coll, rot)
+    for i in range(3):
+        box('%s_LEVEL%d' % (name, i), (x, z, 0.35 + i * 0.72),
+            (w, d, 0.05), 'rack_deck', coll, rot)
+        for j in (-1, 1):
+            box('%s_TOTE%d%d' % (name, i, j),
+                (x + j * w * 0.22, z, 0.35 + i * 0.72 + 0.21),
+                (0.6, 0.44, 0.36), 'crate', coll, rot)
+    return 10
+
+
+def _cabinet(name, x, z, coll, rot=0.0):
+    """电池间/维修间的机柜：柜体 + 顶部指示灯。"""
+    box(name + '_BODY', (x, z, 0.95), (1.0, 0.62, 1.9), 'steel', coll, rot)
+    box(name + '_LED', (x, z, 1.94), (0.9, 0.5, 0.05), 'light', coll, rot)
+    return 2
+
+
+def _chute(name, x, z, coll, rot=0.0):
+    """分拣滑道：倾斜台面 + 侧板（用两块竖板夹一个斜台，远看就是滑道）。"""
+    box(name + '_BED', (x, z, 0.55), (2.2, 0.9, 0.1), 'conveyor', coll, rot)
+    for sz in (-1, 1):
+        box('%s_SIDE%s' % (name, 'A' if sz < 0 else 'B'),
+            (x, z + sz * 0.42, 0.62), (2.2, 0.06, 0.45), 'steel', coll, rot)
+    box(name + '_TOTE', (x + 0.6, z, 0.72), (0.5, 0.5, 0.3), 'crate', coll, rot)
+    return 4
+
+
+#: 区类型 → (生成器, 数量, 需要的半宽)
+AREA_PROPS = {
+    'RECEIVING': (_pallet_stack, 3, 1.6),
+    'QA': (_bench, 2, 1.4),
+    'STAGING_IN': (_pallet_stack, 2, 1.4),
+    'STAGING_OUT': (_pallet_stack, 2, 1.4),
+    'PICK_FACE': (_shelf, 2, 1.4),
+    'REPLENISH': (_bench, 1, 1.3),
+    'SORTING': (_chute, 2, 1.6),
+    'PACKING': (_bench, 1, 1.4),
+    'RETURNS': (_bench, 1, 1.3),
+    'EMPTY_CONTAINER': (_pallet_stack, 2, 1.3),
+    'BATTERY': (_cabinet, 2, 1.1),
+    'MAINTENANCE': (_cabinet, 1, 1.1),
+}
+
+
+def build_area_props(centers):
+    """给功能区配作业家具。返回实际生成的家具组数。"""
+    coll = collection('AREA_PROPS')
+    made = 0
+    for a in AREAS.get('areas', []):
+        kind = a.get('kind')
+        spec = AREA_PROPS.get(kind)
+        if not spec:
+            continue
+        builder, n, half = spec
+        aid = a['id']
+        if a.get('rect'):
+            x0, z0, x1, z1 = a['rect']
+            cx, cz = (x0 + x1) / 2, (z0 + z1) / 2
+            # 物理区：家具沿作业带铺开，别全叠在中心
+            span_x = max(0.0, (x1 - x0) / 2 - half - 0.3)
+            for i in range(n):
+                ox = 0.0 if n == 1 else (-span_x + 2 * span_x * i / (n - 1))
+                spot = (cx + ox, cz)
+                if _warehouse_at(*spot) is None:
+                    continue
+                builder('%s_%s_%d' % (aid, kind, i), spot[0], spot[1], coll)
+                made += 1
+        else:
+            ctr = centers.get(a.get('anchor'))
+            if not ctr:
+                continue
+            for i in range(n):
+                spot = _free_spot(ctr[0], ctr[1], half) if i == 0 else None
+                if spot is None:
+                    continue
+                # 同一个锚点放多组时向 x 方向错开，避免完全重合
+                spot = (spot[0] + i * 0.4, spot[1] - i * 0.6)
+                if _warehouse_at(*spot) is None:
+                    continue
+                builder('%s_%s_%d' % (aid, kind, i), spot[0], spot[1], coll)
+                made += 1
+    COUNTS['area_prop_groups'] = made
+    return made
+
+
 def build_lights_cameras():
     c = collection('LIGHTS_CAMERAS')
     world = bpy.context.scene.world or bpy.data.worlds.new('World')
@@ -803,6 +994,7 @@ def main():
     build_racks_and_cargo(assets)
     build_docks_conveyors(assets)
     build_functional_areas()
+    build_area_props(anchor_centers())
     build_vehicles(assets)
     build_route_lines()
     build_nav_corridors()
