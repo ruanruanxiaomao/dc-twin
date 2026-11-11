@@ -4,6 +4,32 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-11-11
+
+Real orders can now drive the tick engine, and CI proves it every run.
+
+### Added
+
+- `sim_engine.py --events PATH`: consume an external order stream instead of
+  synthesising Poisson arrivals. Arrival times come from the data, do not consume
+  the RNG (service times keep their separate stream), and participate in the
+  tick-jump computation so idle ticks never skip a scheduled order.
+- `scripts/real_data_pilot.py`: one command runs CSV adapter -> external-order
+  simulation -> ledger -> P&L -> comparison report against the synthetic
+  baseline (`out/pilot/report.md`). `--freeze/--check` pin 14 deterministic
+  metrics; two runs of the same CSV match exactly.
+- CI step that runs the pilot after the KPI baseline.
+
+### Changed
+
+- `scripts/kpi_baseline.py` excludes the `pilot_csv` run directory from the
+  8-scenario baseline: the pilot has its own frozen values.
+
+### Notes
+
+The sample CSV has 24 orders across W/F1/F2/F3; the result proves the chain runs
+end to end and reproduces, not what a real operation would earn.
+
 ## [0.7.0] - 2026-11-11
 
 Two foundation pieces: KPIs that cannot drift silently, and an environment you can

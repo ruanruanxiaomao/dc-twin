@@ -122,8 +122,8 @@ def latest_runs(dst: Path) -> tuple[int, int]:
     n = 0
     kept = 0
     for scen in sorted(p for p in src.iterdir() if p.is_dir()):
-        if scen.name in ("logs", "cache"):
-            continue
+        if scen.name in ("logs", "cache", "pilot_csv"):
+            continue          # 试点运行不进交付包：它属于验证证据，不是产品数据
         snaps = sorted((p for p in scen.iterdir() if p.is_dir()),
                        key=lambda p: p.stat().st_mtime)
         if not snaps:

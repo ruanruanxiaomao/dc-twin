@@ -36,7 +36,7 @@ jobs:
         run: python scripts/bootstrap.py --check
 
       - name: Lint new code (legacy scripts predate the lint gate)
-        run: ruff check dc_twin run.py console scripts/manifest.py scripts/validate_data.py scripts/build_docs_assets.py scripts/check_claims.py scripts/check_exe.py scripts/clean.py scripts/bootstrap.py scripts/kpi_baseline.py tests
+        run: ruff check dc_twin run.py console scripts/manifest.py scripts/validate_data.py scripts/build_docs_assets.py scripts/check_claims.py scripts/check_exe.py scripts/clean.py scripts/bootstrap.py scripts/kpi_baseline.py scripts/real_data_pilot.py tests
 
       - name: Doctor
         run: python -m dc_twin doctor
@@ -48,6 +48,10 @@ jobs:
         run: |
           python scripts/kpi_baseline.py --self-test
           python scripts/kpi_baseline.py --check
+
+      - name: Real-data pilot (CSV orders through the real engine)
+        run: |
+          python scripts/real_data_pilot.py --check
 
       - name: Negative tests (17 cases)
         run: python tests/run_all_negative.py

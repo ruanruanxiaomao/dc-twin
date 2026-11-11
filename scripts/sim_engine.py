@@ -340,7 +340,8 @@ class Robot:
 class Simulation:
     station_slots_override = None       # 验证排队用：把所有工位并行位强制为 N
 
-    def __init__(self, scenario_path, sim_spec, fleet, demand, layout, grid, cfg, out_dir=None):
+    def __init__(self, scenario_path, sim_spec, fleet, demand, layout, grid, cfg,
+                 out_dir=None, external_orders=None):
         self.sc = jload(scenario_path)
         self.spec = copy.deepcopy(sim_spec)
         self.fleet, self.demand, self.layout, self.grid = fleet, demand, layout, grid
@@ -378,6 +379,10 @@ class Simulation:
             for v in self.stations.values():
                 v["slots"] = int(Simulation.station_slots_override)
         self.faults = self._disruptions()
+        # 外部订单流（企业 CSV / WMS 适配器产出）：给了就不再合成订单。
+        # 这样"真实数据接入"才是真的跑一遍，而不是拿 CSV 生成个差不多的泊松。
+        self.ext = list(external_orders or [])
+        self.ext_i = 0
         self.metrics = {}
         self.samples = []
         self.position_samples = []
@@ -825,7 +830,10 @@ class Simulation:
         tick = 0
         n_ticks = int(self.horizon / self.tick)
         lam = self.per_hour / 3600.0
-        self.next_arrival = self.rng.expovariate(lam) if lam > 0 else float("inf")
+        if self.ext:
+            self.next_arrival = self.ext[0]["t_arrive"]
+        else:
+            self.next_arrival = self.rng.expovariate(lam) if lam > 0 else float("inf")
         while tick < n_ticks:
             t = tick * self.tick
             # Event-driven tick jump. Fault start/end times are scheduled events
@@ -858,15 +866,31 @@ class Simulation:
                     continue
 
             # 1) demand
-            while self.next_arrival <= t:
-                self._order_n += 1
-                o = self.new_order(self.next_arrival)
-                if o:
+            if self.ext:
+                # 外部订单：到达时间由数据决定，不消耗随机流——同一个 CSV 跑两遍
+                # 结果必须一致，否则"真实数据接入"就没法当基准。
+                while (self.ext_i < len(self.ext)
+                       and self.ext[self.ext_i]["t_arrive"] <= t + 1e-9):
+                    o = self.ext[self.ext_i]
+                    self.ext_i += 1
+                    self._order_n += 1
                     self.queue.append(o)
-                    self.log.emit(self.next_arrival, "ORDER_ARRIVED",
+                    self.log.emit(o["t_arrive"], "ORDER_ARRIVED",
                                   order_id=o["order_id"], order_type=o["type"],
-                                  warehouse=o["warehouse"], priority=o["priority"])
-                self.next_arrival += self.rng.expovariate(lam) if lam > 0 else float("inf")
+                                  warehouse=o["warehouse"], priority=o["priority"],
+                                  source="csv")
+                self.next_arrival = (self.ext[self.ext_i]["t_arrive"]
+                                     if self.ext_i < len(self.ext) else float("inf"))
+            else:
+                while self.next_arrival <= t:
+                    self._order_n += 1
+                    o = self.new_order(self.next_arrival)
+                    if o:
+                        self.queue.append(o)
+                        self.log.emit(self.next_arrival, "ORDER_ARRIVED",
+                                      order_id=o["order_id"], order_type=o["type"],
+                                      warehouse=o["warehouse"], priority=o["priority"])
+                    self.next_arrival += self.rng.expovariate(lam) if lam > 0 else float("inf")
 
             # 2) faults
             self._apply_faults(t)
@@ -1252,9 +1276,54 @@ class Simulation:
                 "queue_depth": len(self.queue), "blocked_docks": sorted(self.blocked_docks)}
 
 
+def load_external_orders(path, layout=None):
+    """把 CSV/WMS 适配器产出的事件流映射成引擎的订单结构。
+
+    返回 None 表示"没有外部数据，按需求 spec 合成"——调用方不必分支。
+    引用完整性由适配器负责（缺 from/to 会在那一步 FAIL），所以这里只丢弃
+    解析不了的行，并在 stderr 报数量，不静默吞掉。
+    """
+    if not path:
+        return None
+    p = Path(path)
+    if not p.exists():
+        raise SystemExit("EVENTS_NOT_FOUND %s" % p)
+    lay = layout or jload(DATA / "layout.json")
+    loc = {}
+    for wh in lay.get("warehouses", []):
+        for item in wh.get("locations", []):
+            loc[item["id"]] = item
+    orders, dropped = [], 0
+    for line in p.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        r = json.loads(line)
+        src, dst = loc.get(r.get("from")), loc.get(r.get("to"))
+        if not src or not dst:
+            dropped += 1
+            continue
+        orders.append({
+            "order_id": r.get("order_id"),
+            "type": r.get("type", "OUTBOUND"),
+            "warehouse": r.get("warehouse_id") or src["id"].split("-")[0],
+            "pick_loc": src["id"], "drop_loc": dst["id"],
+            "pick_xy": tuple(src["access_point"]), "drop_xy": tuple(dst["access_point"]),
+            "t_arrive": float(r.get("t_request", 0.0)),
+            "priority": r.get("priority", "P2"),
+            "deadline": float(r.get("deadline", r.get("t_request", 0.0))),
+            "reassignments": 0,
+        })
+    if dropped:
+        print("EVENTS_WARN 丢弃 %d 行（from/to 不在 layout 里）" % dropped, file=sys.stderr)
+    orders.sort(key=lambda o: (o["t_arrive"], str(o["order_id"])))
+    print("EVENTS_OK %d 单，来源 %s" % (len(orders), p.name), file=sys.stderr)
+    return orders
+
+
 def run_one(scenario_path, args, sim_spec, fleet, demand, layout, grid, cfg, out_dir=None):
     sim = Simulation(scenario_path, sim_spec, fleet, demand, layout, grid, cfg,
-                     out_dir=out_dir)
+                     out_dir=out_dir,
+                     external_orders=load_external_orders(getattr(args, "events", None)))
     if args.horizon:
         sim.horizon = args.horizon
     if args.seed is not None:
@@ -1288,6 +1357,8 @@ def main(argv=None):
     ap.add_argument("--horizon", type=float, default=None)
     ap.add_argument("--seed", type=int, default=None)
     ap.add_argument("--quiet", action="store_true")
+    ap.add_argument("--events", default=None,
+                    help="外部订单事件 JSONL（CSV/WMS 适配器产出）；给了就不再合成需求")
     ap.add_argument("--out-dir", default=None,
                     help="write runs and index under this directory (for determinism tests)")
     args = ap.parse_args(argv)

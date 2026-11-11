@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "kind": "pilot_baseline",
+  "note": "真实 CSV 订单试点的确定性指标；改模型后需要显式 --freeze",
+  "tolerance_rel": 1e-06,
+  "metrics": {
+    "orders_generated": 24,
+    "orders_completed": 24,
+    "orders_lost": 0,
+    "throughput_orders_per_h": 24.0,
+    "on_time_rate": 1.0,
+    "avg_tardiness_s": 0.0,
+    "distance_total_m": 2024.945,
+    "energy_kwh_total": 1.619958,
+    "energy_per_order_kwh": 0.067498,
+    "charge_events": 3,
+    "max_queue_depth": 0,
+    "station_utilization": 0.0626,
+    "strict_collisions": 0,
+    "min_pair_distance_m": 2.8317
+  }
+}
