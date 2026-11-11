@@ -82,6 +82,9 @@
       <button data-tab="artifacts">产物</button>
       <button data-tab="ops">运营</button>
       <button data-tab="scenarios">场景</button>
+      <button data-tab="kpi">指标</button>
+      <button data-tab="areas">功能区</button>
+      <button data-tab="plan">计划书</button>
     </nav>
 
     <div class="panes">
@@ -150,6 +153,30 @@
           <button class="btn" id="btnSavePrice">保存价格</button>
           <span class="muted" id="priceMsg"></span>
         </div>
+      </div>
+
+      <div class="pane" id="pane-kpi">
+        <div class="pane-sub" id="kpiSub">两套指标：解析层 M/M/c · tick 层实测</div>
+        <div class="seg" id="kpiLayer">
+          <button class="on" data-layer="tick">tick 层实测</button>
+          <button data-layer="analytic">解析层 M/M/c</button>
+        </div>
+        <input class="inp" id="kpiSearch" placeholder="按名称/定义过滤，如 queue、utilization">
+        <div class="list" id="kpiList"></div>
+      </div>
+
+      <div class="pane" id="pane-areas">
+        <div id="areaBadges"></div>
+        <div class="pane-sub">21 个功能区（data/areas.json，L23–L26 校验）</div>
+        <div class="list" id="areaList"></div>
+      </div>
+
+      <div class="pane" id="pane-plan">
+        <div class="plan-bar">
+          <span class="pane-sub" style="margin:0">计划书 v3.9 · 30 章 + 附录 A–E</span>
+          <button class="btn mini" id="btnPlanClose">收起 ✕</button>
+        </div>
+        <iframe id="planFrame" title="计划书"></iframe>
       </div>
 
       <div class="pane" id="pane-scenarios">

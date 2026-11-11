@@ -11,6 +11,8 @@
   "/api/pnl": "pnl.json",
   "/api/ledger": "ledger.json",
   "/api/schema": "schema.json",
+  "/api/kpi": "kpi.json",
+  "/api/areas": "areas.json",
   "/api/cost-spec": "cost-spec.json",
   "/api/scenario/template": "scenario/template.json"
 };

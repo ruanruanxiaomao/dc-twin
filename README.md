@@ -18,6 +18,22 @@ acceptance checks.**
 
 ---
 
+## One window for the whole project
+
+```bash
+python dc_app.pyw          # or double-click 启动驾驶舱.bat
+```
+
+`dc_app.pyw` merges the old Tk cockpit and the web console into a single native
+window (pywebview → WebView2): it starts the console server in-process and loads
+the same UI described below. Ten panes cover the whole project — 3D twin,
+vehicles, orders, acceptance, parameters, artefacts, operations, scenarios,
+the 39-metric dictionary, the 21 functional areas, and the full plan document.
+
+If pywebview/WebView2 is unavailable it falls back to an Edge/Chrome `--app`
+window, then to the default browser. `启动驾驶舱_Tk经典版.bat` still opens the
+legacy Tk cockpit.
+
 ## Open the 3D twin in a browser
 
 ![3D web console](assets/webapp_3d.png)

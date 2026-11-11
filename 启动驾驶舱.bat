@@ -1,5 +1,5 @@
 @echo off
-rem Launch the DC Twin Studio desktop cockpit without a console window.
+rem DC Twin — single-window client (pywebview + local console).
 setlocal
 cd /d "%~dp0"
 
@@ -7,9 +7,9 @@ set "PYW=pythonw"
 where pythonw >nul 2>nul
 if errorlevel 1 set "PYW=python"
 
-start "" "%PYW%" "%~dp0desktop_app.pyw"
+start "" "%PYW%" "%~dp0dc_app.pyw"
 if errorlevel 1 (
-  echo Failed to start. Falling back to python desktop_app.pyw
-  python "%~dp0desktop_app.pyw"
+  echo Failed to start. Falling back to python dc_app.pyw
+  python "%~dp0dc_app.pyw"
 )
 endlocal

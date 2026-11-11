@@ -328,6 +328,62 @@ REPORT_FILES = [
 ]
 
 
+def _latest_sim_kpi():
+    """取最近一次 tick 仿真的 KPI（runs/<scenario>/<ts>/sim_kpi.json）。"""
+    runs = sorted((ROOT / "runs").glob("*/*/sim_kpi.json"))
+    if not runs:
+        return None, []
+    p = runs[-1]
+    try:
+        metrics = read_json(p, {}).get("metrics", {})
+    except Exception:
+        return None, []
+    rows = []
+    for k, v in metrics.items():
+        if isinstance(v, dict):
+            rows.append({"key": k, **{kk: v.get(kk) for kk in
+                                      ("value", "unit", "definition", "formula", "source")}})
+        else:
+            rows.append({"key": k, "value": v})
+    return str(p.parent.relative_to(ROOT)), rows
+
+
+def build_kpi_payload():
+    """两套指标并存：解析层 M/M/c（out/kpi.json）+ tick 层实测（sim_kpi.json）。"""
+    a_runs = sorted((ROOT / "runs").glob("baseline/*/kpi.json"))
+    analytic = read_json(a_runs[-1], {}) if a_runs else {}
+    a_metrics = analytic.get("metrics", {})
+    a_rows = [{"key": k, **{kk: v.get(kk) for kk in
+                            ("value", "unit", "definition", "formula", "source")}}
+              if isinstance(v, dict) else {"key": k, "value": v}
+              for k, v in a_metrics.items()]
+    run, t_rows = _latest_sim_kpi()
+    return {"analytic": a_rows, "tick": t_rows, "tick_run": run,
+            "model": analytic.get("model")}
+
+
+def build_areas_payload():
+    d = read_json(DATA / "areas.json", {}) or {}
+    return {"summary": d.get("summary", {}), "areas": d.get("areas", [])}
+
+
+_PLAN_CACHE = {"mtime": 0.0, "html": ""}
+
+
+def build_plan_html():
+    """计划书 → HTML（按 mtime 缓存；转一次约 0.3 s）。"""
+    src = ROOT / "docs" / "DC_MASTER_PLAN.md"
+    if not src.exists():
+        return "<!doctype html><meta charset='utf-8'><p>计划书尚未生成</p>"
+    mt = src.stat().st_mtime
+    if _PLAN_CACHE["mtime"] != mt:
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import md2html
+        _PLAN_CACHE["html"] = md2html.convert(src.read_text(encoding="utf-8"))
+        _PLAN_CACHE["mtime"] = mt
+    return _PLAN_CACHE["html"]
+
+
 def build_bootstrap():
     layout = read_json(DATA / "layout.json", {}) or {}
     config = read_json(DATA / "config.json", {}) or {}
@@ -632,6 +688,19 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send_json(build_bootstrap())
             if path == "/api/paths":
                 return self.send_json(build_paths_payload())
+            if path == "/api/kpi":
+                return self.send_json(build_kpi_payload())
+            if path == "/api/areas":
+                return self.send_json(build_areas_payload())
+            if path in ("/api/plan.html", "/api/plan"):
+                body = build_plan_html().encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("Cache-Control", "no-store")
+                self.end_headers()
+                self.wfile.write(body)
+                return None
             if path == "/api/schema":
                 return self.send_json({"fields": CONFIG_SCHEMA,
                                        "scopes": {k: {"label": v, "steps": len(SCOPES[k])}

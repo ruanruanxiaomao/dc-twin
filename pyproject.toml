@@ -25,6 +25,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# 单窗口客户端（dc_app.pyw）用；缺失时自动降级为 --app 窗口
+gui = ["pywebview>=5.0"]
 dev = [
   "pytest>=8.0",
   "pytest-cov>=5.0",

@@ -1239,11 +1239,101 @@ function openLightbox(url, name) {
   $('lightbox').classList.add('on');
 }
 
+// ------------------------------------------------- 指标 / 功能区 / 计划书（v3.9）
+
+const EXTRA = { kpi: null, areas: null, layer: 'tick', q: '', plan: false };
+
+const KIND_CN = {
+  RECEIVING: '收货', QA: '质检', STAGING_IN: '入库暂存', STORAGE: '存储',
+  PICK_FACE: '拣选面', REPLENISH: '补货', SORTING: '分拣', PACKING: '包装',
+  VAS: '增值', STAGING_OUT: '出库暂存', RETURNS: '退货',
+  EMPTY_CONTAINER: '空容器', BATTERY: '电池间', MAINTENANCE: '维修', OFFICE: '办公',
+};
+
+function num(v) {
+  if (v === null || v === undefined || Number.isNaN(v)) return '—';
+  const n = Number(v);
+  if (Number.isInteger(n)) return String(n);
+  const a = Math.abs(n);
+  return a >= 100 ? fmt(n, 0) : a >= 10 ? fmt(n, 1) : a >= 1 ? fmt(n, 2) : fmt(n, 3);
+}
+
+async function loadKpi() {
+  if (!EXTRA.kpi) EXTRA.kpi = await apiGet('/api/kpi');
+  renderKpi();
+}
+
+function renderKpi() {
+  if (!EXTRA.kpi) return;
+  const rows = EXTRA.layer === 'tick' ? EXTRA.kpi.tick : EXTRA.kpi.analytic;
+  const q = EXTRA.q.trim().toLowerCase();
+  const hit = rows.filter((r) => !q ||
+    (r.key + ' ' + (r.definition || '') + ' ' + (r.formula || '')).toLowerCase().includes(q));
+  $('kpiSub').textContent = EXTRA.layer === 'tick'
+    ? `tick 层实测 ${rows.length} 项 · 来源 ${EXTRA.kpi.tick_run || '—'}`
+    : `解析层 M/M/c ${rows.length} 项 · ${(EXTRA.kpi.model || 'analytic')}`;
+  $('kpiList').innerHTML = hit.map((r) => `
+    <div class="kpi-row">
+      <div class="kpi-head"><code>${esc(r.key)}</code>
+        <b>${num(r.value)}${r.unit ? ' <span class="muted">' + esc(r.unit) + '</span>' : ''}</b></div>
+      <div class="muted kpi-def">${esc(r.definition || '')}</div>
+      ${r.formula ? `<div class="kpi-f">${esc(r.formula)}</div>` : ''}
+    </div>`).join('') || '<div class="muted" style="padding:8px">没有匹配的指标</div>';
+}
+
+async function loadAreas() {
+  if (!EXTRA.areas) EXTRA.areas = await apiGet('/api/areas');
+  renderAreas();
+}
+
+function renderAreas() {
+  if (!EXTRA.areas) return;
+  const { summary = {}, areas = [] } = EXTRA.areas;
+  const badge = (t, v, c) => `<span class="badge" style="--c:${c}">${t} <b>${v}</b></span>`;
+  $('areaBadges').innerHTML =
+    badge('功能区', summary.total ?? areas.length, '#4dc9f6') +
+    badge('物理', summary.physical ?? '—', '#2ee6a6') +
+    badge('逻辑', summary.logical ?? '—', '#b388ff') +
+    badge('可算产能', summary.with_throughput ?? '—', '#f5c451');
+  $('areaList').innerHTML = areas.map((a) => {
+    const cap = Object.entries(a.capacity || {}).filter(([, v]) => v)
+      .map(([k, v]) => `${k}=${v}`).join(' · ');
+    const thr = a.derived ? `${num(a.derived.throughput_per_h)} /h（${a.derived.slots} 位 × ${a.derived.service_mean_s}s）` : '—';
+    const size = a.physical ? `${num(a.area_m2)} m²` : `挂靠 ${esc(a.anchor || '')}`;
+    return `<div class="area-row">
+      <div class="area-head"><code>${esc(a.id)}</code>
+        <span class="pill">${esc(KIND_CN[a.kind] || a.kind)}</span>
+        <span class="muted">${a.physical ? '物理' : '逻辑'}</span></div>
+      <div class="muted area-sub">${esc(a.name || '')} · ${size} · ${esc(cap || '无容量')}</div>
+      <div class="area-thr">${thr}</div>
+    </div>`;
+  }).join('');
+}
+
+function openPlan() {
+  if (EXTRA.plan) return;
+  EXTRA.plan = true;
+  $('planFrame').src = './api/plan.html';
+}
+
 // ------------------------------------------------------------------ Tab
 
+const WIDE_TAB = {
+  plan: 'minmax(0,1fr) minmax(620px, 56vw)',
+  kpi: 'minmax(0,1fr) minmax(430px, 40vw)',
+  areas: 'minmax(0,1fr) minmax(430px, 40vw)',
+};
+
 function switchTab(name) {
+  document.body.dataset.tab = name;
+  // 直接设栅格，不依赖属性选择器（媒体查询可能盖掉，调试过一次）
+  const grid = document.querySelector('.layout');
+  if (grid) grid.style.gridTemplateColumns = WIDE_TAB[name] || '';
   [...$('tabs').children].forEach((b) => b.classList.toggle('active', b.dataset.tab === name));
   document.querySelectorAll('.pane').forEach((p) => p.classList.toggle('active', p.id === 'pane-' + name));
+  if (name === 'kpi') loadKpi().catch((e) => { $('kpiSub').textContent = '加载失败：' + e.message; });
+  if (name === 'areas') loadAreas().catch((e) => { $('pane-areas').innerHTML = '<div class="pane-sub">加载失败：' + esc(e.message) + '</div>'; });
+  if (name === 'plan') openPlan();
 }
 
 function bindTabs() {
@@ -1255,6 +1345,13 @@ function bindTabs() {
   $('btnSaveCfg').addEventListener('click', saveConfig);
   $('btnCancel').addEventListener('click', cancelRun);
   $('btnRun').addEventListener('click', startRun);
+  [...$('kpiLayer').children].forEach((b) => b.addEventListener('click', () => {
+    EXTRA.layer = b.dataset.layer;
+    [...$('kpiLayer').children].forEach((x) => x.classList.toggle('on', x === b));
+    renderKpi();
+  }));
+  $('kpiSearch').addEventListener('input', (e) => { EXTRA.q = e.target.value; renderKpi(); });
+  $('btnPlanClose').addEventListener('click', () => switchTab('agv'));
 }
 
 // ------------------------------------------------------------------ 主循环

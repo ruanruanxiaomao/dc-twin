@@ -106,7 +106,7 @@ body {
   background: var(--panel);
   color: var(--text);
   font: inherit;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 550;
   cursor: pointer;
   transition: .13s;
@@ -128,7 +128,12 @@ body {
   grid-template-columns: minmax(0, 1fr) 400px;
   flex: 1 1 auto;
   min-height: 0;
+  transition: grid-template-columns .18s ease;
 }
+/* 读文档/查指标时把侧栏放宽；看 3D 时保持窄栏 */
+body[data-tab="plan"] .layout { grid-template-columns: minmax(0, 1fr) minmax(620px, 56vw); }
+body[data-tab="kpi"] .layout,
+body[data-tab="areas"] .layout { grid-template-columns: minmax(0, 1fr) minmax(430px, 40vw); }
 
 .stage {
   display: flex;
@@ -263,19 +268,21 @@ body {
 .tabs {
   display: flex;
   flex: 0 0 auto;
+  flex-wrap: wrap;              /* 10 个页签：宁可换行，也别把字竖排 */
   border-bottom: 1px solid var(--line);
   background: var(--panel-2);
 }
 .tabs button {
-  flex: 1 1 0;
+  flex: 1 1 auto;
+  min-width: 52px;
   appearance: none;
-  padding: 9px 4px;
+  padding: 8px 6px;
   border: 0;
   border-bottom: 2px solid transparent;
   background: transparent;
   color: var(--muted);
   font: inherit;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 550;
   cursor: pointer;
   transition: .13s;
@@ -672,3 +679,50 @@ code {
   .layout { grid-template-columns: 1fr 340px; }
   .chips { display: none; }
 }
+
+/* ------------------------------------------------------ 指标 / 功能区 / 计划书 */
+.seg { display: flex; gap: 6px; margin: 4px 0 8px; flex: 0 0 auto; }
+.seg button {
+  flex: 1 1 auto; padding: 6px 8px; font-size: 11.5px; cursor: pointer;
+  color: var(--text-2); background: var(--panel-2);
+  border: 1px solid var(--line); border-radius: 7px;
+}
+.seg button.on { color: #0b1220; background: var(--accent, #4dc9f6); border-color: transparent; font-weight: 600; }
+.inp {
+  width: 100%; padding: 6px 9px; margin-bottom: 8px; font-size: 12px;
+  color: var(--text); background: var(--panel-2);
+  border: 1px solid var(--line); border-radius: 7px; outline: none;
+}
+.inp:focus { border-color: var(--accent, #4dc9f6); }
+.badge {
+  display: inline-flex; align-items: center; gap: 6px; margin: 0 6px 8px 0;
+  padding: 4px 9px; border-radius: 999px; font-size: 11.5px; color: var(--text-2);
+  background: color-mix(in srgb, var(--c, #4dc9f6) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c, #4dc9f6) 45%, transparent);
+}
+.badge b { color: var(--c, #4dc9f6); font-size: 12.5px; }
+.kpi-row, .area-row {
+  padding: 8px 9px; border-radius: 8px; background: var(--panel-2);
+  border: 1px solid var(--line-2, var(--line));
+}
+.kpi-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.kpi-head code { font-size: 11px; color: var(--text-2); }
+.kpi-head b { font-size: 13px; color: var(--text); white-space: nowrap; }
+.kpi-def { font-size: 11px; line-height: 1.5; margin-top: 2px; }
+.kpi-f { font-size: 10.5px; color: var(--muted); margin-top: 2px; font-family: ui-monospace, Consolas, monospace; }
+.area-head { display: flex; align-items: center; gap: 7px; }
+.area-head code { font-size: 11px; }
+.pill { font-size: 10px; padding: 1px 6px; border-radius: 999px;
+        background: rgba(77, 201, 246, .14); color: #9fd8f5; }
+.area-sub { font-size: 11px; margin-top: 2px; line-height: 1.5; }
+.area-thr { font-size: 11.5px; margin-top: 2px; color: #2ee6a6; }
+
+/* 计划书是全屏阅读层：400px 侧栏读 2900 行文档不现实 */
+#pane-plan.active {
+  position: fixed; left: 0; right: 0; top: 48px; bottom: 58px; z-index: 60;
+  display: flex; flex-direction: column; background: var(--panel);
+  padding: 0 16px 10px; border-top: 1px solid var(--line);
+}
+.plan-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 2px; flex: 0 0 auto; }
+#planFrame { flex: 1 1 auto; width: 100%; min-height: 0; border: 0; border-radius: 10px; background: #0d1219; }
+body[data-tab="plan"] .timeline { position: relative; z-index: 61; }

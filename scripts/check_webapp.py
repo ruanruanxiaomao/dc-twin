@@ -76,6 +76,14 @@ def check(app: Path = APP) -> list[str]:
     if missing:
         problems.append("W3 快照缺接口：%s" % ", ".join(missing))
 
+    # W5 计划书 HTML（iframe 直接引用，不走 fetch，W3 覆盖不到）
+    plan = app / "api" / "plan.html"
+    if not plan.exists():
+        problems.append("W5 缺 api/plan.html —— 计划书面板会空白")
+    elif plan.stat().st_size < 50_000:
+        problems.append("W5 api/plan.html 只有 %d 字节，像是转换失败的残片"
+                        % plan.stat().st_size)
+
     # W4 GLB 与主产物同源
     g = app / "out" / "dc_preview.glb"
     if not g.exists():

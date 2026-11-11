@@ -40,6 +40,8 @@ API_FILES = {
     "/api/pnl": "pnl.json",
     "/api/ledger": "ledger.json",
     "/api/schema": "schema.json",
+    "/api/kpi": "kpi.json",
+    "/api/areas": "areas.json",
     "/api/cost-spec": "cost-spec.json",
     "/api/scenario/template": "scenario/template.json",
 }
@@ -268,6 +270,8 @@ def build(out: Path) -> dict:
         "scenario/template": {"ok": True,
                               "template": server.scenario_tools.default_template("my_scenario")},
         "status": server.build_bootstrap()["reports"],
+        "kpi": server.build_kpi_payload(),
+        "areas": server.build_areas_payload(),
     }
     sizes = {}
     for key, obj in payloads.items():
@@ -275,6 +279,15 @@ def build(out: Path) -> dict:
         sizes[key] = jdump(out / "api" / (key + ".json"), obj)
 
     write_text_lf(out / "snapshot.js", SHIM % {"api_map": json.dumps(API_FILES, indent=2)})
+
+    # 计划书：Markdown → HTML，供面板里的 iframe 直接引用（两种模式同一路径）
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import md2html
+    plan_src = ROOT / "docs" / "DC_MASTER_PLAN.md"
+    if plan_src.exists():
+        (out / "api").mkdir(parents=True, exist_ok=True)
+        write_text_lf(out / "api" / "plan.html",
+                      md2html.convert(plan_src.read_text(encoding="utf-8")))
 
     commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT,
                             capture_output=True, text=True).stdout.strip() or "unknown"
