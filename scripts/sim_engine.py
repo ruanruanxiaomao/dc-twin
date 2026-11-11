@@ -495,7 +495,8 @@ class Simulation:
         选点要求：距其他所有车 >= min_sep，避免清障本身造成碰撞。
         """
         others = [(o.id, o.pos) for o in self.robots.values() if o.id != r.id]
-        homes = [l["access_point"] for l in self.world.by_kind.get(r.wid, {}).get("HOME", [])]
+        homes = [loc["access_point"]
+                 for loc in self.world.by_kind.get(r.wid, {}).get("HOME", [])]
         cands = sorted(homes, key=lambda p: math.dist(p, r.pos))
         spot = next((p for p in cands
                      if all(math.dist(p, q) >= self.min_sep for _, q in others)), None)
@@ -1266,7 +1267,12 @@ def run_one(scenario_path, args, sim_spec, fleet, demand, layout, grid, cfg, out
              m["metrics"]["charge_events"]["value"],
              m["metrics"]["orders_lost"]["value"],
              m["metrics"]["wall_clock_s"]["value"], sim.out.as_posix()))
-    return {"scenario": sim.sc["id"], "run_dir": sim.out.as_posix(),
+    # 写相对路径：绝对路径会把 C:/Users/<name>/... 带进 out/ 与交付包
+    try:
+        rel = sim.out.resolve().relative_to(ROOT).as_posix()
+    except ValueError:
+        rel = sim.out.as_posix()
+    return {"scenario": sim.sc["id"], "run_dir": rel,
             "run_id": sim.run_id, "seed": sim.seed,
             "metrics": {k: v["value"] for k, v in m["metrics"].items()}}
 

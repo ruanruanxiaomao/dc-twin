@@ -1097,7 +1097,7 @@ function buildScopeUI() {
   const scopes = (S.schema && S.schema.scopes) || {};
   const defs = [
     ['data', '数据层重跑', '纯 Python 全链路（约 10 秒）：布局 → 栅格 → 派单 → 路径 → 校验 → 路线图'],
-    ['validate', '仅复验', '负测试 + A1–A21 + 状态表，不重算数据'],
+    ['validate', '仅复验', '负测试 + A1–A40 + 状态表，不重算数据'],
     ['full', '全链路重跑', '含 Blender 建模、动画、渲染 942 帧，耗时最长'],
   ];
   for (const [key, title, desc] of defs) {

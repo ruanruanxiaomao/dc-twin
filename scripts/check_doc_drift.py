@@ -22,7 +22,6 @@ import hashlib
 import json
 import os
 import sys
-import tempfile
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 OUT = os.path.join(ROOT, 'out')
@@ -32,9 +31,10 @@ MASTER = os.path.join(ROOT, 'docs', 'DC_MASTER_PLAN.md')
 # 母本可能有多个落地位置（工作区根 / 桌面根 / 项目父目录），按顺序取第一个存在的。
 PLAN_NAME = '配送中心数字孪生_完整计划书.md'
 PLAN_CANDIDATES = [
-    os.path.join(os.path.dirname(ROOT), PLAN_NAME),          # desktop/blender/
+    # 显式指定优先（CI / 别人机器上的布局不同，不该由代码猜）
+    os.environ.get('DC_PLAN_COPY', ''),
+    os.path.join(os.path.dirname(ROOT), PLAN_NAME),          # <parent>/<repo>/../计划书.md
     os.path.join(os.path.dirname(os.path.dirname(ROOT)), PLAN_NAME),
-    'C:/Users/OYC/Desktop/' + PLAN_NAME,
 ]
 
 # 已废弃表述：出现即 FAIL。新增一条，就等于永久钉死一类旧说法。
@@ -123,7 +123,8 @@ def check_plan_copy():
                 % len(PLAN_CANDIDATES)]
     if not os.path.exists(MASTER):
         return ['FAIL', '仓库副本 docs/DC_MASTER_PLAN.md 缺失']
-    h = lambda p: hashlib.sha256(open(p, 'rb').read()).hexdigest()
+    def h(p):
+        return hashlib.sha256(open(p, 'rb').read()).hexdigest()
     if h(src) != h(MASTER):
         return ['FAIL', '仓库副本与母本不一致（母本 %s）：先同步，勿单边编辑' % src]
     return ['OK', '仓库副本与母本一致（%s）' % os.path.relpath(src, ROOT)]

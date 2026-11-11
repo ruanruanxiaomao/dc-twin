@@ -5,7 +5,7 @@
 ## 怎么产生
 
 ```bash
-cd C:/Users/OYC/Desktop/blender/dc_project
+cd /path/to/dc-twin
 
 # 跑场景链 + 一致性检查 + 收产物（最常用）
 python scripts/run_bundle.py --scope scenarios --label m1_process

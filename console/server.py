@@ -42,7 +42,13 @@ OUT = ROOT / "out"
 sys.path.insert(0, str(ROOT / "scripts"))
 import scenario_tools  # noqa: E402  (C1: user-defined scenario tools)
 
+try:                                    # `-m console.server` 与 `python console/server.py` 都能跑
+    from console import security as _security
+except ImportError:                     # 直接执行脚本时 ROOT/console 在 sys.path 上
+    import security as _security  # type: ignore
+
 HOST = os.environ.get("DC_CONSOLE_HOST", "127.0.0.1")
+TOKEN = _security.token_from_env()
 PORT = int(os.environ.get("DC_CONSOLE_PORT", "8765"))
 
 # ---------------------------------------------------------------- 子进程环境
@@ -887,6 +893,9 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---- GET
     def do_GET(self):
+        ok, why, code = _security.check_request(self.headers, TOKEN)
+        if not ok:
+            return self.send_error_json(why, code)
         parsed = urlparse(self.path)
         path = parsed.path
         qs = parse_qs(parsed.query)
@@ -972,6 +981,14 @@ class Handler(BaseHTTPRequestHandler):
     # ---- POST
     def do_POST(self):
         global JOB
+        ok, why, code = _security.check_post(self.headers, TOKEN)
+        if not ok:
+            # 先把请求体读掉再拒绝：不读就关连接，Windows 上客户端收到的是
+            # ConnectionAborted 而不是那条 403 说明（排查时会以为是服务挂了）。
+            n = int(self.headers.get("Content-Length") or 0)
+            if n:
+                self.rfile.read(n)
+            return self.send_error_json(why, code)
         parsed = urlparse(self.path)
         path = parsed.path
         length = int(self.headers.get("Content-Length") or 0)
@@ -1096,6 +1113,10 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main():
+    ok, why = _security.bind_allowed(HOST, TOKEN)
+    if not ok:
+        print("启动被拒绝：" + why, file=sys.stderr)
+        return 2
     print("=" * 66)
     print(" 配送中心数字孪生 —— 本地控制台")
     print("=" * 66)
@@ -1118,4 +1139,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

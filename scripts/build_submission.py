@@ -40,7 +40,7 @@ IMAGE_CAPTIONS = {
     "06_corridor_check.webp": "通道净距几何校验",
     "07_nav_plan.webp": "路网与 A* 导航平面图",
     "08_corridor_plan_zoom.webp": "通道局部放大 · 无穿货架",
-    "09_time_space.webp": "时空预约 / 时间-空间图",
+    "09_time_space.webp": "时间-空间图（AGV 轨迹与占位）",
     "10_snapshot_sequence.webp": "作业时序快照序列",
 }
 
@@ -149,7 +149,7 @@ def deliverables():
             ("scripts/import_dxf.py", "零依赖 ASCII DXF 导入"),
             ("scripts/lif.py", "自研 LIF 草稿导入导出"),
             ("scripts/check_geometry.py", "线段-矩形穿货架校验"),
-            ("scripts/reservation_check.py", "时空预约冲突复核"),
+            ("scripts/reservation_check.py", "0.05 s 采样冲突复核"),
         ]),
         ("3D / 动画交付", [
             ("out/distribution_center.blend", "Blender 5.2 工程（914 对象）"),
@@ -178,7 +178,7 @@ def deliverables():
             ("docs/cli.md", "CLI 命令手册"),
             ("THIRD_PARTY_NOTICES.md", "第三方许可证声明"),
             ("CHANGELOG.md", "版本记录"),
-            ("LICENSE", "MIT"),
+            ("LICENSE", "Apache-2.0"),
             ("pyproject.toml", "包元数据 / pytest / ruff"),
             (".github/workflows/ci.yml", "CI 流水线"),
             ("console/server.py", "本地控制台服务"),
@@ -313,7 +313,8 @@ def architecture():
         {"n": "04", "title": "tick 级真仿真", "icon": "SIM",
          "in": "sim_spec.json · 8 个场景配置",
          "out": "sim_events.jsonl · sim_kpi.json · sim_state.json",
-         "body": "离散事件引擎：泊松到达、在线派单、9 态 FSM、电量/充电、故障重派、L1 时空预约；27 项 measured KPI。"},
+         "body": ("离散事件引擎：泊松到达、在线派单、9 态 FSM、电量/充电、故障重派、"
+                  "反应式门控（到达互斥 + 车间距）；%d 项 measured KPI。" % _kpi_n())},
         {"n": "05", "title": "运营账本", "icon": "P&L",
          "in": "sim_events.jsonl · cost_spec.json",
          "out": "ledger.jsonl · pnl.json / .md / .csv",
@@ -358,6 +359,19 @@ def media_meta():
                     "animations": gr.get("animations"), "generator": gr.get("generator")},
             "slotting": br.get("slotting", {}),
             "path_planning": br.get("path_planning", {})}
+
+
+
+def _kpi_n() -> int:
+    """tick 层 KPI 数量从产物里数，不写死——写死就会和文档一起过期。"""
+    import glob as _glob
+    files = sorted(_glob.glob(str(ROOT / "runs" / "*" / "*" / "sim_kpi.json")))
+    if not files:
+        return 0
+    try:
+        return len(json.loads(open(files[-1], encoding="utf-8").read())["metrics"])
+    except Exception:
+        return 0
 
 
 def snapshot():

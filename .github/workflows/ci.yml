@@ -33,7 +33,7 @@ jobs:
         run: python -m pip install -e ".[dev]"
 
       - name: Lint new code (legacy scripts predate the lint gate)
-        run: ruff check dc_twin run.py scripts/manifest.py scripts/validate_data.py scripts/build_docs_assets.py tests/unit tests/contract tests/integration tests/acceptance tests/e2e tests/blender
+        run: ruff check dc_twin run.py console scripts/manifest.py scripts/validate_data.py scripts/build_docs_assets.py scripts/check_claims.py scripts/check_exe.py scripts/clean.py tests
 
       - name: Doctor
         run: python -m dc_twin doctor
@@ -76,6 +76,11 @@ jobs:
 
       - name: Deadlock yield guard (yield off must be worse)
         run: python scripts/check_deadlock.py
+
+      - name: Claim consistency guard (docs numbers vs code)
+        run: |
+          python scripts/check_claims.py --self-test
+          python scripts/check_claims.py
 
       - name: Web snapshot guard (docs/app links + hashes)
         run: |

@@ -27,13 +27,13 @@ Blender 不在 PATH 时设置 `BLENDER_EXE` 环境变量；`dc doctor` 会给出
 pip install -e .
 dc doctor             # 环境诊断（17 项）
 dc demo               # 纯数据层 + 8 个场景 + 启动控制台，无需 Blender
-dc run --scope full   # 完整链路（需要 Blender 5.2），共 31 步
+dc run --scope full   # 完整链路（需要 Blender 5.2），共 45 步（data 13 / scenarios 23 / full 45）
 dc export --target demo     # 无后端静态演示站
 dc export --target release  # 发布包 + SHA256 校验
 ```
 
 Windows 也可用 `.\run_all.ps1`，POSIX 用 `bash run.sh --scope full`；两者都是 `run.py` 的薄包装。
-任一步退出码非 0 即中止。`dc run` 内部按固定顺序执行 **31 步**（见 `dc_twin/runner.py`），顺序**不可颠倒**：
+任一步退出码非 0 即中止。`dc run` 内部按固定顺序执行 **45 步**（data 13 / scenarios 23 / full 45）（见 `dc_twin/runner.py`），顺序**不可颠倒**：
 
 ```
 spec_layout → gen_data → layout_audit → nav_grid → optimize_slotting
@@ -222,7 +222,7 @@ python console\server.py        # 默认 http://127.0.0.1:8765/
 |---|---|
 | 车辆 | 画布（2D/3D）+ 21 台 AGV 列表；点击车辆查看任务、相位、货物状态、三段里程 |
 | 订单 | 21 张订单，点击跳到该单的取货时刻并锁定对应车辆 |
-| 验收 | A1–A21 逐条 PASS/FAIL 与证据详情，附 7 个负测试用例（验证器必须能失败） |
+| 验收 | A1–A40 逐条 PASS/FAIL 与证据详情，附 7 个负测试用例（验证器必须能失败） |
 | 参数 | 白名单字段编辑并写回 `config.json`（带范围校验与 A7 越界警告）；分级重跑并流式显示脚本日志 |
 | 产物 | 10 张渲染图灯箱、`anim_dc.mp4` 播放器、`CURRENT_STATUS.md` 状态表 |
 
@@ -232,9 +232,9 @@ python console\server.py        # 默认 http://127.0.0.1:8765/
 
 | 范围 | 步骤 | 说明 |
 |---|---|---|
-| 数据层重跑 | 10 步纯 Python | 布局 → 栅格 → 派单 → 路径 → 校验 → 路线图，约 10 s |
-| 仅复验 | 3 步 | 负测试 + A1–A21 + 状态表，不重算数据 |
-| 全链路重跑 | 21 步 | 追加 Blender 建模、动画、渲染 942 帧，最慢 |
+| 数据层重跑 | 13 步纯 Python | 布局 → 栅格 → 派单 → 路径 → 校验 → 路线图，约 10 s |
+| 仅复验 | 3 步 | 负测试 + A1–A40 + 状态表，不重算数据 |
+| 全链路重跑 | 45 步 | 追加 Blender 建模、动画、渲染 942 帧，最慢 |
 
 深链接便于复现某个画面：`http://127.0.0.1:8765/?t=40&sel=W-R03&view=3d&cam=iso&tab=audit&play=1`
 （`t` 秒、`sel` 车辆、`view` 2d/3d、`cam` iso/top/close、`tab` 面板、`play=1` 自动播放）。

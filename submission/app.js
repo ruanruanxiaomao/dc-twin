@@ -97,7 +97,7 @@
 
   const features = [
     ['01 / 布局', '单一真相源', '四层 JSON 配置 → spec_layout 展开 + L1–L13 校验，生成 4 仓 196 货架 441 库位，冻结基线逐字节可复现。'],
-    ['02 / 仿真', 'tick 级 DES', '订单持续到达、在线派单、9 态 FSM、电量与充电、故障重派、L1 时空预约；8 个场景真实执行，27 项 measured KPI。'],
+    ['02 / 仿真', 'tick 级 DES', '订单持续到达、在线派单、9 态 FSM、电量与充电、故障重派、反应式门控；8 个场景真实执行，39 项 measured KPI。'],
     ['03 / 盈亏', '事件溯源账本', '仿真事件 → 分录 → 损益表、单均成本、盈亏平衡与敏感性；F1–F7 独立复算，演示价格强制徽章。'],
     ['04 / 定制', '不改 Python', '可视化场景编排、布局拖拽编辑、DXF/LIF 草稿导入、fleet_spec 容量守卫、WMS 只读适配器框架。'],
   ];
@@ -639,7 +639,7 @@
     D.project.description + '\n\n' +
     '作品以 ' + D.project.stats.warehouses + ' 个仓库、' + D.project.stats.racks + ' 组货架、' +
     D.project.stats.locations + ' 个库位与 ' + D.project.stats.robots + ' 台 AGV 为对象，' +
-    '实现 tick 级离散事件仿真（持续订单、在线派单、电量/充电、故障重派、时空预约）、' +
+    '实现 tick 级离散事件仿真（持续订单、在线派单、电量/充电、故障重派、到达互斥与车间距门控）、' +
     '事件溯源运营账本与损益表，并通过可视化布局编辑器、DXF/LIF 草稿导入和自定义场景面板支持定制。' +
     'Blender 5.2 程序化生成 3D 场景、10 张渲染图与闭环动画；本作品页用可旋转的软件 3D 投影' +
     '完整展示项目全链路，并可下载 .blend / .glb / .mp4。\n\n' +
@@ -659,7 +659,7 @@
       D.project.stats.warehouses + ' / ' + D.project.stats.racks + ' / ' + D.project.stats.locations],
     ['场景数量', D.scenarios.length + ' 内置 + 自定义'], ['损益运行数', D.pnl.length],
     ['3D 资产', '.blend + .glb + .mp4 + 10 张渲染图（均可下载）'],
-    ['许可证', 'MIT（第三方声明见 THIRD_PARTY_NOTICES.md）'],
+    ['许可证', 'Apache-2.0（第三方声明见 THIRD_PARTY_NOTICES.md）'],
     ['数据来源', 'out/*.json 真实报告快照，非手工编造'],
     ['在线链接', D.project.site_url],
   ].map(([k, val]) => '<tr><th>' + k + '</th><td>' + esc(val) + '</td></tr>').join('');

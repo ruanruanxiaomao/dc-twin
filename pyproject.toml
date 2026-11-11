@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dc-twin"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Blender-based distribution-center digital twin: 4 warehouses, 21 AGVs, closed-loop A* tasks, reproducible data chain and 40 acceptance checks"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -23,6 +23,10 @@ dependencies = [
   "imageio-ffmpeg==0.8.1",
   "jsonschema==4.23.0",
 ]
+
+[tool.setuptools.dynamic]
+# 版本只有一个来源：dc_twin/__init__.py 的 __version__
+version = {attr = "dc_twin.__version__"}
 
 [project.optional-dependencies]
 # 单窗口客户端（dc_app.pyw）用；缺失时自动降级为 --app 窗口

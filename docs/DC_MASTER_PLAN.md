@@ -1,7 +1,7 @@
 # 配送中心数字孪生 · 完整建设计划书
 
-> **版本**：v4.2（功能区可见/可改 + 建模细化） · 2026-11-11  
-> **审计对象**：`C:\Users\OYC\Desktop\blender\dc_project`（Blender 5.2 + Python 3.10+，区域仓 W + 前置仓 F1/F2/F3）  
+> **版本**：v4.3（口径守卫 + 控制台准入 + 隐私路径） · 2026-11-11  
+> **审计对象**：`<repo>/`（本机路径因人而异）（Blender 5.2 + Python 3.10+，区域仓 W + 前置仓 F1/F2/F3）  
 > **文档定位**：从“现状审计”到“可落地实施”的一体化计划书；既给评审看结论，也给开发看字段、参数、任务与验收。  
 > **配套工具**：`dc_project/desktop_app.pyw`（DC Twin Studio 桌面驾驶舱，本计划书第 11 章）  
 > **GitHub 数据口径**：2026-11-09 / 2026-11-10 通过 GitHub REST API 实测。star 数会变化；许可证以仓库 `LICENSE` 为准，API 无 SPDX 字段的一律按“未核实”处理，不直接复制代码。  
@@ -43,7 +43,7 @@
 |---|---|---|
 | 前置 | 阅读指南、执行摘要、目录 | 结论先行 |
 | 第一部分 | 第 0–10 章 | 现状审计、DC 必备能力、GitHub 调研、缺口、参数、自定义、路线图、验收、风险、附录 |
-| 第二部分 | 第 11–32 章 | v2.0 增补：桌面驾驶舱、字段级数据字典、参数总表、自定义矩阵、Backlog、测试计划、风险登记册、术语表、仓库速查、交付清单；v3.0 增补：单人最小路径；v3.2 增补：产物包与工作区约定；v3.3 增补：功能区建模方案；v3.4 增补：用户自选功能区（方案 A）；v3.5 增补：勾选式界面与完整性核查；v3.6 增补：过程层进 tick 与界面重做；v3.7 增补：三仓拣选与死锁修复；v3.8 增补：3D 功能区与许可；v3.9 增补：浏览器 3D 控制台；v4.0 增补：单窗口客户端；v4.1 增补：Windows 应用打包；v4.2 增补：功能区可视化与自定义 |
+| 第二部分 | 第 11–33 章 | v2.0 增补：桌面驾驶舱、字段级数据字典、参数总表、自定义矩阵、Backlog、测试计划、风险登记册、术语表、仓库速查、交付清单；v3.0 增补：单人最小路径；v3.2 增补：产物包与工作区约定；v3.3 增补：功能区建模方案；v3.4 增补：用户自选功能区（方案 A）；v3.5 增补：勾选式界面与完整性核查；v3.6 增补：过程层进 tick 与界面重做；v3.7 增补：三仓拣选与死锁修复；v3.8 增补：3D 功能区与许可；v3.9 增补：浏览器 3D 控制台；v4.0 增补：单窗口客户端；v4.1 增补：Windows 应用打包；v4.2 增补：功能区可视化与自定义；v4.3 增补：口径与安全 |
 | 附录 | A–E | 配置片段、GitHub 检索复现、术语、**D 复核命令集**、**E 答辩问答** |
 
 ---
@@ -132,6 +132,7 @@
 - 30. 单窗口客户端：两套界面合并（v4.0 新增）
 - 31. 打包为 Windows 应用与工作区瘦身（v4.1 新增）
 - 32. 功能区可见、可改与建模细化（v4.2 新增）
+- 33. 口径守卫、控制台准入与隐私路径（v4.3 新增）
 
 **附录**
 
@@ -2167,7 +2168,7 @@ ProcessStep n ── n Resource（人/叉车/门/输送线/打包机）
 
 ```bat
 :: 1. 桌面驾驶舱（推荐，演示用）
-cd C:\Users\OYC\Desktop\blender\dc_project
+cd /path/to/dc-twin
 启动驾驶舱.bat
 
 :: 2. 命令行调试（可见 traceback）
@@ -2227,6 +2228,7 @@ python -m pytest -q -m "not blender"
 | v4.0 | 2026-11-11 | **单窗口客户端**：新增 `dc_app.pyw`（进程内起服务 + pywebview 原生窗口 + 原生菜单 + 退出即释放端口，降级 `--app` 窗口/浏览器）；Web 控制台补 **指标 / 功能区 / 计划书** 三页（`/api/kpi`、`/api/areas`、`/api/plan.html`）；新增 `scripts/md2html.py`（零依赖 Markdown→HTML，145 表/219KB）；守卫加 W5；`启动驾驶舱.bat` 指向新入口，Tk 版另存；新增 §30 |
 | v4.1 | 2026-11-11 | **Windows 应用 + 工作区瘦身**：新增 `scripts/build_exe.py`（PyInstaller onedir，界面进包/数据留盘）与 `scripts/check_exe.py`（19 只读接口 + 数据链重跑 + 场景写删 + 无头 3D 截图 + 根目录断言）；`console/server.py` 增加 frozen 分支与 `find_python()` 降级；`dc_app.pyw` 在无 stdout 时重定向日志并弹窗报错；新增 `scripts/clean.py`（默认预览）把工作区 1.2 GB 压到 154 MB；新增 §31 |
 | v4.2 | 2026-11-11 | **功能区可见可改 + 建模细化**：新增 `console/static/areas.js`（2D 图层 / 面板 / 3D 覆盖）；`viewer3d.js` 加 `AREA_OVERLAY`（薄板+圆点+名称牌，可开关可点选）；服务端新增 `/api/areas/catalog|plan|apply|variant`，复用 `build_variant.pack()` 做预览；建模改开放货架、浅色地坪+边线、伸缩缝、墙肋、屋架、月台门框、托盘按列摆放、轨迹线收窄（物体 924→1327，GLB 598→805 KB）；桌面放 `配送中心数字孪生.bat` 启动器；新增 §32 |
+| v4.3 | 2026-11-11 | **口径与安全**：新增 `scripts/check_claims.py`（数字从代码算，9 条规则 + 反例自检，只扫现状文档）；版本号收敛到 `dc_twin.__version__`（pyproject dynamic）；新增 `console/security.py`（Host 回环 / Origin 同源 / token，非回环绑定强制 token）与 8 个安全测试；`sim_latest` 与 `ledger_index` 改相对路径，`check_doc_drift` 去掉硬编码桌面目录；修正 README/cli/COMPLETION_STATUS/控制台/作品页/demo 的 31 步、A1–A21、27 项、MIT、以及「时空预约」等表述；新增 §33 |
 
 ---
 
@@ -2472,7 +2474,7 @@ W 仓 100 × 70 m，用 0.5 m 栅格逐带量过（`nav_grid.json` + 货架行�
 ### 24.3 六步操作（可写进 README）
 
 ```bash
-cd C:/Users/OYC/Desktop/blender/dc_project
+cd /path/to/dc-twin
 
 # ① 看菜单（14 个模板 + 预设）
 python scripts/build_variant.py --list
@@ -3245,6 +3247,96 @@ Windows 不允许脚本直接生成 `.lnk`（COM 与 `cscript` 都被安全策�
 
 ---
 
+## 33. 口径守卫、控制台准入与隐私路径（v4.3）
+
+这一章不是新功能，是**把三类"说不清"变成可失败的检查**。
+
+### 33.1 口径漂移：实际数字与文档差了多少
+
+外部评审逐条列过，我复核后确认存在的：
+
+| 说法 | 文档写的 | 代码/产物实际 |
+|---|---|---|
+| 流水线步数 | 31 步（README/cli.md/状态表） | data 13 · scenarios 23 · full 45 |
+| 验收项 | 控制台" A1–A21 " | A1–A40 |
+| KPI | 27 项 measured | tick 39 项（+解析 25，去重 55） |
+| 版本 | 0.1.0（pyproject / `__version__`） | CHANGELOG 已到 0.5.0 |
+| 许可证 | demo 页脚、作品页写 MIT | 仓库是 Apache-2.0 |
+| 远程仓库 | README 写"no remote/tag" | `origin` 已配 |
+
+根因不是"忘了改"，而是**同一个数字在六七处手写**。所以不靠人盯，改成算出来。
+
+### 33.2 `scripts/check_claims.py`：数字从代码算，文档只许引用
+
+```text
+facts()      ← runner.SCOPES / sim_kpi.json / kpi.json / validate_report.json
+             ← dc_twin.__version__ / LICENSE / areas.json / scenarios 目录
+stale_patterns(facts)  → 9 条"过期写法"正则，每条自带"应该写什么"
+scan()       → 只扫"当前状态"文档（README、cli.md、COMPLETION_STATUS、
+               ARTIFACTS、控制台、作品页、demo）
+```
+
+三个设计取舍：
+
+1. **历史报告不扫**：`PROJECT_REPORT.md`、`DC_EXPANSION_PLAN.md` 记录的是当时的
+   事实，改它等于篡改存档；守卫只保证"现在的说法都现在有效"。
+2. **否认句豁免**："不是 tick 级时空预约"这种句子本身是诚实的，不能判成过度宣称
+   ——否则守卫会逼人删掉真话。
+3. **自带反例**：`--self-test` 用 9 条样本逐条命中，证明规则不是装饰。写守卫最
+   容易的失败模式是"它永远返回 OK"。
+
+版本号同时收敛到一处：`pyproject.toml` 改成 `dynamic = ["version"]`，
+从 `dc_twin.__version__` 读取——两个地方写版本，迟早对不上。
+
+### 33.3 控制台准入：默认端口不是安全边界
+
+这个服务能改 `data/config.json`、能跑整条流水线、能生成变体，而**任何网页都能向
+127.0.0.1 发 POST**（CSRF），浏览器不会因为"是本机"就拦。原来的服务端只看路径，
+不看 Host / Origin。`console/security.py` 补三道闸：
+
+| 闸 | 规则 | 挡什么 |
+|---|---|---|
+| Host | 必须是回环（含 `[::1]`） | DNS rebinding：攻击者域名解析到 127.0.0.1，Host 头却是 `evil.com` |
+| Origin/Referer | 有值就必须是回环来源；无值（curl）放行 | 恶意页面跨源写配置 |
+| token | 设了 `DC_CONSOLE_TOKEN` 就要求 `X-DC-Token`；**绑定非回环地址时强制要求** | 局域网/隧道暴露后无凭据写入 |
+
+配套 8 个测试（`tests/test_console_security.py`）：纯函数 3 个 + 端到端 5 个，
+覆盖跨源 POST 403、token 401、同源 200、无 Origin 200。
+
+> **踩到的坑**：拒绝请求时如果不读 `Content-Length` 指定的请求体就直接关连接，
+> Windows 上客户端收到的是 `ConnectionAborted` 而不是那条 403 说明——远程排查时
+> 会以为是服务挂了。所以先 `rfile.read(n)` 再回错误。
+
+### 33.4 隐私路径：产物里不该出现本机用户名
+
+| 问题 | 处理 |
+|---|---|
+| `check_doc_drift.py` 曾硬编码 `C:/Users/<user>/Desktop/...` | 改为 `DC_PLAN_COPY` 环境变量优先，其次按仓库相对位置找 |
+| `out/sim_latest.json` 的 `run_dir` 是绝对路径 | `sim_engine.py` 写相对 ROOT 的 posix 路径 |
+| `out/ledger_index.json` 的 `run_dir` / `ledger` 是绝对路径 | `ledger.py` 同样相对化，消费端兼容旧格式 |
+| 交付包会带 `dist/`、`runs/`、`artifacts/` | 已有 `scripts/clean.py`；本章新增"路径扫描"口径（见 D-41） |
+
+### 33.5 实测
+
+| 项 | 结果 |
+|---|---|
+| 口径守卫 | `CLAIMS_OK 11 个文档与代码一致`；`--self-test 9/9` |
+| 版本单一来源 | `pyproject` dynamic → `dc_twin.__version__ = 0.6.0` |
+| 安全测试 | 8 passed（跨源 403 / token 401 / 同源 200 / 无 Origin 200） |
+| 全量测试 | pytest `not blender` 51 passed |
+| 作品页 | 重新生成：`SUBMISSION_DATA_OK … A1–A40 / 39 项 measured KPI` |
+| 私有路径 | `grep C:/Users` 在 `scripts/ dc_twin/` 无命中 |
+
+### 33.6 v4.3 边界
+
+- **没做认证体系**：token 是共享密钥，不是用户/权限模型；单机自用足够，多用户不够。
+- **历史文档保留旧数字**：`PROJECT_REPORT.md` 等不纳入守卫，属于存档而非现状。
+- **`submission/` 的第三方许可表仍是 MIT**：那是被参考项目的许可证，正确；改的是
+  "本项目许可证"那一行。
+- **CI 未加覆盖率门槛**，也未跑 Blender 渲染回归；这两项仍在路线图上。
+
+---
+
 ## 附录 D · 复核命令集（v3.0 新增）
 
 > 全部命令在 `dc_project/` 下执行，Git Bash 或 PowerShell 均可（`python` 指 3.10+）。每条都给出**期望输出**，输出不符即为文档过期。这是本计划书“可核查”的落地形式。
@@ -3289,11 +3381,14 @@ Windows 不允许脚本直接生成 `.lnk`（COM 与 `cscript` 都被安全策�
 | **D-36** | 工作区有多少可重建垃圾 | `python scripts/clean.py` | 1.2 GB → 154 MB（407 项）；加 `--apply` 才删 |
 | **D-37** | 功能区在 2D/3D 是否可见 | `curl -s localhost:8765/api/areas | python -m json.tool | grep -c '"xy"'` | 21（每区都有坐标）；界面见 `assets/ui_2d_areas.png`、`assets/ui_3d_areas.png` |
 | **D-38** | 自定义扩仓能不能算/能生成 | `POST /api/areas/plan` 与 `POST /api/areas/apply` | plan 返回深度与占地；apply `VARIANT_PASS … 功能区 L23–L26 PASS` |
+| **D-39** | 文档数字是否与代码一致 | `python scripts/check_claims.py` | `CLAIMS_OK 11 个文档`；`--self-test 9/9` |
+| **D-40** | 控制台是否挡得住跨源写入 | `python -m pytest tests/test_console_security.py -q` | 8 passed（跨源 403 / token 401 / 同源与无 Origin 放行） |
+| **D-41** | 代码里是否残留本机绝对路径 | `grep -rn "C:/Users" scripts dc_twin console` | 无命中 |
 
 **D-7 的同步命令**（母本在工作区根，仓库只放副本）：
 
 ```bash
-cd C:/Users/OYC/Desktop/blender/dc_project
+cd /path/to/dc-twin
 python -c "import shutil;shutil.copy2('../配送中心数字孪生_完整计划书.md','docs/DC_MASTER_PLAN.md')"
 ```
 

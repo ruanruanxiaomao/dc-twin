@@ -4,6 +4,35 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-11-11
+
+Made the project's own claims checkable, and closed the console's write endpoints.
+
+### Added
+
+- `scripts/check_claims.py`: derives step counts, KPI counts, acceptance checks,
+  version, licence and area counts from code and artefacts, then flags stale
+  wording in current-state docs. `--self-test` proves all nine rules fire.
+  Historical reports are excluded on purpose: they record what was true then.
+- `console/security.py` + `tests/test_console_security.py` (8 tests): Host must be
+  loopback (blocks DNS rebinding), POST with an Origin/Referer must be same-origin
+  (blocks CSRF), and a configured `DC_CONSOLE_TOKEN` is required for every request.
+  Binding a non-loopback address without a token now refuses to start.
+- CI step and README section for both guards.
+
+### Changed
+
+- Version has a single source: `dc_twin.__version__` (0.6.0); `pyproject.toml` now
+  declares `dynamic = ["version"]` instead of duplicating it.
+- Corrected stale claims across README, docs/cli.md, COMPLETION_STATUS.md, the
+  console, the submission page and the demo footer: 31 to 45 steps, A1-A21 to
+  A1-A40, 27 to 39 tick KPIs, MIT to Apache-2.0, "no remote/tag" removed, and the
+  "L1 time-space reservation" wording replaced with what the code does.
+- out/sim_latest.json and out/ledger_index.json store repository-relative paths
+  instead of absolute C:/Users/... paths.
+- scripts/check_doc_drift.py no longer hard-codes a desktop path; DC_PLAN_COPY
+  points at the master plan.
+
 ## [0.5.0] - 2026-11-11
 
 Shipped as a **Windows application** and trimmed the workspace by ~1 GB.

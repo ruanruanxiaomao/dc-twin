@@ -177,7 +177,10 @@ def validate(entries, events, cost):
 
 
 def process(run_dir, cost, source="auto", rebuild=False):
+    # run_dir 可能是相对 ROOT 的新格式，也可能是旧产物里的绝对路径
     d = Path(run_dir)
+    if not d.is_absolute():
+        d = Path(ROOT) / d
     events, engine, src_path, kpi = load_events(d, source)
     settled = next((e for e in events if e["type"] == "RUN_SETTLED"), None)
     if not settled:
@@ -214,8 +217,15 @@ def process(run_dir, cost, source="auto", rebuild=False):
         raise SystemExit("LEDGER_FAIL %s" % issues[:3])
     print("LEDGER_OK %s engine=%s postings=%d -> %s"
           % (run_id, engine, len(entries), ledger))
-    return {"run_id": run_id, "run_dir": str(d), "engine": engine,
-            "postings": len(entries), "ledger": str(ledger)}
+    # 索引里只写相对 ROOT 的路径：index 会进 out/（可能被打进交付包），
+    # 绝对路径等于把本机用户名和目录结构一起发出去。
+    def _rel(x):
+        try:
+            return Path(x).resolve().relative_to(Path(ROOT)).as_posix()
+        except ValueError:
+            return str(x)
+    return {"run_id": run_id, "run_dir": _rel(d), "engine": engine,
+            "postings": len(entries), "ledger": _rel(ledger)}
 
 
 def main(argv=None):

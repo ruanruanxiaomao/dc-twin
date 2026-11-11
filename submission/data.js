@@ -1,5 +1,5 @@
 window.DC_SUBMISSION = {
-  "generated_at": "2026-11-10T15:20:03+00:00",
+  "generated_at": "2026-11-11T13:46:24+00:00",
   "project": {
     "name": "配送中心数字孪生 · DC Twin Studio",
     "tagline": "从一张布局图纸，到可仿真、可算账、可定制的运营孪生",
@@ -26200,6 +26200,38 @@ window.DC_SUBMISSION = {
   ],
   "pnl": [
     {
+      "run_id": "replay/main",
+      "engine": "replay",
+      "prices_source": "demo",
+      "revenue": 142.8,
+      "variable": 4.379414,
+      "fixed": 750.732496,
+      "profit": -612.31191,
+      "orders": 21,
+      "breakeven": 114,
+      "per_order_profit": -29.15771,
+      "sensitivity": {
+        "energy_tariff_pm20": {
+          "low": -612.066027,
+          "base": -612.31191,
+          "high": -612.557793,
+          "note": "电价 -20% / +20%"
+        },
+        "order_volume_pm20": {
+          "low": -640.24191,
+          "base": -612.31191,
+          "high": -584.38191,
+          "note": "单量 -20% / +20%，固定成本不变"
+        },
+        "fleet_pm2": {
+          "low": -590.668074,
+          "base": -612.31191,
+          "high": -633.955746,
+          "note": "车数 -2 / +2，只影响折旧与维护"
+        }
+      }
+    },
+    {
       "run_id": "baseline/20261110T150340Z",
       "engine": "sim",
       "prices_source": "demo",
@@ -26227,6 +26259,70 @@ window.DC_SUBMISSION = {
           "low": -591.656813,
           "base": -613.300649,
           "high": -634.944485,
+          "note": "车数 -2 / +2，只影响折旧与维护"
+        }
+      }
+    },
+    {
+      "run_id": "replay/main",
+      "engine": "replay",
+      "prices_source": "demo",
+      "revenue": 142.8,
+      "variable": 4.379414,
+      "fixed": 750.732496,
+      "profit": -612.31191,
+      "orders": 21,
+      "breakeven": 114,
+      "per_order_profit": -29.15771,
+      "sensitivity": {
+        "energy_tariff_pm20": {
+          "low": -612.066027,
+          "base": -612.31191,
+          "high": -612.557793,
+          "note": "电价 -20% / +20%"
+        },
+        "order_volume_pm20": {
+          "low": -640.24191,
+          "base": -612.31191,
+          "high": -584.38191,
+          "note": "单量 -20% / +20%，固定成本不变"
+        },
+        "fleet_pm2": {
+          "low": -590.668074,
+          "base": -612.31191,
+          "high": -633.955746,
+          "note": "车数 -2 / +2，只影响折旧与维护"
+        }
+      }
+    },
+    {
+      "run_id": "replay/main",
+      "engine": "replay",
+      "prices_source": "demo",
+      "revenue": 142.8,
+      "variable": 4.379414,
+      "fixed": 750.732496,
+      "profit": -612.31191,
+      "orders": 21,
+      "breakeven": 114,
+      "per_order_profit": -29.15771,
+      "sensitivity": {
+        "energy_tariff_pm20": {
+          "low": -612.066027,
+          "base": -612.31191,
+          "high": -612.557793,
+          "note": "电价 -20% / +20%"
+        },
+        "order_volume_pm20": {
+          "low": -640.24191,
+          "base": -612.31191,
+          "high": -584.38191,
+          "note": "单量 -20% / +20%，固定成本不变"
+        },
+        "fleet_pm2": {
+          "low": -590.668074,
+          "base": -612.31191,
+          "high": -633.955746,
           "note": "车数 -2 / +2，只影响折旧与维护"
         }
       }
@@ -26264,6 +26360,38 @@ window.DC_SUBMISSION = {
       }
     },
     {
+      "run_id": "replay/main",
+      "engine": "replay",
+      "prices_source": "demo",
+      "revenue": 142.8,
+      "variable": 4.379414,
+      "fixed": 750.732496,
+      "profit": -612.31191,
+      "orders": 21,
+      "breakeven": 114,
+      "per_order_profit": -29.15771,
+      "sensitivity": {
+        "energy_tariff_pm20": {
+          "low": -612.066027,
+          "base": -612.31191,
+          "high": -612.557793,
+          "note": "电价 -20% / +20%"
+        },
+        "order_volume_pm20": {
+          "low": -640.24191,
+          "base": -612.31191,
+          "high": -584.38191,
+          "note": "单量 -20% / +20%，固定成本不变"
+        },
+        "fleet_pm2": {
+          "low": -590.668074,
+          "base": -612.31191,
+          "high": -633.955746,
+          "note": "车数 -2 / +2，只影响折旧与维护"
+        }
+      }
+    },
+    {
       "run_id": "holiday/20261110T150345Z",
       "engine": "sim",
       "prices_source": "demo",
@@ -26291,6 +26419,38 @@ window.DC_SUBMISSION = {
           "low": -641.00408,
           "base": -662.647916,
           "high": -684.291752,
+          "note": "车数 -2 / +2，只影响折旧与维护"
+        }
+      }
+    },
+    {
+      "run_id": "replay/main",
+      "engine": "replay",
+      "prices_source": "demo",
+      "revenue": 142.8,
+      "variable": 4.379414,
+      "fixed": 750.732496,
+      "profit": -612.31191,
+      "orders": 21,
+      "breakeven": 114,
+      "per_order_profit": -29.15771,
+      "sensitivity": {
+        "energy_tariff_pm20": {
+          "low": -612.066027,
+          "base": -612.31191,
+          "high": -612.557793,
+          "note": "电价 -20% / +20%"
+        },
+        "order_volume_pm20": {
+          "low": -640.24191,
+          "base": -612.31191,
+          "high": -584.38191,
+          "note": "单量 -20% / +20%，固定成本不变"
+        },
+        "fleet_pm2": {
+          "low": -590.668074,
+          "base": -612.31191,
+          "high": -633.955746,
           "note": "车数 -2 / +2，只影响折旧与维护"
         }
       }
@@ -26328,6 +26488,38 @@ window.DC_SUBMISSION = {
       }
     },
     {
+      "run_id": "replay/main",
+      "engine": "replay",
+      "prices_source": "demo",
+      "revenue": 142.8,
+      "variable": 4.379414,
+      "fixed": 750.732496,
+      "profit": -612.31191,
+      "orders": 21,
+      "breakeven": 114,
+      "per_order_profit": -29.15771,
+      "sensitivity": {
+        "energy_tariff_pm20": {
+          "low": -612.066027,
+          "base": -612.31191,
+          "high": -612.557793,
+          "note": "电价 -20% / +20%"
+        },
+        "order_volume_pm20": {
+          "low": -640.24191,
+          "base": -612.31191,
+          "high": -584.38191,
+          "note": "单量 -20% / +20%，固定成本不变"
+        },
+        "fleet_pm2": {
+          "low": -590.668074,
+          "base": -612.31191,
+          "high": -633.955746,
+          "note": "车数 -2 / +2，只影响折旧与维护"
+        }
+      }
+    },
+    {
       "run_id": "night/20261110T150357Z",
       "engine": "sim",
       "prices_source": "demo",
@@ -26355,6 +26547,38 @@ window.DC_SUBMISSION = {
           "low": -612.49798,
           "base": -634.141816,
           "high": -655.785652,
+          "note": "车数 -2 / +2，只影响折旧与维护"
+        }
+      }
+    },
+    {
+      "run_id": "replay/main",
+      "engine": "replay",
+      "prices_source": "demo",
+      "revenue": 142.8,
+      "variable": 4.379414,
+      "fixed": 750.732496,
+      "profit": -612.31191,
+      "orders": 21,
+      "breakeven": 114,
+      "per_order_profit": -29.15771,
+      "sensitivity": {
+        "energy_tariff_pm20": {
+          "low": -612.066027,
+          "base": -612.31191,
+          "high": -612.557793,
+          "note": "电价 -20% / +20%"
+        },
+        "order_volume_pm20": {
+          "low": -640.24191,
+          "base": -612.31191,
+          "high": -584.38191,
+          "note": "单量 -20% / +20%，固定成本不变"
+        },
+        "fleet_pm2": {
+          "low": -590.668074,
+          "base": -612.31191,
+          "high": -633.955746,
           "note": "车数 -2 / +2，只影响折旧与维护"
         }
       }
@@ -26392,6 +26616,38 @@ window.DC_SUBMISSION = {
       }
     },
     {
+      "run_id": "replay/main",
+      "engine": "replay",
+      "prices_source": "demo",
+      "revenue": 142.8,
+      "variable": 4.379414,
+      "fixed": 750.732496,
+      "profit": -612.31191,
+      "orders": 21,
+      "breakeven": 114,
+      "per_order_profit": -29.15771,
+      "sensitivity": {
+        "energy_tariff_pm20": {
+          "low": -612.066027,
+          "base": -612.31191,
+          "high": -612.557793,
+          "note": "电价 -20% / +20%"
+        },
+        "order_volume_pm20": {
+          "low": -640.24191,
+          "base": -612.31191,
+          "high": -584.38191,
+          "note": "单量 -20% / +20%，固定成本不变"
+        },
+        "fleet_pm2": {
+          "low": -590.668074,
+          "base": -612.31191,
+          "high": -633.955746,
+          "note": "车数 -2 / +2，只影响折旧与维护"
+        }
+      }
+    },
+    {
       "run_id": "robot_failure/20261110T150408Z",
       "engine": "sim",
       "prices_source": "demo",
@@ -26424,38 +26680,6 @@ window.DC_SUBMISSION = {
       }
     },
     {
-      "run_id": "scale_50/20261110T150411Z",
-      "engine": "sim",
-      "prices_source": "demo",
-      "revenue": 183.5,
-      "variable": 54.005508,
-      "fixed": 1064.568112,
-      "profit": -935.07362,
-      "orders": 35,
-      "breakeven": 288,
-      "per_order_profit": -26.716389,
-      "sensitivity": {
-        "energy_tariff_pm20": {
-          "low": -933.322518,
-          "base": -935.07362,
-          "high": -936.824722,
-          "note": "电价 -20% / +20%"
-        },
-        "order_volume_pm20": {
-          "low": -962.72362,
-          "base": -935.07362,
-          "high": -907.42362,
-          "note": "单量 -20% / +20%，固定成本不变"
-        },
-        "fleet_pm2": {
-          "low": -913.429784,
-          "base": -935.07362,
-          "high": -956.717456,
-          "note": "车数 -2 / +2，只影响折旧与维护"
-        }
-      }
-    },
-    {
       "run_id": "replay/main",
       "engine": "replay",
       "prices_source": "demo",
@@ -26483,6 +26707,38 @@ window.DC_SUBMISSION = {
           "low": -590.668074,
           "base": -612.31191,
           "high": -633.955746,
+          "note": "车数 -2 / +2，只影响折旧与维护"
+        }
+      }
+    },
+    {
+      "run_id": "scale_50/20261110T150411Z",
+      "engine": "sim",
+      "prices_source": "demo",
+      "revenue": 183.5,
+      "variable": 54.005508,
+      "fixed": 1064.568112,
+      "profit": -935.07362,
+      "orders": 35,
+      "breakeven": 288,
+      "per_order_profit": -26.716389,
+      "sensitivity": {
+        "energy_tariff_pm20": {
+          "low": -933.322518,
+          "base": -935.07362,
+          "high": -936.824722,
+          "note": "电价 -20% / +20%"
+        },
+        "order_volume_pm20": {
+          "low": -962.72362,
+          "base": -935.07362,
+          "high": -907.42362,
+          "note": "单量 -20% / +20%，固定成本不变"
+        },
+        "fleet_pm2": {
+          "low": -913.429784,
+          "base": -935.07362,
+          "high": -956.717456,
           "note": "车数 -2 / +2，只影响折旧与维护"
         }
       }
@@ -26578,7 +26834,7 @@ window.DC_SUBMISSION = {
       "icon": "SIM",
       "in": "sim_spec.json · 8 个场景配置",
       "out": "sim_events.jsonl · sim_kpi.json · sim_state.json",
-      "body": "离散事件引擎：泊松到达、在线派单、9 态 FSM、电量/充电、故障重派、L1 时空预约；27 项 measured KPI。"
+      "body": "离散事件引擎：泊松到达、在线派单、9 态 FSM、电量/充电、故障重派、反应式门控（到达互斥 + 车间距）；39 项 measured KPI。"
     },
     {
       "n": "05",
@@ -26721,15 +26977,15 @@ window.DC_SUBMISSION = {
       {
         "group": "核心脚本",
         "path": "scripts/sim_engine.py",
-        "bytes": 65647,
-        "size": "64.1 KB",
+        "bytes": 65873,
+        "size": "64.3 KB",
         "note": "tick 级离散事件仿真引擎"
       },
       {
         "group": "核心脚本",
         "path": "scripts/ledger.py",
-        "bytes": 11147,
-        "size": "10.9 KB",
+        "bytes": 11882,
+        "size": "11.6 KB",
         "note": "事件溯源账本"
       },
       {
@@ -26742,8 +26998,8 @@ window.DC_SUBMISSION = {
       {
         "group": "核心脚本",
         "path": "scripts/validate.py",
-        "bytes": 39098,
-        "size": "38.2 KB",
+        "bytes": 39759,
+        "size": "38.8 KB",
         "note": "A1–A40 独立验收"
       },
       {
@@ -26756,15 +27012,15 @@ window.DC_SUBMISSION = {
       {
         "group": "核心脚本",
         "path": "scripts/validate_pnl.py",
-        "bytes": 9508,
-        "size": "9.3 KB",
+        "bytes": 10092,
+        "size": "9.9 KB",
         "note": "F1–F7 盈亏验收"
       },
       {
         "group": "核心脚本",
         "path": "scripts/build_dc.py",
-        "bytes": 31313,
-        "size": "30.6 KB",
+        "bytes": 36694,
+        "size": "35.8 KB",
         "note": "Blender 程序化建模"
       },
       {
@@ -26807,34 +27063,34 @@ window.DC_SUBMISSION = {
         "path": "scripts/reservation_check.py",
         "bytes": 5219,
         "size": "5.1 KB",
-        "note": "时空预约冲突复核"
+        "note": "0.05 s 采样冲突复核"
       },
       {
         "group": "3D / 动画交付",
         "path": "out/distribution_center.blend",
-        "bytes": 640463,
-        "size": "625.5 KB",
+        "bytes": 711803,
+        "size": "695.1 KB",
         "note": "Blender 5.2 工程（914 对象）"
       },
       {
         "group": "3D / 动画交付",
         "path": "out/dc_preview.glb",
-        "bytes": 612696,
-        "size": "598.3 KB",
+        "bytes": 806620,
+        "size": "787.7 KB",
         "note": "glTF 2.0 静态预览"
       },
       {
         "group": "3D / 动画交付",
         "path": "out/anim_dc.mp4",
-        "bytes": 940071,
-        "size": "918.0 KB",
+        "bytes": 1051703,
+        "size": "1.00 MB",
         "note": "21 车闭环作业动画"
       },
       {
         "group": "3D / 动画交付",
         "path": "out/renders/01_overview.png",
-        "bytes": 2255554,
-        "size": "2.15 MB",
+        "bytes": 2332244,
+        "size": "2.22 MB",
         "note": "1920×1080 总览渲染"
       },
       {
@@ -26847,8 +27103,8 @@ window.DC_SUBMISSION = {
       {
         "group": "报告 / 验收",
         "path": "out/manifest.json",
-        "bytes": 12051,
-        "size": "11.8 KB",
+        "bytes": 13110,
+        "size": "12.8 KB",
         "note": "58 个产物 + sidecar 哈希清单"
       },
       {
@@ -26868,22 +27124,22 @@ window.DC_SUBMISSION = {
       {
         "group": "报告 / 验收",
         "path": "out/validate_report.json",
-        "bytes": 7289,
+        "bytes": 7292,
         "size": "7.1 KB",
         "note": "A1–A40 逐条结果"
       },
       {
         "group": "报告 / 验收",
         "path": "out/blend_audit.json",
-        "bytes": 1663,
+        "bytes": 1675,
         "size": "1.6 KB",
         "note": "Blender 场景审计"
       },
       {
         "group": "报告 / 验收",
         "path": "out/glb_report.json",
-        "bytes": 346,
-        "size": "346 B",
+        "bytes": 348,
+        "size": "348 B",
         "note": "glTF 结构审计"
       },
       {
@@ -26903,14 +27159,14 @@ window.DC_SUBMISSION = {
       {
         "group": "开源交付 / 文档",
         "path": "README.md",
-        "bytes": 10647,
-        "size": "10.4 KB",
+        "bytes": 15083,
+        "size": "14.7 KB",
         "note": "Hero README 与能力边界"
       },
       {
         "group": "开源交付 / 文档",
         "path": "README.zh-CN.md",
-        "bytes": 19122,
+        "bytes": 19198,
         "size": "18.7 KB",
         "note": "中文说明"
       },
@@ -26924,8 +27180,8 @@ window.DC_SUBMISSION = {
       {
         "group": "开源交付 / 文档",
         "path": "docs/COMPLETION_STATUS.md",
-        "bytes": 12374,
-        "size": "12.1 KB",
+        "bytes": 12554,
+        "size": "12.3 KB",
         "note": "A/B/C/G 阶段实施状态"
       },
       {
@@ -26945,7 +27201,7 @@ window.DC_SUBMISSION = {
       {
         "group": "开源交付 / 文档",
         "path": "docs/cli.md",
-        "bytes": 2621,
+        "bytes": 2675,
         "size": "2.6 KB",
         "note": "CLI 命令手册"
       },
@@ -26959,8 +27215,8 @@ window.DC_SUBMISSION = {
       {
         "group": "开源交付 / 文档",
         "path": "CHANGELOG.md",
-        "bytes": 10910,
-        "size": "10.7 KB",
+        "bytes": 12407,
+        "size": "12.1 KB",
         "note": "版本记录"
       },
       {
@@ -26968,27 +27224,27 @@ window.DC_SUBMISSION = {
         "path": "LICENSE",
         "bytes": 11546,
         "size": "11.3 KB",
-        "note": "MIT"
+        "note": "Apache-2.0"
       },
       {
         "group": "开源交付 / 文档",
         "path": "pyproject.toml",
-        "bytes": 1731,
-        "size": "1.7 KB",
+        "bytes": 1979,
+        "size": "1.9 KB",
         "note": "包元数据 / pytest / ruff"
       },
       {
         "group": "开源交付 / 文档",
         "path": ".github/workflows/ci.yml",
-        "bytes": 4200,
-        "size": "4.1 KB",
+        "bytes": 4678,
+        "size": "4.6 KB",
         "note": "CI 流水线"
       },
       {
         "group": "开源交付 / 文档",
         "path": "console/server.py",
-        "bytes": 33558,
-        "size": "32.8 KB",
+        "bytes": 48671,
+        "size": "47.5 KB",
         "note": "本地控制台服务"
       },
       {
@@ -27021,7 +27277,7 @@ window.DC_SUBMISSION = {
     {
       "file": "data/config.json",
       "lines": 227,
-      "bytes": 3858,
+      "bytes": 3866,
       "size": "3.8 KB",
       "fields": "binary / n/a"
     },
@@ -28086,7 +28342,7 @@ window.DC_SUBMISSION = {
       {
         "id": "A11 GLB/PNG/MP4 与 .blend 重开实测一致",
         "status": "PASS",
-        "detail": "glb nodes=924 forbidden=[] DC_ROOT=True；png尺寸全对=True；objects 977/977 meshes 103/103"
+        "detail": "glb nodes=1274 forbidden=[] DC_ROOT=True；png尺寸全对=True；objects 1327/1327 meshes 187/187"
       },
       {
         "id": "A12 自身 Apache-2.0 + 第三方 MIT 全文与资产哈希",
@@ -28206,7 +28462,7 @@ window.DC_SUBMISSION = {
       {
         "id": "A35 50 车场景 plan_wall_clock <300 s",
         "status": "PASS",
-        "detail": "fleet=50 wall_clock=0.041s"
+        "detail": "fleet=50 wall_clock=0.047s"
       },
       {
         "id": "A36 改 seed 后展开结果改变",
@@ -28739,7 +28995,7 @@ window.DC_SUBMISSION = {
       },
       {
         "file": "assets/09_time_space.webp",
-        "caption": "时空预约 / 时间-空间图",
+        "caption": "时间-空间图（AGV 轨迹与占位）",
         "bytes": 41454,
         "size": "40.5 KB",
         "resolution": "1400×900"
@@ -28756,47 +29012,47 @@ window.DC_SUBMISSION = {
       {
         "file": "assets/anim_dc.mp4",
         "note": "AGV 闭环作业动画（8 fps，942 帧编码）",
-        "bytes": 940071,
-        "size": "918.0 KB",
+        "bytes": 1051703,
+        "size": "1.00 MB",
         "exists": true
       },
       {
         "file": "assets/dc_preview.glb",
         "note": "glTF 静态场景预览（无动画，动画在 mp4 / .blend）",
-        "bytes": 612696,
-        "size": "598.3 KB",
+        "bytes": 806620,
+        "size": "787.7 KB",
         "exists": true
       },
       {
         "file": "assets/distribution_center.blend",
         "note": "Blender 5.2 工程源文件（含 42 个动作）",
-        "bytes": 640463,
-        "size": "625.5 KB",
+        "bytes": 711803,
+        "size": "695.1 KB",
         "exists": true
       }
     ],
     "blend": {
-      "objects": 977,
-      "meshes": 103,
-      "materials": 48,
+      "objects": 1327,
+      "meshes": 187,
+      "materials": 58,
       "cameras": 6,
       "lights": 4,
       "actions": 42,
       "fps": 8,
       "frames": 942,
       "bbox": [
-        112.0,
-        114.0,
+        184.125,
+        186.95,
         12.0
       ],
       "engine": "BLENDER_EEVEE",
       "blender": "5.2.3 LTS"
     },
     "glb": {
-      "bytes": 612696,
-      "nodes": 924,
-      "meshes": 101,
-      "materials": 47,
+      "bytes": 806620,
+      "nodes": 1274,
+      "meshes": 185,
+      "materials": 56,
       "animations": 0,
       "generator": "Khronos glTF Blender I/O v5.2.41"
     },

@@ -34,6 +34,22 @@ If pywebview/WebView2 is unavailable it falls back to an Edge/Chrome `--app`
 window, then to the default browser. `启动驾驶舱_Tk经典版.bat` still opens the
 legacy Tk cockpit.
 
+## The local console can write, so it checks who is asking
+
+`console/server.py` can rewrite `data/config.json`, trigger the whole pipeline and
+generate layout variants. "It only binds 127.0.0.1" is not a security boundary:
+any web page can POST to loopback. `console/security.py` therefore enforces three
+things — Host must be loopback (DNS rebinding), any POST carrying an Origin or
+Referer must be same-origin (CSRF), and if `DC_CONSOLE_TOKEN` is set every request
+needs `X-DC-Token`. Binding a non-loopback address **without** a token refuses to
+start.
+
+```bash
+DC_CONSOLE_TOKEN=$(python -c "import secrets;print(secrets.token_hex(16))") \
+  python -m console.server      # then send X-DC-Token on requests
+python -m pytest tests/test_console_security.py -q   # 8 tests
+```
+
 ## Functional areas, visible and editable
 
 ![Areas on the 2D plan](assets/ui_2d_areas.png)
@@ -277,8 +293,8 @@ The seed lives in `config/layout_spec.json → site.seed` and `data/config.json 
 See [CONTRIBUTING.md](CONTRIBUTING.md), [CHANGELOG.md](CHANGELOG.md),
 [SECURITY.md](SECURITY.md) and [CITATION.cff](CITATION.cff).
 `dc export --target release` builds a checksum-verified bundle
-(`.blend`, `.glb`, `.mp4`, renders) for a GitHub Release; no remote/tag is
-configured in this local repository yet, so none of the badges above pretend
-to point at a live CI.
+(`.blend`, `.glb`, `.mp4`, renders) for a GitHub Release. The remote is
+`origin` → `github.com/ruanruanxiaomao/dc-twin`, so the CI badge above points at
+a workflow that actually runs.
 
 Licensed under the [Apache License 2.0](LICENSE); attribution notices in [NOTICE](NOTICE). Synthetic sample data contains no real customer data.
