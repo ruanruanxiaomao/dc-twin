@@ -12,6 +12,7 @@ acceptance checks.**
 [![Blender 5.2](https://img.shields.io/badge/Blender-5.2-orange.svg)](docs/getting-started.md)
 [![Acceptance 40/40](https://img.shields.io/badge/acceptance-40%2F40-brightgreen.svg)](out/CURRENT_STATUS.md)
 [![CI](https://github.com/ruanruanxiaomao/dc-twin/actions/workflows/ci.yml/badge.svg)](https://github.com/ruanruanxiaomao/dc-twin/actions/workflows/ci.yml)
+[![3D live](https://img.shields.io/badge/3D-live%20in%20browser-4dc9f6.svg)](https://ruanruanxiaomao.github.io/dc-twin/app/index.html?view=3d)
 
 **English** · [简体中文](README.zh-CN.md) · [Live static demo](demo/index.html)
 

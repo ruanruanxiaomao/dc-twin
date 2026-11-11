@@ -2960,6 +2960,7 @@ Pages 上没人跑 Python，断链的表现是"转圈"或"面板空白"，CI 完
 | 3D 控制台 | https://ruanruanxiaomao.github.io/dc-twin/app/index.html?view=3d |
 | 源 | `master` 分支 `/docs`，`.nojekyll` 关闭 Jekyll |
 | 内容 | `docs/index.html` 落地页 + `docs/app/` 快照（只读） |
+| 上线验证 | 2026-11-11 08:37：首页 200、`app/index.html` 200；无头 Edge 截图确认 4 仓 + 货架 + 分区 + 21 台 AGV 正常渲染，顶栏显示"21 AGV · 2155 节点" |
 
 ### 29.7 v3.9 边界
 
