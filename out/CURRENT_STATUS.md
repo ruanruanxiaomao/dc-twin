@@ -5,7 +5,7 @@
 
 | 指标 | 当前值 |
 |---|---|
-| 生成时间 | 2026-11-11 12:42:33 |
+| 生成时间 | 2026-11-11 12:53:02 |
 | Blender | 5.2.3 LTS |
 | 布局来源 | config/layout_spec.json → spec_layout.py（L1–L13 PASS，issues=0 warnings=148；38 扇门） |
 | AP 互斥 | 148 对（WARN，两 AP <2R 不能同时占用）；预约表复核同时占用 0 次；加宽变体互斥 29 对 |
@@ -31,7 +31,7 @@
 | 路线图 | closed_loops=21 / routes=21 / segments=3444 / head_on=0 / edge_clearance=0.3204 m / 中央主通道采样=128 |
 | 车队/交通复核 | 状态迁移 147 次/非法 0；最低电量 53.986%；预约表顶点 0 / 边交换 0 |
 | 数据适配/复现 | CSV 24 行 schema=PASS；全新空目录复现 9/9 步、8 份 JSON 逐字节一致 |
-| 验收 | 39/40 PASS（A1–A40）；负测试 17/17（3 个测试文件） |
+| 验收 | 40/40 PASS（A1–A40）；负测试 17/17（3 个测试文件） |
 | 开源交付层 | dc CLI 7 命令 / 31 步链（data 11 · scenarios 16 · full 31）；输出契约 sidecar 37 份 / manifest 75 个产物；静态 Demo 8 个场景 · 21 台车 |
 | 分档验收 | data tier 12/12 PASS；pytest -m "not blender" 与 CI 矩阵见 `.github/workflows/ci.yml` |
 
