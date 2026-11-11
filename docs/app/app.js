@@ -31,13 +31,14 @@ const S = {
   dirty: true,
   mode3d: false,
   view: { scale: 1, ox: 0, oy: 0 },
-  show: { racks: true, zones: true, heat: false, trail: true, route: true },
+  show: { racks: true, zones: true, areas: true, heat: false, trail: true, route: true },
   drag: null,
   job: null,
   jobTimer: null,
   jobNext: 0,
   runScope: 'data',
   heat: {},
+  showAreas: true,
 };
 
 // ------------------------------------------------------------------ 工具
@@ -401,6 +402,9 @@ function draw() {
     }
   }
 
+  // 8.5 功能区（物理区填色、逻辑区锚点；来自 areas.js）
+  if (typeof areasDraw2d === 'function') areasDraw2d(ctx);
+
   // 9. 选中车的闭环路线
   if (S.show.route && S.sel) {
     drawRoute(ctx, S.sel);
@@ -627,9 +631,21 @@ function bindCanvas() {
   $('btnFit').addEventListener('click', fitView);
   $('btnReload').addEventListener('click', () => reloadData(false));
 
+  // 功能区面板（areas.js）：模式切换 / 预设 / 生成
+  [...$('areaMode').children].forEach((b) => b.addEventListener('click', () => areasMode(b.dataset.mode)));
+  $('btnAreaPresetMin').addEventListener('click', () => areasPreset('minimal'));
+  $('btnAreaPresetEcom').addEventListener('click', () => areasPreset('ecommerce'));
+  $('btnAreaAll').addEventListener('click', () => areasToggleAll(true));
+  $('btnAreaNone').addEventListener('click', () => areasToggleAll(false));
+  $('btnAreaApply').addEventListener('click', areasApply);
+  $('chkAreas3d').addEventListener('change', (e) => {
+    if (typeof A !== 'undefined') A.visible3d = e.target.checked;
+    if (viewer) viewer.setAreasVisible(e.target.checked);
+  });
+
   const toggles = [
-    ['chkRacks', 'racks'], ['chkZones', 'zones'], ['chkHeat', 'heat'],
-    ['chkTrail', 'trail'], ['chkRoute', 'route'],
+    ['chkRacks', 'racks'], ['chkZones', 'zones'], ['chkAreas', 'areas'],
+    ['chkHeat', 'heat'], ['chkTrail', 'trail'], ['chkRoute', 'route'],
   ];
   for (const [id, key] of toggles) {
     $(id).addEventListener('change', (e) => {
@@ -697,6 +713,12 @@ async function ensureViewer() {
         bounds: { x0: 0, z0: 0, x1: ls.width, z1: ls.depth },
         onProgress: (r) => { stat.textContent = `加载中 ${Math.round(r * 100)}%`; },
         onPick: (id) => selectAgent(id),
+        areas: (typeof areasFor3d === 'function') ? areasFor3d() : [],
+        areasVisible: (typeof A !== 'undefined') ? A.visible3d : true,
+        onAreaPick: (id) => {
+          if (S.mode3d && typeof areasHud === 'function') areasHud(id);
+          else if (typeof areasFocus === 'function') areasFocus(id);
+        },
       });
       const st = viewer.stats();
       stat.textContent = `${st.agv} 台 AGV · ${st.nodes} 个节点`;
@@ -1241,14 +1263,8 @@ function openLightbox(url, name) {
 
 // ------------------------------------------------- 指标 / 功能区 / 计划书（v3.9）
 
-const EXTRA = { kpi: null, areas: null, layer: 'tick', q: '', plan: false };
+const EXTRA = { kpi: null, layer: 'tick', q: '', plan: false };
 
-const KIND_CN = {
-  RECEIVING: '收货', QA: '质检', STAGING_IN: '入库暂存', STORAGE: '存储',
-  PICK_FACE: '拣选面', REPLENISH: '补货', SORTING: '分拣', PACKING: '包装',
-  VAS: '增值', STAGING_OUT: '出库暂存', RETURNS: '退货',
-  EMPTY_CONTAINER: '空容器', BATTERY: '电池间', MAINTENANCE: '维修', OFFICE: '办公',
-};
 
 function num(v) {
   if (v === null || v === undefined || Number.isNaN(v)) return '—';
@@ -1281,35 +1297,6 @@ function renderKpi() {
     </div>`).join('') || '<div class="muted" style="padding:8px">没有匹配的指标</div>';
 }
 
-async function loadAreas() {
-  if (!EXTRA.areas) EXTRA.areas = await apiGet('/api/areas');
-  renderAreas();
-}
-
-function renderAreas() {
-  if (!EXTRA.areas) return;
-  const { summary = {}, areas = [] } = EXTRA.areas;
-  const badge = (t, v, c) => `<span class="badge" style="--c:${c}">${t} <b>${v}</b></span>`;
-  $('areaBadges').innerHTML =
-    badge('功能区', summary.total ?? areas.length, '#4dc9f6') +
-    badge('物理', summary.physical ?? '—', '#2ee6a6') +
-    badge('逻辑', summary.logical ?? '—', '#b388ff') +
-    badge('可算产能', summary.with_throughput ?? '—', '#f5c451');
-  $('areaList').innerHTML = areas.map((a) => {
-    const cap = Object.entries(a.capacity || {}).filter(([, v]) => v)
-      .map(([k, v]) => `${k}=${v}`).join(' · ');
-    const thr = a.derived ? `${num(a.derived.throughput_per_h)} /h（${a.derived.slots} 位 × ${a.derived.service_mean_s}s）` : '—';
-    const size = a.physical ? `${num(a.area_m2)} m²` : `挂靠 ${esc(a.anchor || '')}`;
-    return `<div class="area-row">
-      <div class="area-head"><code>${esc(a.id)}</code>
-        <span class="pill">${esc(KIND_CN[a.kind] || a.kind)}</span>
-        <span class="muted">${a.physical ? '物理' : '逻辑'}</span></div>
-      <div class="muted area-sub">${esc(a.name || '')} · ${size} · ${esc(cap || '无容量')}</div>
-      <div class="area-thr">${thr}</div>
-    </div>`;
-  }).join('');
-}
-
 function openPlan() {
   if (EXTRA.plan) return;
   EXTRA.plan = true;
@@ -1332,7 +1319,9 @@ function switchTab(name) {
   [...$('tabs').children].forEach((b) => b.classList.toggle('active', b.dataset.tab === name));
   document.querySelectorAll('.pane').forEach((p) => p.classList.toggle('active', p.id === 'pane-' + name));
   if (name === 'kpi') loadKpi().catch((e) => { $('kpiSub').textContent = '加载失败：' + e.message; });
-  if (name === 'areas') loadAreas().catch((e) => { $('pane-areas').innerHTML = '<div class="pane-sub">加载失败：' + esc(e.message) + '</div>'; });
+  if (name === 'areas') areasOpen().catch((e) => {
+    $('pane-areas').innerHTML = '<div class="pane-sub">加载失败：' + esc(e.message) + '</div>';
+  });
   if (name === 'plan') openPlan();
 }
 
@@ -1358,6 +1347,8 @@ function bindTabs() {
 
 let lastTs = 0;
 let lastPanel = 0;
+
+function appDraw() { S.dirty = true; }
 
 function tick(ts) {
   const dt = lastTs ? (ts - lastTs) / 1000 : 0;
@@ -1399,6 +1390,9 @@ async function main() {
   try {
     await loadAll();
     applyUrlState();
+    // 功能区图层在 2D 里常显（用户第一眼就该看见分区），所以启动就取一次，
+    // 不能等切到"功能区"页才加载——以前就是这样，默认视图里一个区都看不到。
+    if (typeof areasOpen === 'function') await areasOpen().catch(() => {});
     // 恢复上一次作业的日志（刷新页面后仍能看到重跑记录）
     S.jobHandled = true;
     await pollJob();

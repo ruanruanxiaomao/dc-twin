@@ -175,6 +175,121 @@ export async function create(canvas, opts = {}) {
     markers[id] = sp;
   }
 
+
+  // ---- 功能区覆盖层 ----
+  // GLB 里只有 3 个物理区有地面板块，另外 18 个逻辑区是"挂靠"在货架/月台上的小标记，
+  // 板子小、字更小，远看根本不存在。这里用 glTF 坐标在 three 里再画一层：
+  // 物理区 = 半透明薄板 + 名称牌，逻辑区 = 圆点 + 名称牌，可整层开关、可点击。
+  const areaGroup = new THREE.Group();
+  areaGroup.name = 'AREA_OVERLAY';
+  scene.add(areaGroup);
+  const areaPicks = [];
+  const areaLabels = [];
+
+  function labelSprite(text, color) {
+    const pad = 8, fs = 26;
+    const cv = document.createElement('canvas');
+    const g = cv.getContext('2d');
+    g.font = '600 ' + fs + 'px "Microsoft YaHei", -apple-system, sans-serif';
+    const w = Math.ceil(g.measureText(text).width) + pad * 2;
+    cv.width = w;
+    cv.height = fs + pad * 2;
+    const gg = cv.getContext('2d');
+    gg.font = '600 ' + fs + 'px "Microsoft YaHei", -apple-system, sans-serif';
+    gg.fillStyle = 'rgba(255,255,255,.92)';
+    gg.strokeStyle = color;
+    gg.lineWidth = 2;
+    const r = 8;
+    gg.beginPath();
+    gg.moveTo(r, 0); gg.lineTo(cv.width - r, 0); gg.quadraticCurveTo(cv.width, 0, cv.width, r);
+    gg.lineTo(cv.width, cv.height - r); gg.quadraticCurveTo(cv.width, cv.height, cv.width - r, cv.height);
+    gg.lineTo(r, cv.height); gg.quadraticCurveTo(0, cv.height, 0, cv.height - r);
+    gg.lineTo(0, r); gg.quadraticCurveTo(0, 0, r, 0); gg.closePath();
+    gg.fill(); gg.stroke();
+    gg.fillStyle = color;
+    gg.textBaseline = 'middle';
+    gg.fillText(text, pad, cv.height / 2);
+
+    const tex = new THREE.CanvasTexture(cv);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    // sizeAttenuation:false 才是"屏幕上恒定大小"。开着的话 scale 是世界单位，
+    // 0.02 就是 2 cm，缩到整场视角时牌子上只剩一个白点（第一次就是这样翻车的）。
+    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true,
+                                           depthTest: false, depthWrite: false,
+                                           sizeAttenuation: false });
+    const sp = new THREE.Sprite(mat);
+    const h = 0.030;                       // 约占视口高度的 3%
+    sp.scale.set(h * cv.width / cv.height, h, 1);
+    sp.renderOrder = 30;
+    return sp;
+  }
+
+  function disposeAreaGroup() {
+    for (const c of [...areaGroup.children]) {
+      areaGroup.remove(c);
+      if (c.geometry) c.geometry.dispose();
+      if (c.material) {
+        if (c.material.map) c.material.map.dispose();
+        c.material.dispose();
+      }
+    }
+    areaPicks.length = 0;
+    areaLabels.length = 0;
+  }
+
+  function setAreas(list) {
+    disposeAreaGroup();
+    for (const a of list || []) {
+      const col = new THREE.Color(a.color || '#0ea5e9');
+      if (a.rect && a.rect.length === 4) {
+        const [x0, z0, x1, z1] = a.rect;
+        const w = Math.max(0.5, x1 - x0), d = Math.max(0.5, z1 - z0);
+        const geo = new THREE.BoxGeometry(w, 0.16, d);
+        const mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
+          color: col, transparent: true, opacity: 0.46, depthWrite: false,
+        }));
+        mesh.position.set((x0 + x1) / 2, 0.12, -(z0 + z1) / 2);
+        mesh.userData.areaId = a.id;
+        mesh.renderOrder = 2;
+        areaGroup.add(mesh);
+        areaPicks.push(mesh);
+
+        const edge = new THREE.LineSegments(
+          new THREE.EdgesGeometry(geo),
+          new THREE.LineBasicMaterial({ color: col }));
+        edge.position.copy(mesh.position);
+        areaGroup.add(edge);
+
+        const sp = labelSprite(a.name || a.id, a.color || '#0ea5e9');
+        sp.position.set((x0 + x1) / 2, 2.4, -(z0 + z1) / 2);
+        sp.userData.areaId = a.id;
+        areaGroup.add(sp);
+        areaLabels.push(sp);
+        areaPicks.push(sp);
+      } else if (a.xy) {
+        const dot = new THREE.Mesh(
+          new THREE.CircleGeometry(1.6, 24),
+          new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.75,
+                                        depthWrite: false, side: THREE.DoubleSide }));
+        dot.rotation.x = -Math.PI / 2;
+        dot.position.set(a.xy[0], 0.1, -a.xy[1]);
+        dot.userData.areaId = a.id;
+        areaGroup.add(dot);
+        areaPicks.push(dot);
+
+        const sp = labelSprite(a.name || a.id, a.color || '#0ea5e9');
+        sp.position.set(a.xy[0], 1.5, -a.xy[1]);
+        sp.userData.areaId = a.id;
+        areaGroup.add(sp);
+        areaLabels.push(sp);
+        areaPicks.push(sp);
+      }
+    }
+  }
+
+  setAreas(opts.areas || []);
+  areaGroup.visible = opts.areasVisible !== false;
+
   // ---- 状态 ----
   let selId = null;
   let follow = false;
@@ -233,6 +348,15 @@ export async function create(canvas, opts = {}) {
     ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
     raycaster.setFromCamera(ndc, camera);
 
+    // 功能区优先：薄板在地面上、面积大，否则点哪都是"点到天花板"
+    if (areaGroup.visible && opts.onAreaPick) {
+      const hitA = raycaster.intersectObjects(areaPicks, false);
+      if (hitA.length) {
+        const id = hitA[0].object.userData.areaId;
+        if (id) { opts.onAreaPick(id); return; }
+      }
+    }
+
     // 车体只有几像素，主要靠头顶标记点命中
     const targets = [
       ...Object.values(agents).map((a) => a.obj),
@@ -284,6 +408,9 @@ export async function create(canvas, opts = {}) {
     preset,
     resize,
     setFollow(v) { follow = !!v; },
+    setAreas,
+    setAreasVisible(v) { areaGroup.visible = !!v; },
+    areaCount() { return areaPicks.length / 2; },
     setVisible(v) {
       visible = !!v;
       if (v) { resize(); controls.update(); }

@@ -31,7 +31,7 @@ ASSET_GLB = os.path.join(ROOT, 'assets', 'cargotwin_assets.glb')
 BLEND = os.path.join(OUT, 'distribution_center.blend')
 
 LAYOUT = json.load(open(os.path.join(DATA, 'layout.json'), encoding='utf-8'))
-import scene_config
+import scene_config  # noqa: E402  (要在 LAYOUT 之后才能定位 data/)
 CFG = scene_config.load()
 RNG = random.Random(LAYOUT['seed'])
 COUNTS = {}
@@ -42,8 +42,14 @@ PALETTE = {
     'roof_beam': '#9aa0a6', 'rack_frame': '#e2601f', 'rack_deck': '#b9bcc0',
     'glass': '#a9c6d8', 'line_yellow': '#f2b21b', 'line_cyan': '#25c9dd',
     'road': '#5b6068', 'dock': '#8b9099', 'conveyor': '#4a5058',
-    'zone_a': '#3b82f6', 'zone_b': '#a855f7', 'zone_c': '#22c55e',
-    'zone_d': '#f59e0b', 'zone_f': '#14b8a6',
+    # 分区地坪：浅色底 + 饱和色边线。整块刷成饱和度 100% 的蓝/绿/粉，
+    # 看着像幼儿园地垫，不像仓库——所以底色只保留 8% 倾向，颜色交给 0.15 m 边线。
+    'zone_a': '#dbe6f5', 'zone_b': '#e8dff5', 'zone_c': '#dcf0e1',
+    'zone_d': '#f8ead4', 'zone_f': '#d9eeec',
+    'zone_a_edge': '#3b82f6', 'zone_b_edge': '#a855f7', 'zone_c_edge': '#22c55e',
+    'zone_d_edge': '#f59e0b', 'zone_f_edge': '#14b8a6',
+    'concrete_joint': '#b8b8b2', 'bumper': '#111827', 'steel': '#6b7280',
+    'route_line': '#93a6ba',
     'corridor': '#8aa9bd',
     'crate': '#c99b62', 'light': '#fff6e0',
     'rack_cold': '#3b82f6', 'rack_cool': '#22c55e', 'rack_mid': '#eab308',
@@ -56,7 +62,7 @@ SCHED = json.load(open(os.path.join(DATA, 'agent_schedules.json'),
                        encoding='utf-8'))['schedules']
 TASKS = json.load(open(os.path.join(DATA, 'tasks.json'), encoding='utf-8'))
 CARGO = json.load(open(os.path.join(DATA, 'cargo_state.json'), encoding='utf-8'))
-LOCMAP = {l['id']: l for w in LAYOUT['warehouses'] for l in w['locations']}
+LOCMAP = {loc['id']: loc for w in LAYOUT['warehouses'] for loc in w['locations']}
 
 
 def srgb_to_linear(c):
@@ -79,7 +85,14 @@ def material(key):
     r, g, b = hex_linear(PALETTE[key])
     bsdf.inputs['Base Color'].default_value = (r, g, b, 1.0)
     bsdf.inputs['Roughness'].default_value = 0.85
-    if key == 'line_cyan':
+    if key in ('line_cyan', 'light'):
+        try:
+            bsdf.inputs['Emission Color'].default_value = (r, g, b, 1.0)
+            bsdf.inputs['Emission Strength'].default_value = 2.5 if key == 'line_cyan' else 6.0
+        except KeyError:
+            pass
+    if key == 'light':
+        bsdf.inputs['Roughness'].default_value = 0.4
         try:
             bsdf.inputs['Emission Color'].default_value = (r, g, b, 1.0)
             bsdf.inputs['Emission Strength'].default_value = 2.5
@@ -155,14 +168,31 @@ def add_bm_box(bm, lo, hi, mat_index):
 
 
 def unit_rack_mesh(levels=4, frame_key='rack_frame'):
-    """[0,1]^3 标准货架：底面 z=0，4 根立柱 + levels 层板，两个材质槽。"""
+    """[0,1]^3 标准托盘货架：立柱 + 前后层梁 + 横撑。
+
+    以前每层是一整块 1×1 的板，等于把四层"橘色大抽屉"叠起来：托盘全被挡住，
+    远看就是几个色块。真实货架是**开放式**的——立柱撑起、前后各一根横梁、
+    层间能看见托盘和货箱，所以这里只留梁和立柱。
+    """
     bm = bmesh.new()
-    for sx in (0.0, 0.94):
-        for sy in (0.0, 0.94):
-            add_bm_box(bm, (sx, sy, 0.0), (sx + 0.06, sy + 0.06, 1.0), 0)
+    post = 0.045
+    # 4 根角柱 + 中间两根（3 m 跨两托，中间要立柱，否则像悬空货架）
+    for sx in (0.0, 0.955):
+        for sy in (0.0, 0.955):
+            add_bm_box(bm, (sx, sy, 0.0), (sx + post, sy + post, 1.0), 0)
+    for sy in (0.0, 0.955):
+        add_bm_box(bm, (0.478, sy, 0.0), (0.478 + post, sy + post, 1.0), 0)
+    # 斜撑：端面一根斜杆太麻烦，用两道横撑代替，视觉上已经"有结构"
+    for z in (0.05, 0.5):
+        for sy in (0.0, 0.955):
+            add_bm_box(bm, (0.0, sy, z), (1.0, sy + 0.03, z + 0.03), 1)
+    # 每层：前后两根层梁 + 三根横撑（托盘就落在横撑上）
     for i in range(levels):
-        z = (i + 1) / levels
-        add_bm_box(bm, (0.0, 0.0, max(z - 0.018, 0.0)), (1.0, 1.0, z), 1)
+        z = (i + 1) / levels - 0.02
+        for sy in (0.0, 0.94):
+            add_bm_box(bm, (0.0, sy, z - 0.055), (1.0, sy + 0.06, z), 1)
+        for sx in (0.03, 0.487, 0.94):
+            add_bm_box(bm, (sx, 0.0, z - 0.045), (sx + 0.025, 1.0, z), 1)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     m = bpy.data.meshes.new('UNIT_RACK_%d' % levels)
     bm.to_mesh(m)
@@ -240,14 +270,32 @@ def build_ground_and_buildings(assets, coll_ground, coll_build):
         W, D, H = wh['size']['width'], wh['size']['depth'], wh['size']['height']
         c = collection('BLD_' + wh['id'])
         plane('FLOOR_' + wh['id'], ox, oz, ox + W, oz + D, 0.02, 'concrete', c)
-        # 分区标线（贴地彩色条）
+        # 分区：浅色地坪 + 0.15 m 饱和色边线（整块刷色像塑料地板，不像仓库）
         for z in wh['zones']:
             pts = z['polygon']
             key = 'zone_' + z['id'].lower() if z['id'] in 'ABCD' else 'zone_f'
             if key not in PALETTE:
                 key = 'zone_f'
-            plane('ZONE_' + wh['id'] + '_' + z['id'], pts[0][0], pts[0][1],
-                  pts[2][0], pts[2][1], 0.025, key, c)
+            x0, z0 = pts[0]
+            x1, z1 = pts[2]
+            plane('ZONE_' + wh['id'] + '_' + z['id'], x0, z0, x1, z1, 0.025, key, c)
+            ek = key + '_edge'
+            if ek in PALETTE:
+                e = 0.25
+                plane('ZEDGE_%s_%s_S' % (wh['id'], z['id']), x0, z0, x1, z0 + e, 0.027, ek, c)
+                plane('ZEDGE_%s_%s_N' % (wh['id'], z['id']), x0, z1 - e, x1, z1, 0.027, ek, c)
+                plane('ZEDGE_%s_%s_W' % (wh['id'], z['id']), x0, z0, x0 + e, z1, 0.027, ek, c)
+                plane('ZEDGE_%s_%s_E' % (wh['id'], z['id']), x1 - e, z0, x1, z1, 0.027, ek, c)
+
+        # 混凝土地坪伸缩缝（每 6 m 一道）：真实地坪都有，加了就不像一块塑料板
+        for i in range(1, int(W / 6)):
+            x = ox + i * 6
+            plane('JOINT_%s_X%d' % (wh['id'], i), x - 0.03, oz + 0.2, x + 0.03, oz + D - 0.2,
+                  0.024, 'concrete_joint', c)
+        for i in range(1, int(D / 6)):
+            z = oz + i * 6
+            plane('JOINT_%s_Z%d' % (wh['id'], i), ox + 0.2, z - 0.03, ox + W - 0.2, z + 0.03,
+                  0.024, 'concrete_joint', c)
         # 开放厂房骨架：角柱 + 边柱 + 顶梁 + 后墙（其余三面开放，便于俯视仓内）
         inset = 0.25
         for px in (ox + inset, ox + W - inset):
@@ -265,6 +313,43 @@ def build_ground_and_buildings(assets, coll_ground, coll_build):
         box('BEAM_%s_E' % wh['id'], (ox + W - 0.15, oz + D / 2, H - 0.15), (0.3, D, 0.3), 'roof_beam', c)
         box('WALL_%s_BACK' % wh['id'], (ox + W / 2, oz + D - 0.1, H / 2),
             (W, 0.2, H), 'wall', c)
+        # 墙面竖肋（压型钢板）：每 1.2 m 一道，背墙上像"波纹"，不再是白纸板
+        for i in range(1, int(W / 1.2)):
+            x = ox + i * 1.2
+            box('RIB_%s_%d' % (wh['id'], i), (x, oz + D - 0.16, H / 2),
+                (0.05, 0.1, H - 0.3), 'wall', c)
+        # 屋架：横向桁架每 6 m 一道（无顶板，保留俯视可看性）
+        for i in range(1, int(W / 6)):
+            x = ox + i * 6
+            box('TRUSS_%s_%d' % (wh['id'], i), (x, oz + D / 2, H - 0.45),
+                (0.18, D - 0.6, 0.35), 'steel', c)
+        # 高棚灯：只贴在屋架下方（没有顶板时不单独放，否则灯会"浮在半空"）
+        nx, nz = max(1, int(W / 12)), max(1, int(D / 14))
+        for ix in range(nx):
+            for iz in range(nz):
+                if ix == 0:
+                    continue
+                lx = ox + (ix + 0.5) * W / nx
+                lz = oz + (iz + 0.5) * D / nz
+                box('LAMP_%s_%d_%d' % (wh['id'], ix, iz), (lx, lz, H - 0.75),
+                    (1.3, 0.35, 0.08), 'light', c)
+        # 月台：门框 + 防撞块 + 黄色安全线（不然月台就是几个灰方块）
+        for dk in wh.get('docks', []):
+            dx0, dz0, dx1, dz1 = dk['rect']
+            dw = dx1 - dx0
+            sign = 1 if dz0 < D / 2 else -1          # 靠南墙还是北墙
+            wz = oz + (dz0 if sign > 0 else dz1)     # 门所在的墙面 z
+            for px in (dx0, dx1):
+                box('DOCKPOST_%s_%.1f' % (dk['id'], px),
+                    (ox + px, wz, 2.2), (0.25, 0.3, 4.4), 'steel', c)
+            box('DOCKLINTEL_' + dk['id'], (ox + dw / 2 + dx0, wz, 4.35),
+                (dw, 0.3, 0.25), 'steel', c)
+            for px in (dx0 + 0.6, dx1 - 0.6):
+                box('BUMPER_%s_%.1f' % (dk['id'], px), (ox + px, wz + sign * -0.35, 0.55),
+                    (0.3, 0.25, 0.45), 'bumper', c)
+            plane('DOCKLINE_' + dk['id'], ox + dx0, oz + (dz1 - 0.6 if sign < 0 else dz0),
+                  ox + dx1, oz + (dz1 if sign < 0 else dz0 + 0.6), 0.031,
+                  'line_yellow', c)
         # 地面 5S 标线
         for i, (x0, z0, x1, z1) in enumerate((
                 (2, 2, W - 2, 2.16), (2, D - 2.16, W - 2, D - 2))):
@@ -305,12 +390,17 @@ def build_racks_and_cargo(assets):
             COUNTS['racks_built'] += 1
             if pallet_mesh:
                 lh = rh / levels
+                # 每层两个托盘位（3 m 跨两托）：以前所有托盘都放在货架正中心、
+                # 靠层号区分层高，远看就是"一根柱子上摞了几箱"，完全不像货架。
+                cols = max(1, int(rl / 1.5))
                 for j, a in enumerate(by_rack.get(rk['id'], [])):
                     lv = j % levels
-                    deck_z = h + 0.03 + (lv + 1) * lh   # 第 lv 层层板顶面
+                    col = (j // levels) % cols
+                    deck_z = h + 0.03 + (lv + 1) * lh   # 第 lv 层层梁顶面
+                    px = x + rl * (col + 0.5) / cols
                     p = bpy.data.objects.new('PALLET_%s' % a['sku'], pallet_mesh)
                     cc.objects.link(p)
-                    p.location = (x + rl / 2, z + rd / 2, deck_z + 0.02)
+                    p.location = (px, z + rd / 2, deck_z + 0.02)
                     p.scale = (0.92, 0.92, min(0.92, lh / 1.15))
                     COUNTS['pallets_built'] += 1
 
@@ -402,7 +492,7 @@ def build_route_lines():
         p = json.loads(line)
         by.setdefault(p['agent_id'], []).append((p['x'], p['y']))
     bm = bmesh.new()
-    half = 0.18
+    half = 0.09
     segs = 0
     for pts in by.values():
         for i in range(len(pts) - 1):
@@ -421,7 +511,7 @@ def build_route_lines():
     m = bpy.data.meshes.new('AGV_ROUTE_LINES')
     bm.to_mesh(m)
     bm.free()
-    m.materials.append(material('line_cyan'))
+    m.materials.append(material('route_line'))
     o = bpy.data.objects.new('AGV_ROUTE_LINES', m)
     collection('ROUTES').objects.link(o)
     COUNTS['route_segments'] = segs
@@ -506,11 +596,11 @@ def build_dynamic_cargo():
     c2 = collection('HOME_BAYS')
     m = 0
     for w in LAYOUT['warehouses']:
-        for l in w['locations']:
-            if l['kind'] != 'HOME':
+        for loc in w['locations']:
+            if loc['kind'] != 'HOME':
                 continue
-            x, z = l['access_point']
-            box('HOME_BAY_' + l['id'], (x, z, 0.06),
+            x, z = loc['access_point']
+            box('HOME_BAY_' + loc['id'], (x, z, 0.06),
                 (1.3, 1.3, 0.12), 'line_yellow', c2)
             m += 1
     COUNTS['home_bays'] = m

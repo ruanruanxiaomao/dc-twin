@@ -32,7 +32,8 @@ GLB = ROOT / "out" / "dc_preview.glb"
 # 静态快照里故意不提供、由垫片就地返回的接口
 RUNTIME_ONLY = {"/api/job", "/api/scenario/get", "/api/run", "/api/cancel",
                 "/api/config", "/api/scenario/save", "/api/scenario/delete",
-                "/api/scenario/run", "/api/scenario/dry-run", "/api/scenario/validate"}
+                "/api/scenario/run", "/api/scenario/dry-run", "/api/scenario/validate",
+                "/api/areas/plan", "/api/areas/apply"}
 
 
 def sha(p: Path) -> str:
@@ -66,7 +67,7 @@ def check(app: Path = APP) -> list[str]:
 
     # W3 API 覆盖
     api = set()
-    for js in ("app.js", "ops.js"):
+    for js in ("app.js", "ops.js", "areas.js"):
         p = app / js
         if p.exists():
             api |= set(re.findall(r"['\"](/api/[a-z0-9/-]+)", p.read_text(encoding="utf-8")))

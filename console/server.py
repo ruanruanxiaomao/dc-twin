@@ -391,9 +391,190 @@ def build_kpi_payload():
             "model": analytic.get("model")}
 
 
+def _anchor_index():
+    """锚点 id → {kind, xy, label}。
+
+    18 个功能区是"逻辑区"（没有 rect，只挂靠货架/月台/工位/充电桩）。前端要在
+    2D/3D 里把它们画出来，就必须知道锚点在哪——以前只给了 anchor_resolved 的
+    类型（"ZONE"/"RACK"），没有坐标，所以界面上根本看不见。
+    """
+    lay = read_json(DATA / "layout.json", {}) or {}
+    idx = {}
+    for wh in lay.get("warehouses", []):
+        for z in wh.get("zones", []):
+            poly = z.get("polygon") or []
+            if not poly:
+                continue
+            idx[z["id"]] = {"kind": "ZONE", "wh": wh["id"], "label": z.get("name", z["id"]),
+                            "xy": [sum(p[0] for p in poly) / len(poly),
+                                   sum(p[1] for p in poly) / len(poly)]}
+        for r in wh.get("racks", []):
+            pos = r.get("position") or [0, 0, 0]
+            idx[r["id"]] = {"kind": "RACK", "wh": wh["id"], "label": r.get("zone", ""),
+                            "xy": [pos[0], pos[2]]}
+        for d in wh.get("docks", []):
+            rect = d.get("rect") or [0, 0, 0, 0]
+            idx[d["id"]] = {"kind": "DOCK", "wh": wh["id"], "label": d.get("kind", ""),
+                            "xy": [(rect[0] + rect[2]) / 2, (rect[1] + rect[3]) / 2]}
+        for s in wh.get("stations", []):
+            rect = s.get("rect") or [0, 0, 0, 0]
+            idx[s["id"]] = {"kind": "STATION", "wh": wh["id"], "label": s.get("kind", ""),
+                            "xy": [(rect[0] + rect[2]) / 2, (rect[1] + rect[3]) / 2]}
+        for c in wh.get("charging_stations", []):
+            pos = c.get("position") or [0, 0, 0]
+            idx[c["id"]] = {"kind": "CHARGER", "wh": wh["id"], "label": "充电",
+                            "xy": [pos[0], pos[2]]}
+    return idx
+
+
+def _area_xy(a, idx):
+    """给每个功能区算出可绘制的坐标：物理区取矩形中心，逻辑区取锚点。"""
+    rect = a.get("rect")
+    if rect:
+        return [(rect[0] + rect[2]) / 2, (rect[1] + rect[3]) / 2], "RECT"
+    hit = idx.get(a.get("anchor") or "")
+    if hit:
+        return hit["xy"], hit["kind"]
+    return None, "UNKNOWN"
+
+
 def build_areas_payload():
     d = read_json(DATA / "areas.json", {}) or {}
-    return {"summary": d.get("summary", {}), "areas": d.get("areas", [])}
+    idx = _anchor_index()
+    areas = []
+    for a in d.get("areas", []):
+        xy, how = _area_xy(a, idx)
+        areas.append(dict(a, xy=xy, anchor_how=how,
+                          anchor_xy=(idx.get(a["anchor"]) or {}).get("xy")
+                          if a.get("anchor") else None))
+    return {"summary": d.get("summary", {}), "areas": areas}
+
+
+def _variant_engine():
+    """把 build_variant.py 当模块加载（只读常量，无副作用），复用它的排布算法。
+
+    为什么复用而不是重写：`pack()` 决定"选中的区能不能塞进 W 仓北侧"，界面上
+    预览的深度必须和真正生成变体时一致，否则预览就成了猜。
+    """
+    import importlib.util
+    path = ROOT / "scripts" / "build_variant.py"
+    spec = importlib.util.spec_from_file_location("dc_variant_runtime", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def build_areas_catalog():
+    eng = _variant_engine()
+    catalog, _raw = eng.load_catalog()
+    base = eng.jload(eng.BASE_SPEC)
+    wh = next((w for w in base["warehouses"] if w["id"] == "W"), None)
+    sel = eng.jload(eng.SELECTION) if Path(eng.SELECTION).exists() else {}
+    others = [float(w["origin"][1]) for w in base["warehouses"] if w["id"] != "W"]
+    tpls = []
+    for key, t in sorted(catalog.items(), key=lambda kv: -kv[1]["priority"]):
+        proc = t.get("process") or {}
+        slots = proc.get("parallel_slots") or 1
+        mean = (proc.get("service_time_s") or {}).get("mean") or 0
+        tpls.append({
+            "template": key, "kind": t.get("kind"), "name": t.get("name"),
+            "group": t.get("group", ""), "priority": t.get("priority"),
+            "size": t.get("size"), "capacity": t.get("capacity"),
+            "slots": slots, "service_mean_s": mean,
+            "throughput_per_h": round(slots * 3600 / mean, 1) if mean else None,
+        })
+    return {
+        "templates": tpls,
+        "presets": dict(eng.PRESETS),
+        "selection": {"enabled": sel.get("enabled") or [],
+                      "placement": sel.get("placement") or {},
+                      "expand": sel.get("expand") or {}},
+        "limits": {
+            "width": wh["size"]["width"] if wh else 0,
+            "base_depth": wh["size"]["depth"] if wh else 0,
+            "depth_limit": (min(others) - 2.0) if others else None,
+            "has_variant": Path(eng.VARIANT_SPEC).exists(),
+        },
+    }
+
+
+def plan_areas(enabled, target_depth=None):
+    """纯计算：给定选中的模板，算出排布、占地与所需深度（不写任何文件）。"""
+    eng = _variant_engine()
+    catalog, _raw = eng.load_catalog()
+    base = eng.jload(eng.BASE_SPEC)
+    sel = eng.jload(eng.SELECTION) if Path(eng.SELECTION).exists() else {}
+    place = sel.get("placement") or {}
+    exp = sel.get("expand") or {}
+    wh = next((w for w in base["warehouses"] if w["id"] == "W"), None)
+    if wh is None:
+        return {"ok": False, "error": "基础 spec 里没有 W 仓"}
+
+    base_depth = float(wh["size"]["depth"])
+    x_margin = float(place.get("x_margin_m", 4.0))
+    gap = float(place.get("gap_m", 2.0))
+    offset = float(place.get("band_start_offset_m", 2.0))
+    north_aisle = float(exp.get("north_aisle_m", 2.0))
+    target = float(target_depth) if target_depth else base_depth + 18
+
+    picked = [catalog[k] for k in enabled if k in catalog]
+    items = sorted(picked, key=lambda t: -t["priority"])
+    band_z0 = base_depth + offset
+    placed, depth_used = eng.pack(items, (x_margin, band_z0, wh["size"]["width"] - x_margin),
+                                  x_margin, gap)
+    need = base_depth + offset + depth_used + north_aisle
+    others = [float(w["origin"][1]) for w in base["warehouses"] if w["id"] != "W"]
+    limit = (min(others) - 2.0) if others else None
+
+    rows = []
+    for p in placed:
+        proc = p.get("process") or {}
+        slots = proc.get("parallel_slots") or 1
+        mean = (proc.get("service_time_s") or {}).get("mean") or 0
+        rows.append({
+            "template": p["template"], "kind": p.get("kind"), "name": p.get("name"),
+            "group": p.get("group", ""), "rect": p["rect"], "size": p["size"],
+            "capacity": p.get("capacity"),
+            "throughput_per_h": round(slots * 3600 / mean, 1) if mean else None,
+        })
+    unknown = [k for k in enabled if k not in catalog]
+    return {
+        "ok": limit is None or need <= limit + 1e-9,
+        "placed": rows,
+        "unknown": unknown,
+        "depth": {"base": base_depth, "needed": round(need, 2), "target": round(target, 2),
+                  "limit": limit, "grew": need > target},
+        "band": {"x0": x_margin, "x1": round(wh["size"]["width"] - x_margin, 2),
+                 "z0": round(band_z0, 2)},
+        "totals": {"count": len(rows),
+                   "area_m2": round(sum((r["rect"][2] - r["rect"][0]) *
+                                        (r["rect"][3] - r["rect"][1]) for r in rows), 1),
+                   "throughput_per_h": round(sum(r["throughput_per_h"] or 0
+                                                 for r in rows), 1)},
+    }
+
+
+def apply_areas(enabled):
+    """写 selection + 跑 build_variant --build（生成 layout_spec_areas.json 与
+    data/areas_variant.json）。真正的几何校验交给它自己的 validate()。"""
+    eng = _variant_engine()
+    sel = eng.jload(eng.SELECTION) if Path(eng.SELECTION).exists() else {}
+    sel = dict(sel)
+    sel.update({"schema_version": "1.0", "warehouse": "W", "enabled": list(enabled)})
+    Path(eng.SELECTION).parent.mkdir(parents=True, exist_ok=True)
+    Path(eng.SELECTION).write_text(json.dumps(sel, ensure_ascii=False, indent=2) + "\n",
+                                   encoding="utf-8")
+    py = PY or sys.executable
+    cmd = [py, "scripts/build_variant.py", "--build"]
+    try:
+        p = subprocess.run(cmd, cwd=str(ROOT), capture_output=True, text=True,
+                           encoding="utf-8", errors="replace", timeout=300)
+    except Exception as exc:                          # noqa: BLE001
+        return {"ok": False, "error": repr(exc), "log": []}
+    tail = [ln for ln in (p.stdout or "").splitlines() if ln.strip()][-14:]
+    return {"ok": p.returncode == 0, "returncode": p.returncode, "log": tail,
+            "spec": "config/layout_spec_areas.json"}
+
 
 
 _PLAN_CACHE = {"mtime": 0.0, "html": ""}
@@ -721,6 +902,17 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send_json(build_kpi_payload())
             if path == "/api/areas":
                 return self.send_json(build_areas_payload())
+            if path == "/api/areas/catalog":
+                return self.send_json(build_areas_catalog())
+            if path == "/api/areas/variant":
+                d = read_json(DATA / "areas_variant.json", {}) or {}
+                idx = _anchor_index()
+                rows = []
+                for a in d.get("areas", []):
+                    xy, how = _area_xy(a, idx)
+                    rows.append(dict(a, xy=xy, anchor_how=how))
+                return self.send_json({"summary": d.get("summary", {}), "areas": rows,
+                                       "exists": bool(d)})
             if path in ("/api/plan.html", "/api/plan"):
                 body = build_plan_html().encode("utf-8")
                 self.send_response(200)
@@ -794,6 +986,11 @@ class Handler(BaseHTTPRequestHandler):
                 return self.handle_config(payload)
             if path == "/api/cost-spec":
                 return self.send_json(patch_cost_spec(payload.get("patch")))
+            if path == "/api/areas/plan":
+                return self.send_json(plan_areas(payload.get("enabled") or [],
+                                                 payload.get("target_depth")))
+            if path == "/api/areas/apply":
+                return self.send_json(apply_areas(payload.get("enabled") or []))
             if path == "/api/scenario/validate":
                 issues, warnings = scenario_tools.validate_scenario(payload.get("scenario") or {})
                 return self.send_json({"ok": not issues, "issues": issues,

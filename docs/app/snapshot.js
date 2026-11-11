@@ -13,6 +13,8 @@
   "/api/schema": "schema.json",
   "/api/kpi": "kpi.json",
   "/api/areas": "areas.json",
+  "/api/areas/catalog": "areas/catalog.json",
+  "/api/areas/variant": "areas/variant.json",
   "/api/cost-spec": "cost-spec.json",
   "/api/scenario/template": "scenario/template.json"
 };
@@ -45,6 +47,9 @@
       if (path === '/api/job') return json({ status: 'idle', lines: [], next: 0 });
       if (path === '/api/scenario/get')
         return json({ ok: false, static: true, error: '静态快照不含可编辑场景' });
+      if (path === '/api/areas/plan' || path === '/api/areas/apply')
+        return json({ ok: false, static: true,
+                      error: '静态快照不能改布局，请在本地应用里生成扩仓变体' });
       return json({ ok: false, static: true, error: 'no snapshot for ' + path });
     }
     if (path.startsWith('/out/')) return realFetch('.' + url, { cache: 'no-store' });

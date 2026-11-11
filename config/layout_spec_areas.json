@@ -1044,6 +1044,38 @@
       ],
       "areas": [
         {
+          "id": "F1-FWD-01",
+          "kind": "PICK_FACE",
+          "name": "前置仓拣选面",
+          "anchor": "RACK-F1Z1101",
+          "capacity": {
+            "sku_positions": 24,
+            "tote_positions": 12
+          },
+          "process": {
+            "service_time_s": {
+              "dist": "lognormal",
+              "mean": 90,
+              "cv": 0.5
+            },
+            "resources": [
+              {
+                "kind": "PERSON",
+                "count": 1
+              }
+            ],
+            "parallel_slots": 1,
+            "wave_period_s": 1800
+          },
+          "constraints": {
+            "temp_c": [
+              15,
+              30
+            ],
+            "hazmat": false
+          }
+        },
+        {
           "id": "F1-STGIN-01",
           "kind": "STAGING_IN",
           "name": "入库暂存",
@@ -1219,6 +1251,38 @@
       ],
       "areas": [
         {
+          "id": "F2-FWD-01",
+          "kind": "PICK_FACE",
+          "name": "前置仓拣选面",
+          "anchor": "RACK-F2Z1101",
+          "capacity": {
+            "sku_positions": 24,
+            "tote_positions": 12
+          },
+          "process": {
+            "service_time_s": {
+              "dist": "lognormal",
+              "mean": 90,
+              "cv": 0.5
+            },
+            "resources": [
+              {
+                "kind": "PERSON",
+                "count": 1
+              }
+            ],
+            "parallel_slots": 1,
+            "wave_period_s": 1800
+          },
+          "constraints": {
+            "temp_c": [
+              15,
+              30
+            ],
+            "hazmat": false
+          }
+        },
+        {
           "id": "F2-STGIN-01",
           "kind": "STAGING_IN",
           "name": "入库暂存",
@@ -1393,6 +1457,38 @@
         }
       ],
       "areas": [
+        {
+          "id": "F3-FWD-01",
+          "kind": "PICK_FACE",
+          "name": "前置仓拣选面",
+          "anchor": "RACK-F3Z1101",
+          "capacity": {
+            "sku_positions": 24,
+            "tote_positions": 12
+          },
+          "process": {
+            "service_time_s": {
+              "dist": "lognormal",
+              "mean": 85,
+              "cv": 0.5
+            },
+            "resources": [
+              {
+                "kind": "PERSON",
+                "count": 1
+              }
+            ],
+            "parallel_slots": 1,
+            "wave_period_s": 1800
+          },
+          "constraints": {
+            "temp_c": [
+              15,
+              30
+            ],
+            "hazmat": false
+          }
+        },
         {
           "id": "F3-STGIN-01",
           "kind": "STAGING_IN",

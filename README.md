@@ -34,6 +34,22 @@ If pywebview/WebView2 is unavailable it falls back to an Edge/Chrome `--app`
 window, then to the default browser. `启动驾驶舱_Tk经典版.bat` still opens the
 legacy Tk cockpit.
 
+## Functional areas, visible and editable
+
+![Areas on the 2D plan](assets/ui_2d_areas.png)
+
+All 21 functional areas (`data/areas.json`) are drawn on both views: 3 physical
+areas as dashed footprints, 18 logical ones as markers on the rack/dock/station
+they hang off. The **功能区** pane lists them with capacity and derived
+throughput; clicking a row pans the 2D plan to that area. In 3D the same data
+becomes a toggleable overlay (`AREA_OVERLAY`) with clickable name plates — the
+GLB itself only contains the three physical slabs.
+
+**自定义扩仓** (same pane, second tab) is the area picker that used to live only
+in the legacy Tk cockpit: tick any of the 14 templates, watch the required depth
+and footprint update live (`POST /api/areas/plan`, same `pack()` as the real
+build), then generate the variant spec (`POST /api/areas/apply`).
+
 ## Windows app (one exe, no Python needed to look)
 
 ![Packaged app, 3D view](assets/exe_3d.png)

@@ -42,6 +42,7 @@
       <div class="stage-tools" id="tools2d">
         <label class="tog"><input type="checkbox" id="chkRacks" checked> 货架</label>
         <label class="tog"><input type="checkbox" id="chkZones" checked> 分区</label>
+        <label class="tog"><input type="checkbox" id="chkAreas" checked> 功能区</label>
         <label class="tog"><input type="checkbox" id="chkHeat"> 热度</label>
         <label class="tog"><input type="checkbox" id="chkTrail" checked> 尾迹</label>
         <label class="tog"><input type="checkbox" id="chkRoute" checked> 选中车路线</label>
@@ -58,6 +59,7 @@
         <button class="btn mini" data-cam="close">近景</button>
         <span class="sep"></span>
         <label class="tog"><input type="checkbox" id="chkFollow"> 跟随选中车</label>
+        <label class="tog"><input type="checkbox" id="chkAreas3d" checked> 功能区</label>
         <span class="sep"></span>
         <button class="btn mini" id="btnFit3d">适应窗口</button>
       </div>
@@ -166,9 +168,32 @@
       </div>
 
       <div class="pane" id="pane-areas">
-        <div id="areaBadges"></div>
-        <div class="pane-sub">21 个功能区（data/areas.json，L23–L26 校验）</div>
-        <div class="list" id="areaList"></div>
+        <div class="seg" id="areaMode">
+          <button class="on" data-mode="browse">当前 21 区</button>
+          <button data-mode="custom">自定义扩仓</button>
+        </div>
+
+        <div id="areaBrowse">
+          <div id="areaBadges"></div>
+          <div class="pane-sub">点类型筛选 · 点一行在 2D 沙盘里定位（虚框=物理占地，圆点=挂靠货架/月台）</div>
+          <div class="filter-row" id="areaFilter"></div>
+          <div class="list" id="areaList"></div>
+        </div>
+
+        <div id="areaCustom" hidden>
+          <div class="pane-sub">勾选要放进 W 仓北侧作业带的功能区模板，实时算深度/占地/产能</div>
+          <div class="area-sum" id="areaSum"></div>
+          <div class="row-actions sticky-actions">
+            <button class="btn mini" id="btnAreaPresetMin">最小集</button>
+            <button class="btn mini" id="btnAreaPresetEcom">电商标准</button>
+            <button class="btn mini" id="btnAreaAll">全选</button>
+            <button class="btn mini" id="btnAreaNone">全不选</button>
+            <button class="btn primary" id="btnAreaApply">生成扩仓变体</button>
+          </div>
+          <div class="tpl-groups" id="tplGroups"></div>
+          <div class="pane-sub">生成日志</div>
+          <pre class="log" id="areaLog" style="max-height:150px"></pre>
+        </div>
       </div>
 
       <div class="pane" id="pane-plan">
@@ -215,6 +240,7 @@
 
 <div class="lightbox" id="lightbox"><img id="lightboxImg" alt=""><div class="lb-cap" id="lightboxCap"></div></div>
 
+<script src="/static/areas.js"></script>
 <script src="/static/app.js"></script>
 <script src="/static/ops.js"></script>
 </body>
