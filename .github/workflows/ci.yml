@@ -32,14 +32,22 @@ jobs:
       - name: Install
         run: python -m pip install -e ".[dev]"
 
+      - name: Environment consistency (python range + locked deps + doctor)
+        run: python scripts/bootstrap.py --check
+
       - name: Lint new code (legacy scripts predate the lint gate)
-        run: ruff check dc_twin run.py console scripts/manifest.py scripts/validate_data.py scripts/build_docs_assets.py scripts/check_claims.py scripts/check_exe.py scripts/clean.py tests
+        run: ruff check dc_twin run.py console scripts/manifest.py scripts/validate_data.py scripts/build_docs_assets.py scripts/check_claims.py scripts/check_exe.py scripts/clean.py scripts/bootstrap.py scripts/kpi_baseline.py tests
 
       - name: Doctor
         run: python -m dc_twin doctor
 
       - name: Data + scenario chain (no Blender)
         run: python -m dc_twin run --scope scenarios
+
+      - name: KPI baseline drift (8 scenarios / 192 metrics)
+        run: |
+          python scripts/kpi_baseline.py --self-test
+          python scripts/kpi_baseline.py --check
 
       - name: Negative tests (17 cases)
         run: python tests/run_all_negative.py

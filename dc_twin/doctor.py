@@ -42,6 +42,18 @@ def collect() -> dict:
             add("dep:" + mod, True, v)
         except ImportError:
             add("dep:" + mod, False, "missing - run: pip install -r requirements.txt")
+    # 可选能力：缺了不致命，但要说清"会失去什么"，而不是静默 PASS
+    try:
+        from importlib.metadata import version as _v
+        add("opt:pywebview", True, "%s（原生单窗口）" % _v("pywebview"))
+    except Exception:
+        add("opt:pywebview", False,
+            "missing - 单窗口客户端回退到浏览器窗口（功能不丢，只是外形不同）")
+    v = sys.version_info
+    tested = (3, 11) <= v < (3, 14)
+    add("python_tested", tested,
+        "%d.%d %s CI 矩阵（3.11 / 3.13）" % (v[0], v[1], "在" if tested else "不在"))
+
     bl = paths.blender_exe()
     add("blender", bl is not None,
         bl or "not found; data/scenarios scopes still work, full needs Blender 5.2")

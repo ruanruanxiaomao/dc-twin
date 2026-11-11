@@ -4,6 +4,34 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-11-11
+
+Two foundation pieces: KPIs that cannot drift silently, and an environment you can
+rebuild with one command. No refactors, no new simulation features.
+
+### Added
+
+- `scripts/kpi_baseline.py`: freezes 8 scenarios x 24 deterministic metrics
+  (`wall_clock_s` excluded on purpose), compares counts exactly and floats at a
+  1e-6 relative tolerance, and requires an explicit `--freeze` to move the
+  baseline. `--self-test` proves both drift kinds are caught.
+  A full 23-step scenario chain (108 s) reproduces all 192 values bit for bit.
+- `requirements.lock`: exact versions that both the local Windows box and the CI
+  matrix have been tested with.
+- `scripts/bootstrap.py`: create `.venv`, install from the lock, install the
+  project editable with `--no-deps`, then run doctor. `--check` verifies an
+  existing environment without installing, and is now a CI step.
+- CI: environment consistency check, and KPI baseline drift after the scenario chain.
+
+### Changed
+
+- `dc_twin/paths.py` no longer carries its own `VERSION = "0.1.0"`; it imports
+  `__version__`, which is what doctor prints (it had been reporting 0.1.0 while
+  the package was already 0.6.0).
+- doctor now reports optional capabilities (`opt:pywebview`) and whether the
+  running interpreter is inside the tested range (`python_tested`), instead of
+  silently passing.
+
 ## [0.6.0] - 2026-11-11
 
 Made the project's own claims checkable, and closed the console's write endpoints.

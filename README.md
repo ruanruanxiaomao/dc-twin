@@ -34,6 +34,22 @@ If pywebview/WebView2 is unavailable it falls back to an Edge/Chrome `--app`
 window, then to the default browser. `启动驾驶舱_Tk经典版.bat` still opens the
 legacy Tk cockpit.
 
+## Reproduce from scratch
+
+```bash
+python scripts/bootstrap.py                     # .venv + locked deps + doctor
+python -m dc_twin run --scope scenarios         # data + 8 scenarios, ~110 s, no Blender
+python scripts/kpi_baseline.py --check          # 8 scenarios / 192 metrics must match
+```
+
+`requirements.lock` pins the exact versions that both this machine and CI have
+been tested with; `bootstrap.py --check` verifies an existing environment without
+installing, and runs as a CI step.
+
+The KPI baseline is a deliberate ratchet: change a service time or a dispatch rule
+and CI fails until you either fix the regression or re-freeze with
+`python scripts/kpi_baseline.py --freeze` and say why in the commit message.
+
 ## The local console can write, so it checks who is asking
 
 `console/server.py` can rewrite `data/config.json`, trigger the whole pipeline and

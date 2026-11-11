@@ -1,6 +1,6 @@
 # 配送中心数字孪生 · 完整建设计划书
 
-> **版本**：v4.3（口径守卫 + 控制台准入 + 隐私路径） · 2026-11-11  
+> **版本**：v4.4（KPI 基准 + 环境引导） · 2026-11-11  
 > **审计对象**：`<repo>/`（本机路径因人而异）（Blender 5.2 + Python 3.10+，区域仓 W + 前置仓 F1/F2/F3）  
 > **文档定位**：从“现状审计”到“可落地实施”的一体化计划书；既给评审看结论，也给开发看字段、参数、任务与验收。  
 > **配套工具**：`dc_project/desktop_app.pyw`（DC Twin Studio 桌面驾驶舱，本计划书第 11 章）  
@@ -43,7 +43,7 @@
 |---|---|---|
 | 前置 | 阅读指南、执行摘要、目录 | 结论先行 |
 | 第一部分 | 第 0–10 章 | 现状审计、DC 必备能力、GitHub 调研、缺口、参数、自定义、路线图、验收、风险、附录 |
-| 第二部分 | 第 11–33 章 | v2.0 增补：桌面驾驶舱、字段级数据字典、参数总表、自定义矩阵、Backlog、测试计划、风险登记册、术语表、仓库速查、交付清单；v3.0 增补：单人最小路径；v3.2 增补：产物包与工作区约定；v3.3 增补：功能区建模方案；v3.4 增补：用户自选功能区（方案 A）；v3.5 增补：勾选式界面与完整性核查；v3.6 增补：过程层进 tick 与界面重做；v3.7 增补：三仓拣选与死锁修复；v3.8 增补：3D 功能区与许可；v3.9 增补：浏览器 3D 控制台；v4.0 增补：单窗口客户端；v4.1 增补：Windows 应用打包；v4.2 增补：功能区可视化与自定义；v4.3 增补：口径与安全 |
+| 第二部分 | 第 11–34 章 | v2.0 增补：桌面驾驶舱、字段级数据字典、参数总表、自定义矩阵、Backlog、测试计划、风险登记册、术语表、仓库速查、交付清单；v3.0 增补：单人最小路径；v3.2 增补：产物包与工作区约定；v3.3 增补：功能区建模方案；v3.4 增补：用户自选功能区（方案 A）；v3.5 增补：勾选式界面与完整性核查；v3.6 增补：过程层进 tick 与界面重做；v3.7 增补：三仓拣选与死锁修复；v3.8 增补：3D 功能区与许可；v3.9 增补：浏览器 3D 控制台；v4.0 增补：单窗口客户端；v4.1 增补：Windows 应用打包；v4.2 增补：功能区可视化与自定义；v4.3 增补：口径与安全；v4.4 增补：基准与环境 |
 | 附录 | A–E | 配置片段、GitHub 检索复现、术语、**D 复核命令集**、**E 答辩问答** |
 
 ---
@@ -133,6 +133,7 @@
 - 31. 打包为 Windows 应用与工作区瘦身（v4.1 新增）
 - 32. 功能区可见、可改与建模细化（v4.2 新增）
 - 33. 口径守卫、控制台准入与隐私路径（v4.3 新增）
+- 34. KPI 基准与环境引导（v4.4 新增）
 
 **附录**
 
@@ -2229,6 +2230,7 @@ python -m pytest -q -m "not blender"
 | v4.1 | 2026-11-11 | **Windows 应用 + 工作区瘦身**：新增 `scripts/build_exe.py`（PyInstaller onedir，界面进包/数据留盘）与 `scripts/check_exe.py`（19 只读接口 + 数据链重跑 + 场景写删 + 无头 3D 截图 + 根目录断言）；`console/server.py` 增加 frozen 分支与 `find_python()` 降级；`dc_app.pyw` 在无 stdout 时重定向日志并弹窗报错；新增 `scripts/clean.py`（默认预览）把工作区 1.2 GB 压到 154 MB；新增 §31 |
 | v4.2 | 2026-11-11 | **功能区可见可改 + 建模细化**：新增 `console/static/areas.js`（2D 图层 / 面板 / 3D 覆盖）；`viewer3d.js` 加 `AREA_OVERLAY`（薄板+圆点+名称牌，可开关可点选）；服务端新增 `/api/areas/catalog|plan|apply|variant`，复用 `build_variant.pack()` 做预览；建模改开放货架、浅色地坪+边线、伸缩缝、墙肋、屋架、月台门框、托盘按列摆放、轨迹线收窄（物体 924→1327，GLB 598→805 KB）；桌面放 `配送中心数字孪生.bat` 启动器；新增 §32 |
 | v4.3 | 2026-11-11 | **口径与安全**：新增 `scripts/check_claims.py`（数字从代码算，9 条规则 + 反例自检，只扫现状文档）；版本号收敛到 `dc_twin.__version__`（pyproject dynamic）；新增 `console/security.py`（Host 回环 / Origin 同源 / token，非回环绑定强制 token）与 8 个安全测试；`sim_latest` 与 `ledger_index` 改相对路径，`check_doc_drift` 去掉硬编码桌面目录；修正 README/cli/COMPLETION_STATUS/控制台/作品页/demo 的 31 步、A1–A21、27 项、MIT、以及「时空预约」等表述；新增 §33 |
+| v4.4 | 2026-11-11 | **基准与环境**：新增 `scripts/kpi_baseline.py`（8 场景 × 24 项确定性指标，计数精确 / 浮点 1e-6，`--freeze` 手动挪基准，`--self-test` 证明会失败；整链重跑 192/192 一致）；新增 `requirements.lock` 与 `scripts/bootstrap.py`（venv + 按锁安装 + doctor，`--check` 进 CI）；doctor 版本改为单一来源、新增可选依赖与 Python 区间两项；CI 增加环境一致性与基准漂移检查；新增 §34 |
 
 ---
 
@@ -3337,6 +3339,84 @@ scan()       → 只扫"当前状态"文档（README、cli.md、COMPLETION_STATU
 
 ---
 
+## 34. KPI 基准与环境引导（v4.4）
+
+这一版只做两件"地基"事：**让数字不能悄悄变**、**让换台机器一条命令跑起来**。
+过程层/库存层/真实接入是产品能力，重构是工程卫生，按评审的排序都排在后面。
+
+### 34.1 为什么先做 KPI 基准
+
+项目一直强调"数字是跑出来的"，但此前**没有任何机制保证下次跑出来还是同一批数字**：
+改一行服务时长、动一下派单策略，KPI 会悄悄变，文档却还写着旧值。审查的人无法分辨
+"改进了"还是"跑坏了"——这正是上一轮口径漂移的深层原因。
+
+`scripts/kpi_baseline.py` 的做法：
+
+| 决策 | 理由 |
+|---|---|
+| 只冻结 **8 个场景 × 24 项 = 192 个指标** | 全冻结会把诊断量也算进去，噪声太大 |
+| 排除 `wall_clock_s` | 跟机器快慢有关，不是模型属性 |
+| 计数类**精确相等**，浮点用 `1e-6` 相对容差 | 订单数变了 1 单就是变了；距离差 1e-9 是浮点噪声 |
+| `--freeze` 必须手动执行 | 有意改模型时才允许挪基准，且要在提交信息里说明 |
+
+**实测**：改完之后把 23 步场景链整体重跑（108 s），再比对——
+
+```text
+KPI_BASELINE_OK  8 场景 / 192 项指标与基准一致
+```
+
+192 项**逐位一致**，说明种子化仿真确实可复现，不是"看起来差不多"。
+CI 里已经在跑同一条链，所以现在多一道 `--check`，改坏模型会当场红。
+
+### 34.2 环境：从"照 README 敲"到一条命令
+
+原来的安装是 `python -m venv .venv && pip install -e ".[dev]"`，换机器常卡在三处：
+用错解释器（比如 3.14 上依赖还没有轮子）、装完没跑 doctor、装完 `dc` 不在 PATH。
+
+现在：
+
+```text
+requirements.lock     ← 验证过的精确版本（pillow 13.0.0 / imageio-ffmpeg 0.8.1 /
+                        jsonschema 4.23.0 / pywebview 6.2.1 / pytest 9.2.0 / ruff 0.17.4）
+scripts/bootstrap.py  ← 建 .venv → 按 lock 安装 → pip install -e . --no-deps → doctor
+```
+
+两条设计取舍：
+
+1. **按 lock 装，不按 pyproject 的范围装**：范围只能保证"不报错"，锁才能保证
+   "和验证过的一致"。项目本身再用 `--no-deps` 装上，避免二次解析。
+2. **`--check` 与安装分开**：CI 不该偷偷装东西，它只验证"当前环境是否满足"。
+
+`--check` 做三件事：Python 区间、必需依赖是否齐、`doctor` 是否 PASS；可选依赖
+（pywebview / pythonnet）单列一行说明"缺了只是没有原生窗口，功能不丢"。
+
+### 34.3 doctor 顺带修的两处不诚实
+
+| 问题 | 现象 | 修法 |
+|---|---|---|
+| 版本号两处 | `dc_twin/paths.py` 里还有 `VERSION = "0.1.0"`，doctor 打印旧版本 | `paths` 直接 `from . import __version__`，与 pyproject 动态版本同源 |
+| 可选依赖静默 | 没有 pywebview 也显示 PASS，用户不知道"少的是什么能力" | 新增 `opt:pywebview` 与 `python_tested` 两项，detail 写清"失去什么" |
+
+### 34.4 实测
+
+| 项 | 结果 |
+|---|---|
+| 基准冻结 | `KPI_BASELINE_FROZEN 8 场景`（192 项） |
+| 整链重跑后比对 | `KPI_BASELINE_OK 8 场景 / 192 项一致`（108 s） |
+| 自检 | `KPI_BASELINE_SELFTEST OK`：计数 +1 与浮点 ×1.01 都能抓到 |
+| 引导 | `python scripts/bootstrap.py --force` 实测建 .venv 并装完，`--check` 通过 |
+| 版本 | doctor 打印 `dc-twin 0.7.0`（与 `__version__` 一致） |
+| CI | 新增 "Environment consistency" 与 "KPI baseline drift" 两步 |
+
+### 34.5 v4.4 边界
+
+- **锁只覆盖验证过的组合**：Windows/Linux × Python 3.11–3.13；3.14 能跑但没进 CI。
+- **没有离线安装**：`bootstrap.py` 依赖网络拉 wheel，离线环境要先自建 wheelhouse。
+- **基准是"现状"不是"正确值"**：它只回答"有没有变"，不回答"这样对不对"。
+- **KPI 仍是订单级**：库存层、过程层没做，基准也只能锁住现有的 24 项。
+
+---
+
 ## 附录 D · 复核命令集（v3.0 新增）
 
 > 全部命令在 `dc_project/` 下执行，Git Bash 或 PowerShell 均可（`python` 指 3.10+）。每条都给出**期望输出**，输出不符即为文档过期。这是本计划书“可核查”的落地形式。
@@ -3384,6 +3464,9 @@ scan()       → 只扫"当前状态"文档（README、cli.md、COMPLETION_STATU
 | **D-39** | 文档数字是否与代码一致 | `python scripts/check_claims.py` | `CLAIMS_OK 11 个文档`；`--self-test 9/9` |
 | **D-40** | 控制台是否挡得住跨源写入 | `python -m pytest tests/test_console_security.py -q` | 8 passed（跨源 403 / token 401 / 同源与无 Origin 放行） |
 | **D-41** | 代码里是否残留本机绝对路径 | `grep -rn "C:/Users" scripts dc_twin console` | 无命中 |
+| **D-42** | KPI 是否与基准一致 | `python scripts/kpi_baseline.py --check` | `KPI_BASELINE_OK 8 场景 / 192 项` |
+| **D-43** | 基准比对会不会失败 | `python scripts/kpi_baseline.py --self-test` | 计数漂移 + 浮点漂移 2 处均被捕获 |
+| **D-44** | 换机器能否一条命令装好 | `python scripts/bootstrap.py --check` | Python 区间 / 必需依赖 / doctor 三项全过 |
 
 **D-7 的同步命令**（母本在工作区根，仓库只放副本）：
 

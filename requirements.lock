@@ -1,0 +1,14 @@
+# 验证过的精确版本（本机 Windows / Python 3.13 与 CI Ubuntu-Windows / 3.11-3.13 均通过）
+#
+# 为什么锁：`pyproject` 写的是范围（pillow==13.0.0 这类已经够严，但 pywebview/pytest
+# 是下界），换台机器 `pip install -e .` 可能装到未验证的新版本。这里把"实际跑通过的
+# 组合"钉死，`scripts/bootstrap.py` 直接按本文件装。
+pillow==13.0.0
+imageio-ffmpeg==0.8.1
+jsonschema==4.23.0
+pywebview==6.2.1
+pythonnet==3.2.1; sys_platform == "win32"     # pywebview 的 Windows 后端
+
+# 开发/校验工具（CI 与本地都用到）
+pytest==9.2.0
+ruff==0.17.4

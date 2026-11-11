@@ -46,6 +46,7 @@ BUILD_DIR = ROOT / "build" / "pyinstaller"
 #: 单文件（相对 ROOT）
 FILES = [
     "docs/DC_MASTER_PLAN.md",
+    "requirements.lock",
     "LICENSE",
     "NOTICE",
     "THIRD_PARTY_NOTICES.md",
@@ -130,10 +131,16 @@ def latest_runs(dst: Path) -> tuple[int, int]:
         # 每次模拟产出两套东西：旧的 `kpi.json`（速算）和新的 `sim_kpi.json`
         # （tick 层 39 项）。只按 mtime 取最新会拿到没有 tick 指标的那套，
         # 界面"指标"页就会空白——所以两类各保一套。
+        # 三种快照各自代表一层数据，缺一层界面上就少一块：
+        #   latest  → 状态/账本读它
+        #   sim_kpi → tick 层 39 项指标（sim_engine 产出）
+        #   kpi     → 解析层 25 项（scenario_run 产出）
+        # 只按 mtime 取最新，会拿到"只有 tick 没有解析层"的那套，指标页显示 0。
         pick = [snaps[-1]]
-        tick = [p for p in snaps if (p / "sim_kpi.json").exists()]
-        if tick and tick[-1] != pick[0]:
-            pick.append(tick[-1])
+        for name in ("sim_kpi.json", "kpi.json"):
+            has = [p for p in snaps if (p / name).exists()]
+            if has and has[-1] not in pick:
+                pick.append(has[-1])
         for s in pick:
             kept += 1
             n += copy_tree(s, dst / scen.name / s.name)

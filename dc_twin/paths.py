@@ -24,7 +24,9 @@ DEMO = ROOT / "demo"
 ASSETS = ROOT / "assets"
 CONSOLE = ROOT / "console"
 
-VERSION = "0.1.0"
+# 版本只有一个来源：dc_twin/__init__.py。这里再写一遍必然漂移（0.1.0 与 0.6.0
+# 曾经同时存在过，doctor 打印的就是旧的那个）。
+from . import __version__ as VERSION  # noqa: E402,F401  (对外再导出)
 
 
 def python_exe() -> str:
