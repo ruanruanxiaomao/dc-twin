@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>配送中心数字孪生 · 控制台</title>
+<link rel="stylesheet" href="./style.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three.module.js",
+    "three/addons/": "./vendor/addons/"
+  }
+}
+</script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">DC</div>
+    <div class="brand-txt">
+      <h1>配送中心数字孪生 · 控制台</h1>
+      <p id="brandSub">区域仓 W + 前置仓 F1/F2/F3 · 21 AGV 闭环作业</p>
+    </div>
+  </div>
+  <div class="chips" id="chips"></div>
+  <div class="top-actions">
+    <button class="btn ghost" id="btnReload" title="重新读取 data/ 与 out/ 的最新产物">重新载入</button>
+  </div>
+</header>
+
+<main class="layout">
+
+  <section class="stage">
+    <div class="stage-head">
+      <div class="view-switch" id="viewSwitch">
+        <button data-view="2d" class="on">2D 俯视</button>
+        <button data-view="3d">3D 透视</button>
+      </div>
+      <div class="legend" id="legend"></div>
+      <div class="stage-tools" id="tools2d">
+        <label class="tog"><input type="checkbox" id="chkRacks" checked> 货架</label>
+        <label class="tog"><input type="checkbox" id="chkZones" checked> 分区</label>
+        <label class="tog"><input type="checkbox" id="chkHeat"> 热度</label>
+        <label class="tog"><input type="checkbox" id="chkTrail" checked> 尾迹</label>
+        <label class="tog"><input type="checkbox" id="chkRoute" checked> 选中车路线</label>
+        <span class="sep"></span>
+        <button class="btn mini" id="btnFit">适应窗口</button>
+      </div>
+    </div>
+
+    <div class="stage-head sub" id="bar3d" hidden>
+      <div class="stage-tools">
+        <span class="muted">相机</span>
+        <button class="btn mini" data-cam="iso">斜视</button>
+        <button class="btn mini" data-cam="top">俯视</button>
+        <button class="btn mini" data-cam="close">近景</button>
+        <span class="sep"></span>
+        <label class="tog"><input type="checkbox" id="chkFollow"> 跟随选中车</label>
+        <span class="sep"></span>
+        <button class="btn mini" id="btnFit3d">适应窗口</button>
+      </div>
+      <div class="stage-tools"><span class="muted" id="glbStat">未加载</span></div>
+    </div>
+
+    <div class="canvas-wrap" id="canvasWrap">
+      <canvas id="cv"></canvas>
+      <canvas id="cv3d" hidden></canvas>
+      <div class="hud" id="hud"></div>
+      <div class="canvas-hint" id="hint2d">滚轮缩放 · 拖拽平移 · 点击车辆查看详情</div>
+      <div class="canvas-hint" id="hint3d" hidden>左键旋转 · 滚轮缩放 · 右键平移 · 点击车辆查看详情</div>
+    </div>
+  </section>
+
+  <aside class="side">
+    <nav class="tabs" id="tabs">
+      <button data-tab="agv" class="active">车辆</button>
+      <button data-tab="orders">订单</button>
+      <button data-tab="audit">验收</button>
+      <button data-tab="params">参数</button>
+      <button data-tab="artifacts">产物</button>
+      <button data-tab="ops">运营</button>
+      <button data-tab="scenarios">场景</button>
+    </nav>
+
+    <div class="panes">
+
+      <div class="pane active" id="pane-agv">
+        <div id="agvDetail" class="detail"></div>
+        <div class="pane-sub">全部车辆</div>
+        <div class="list" id="agvList"></div>
+      </div>
+
+      <div class="pane" id="pane-orders">
+        <div class="pane-sub" id="ordersSub">21 张订单</div>
+        <div class="list" id="orderList"></div>
+      </div>
+
+      <div class="pane" id="pane-audit">
+        <div class="pane-sub">A1–A21 硬门槛验收</div>
+        <div class="audit-sum" id="auditSum"></div>
+        <div class="list" id="auditList"></div>
+      </div>
+
+      <div class="pane" id="pane-params">
+        <div class="pane-sub">参数（写回 data/config.json）</div>
+        <div class="form" id="paramForm"></div>
+        <div class="row-actions">
+          <button class="btn" id="btnSaveCfg">保存参数</button>
+          <span class="muted" id="cfgMsg"></span>
+        </div>
+        <div class="pane-sub">重跑</div>
+        <div class="run-scopes" id="runScopes"></div>
+        <div class="row-actions">
+          <button class="btn primary" id="btnRun">开始重跑</button>
+          <button class="btn danger" id="btnCancel" disabled>取消</button>
+        </div>
+        <div class="progress">
+          <div class="progress-bar"><i id="progFill"></i></div>
+          <span id="progLabel" class="muted">空闲</span>
+        </div>
+        <div class="pane-sub">运行日志</div>
+        <pre class="log" id="logBox"></pre>
+      </div>
+
+      <div class="pane" id="pane-artifacts">
+        <div class="pane-sub">渲染图 01–10</div>
+        <div class="gallery" id="gallery"></div>
+        <div class="pane-sub">动画</div>
+        <div id="videoBox"></div>
+        <div class="pane-sub">状态表 CURRENT_STATUS.md</div>
+        <div class="md" id="statusMd"></div>
+      </div>
+
+      <div class="pane" id="pane-ops">
+        <div id="opsBadges"></div>
+        <div class="pane-sub">选择运行（损益来源：事件溯源账本）</div>
+        <select id="opsRun" style="width:100%;padding:6px;margin-bottom:8px"></select>
+        <div id="opsKpis"></div>
+        <div class="pane-sub">损益瀑布</div>
+        <div id="opsWaterfall"></div>
+        <div class="pane-sub">场景对比（利润差）</div>
+        <div id="opsCompare"></div>
+        <div class="pane-sub">账本分录（前 30 笔）</div>
+        <div class="list" id="opsLedger"></div>
+        <div class="pane-sub">价格参数（写回 config/cost_spec.json）</div>
+        <div class="form" id="opsPriceForm"></div>
+        <div class="row-actions">
+          <button class="btn" id="btnSavePrice">保存价格</button>
+          <span class="muted" id="priceMsg"></span>
+        </div>
+      </div>
+
+      <div class="pane" id="pane-scenarios">
+        <div class="pane-sub">场景列表（内置 8 个冻结，自定义存于 config/scenarios/custom/）</div>
+        <div class="list" id="scenList"></div>
+        <div class="pane-sub">新建 / 编辑自定义场景</div>
+        <div class="form" id="scenForm"></div>
+        <div class="row-actions" style="flex-wrap:wrap;gap:4px">
+          <button class="btn" id="btnScenNew">新建</button>
+          <button class="btn" id="btnScenValidate">校验</button>
+          <button class="btn" id="btnScenDry">试算 600s</button>
+          <button class="btn primary" id="btnScenSave">保存</button>
+          <button class="btn" id="btnScenRun">运行并出损益</button>
+          <button class="btn danger" id="btnScenDelete">删除</button>
+        </div>
+        <div class="pane-sub">结果</div>
+        <pre class="log" id="scenResult" style="max-height:220px"></pre>
+      </div>
+
+    </div>
+  </aside>
+
+</main>
+
+<footer class="timeline">
+  <button class="play" id="btnPlay" title="播放 / 暂停（空格）">▶</button>
+  <div class="tl-main">
+    <input type="range" id="scrub" min="0" max="1000" value="0" step="1">
+    <div class="tl-marks" id="tlMarks"></div>
+  </div>
+  <div class="tl-read">
+    <strong id="timeNow">0.00</strong><span class="muted"> / <span id="timeEnd">0.00</span> s</span>
+  </div>
+  <div class="speeds" id="speeds"></div>
+</footer>
+
+<div class="lightbox" id="lightbox"><img id="lightboxImg" alt=""><div class="lb-cap" id="lightboxCap"></div></div>
+
+<script src="./snapshot.js"></script>
+<script src="./app.js"></script>
+<script src="./ops.js"></script>
+</body>
+</html>

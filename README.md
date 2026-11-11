@@ -17,6 +17,29 @@ acceptance checks.**
 
 ---
 
+## Open the 3D twin in a browser
+
+![3D web console](assets/webapp_3d.png)
+
+`console/` is a zero-dependency web cockpit: three.js renders `dc_preview.glb`
+in real time, with orbit/zoom, six camera presets, AGV playback driven by the
+same `paths.jsonl` as the desktop app, and per-agent inspection.
+
+```bash
+python -m console.server        # → http://127.0.0.1:8765/?view=3d
+```
+
+It is also published as a **read-only static snapshot** on GitHub Pages, built by
+`scripts/build_webapp.py` (the REST endpoints are frozen into `docs/app/api/*.json`
+and a 90-line fetch shim rewrites `/api/*` to those files):
+
+- 3D console: https://ruanruanxiaomao.github.io/dc-twin/app/index.html?view=3d
+- landing page: https://ruanruanxiaomao.github.io/dc-twin/
+
+The desktop cockpit (**DC Twin Studio**) opens the same page from
+*工具箱 → 界面入口 → 3D 网页版*, falling back to the static snapshot if the
+full console cannot start.
+
 ## See it in 30 seconds
 
 ![4-second AGV animation](docs/assets/demo.gif)

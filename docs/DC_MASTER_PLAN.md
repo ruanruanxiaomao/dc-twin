@@ -1,6 +1,6 @@
 # 配送中心数字孪生 · 完整建设计划书
 
-> **版本**：v3.8（3D 功能区落地 + 开源许可切换） · 2026-11-10  
+> **版本**：v3.9（浏览器 3D 控制台 + Pages 发布） · 2026-11-11  
 > **审计对象**：`C:\Users\OYC\Desktop\blender\dc_project`（Blender 5.2 + Python 3.10+，区域仓 W + 前置仓 F1/F2/F3）  
 > **文档定位**：从“现状审计”到“可落地实施”的一体化计划书；既给评审看结论，也给开发看字段、参数、任务与验收。  
 > **配套工具**：`dc_project/desktop_app.pyw`（DC Twin Studio 桌面驾驶舱，本计划书第 11 章）  
@@ -23,7 +23,8 @@
 移动前对可用电量封顶；`validate_sim` 的 S2 能量守恒从残差 0.157 kWh 回到 0。"
 ④ tick KPI 33 → **39**（+退让/绕行/清障/最长受阻/累计受阻/电量守卫充电），新增守卫 "
 `scripts/check_deadlock.py`（关闭退让必须更差）。详见 **§27**。  
-> **v3.8 落地口径**：① **3D 终于跟上了功能区**——`build_dc.py` 读 `data/areas.json`，物理区画地面色块 + 深色边界 + 中文名称牌（3 块），逻辑区在挂靠点放 18 个标牌，不再画假矩形；中文字体自动探测 `msyh.ttc`，探测不到就退回纯 ASCII，不会出现方块字。② **许可证改为 Apache-2.0**（用户指定），新增 `NOTICE`，`A12` 同时核验"自身 Apache + 第三方 MIT"；`README` / `README.zh-CN` / `pyproject` 同步。③ 重出 6 张静帧、`dc_preview.glb`、`submission/data.js` 与 `dist/release`（`CURRENT_STATUS` 副本已与主本逐字节一致）。④ `validate 40/40` 回归。详见 **§28**。
+> **v3.8 落地口径**：① **3D 终于跟上了功能区**——`build_dc.py` 读 `data/areas.json`，物理区画地面色块 + 深色边界 + 中文名称牌（3 块），逻辑区在挂靠点放 18 个标牌，不再画假矩形；中文字体自动探测 `msyh.ttc`，探测不到就退回纯 ASCII，不会出现方块字。② **许可证改为 Apache-2.0**（用户指定），新增 `NOTICE`，`A12` 同时核验"自身 Apache + 第三方 MIT"；`README` / `README.zh-CN` / `pyproject` 同步。③ 重出 6 张静帧、`dc_preview.glb`、`submission/data.js` 与 `dist/release`（`CURRENT_STATUS` 副本已与主本逐字节一致）。④ `validate 40/40` 回归。详见 **§28**。  
+> **v3.9 落地口径**：驾驶舱里**终于能看 3D 了**——但不是新写渲染器，而是把仓库里本来就有的 `console/` 网页控制台接上：`python -m console.server` 打开 `?view=3d` 即可实时转视角、看 AGV 回放、点车看状态。根因是 `console/` 少了 `__init__.py`，`-m` 启动必然失败，而驾驶舱原来只 Popen 不检查，所以表现为"按钮点了没反应"。同一份前端由 **`scripts/build_webapp.py`** 冻结接口后发布到 GitHub Pages（`docs/app/`），新增守卫 **`scripts/check_webapp.py`**（4 项 + 3 反例）。详见 **§29**。
 ---
 
 ## 阅读指南
@@ -42,7 +43,7 @@
 |---|---|---|
 | 前置 | 阅读指南、执行摘要、目录 | 结论先行 |
 | 第一部分 | 第 0–10 章 | 现状审计、DC 必备能力、GitHub 调研、缺口、参数、自定义、路线图、验收、风险、附录 |
-| 第二部分 | 第 11–28 章 | v2.0 增补：桌面驾驶舱、字段级数据字典、参数总表、自定义矩阵、Backlog、测试计划、风险登记册、术语表、仓库速查、交付清单；v3.0 增补：单人最小路径；v3.2 增补：产物包与工作区约定；v3.3 增补：功能区建模方案；v3.4 增补：用户自选功能区（方案 A）；v3.5 增补：勾选式界面与完整性核查；v3.6 增补：过程层进 tick 与界面重做；v3.7 增补：三仓拣选与死锁修复；v3.8 增补：3D 功能区与许可 |
+| 第二部分 | 第 11–29 章 | v2.0 增补：桌面驾驶舱、字段级数据字典、参数总表、自定义矩阵、Backlog、测试计划、风险登记册、术语表、仓库速查、交付清单；v3.0 增补：单人最小路径；v3.2 增补：产物包与工作区约定；v3.3 增补：功能区建模方案；v3.4 增补：用户自选功能区（方案 A）；v3.5 增补：勾选式界面与完整性核查；v3.6 增补：过程层进 tick 与界面重做；v3.7 增补：三仓拣选与死锁修复；v3.8 增补：3D 功能区与许可；v3.9 增补：浏览器 3D 控制台 |
 | 附录 | A–E | 配置片段、GitHub 检索复现、术语、**D 复核命令集**、**E 答辩问答** |
 
 ---
@@ -127,6 +128,7 @@
 - 26. 过程层进 tick：工位排队与界面重做（v3.6 新增）
 - 27. 三仓拣选进 tick 与交通死锁修复（v3.7 新增）
 - 28. 3D 功能区落地与开源许可（v3.8 新增）
+- 29. 浏览器 3D 控制台与 Pages 发布（v3.9 新增）
 
 **附录**
 
@@ -2218,6 +2220,7 @@ python -m pytest -q -m "not blender"
 | v3.6 | 2026-11-10 | **过程层进 tick**：`sim_engine` 把 process_spec 工位（6 个）与 PICK_FACE 拣选池（`@PICK:<仓>`）当服务台，服务时长按 lognormal 采样、并行位限容、FIFO 排队、新增 `WAITING` 状态与 STATION_* 三事件；tick KPI 27→**33**；新增守卫 `scripts/check_station.py`（holiday 场景并行位 4→1 必须排队，`STATION_OK`）并接入流水线/CI/工具箱；8 场景重跑、`validate 40/40` 不回退；同时**驾驶舱界面重做**（圆角卡片、自绘胶囊按钮、侧栏圆角高亮、功能区页两列布局 + 仓库俯视图）；新增 §26 |
 | v3.7 | 2026-11-10 | **三仓拣选 + 死锁修复**：F1/F2/F3 各补 `PICK_FACE`（21 个功能区 / 4 个拣选池 / `stations_defined` 10）；修复反应式交通层的结构性死锁（退让 8 s / 绕行 20 s+30 s 冷却 / 清障 300 s），峰值 13→**59 单**、丢单 32→**0**；修电量耗尽仍行驶（派单按行程核算 + 移动封顶），S2 残差 0.157→0；tick KPI 33→**39**；新增守卫 `scripts/check_deadlock.py`（关闭退让必须更差），工位守卫判据改为"容量影响队列与利用率"并解释反直觉结果（并行位 4→1 吞吐 40→62/h）；8 场景重跑、`validate 40/40`、`validate_sim 22/22`；新增 §27 |
 | v3.8 | 2026-11-10 | **3D 功能区 + 许可切换**：`build_dc.py` 读 `areas.json` 画 3 个物理区色块（深色边界 + 中文名称牌）与 18 个逻辑区挂靠标牌，自动探测中文字体；修两个故障（Blender `-P` 缺 `sys.path` 导致 `import scene_config` 崩溃、静帧渲染被迫连带 942 帧动画）；新增 `DC_RENDER_STILLS=1`；许可证 MIT→**Apache-2.0** + `NOTICE`，A12 改为双查；重出 blend/GLB/6 张静帧/submission/dist；`validate 40/40`；新增 §28 |
+| v3.9 | 2026-11-11 | **浏览器 3D 控制台 + Pages**：修 `console/__init__.py` 缺失（`-m console.server` 原来必挂）并把驾驶舱入口改成"探活 → 打开 → 失败降级静态快照"；新增 `scripts/build_webapp.py`（冻结 9 个接口到 `docs/app/api/*.json` + fetch 垫片 + 相对路径重写）与 `scripts/serve_webapp.py`；新增守卫 `scripts/check_webapp.py`（W1–W4 + 3 反例）并接入 CI 与全量验收链；GitHub Pages 发布 `docs/`；新增 §29 |
 
 ---
 
@@ -2874,6 +2877,100 @@ build_report.json     areas_total=21 · physical=3 · logical_tags=18 · cjk_fon
 
 ---
 
+## 29. 浏览器 3D 控制台与 Pages 发布（v3.9）
+
+### 29.1 先说清楚：为什么之前"看不到 3D"
+
+仓库里**本来就有**一个完整的网页控制台（`console/`）：three.js r1xx + `GLTFLoader` +
+`OrbitControls`，加载 `out/dc_preview.glb`，按 `paths.jsonl` 驱动 21 台 AGV 回放，带六个
+相机预设和单车道级选择。驾驶舱的"本地 Web 控制台"入口也是有的。
+
+问题出在两处，都不是"缺功能"：
+
+| 症状 | 根因 | 证据 |
+|---|---|---|
+| 点"本地 Web 控制台"没反应，浏览器打开是空白 | `console/` **没有 `__init__.py`**，`python -m console.server` 必然 `ModuleNotFoundError` | `ls console/__init__.py` → 不存在 |
+| 界面也不提示失败 | 入口用 `Popen(stdout=DEVNULL, stderr=DEVNULL)`，**从不检查端口是否起来** | `tools.py` `_open_console` 原实现 |
+
+补上 `console/__init__.py` 后，`python -m console.server` 立刻可用（实测 200 / API 正常）。
+
+### 29.2 驾驶舱入口重写：先探活，再打开，失败降级
+
+```python
+_open_console()          # 8765 有服务 → 直接开 ?view=3d
+   ├─ 没有 → Popen(python -m console.server)
+   │     └─ 每 250 ms 探一次端口，最多 4.5 s
+   └─ 仍未起来 → _open_snapshot()   # 起 8899 静态快照，只读但一定有画面
+```
+
+三点值得记：
+
+1. **`?view=3d` 是现成的深链接**（`applyUrlState()` 里已有），不用改前端；
+2. **探活用 `socket.connect_ex`**，不要用 `time.sleep(1.2)` 猜——机器快慢不一样；
+3. **失败要有第二方案**：完整控制台依赖 Python 服务端，静态快照只需要一个静态目录。
+
+### 29.3 静态快照：把 REST 接口冻结成文件
+
+GitHub Pages 只发文件、不跑 Python，所以 `scripts/build_webapp.py` 做三件事：
+
+| 步骤 | 做法 |
+|---|---|
+| 复制前端 | `console/static/*` → `docs/app/`，并把 `/static/`、`importmap` 改成相对路径 |
+| 冻结接口 | 直接调用 `console.server` 的 `build_bootstrap()` / `build_paths_payload()` 等，写出 `api/*.json`（9 个，2.5 MB 含 GLB） |
+| 插入垫片 | `snapshot.js` 重写 `window.fetch`：`/api/x` → `./api/x.json`，`/out/*`、`/data/*` 相对化，POST 一律拒绝并提示 |
+
+**踩过的坑**：three 的 `FileLoader` 传进来的是 `Request` 对象，`String(request)` 是
+`[object Request]`，直接截字符串永远匹配不到 `/out/`——必须 `new URL(raw, location.href)`
+取 `pathname`。第一版就是因此 404（截图里能看到"3D 加载失败"）。
+
+另一个坑：`await import('/static/viewer3d.js')` 走**模块加载器**，不经过 fetch，
+垫片拦不到，只能在构建时把字符串改掉。
+
+### 29.4 守卫 `check_webapp.py`：断链要能被发现
+
+Pages 上没人跑 Python，断链的表现是"转圈"或"面板空白"，CI 完全看不出来。四项检查：
+
+| 项 | 查什么 |
+|---|---|
+| W1 | `manifest.json` 中每个文件的 sha256 与磁盘一致（发现手改/漏拷） |
+| W2 | `index.html` 的本地引用（css/js/importmap）都存在，且 `snapshot.js` 已插入 |
+| W3 | `app.js`/`ops.js` 里 fetch 的 `/api/*` 要么有对应 JSON，要么在"轮询白名单"里 |
+| W4 | 快照 GLB 与 `out/dc_preview.glb` 同哈希（模型更新后忘了重建会立刻暴露） |
+
+`--self-test` 三个反例：删 `api/bootstrap.json`、加一个未冻结接口——都按预期 FAIL；
+第三个用例会**同步 manifest 哈希**，确保它是被 W3 抓住，而不是被 W1 蒙对。
+
+### 29.5 实测
+
+| 项 | 结果 |
+|---|---|
+| 本地完整控制台 | `http://127.0.0.1:8765/?view=3d` → 200，`/api/bootstrap` 正常 |
+| 静态快照 | `docs/app` 20 个文件 / 2.5 MB；`index.html`、`three.module.js`、`dc_preview.glb`、`api/*.json` 全部 200 |
+| 3D 渲染 | 无头 Edge（SwiftShader）截图：4 仓 + 货架 + 分区色块 + 21 台 AGV 圆点，帧率与节点数显示 "21 AGV · 2155 节点" |
+| 守卫 | `WEBAPP_OK files=20 api=9 glb=598KB`；`--self-test` 3/3 按预期 |
+| CI | 新增 "Web snapshot guard" 步骤（只查不改；CI 无 GLB 时 W4 自动跳过） |
+
+证据图：`assets/webapp_3d.png`（3D 视图）、`assets/webapp_2d.png`（2D 视图 + 黄色"静态快照"横幅）。
+
+### 29.6 Pages
+
+| 项 | 值 |
+|---|---|
+| 站点 | https://ruanruanxiaomao.github.io/dc-twin/ |
+| 3D 控制台 | https://ruanruanxiaomao.github.io/dc-twin/app/index.html?view=3d |
+| 源 | `master` 分支 `/docs`，`.nojekyll` 关闭 Jekyll |
+| 内容 | `docs/index.html` 落地页 + `docs/app/` 快照（只读） |
+
+### 29.7 v3.9 边界
+
+- **Pages 上是只读快照**：重跑、改配置、存场景都会被垫片拒绝，并提示用本地控制台。
+- **GLB 本身没有动画**：网页里 AGV 在动，是因为前端按 `paths.jsonl` 插值驱动节点，不是 glTF 动画轨。
+- **快照不自动更新**：改了布局/模型要重跑 `build_webapp.py` 再提交，否则 W4 会报哈希不一致。
+- **驾驶舱仍是 Tkinter 外壳**：3D 在外跳浏览器里看，没有做成内嵌 webview（那要引
+  `pywebview` 或 `tkinterweb`，多一个依赖，暂不做）。
+
+---
+
 ## 附录 D · 复核命令集（v3.0 新增）
 
 > 全部命令在 `dc_project/` 下执行，Git Bash 或 PowerShell 均可（`python` 指 3.10+）。每条都给出**期望输出**，输出不符即为文档过期。这是本计划书“可核查”的落地形式。
@@ -2909,6 +3006,8 @@ build_report.json     areas_total=21 · physical=3 · logical_tags=18 · cjk_fon
 | **D-27** | 死锁退让是否真的有用 | `python scripts/check_deadlock.py` | 关闭退让：17/h、丢 32；开启：59/h、丢 0，`DEADLOCK_OK` |
 | **D-28** | 3D 是否真的画了功能区 | `python -c "import json;c=json.load(open('out/build_report.json',encoding='utf-8'))['counts'];print(c['areas_total'],c['areas_physical_drawn'],c['areas_logical_tags'],c['area_cjk_font'])"` | `21 3 18 True` |
 | **D-29** | 许可证是否为 Apache-2.0 且第三方 MIT 未丢 | `python scripts/validate.py 2>&1 | grep A12` | `A12 自身 Apache-2.0 + 第三方 MIT 全文与资产哈希 — … 自身Apache=True 第三方MIT段落=3` |
+| **D-30** | 网页快照是否断链 | `python scripts/check_webapp.py` | `WEBAPP_OK files=20 api=9 glb=598KB` |
+| **D-31** | 证明快照守卫会失败 | `python scripts/check_webapp.py --self-test` | 3 个反例按预期 FAIL，`WEBAPP_SELFTEST OK` |
 
 **D-7 的同步命令**（母本在工作区根，仓库只放副本）：
 

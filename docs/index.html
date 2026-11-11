@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>配送中心数字孪生 · DC Twin</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin:0; min-height:100vh; background:#0a0e16; color:#eef3fb;
+         font:15px/1.7 system-ui,"Microsoft YaHei",sans-serif; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 64px 24px 80px; }
+  h1 { font-size: 30px; margin: 0 0 6px; letter-spacing:.5px; }
+  .sub { color:#9babc4; margin-bottom: 34px; }
+  .cards { display:grid; gap:14px; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); }
+  a.card { display:block; padding:20px 22px; border-radius:14px; text-decoration:none;
+            background:#111823; border:1px solid #202b3b; transition:.16s; }
+  a.card:hover { border-color:#4dc9f6; transform: translateY(-2px); }
+  a.card b { display:block; color:#eef3fb; font-size:16px; margin-bottom:4px; }
+  a.card span { color:#9babc4; font-size:13px; }
+  .meta { margin-top:36px; color:#697a93; font-size:12.5px; }
+  .meta code { color:#9babc4; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>配送中心数字孪生</h1>
+  <div class="sub">4 仓 · 441 库位 · 21 台 AMR · 21 个功能区 · 39 项实测 KPI</div>
+  <div class="cards">
+    <a class="card" href="./app/index.html">
+      <b>3D 控制台 →</b>
+      <span>three.js 实时渲染 .glb，可转视角、看 AGV 回放与功能区</span>
+    </a>
+    <a class="card" href="https://github.com/ruanruanxiaomao/dc-twin">
+      <b>源代码 →</b>
+      <span>Python 数据链 + Blender 场景 + 8 个可证伪守卫</span>
+    </a>
+    <a class="card" href="https://github.com/ruanruanxiaomao/dc-twin/blob/master/docs/DC_MASTER_PLAN.md">
+      <b>计划书 →</b>
+      <span>v3.8：自审核对表、字段字典、28 章实施计划</span>
+    </a>
+  </div>
+  <div class="meta">
+    快照构建于 <code>2026-11-11 00:32 UTC</code> · 提交 <code>2bed77e</code> · 模型 <code>598 KB</code>
+  </div>
+</div>
+</body>
+</html>

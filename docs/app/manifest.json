@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "kind": "webapp_snapshot",
+  "generated_at": "2026-11-11T00:32:38+00:00",
+  "commit": "2bed77e",
+  "glb": "out/dc_preview.glb",
+  "api": {
+    "bootstrap": 218924,
+    "paths": 189961,
+    "scenarios": 4253,
+    "pnl": 89,
+    "ledger": 47,
+    "schema": 1596,
+    "cost-spec": 1950,
+    "scenario/template": 652,
+    "status": 16378
+  },
+  "files": {
+    "api/bootstrap.json": {
+      "bytes": 218924,
+      "sha256": "9b0fd188bc91ef52e52c6d4c897ce8490f748827e144c9f833774cb9c9a3f6bb"
+    },
+    "api/cost-spec.json": {
+      "bytes": 1950,
+      "sha256": "ce6694c23eb109a17ee3b0396731e5a6962be51344635b41684d829fe66cbf2b"
+    },
+    "api/ledger.json": {
+      "bytes": 47,
+      "sha256": "fe598db6a402d8e701627bff0ed253f4c5249eebd55896a93f010e9f7cd40aec"
+    },
+    "api/paths.json": {
+      "bytes": 189961,
+      "sha256": "18ae982358843659bbce69e5e30b769def90451ed841f44d7cb0c8c4e167c1a8"
+    },
+    "api/pnl.json": {
+      "bytes": 89,
+      "sha256": "2327a966654d6fec1c13eeb135eb43e4071481d1182bff0a608ad019de37b5f3"
+    },
+    "api/scenario/template.json": {
+      "bytes": 652,
+      "sha256": "baa51553d5b9b5461986e55cd598ded84a337a00c3e583f3551721a5d9221da1"
+    },
+    "api/scenarios.json": {
+      "bytes": 4253,
+      "sha256": "8eef3621b2caca6a45eb41d2cc8ef3c112640bacd46e9102802504dc9882bb9e"
+    },
+    "api/schema.json": {
+      "bytes": 1596,
+      "sha256": "7aa4be2e3e9e2d729b2f629dd8754bc9fb0a7e82575844772edeab9dac5fc46c"
+    },
+    "api/status.json": {
+      "bytes": 16378,
+      "sha256": "d7e0ab63cd6a19e9afd38bc8fd4f404c1e7551389837e0399eabb9aeb5fba2d8"
+    },
+    "app.js": {
+      "bytes": 42253,
+      "sha256": "ded513cc5a5bc46bb7a61572abff89149f6d5f20d8939cae5a6838843d5418d7"
+    },
+    "index.html": {
+      "bytes": 7680,
+      "sha256": "3383d6f3b6afc3e09b7a886de4780a5aac3a7d62ee98c1eff7a633e2b5e28ae2"
+    },
+    "ops.js": {
+      "bytes": 15296,
+      "sha256": "f533ceae0d92fc8698691573fb94255c5af5a668bb1e03cb13f30a173c0a5e95"
+    },
+    "out/dc_preview.glb": {
+      "bytes": 612696,
+      "sha256": "3df99e05d69c6c6a2f55ae1c827fc090ccb6d2273efa79bc10c183ce7f639daa"
+    },
+    "snapshot.js": {
+      "bytes": 3226,
+      "sha256": "ccc3c6567c73eb00ace6ab0fab0ea792684a5ad50a6950690d1c748e6ed6030d"
+    },
+    "style.css": {
+      "bytes": 17612,
+      "sha256": "133584a006a408d02bda2273ef3d47c423a477e53c1c9cee90f5108b6bc5f47e"
+    },
+    "vendor/addons/controls/OrbitControls.js": {
+      "bytes": 29868,
+      "sha256": "5a44a9e86a2a0fb11933eed69bc2cd33c76a496854c1aed6ed776efa87d7b064"
+    },
+    "vendor/addons/loaders/GLTFLoader.js": {
+      "bytes": 108522,
+      "sha256": "d073b438e6a07e1359741dd5d6c76c953420cc0d4fd84eb1bdde94315540e6a3"
+    },
+    "vendor/addons/utils/BufferGeometryUtils.js": {
+      "bytes": 31906,
+      "sha256": "9be041e96308775d00e2695cc607645b9a9b64fd7c0e759dd8f7c00a8d92becb"
+    },
+    "vendor/three.module.js": {
+      "bytes": 1272972,
+      "sha256": "76dea8151bc9352aef3528b4262e249b2604f62543828328db978d060d61a495"
+    },
+    "viewer3d.js": {
+      "bytes": 9369,
+      "sha256": "0ef2fbdbe392b7b8c8dcbf100c7d579d39e46053917f3f4abe04d9ebf086bfc3"
+    }
+  },
+  "counts": {
+    "files": 20,
+    "bytes": 2585250
+  },
+  "note": "静态快照：/api/* 已冻结为 api/*.json，POST 一律拒绝"
+}

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import os
 import platform
+import socket
 import subprocess
 import sys
 import threading
@@ -86,7 +87,8 @@ class ToolsPage(tk.Frame):
         launch = Card(left, "界面入口", "", accent=T.PURPLE)
         launch.pack(fill="x", pady=(10, 0))
         links = [
-            ("本地 Web 控制台", "http://127.0.0.1:8765/", self._open_console, T.ACCENT),
+            ("3D 网页版（three.js）", "实时转视角 · AGV 回放 · 功能区；打不开时自动退到静态快照",
+             self._open_console, T.ACCENT),
             ("2D 布局编辑器", "submission/editor.js 所在作品页", self._open_editor, T.PURPLE),
             ("静态 Demo", "demo/index.html", self._open_demo, T.GREEN),
             ("Blender 场景", "out/distribution_center.blend", self._open_blend, T.AMBER),
@@ -197,17 +199,57 @@ class ToolsPage(tk.Frame):
         self.state.configure(text="空闲" if ok else "上一次任务失败", fg=T.GREEN if ok else T.RED)
 
     # ------------------------------------------------------------ launchers
+    @staticmethod
+    def _port_up(port: int, host: str = "127.0.0.1") -> bool:
+        with socket.socket() as s:
+            s.settimeout(0.2)
+            return s.connect_ex((host, port)) == 0
+
     def _open_console(self):
+        """打开 3D 网页版。
+
+        优先完整控制台（8765，能重跑/编辑）；它起不来（缺依赖、端口被占、
+        `-m console.server` 导入失败等）就退回静态快照（8899，只读但要什么有什么）。
+        以前这里只 Popen 不检查，失败时浏览器打开一片空白，界面上完全看不出原因。
+        """
+        def open_when_ready(url: str, tries: int = 18):
+            if self._port_up(int(url.rsplit(":", 1)[1].split("/")[0])):
+                self._append(f"$ 打开 {url}\n")
+                webbrowser.open(url)
+                return
+            if tries <= 0:
+                self._append("$ 控制台未就绪，改开静态快照\n")
+                self._open_snapshot()
+                return
+            self.after(250, lambda: open_when_ready(url, tries - 1))
+
+        if self._port_up(8765):
+            open_when_ready("http://127.0.0.1:8765/?view=3d", 1)
+            return
         if not self._server_started:
             self._server_started = True
-            self._append("\n$ 启动本地控制台 http://127.0.0.1:8765/\n")
+            self._append("\n$ 启动本地控制台 http://127.0.0.1:8765/?view=3d\n")
             try:
                 subprocess.Popen([sys.executable, "-m", "console.server"], cwd=str(self.store.root),
                                  creationflags=CREATE_NO_WINDOW,
                                  stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             except Exception as exc:
                 self._append(f"$ 启动失败：{exc}\n")
-        self.after(1200, lambda: webbrowser.open("http://127.0.0.1:8765/"))
+        open_when_ready("http://127.0.0.1:8765/?view=3d")
+
+    def _open_snapshot(self):
+        """静态快照（docs/app）：不依赖控制台服务，只读但能看 3D。"""
+        if not self._port_up(8899):
+            try:
+                subprocess.Popen([sys.executable, "scripts/serve_webapp.py",
+                                  "--no-open", "--port", "8899"],
+                                 cwd=str(self.store.root), creationflags=CREATE_NO_WINDOW,
+                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            except Exception as exc:
+                self._append(f"$ 静态快照启动失败：{exc}\n")
+                return
+        self.after(1500, lambda: webbrowser.open(
+            "http://127.0.0.1:8899/app/index.html?view=3d"))
 
     def _open_editor(self):
         open_path(self.store.root / "submission" / "index.html")

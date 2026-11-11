@@ -77,6 +77,11 @@ jobs:
       - name: Deadlock yield guard (yield off must be worse)
         run: python scripts/check_deadlock.py
 
+      - name: Web snapshot guard (docs/app links + hashes)
+        run: |
+          python scripts/check_webapp.py --self-test
+          python scripts/check_webapp.py
+
       - name: pytest (no Blender)
         run: pytest -m "not blender" --cov=dc_twin --cov-report=term-missing
 
