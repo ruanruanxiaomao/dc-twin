@@ -29,6 +29,8 @@ DATA_CHAIN = [
     ("scripts/check_process.py", ("--quiet",), "python"),  # 过程配置 L14–L22（产出 process_report）
 
     ("scripts/optimize_slotting.py", (), "python"),
+    # P6a-0：库存层数据（派生自 skus.json + slotting.json，确定性生成）
+    ("scripts/gen_inventory.py", ("--quiet",), "python"),
     ("scripts/gen_tasks.py", (), "python"),
     ("scripts/plan_paths.py", (), "python"),
     ("scripts/gen_cargo.py", (), "python"),

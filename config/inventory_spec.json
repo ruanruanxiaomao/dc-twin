@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "kind": "inventory_spec",
+  "note": "改这里不改 Python。库位/数量现算于 data/*.json；本文件只定义行为与费率。数值为演示值（placeholder），与 cost_spec 的 prices_source=demo 同口径。",
+  "reorder": {
+    "policy": "reorder_point",
+    "safety_stock_factor": 1.5,
+    "reorder_point_factor": 2.0,
+    "replenish_qty": "to_max",
+    "reorder_check": "on_stock_change"
+  },
+  "holding": {
+    "holding_rate_per_year": 0.24,
+    "accrual": "sim_hour"
+  },
+  "stockout": {
+    "penalty_per_unit": 8.0,
+    "policy": "fail_order",
+    "partial_fill": true
+  },
+  "shrink": {
+    "rate": 0.0
+  },
+  "pick_face": {
+    "enabled": true,
+    "min_fill_ratio": 0.3,
+    "refill_from": "reserve",
+    "max_per_warehouse": 24,
+    "fill_ratio_of_reserve": 0.3
+  },
+  "stock_policy": {
+    "base_qty": { "A": 48, "B": 24, "C": 8 },
+    "overflow_multiplier": 0.5,
+    "qty_is_integer": true
+  }
+}

@@ -33,3 +33,4 @@ contradict the engine. They are recorded here because the *reasons* outlive the 
 | [GAME-06](ADR-GAME-06.md) | GPL reference isolation | reference projects inform design only |
 | [GAME-07](ADR-GAME-07.md) | Level = scenario + business objectives | objectives stay separate from `assertions` |
 | [GAME-08](ADR-GAME-08.md) | Override whitelist derives from the engine | never keep a second copy of policy names |
+| [GAME-09](ADR-GAME-09.md) | Inventory: procurement stays out of P&L; snapshot 2.0; one v2 refreeze | COGS needs its own ADR + retariff + refreeze; SKU is derived from location, never sampled |

@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dc-twin.local/schemas/inventory_spec.schema.json",
+  "title": "库存层行为与费率（P6a）",
+  "type": "object",
+  "required": ["schema_version", "kind", "reorder", "holding", "stockout", "pick_face"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "kind": {"const": "inventory_spec"},
+    "note": {"type": "string"},
+    "reorder": {
+      "type": "object",
+      "required": ["policy", "safety_stock_factor", "reorder_point_factor", "replenish_qty", "reorder_check"],
+      "additionalProperties": false,
+      "properties": {
+        "policy": {"enum": ["reorder_point"]},
+        "safety_stock_factor": {"type": "number", "minimum": 0, "maximum": 10},
+        "reorder_point_factor": {"type": "number", "minimum": 0, "maximum": 20},
+        "replenish_qty": {"enum": ["to_max", "fixed"]},
+        "reorder_check": {"enum": ["on_stock_change", "periodic"]},
+        "period_s": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "holding": {
+      "type": "object",
+      "required": ["holding_rate_per_year", "accrual"],
+      "additionalProperties": false,
+      "properties": {
+        "holding_rate_per_year": {"type": "number", "minimum": 0, "maximum": 2},
+        "accrual": {"enum": ["sim_hour"]}
+      }
+    },
+    "stockout": {
+      "type": "object",
+      "required": ["penalty_per_unit", "policy", "partial_fill"],
+      "additionalProperties": false,
+      "properties": {
+        "penalty_per_unit": {"type": "number", "minimum": 0, "maximum": 1000},
+        "policy": {"enum": ["fail_order", "backorder"]},
+        "partial_fill": {"type": "boolean"}
+      }
+    },
+    "shrink": {
+      "type": "object",
+      "required": ["rate"],
+      "additionalProperties": false,
+      "properties": {"rate": {"type": "number", "minimum": 0, "maximum": 0.1}}
+    },
+    "pick_face": {
+      "type": "object",
+      "required": ["enabled", "min_fill_ratio", "refill_from"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "min_fill_ratio": {"type": "number", "minimum": 0, "maximum": 1},
+        "refill_from": {"enum": ["reserve"]},
+        "max_per_warehouse": {"type": "integer", "minimum": 0, "maximum": 64},
+        "fill_ratio_of_reserve": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "stock_policy": {
+      "type": "object",
+      "required": ["base_qty", "overflow_multiplier"],
+      "additionalProperties": false,
+      "properties": {
+        "base_qty": {
+          "type": "object",
+          "required": ["A", "B", "C"],
+          "additionalProperties": false,
+          "properties": {
+            "A": {"type": "integer", "minimum": 1, "maximum": 10000},
+            "B": {"type": "integer", "minimum": 1, "maximum": 10000},
+            "C": {"type": "integer", "minimum": 1, "maximum": 10000}
+          }
+        },
+        "overflow_multiplier": {"type": "number", "minimum": 0, "maximum": 10},
+        "qty_is_integer": {"type": "boolean"}
+      }
+    }
+  }
+}

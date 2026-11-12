@@ -16,10 +16,12 @@ import tempfile
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 PY = sys.executable
-STEPS = ['gen_data', 'layout_audit', 'nav_grid', 'optimize_slotting',
+STEPS = ['gen_data', 'layout_audit', 'nav_grid', 'optimize_slotting', 'gen_inventory',
          'gen_tasks', 'plan_paths', 'gen_cargo', 'traffic_check', 'check_geometry']
 COMPARE = ['data/layout.json', 'data/skus.json', 'data/events.jsonl',
            'data/tasks.json', 'data/paths.jsonl', 'data/cargo_state.json',
+           'data/sku_master.json', 'data/inventory_slotting.json',
+           'data/inventory_initial.json',
            'out/traffic_report.json', 'out/geometry_report.json']
 
 

@@ -1,0 +1,4409 @@
+{
+  "schema_version": "1.0",
+  "kind": "inventory_slotting",
+  "generated_from": "data/slotting.json + data/layout.json + config/inventory_spec.json",
+  "notes": [
+    "每个 SHELF 库位恰好一个 SKU：P6a-1 用 pick_loc 反查 SKU，查不到就 raise。",
+    "role=pick_face 的库位由空库位按'离 OUTBOUND 月台最近'选出，作为前置小批量。",
+    "空库位全部补给 A 类 SKU 作溢出储位：不新增 SKU，只让库位不再无主。"
+  ],
+  "counts": {
+    "locations": 392,
+    "skus": 240,
+    "pick_face": 24,
+    "reserve": 368,
+    "from_overflow": 152
+  },
+  "pick_face_by_warehouse": {
+    "W": [
+      "SHELF-W0070",
+      "SHELF-W0165",
+      "SHELF-W0167",
+      "SHELF-W0168",
+      "SHELF-W0169",
+      "SHELF-W0170",
+      "SHELF-W0171",
+      "SHELF-W0172",
+      "SHELF-W0173",
+      "SHELF-W0174",
+      "SHELF-W0175",
+      "SHELF-W0176",
+      "SHELF-W0177",
+      "SHELF-W0178",
+      "SHELF-W0179",
+      "SHELF-W0180",
+      "SHELF-W0189",
+      "SHELF-W0191",
+      "SHELF-W0193",
+      "SHELF-W0195",
+      "SHELF-W0197",
+      "SHELF-W0199",
+      "SHELF-W0241",
+      "SHELF-W0243"
+    ]
+  },
+  "by_sku": {
+    "SKU-0001": {
+      "reserve": [
+        "SHELF-F10003",
+        "SHELF-W0264"
+      ],
+      "pick_face": [
+        "SHELF-W0070"
+      ]
+    },
+    "SKU-0002": {
+      "reserve": [
+        "SHELF-F20003",
+        "SHELF-W0150",
+        "SHELF-W0265"
+      ],
+      "pick_face": []
+    },
+    "SKU-0003": {
+      "reserve": [
+        "SHELF-F30003",
+        "SHELF-W0164",
+        "SHELF-W0266"
+      ],
+      "pick_face": []
+    },
+    "SKU-0004": {
+      "reserve": [
+        "SHELF-F10011",
+        "SHELF-W0267"
+      ],
+      "pick_face": [
+        "SHELF-W0165"
+      ]
+    },
+    "SKU-0005": {
+      "reserve": [
+        "SHELF-F20011",
+        "SHELF-W0166",
+        "SHELF-W0268"
+      ],
+      "pick_face": []
+    },
+    "SKU-0006": {
+      "reserve": [
+        "SHELF-F30011",
+        "SHELF-W0269"
+      ],
+      "pick_face": [
+        "SHELF-W0167"
+      ]
+    },
+    "SKU-0007": {
+      "reserve": [
+        "SHELF-F10001",
+        "SHELF-W0270"
+      ],
+      "pick_face": [
+        "SHELF-W0168"
+      ]
+    },
+    "SKU-0008": {
+      "reserve": [
+        "SHELF-F10005",
+        "SHELF-W0271"
+      ],
+      "pick_face": [
+        "SHELF-W0169"
+      ]
+    },
+    "SKU-0009": {
+      "reserve": [
+        "SHELF-F10009",
+        "SHELF-W0272"
+      ],
+      "pick_face": [
+        "SHELF-W0170"
+      ]
+    },
+    "SKU-0010": {
+      "reserve": [
+        "SHELF-F20001",
+        "SHELF-W0273"
+      ],
+      "pick_face": [
+        "SHELF-W0171"
+      ]
+    },
+    "SKU-0011": {
+      "reserve": [
+        "SHELF-F20005",
+        "SHELF-W0274"
+      ],
+      "pick_face": [
+        "SHELF-W0172"
+      ]
+    },
+    "SKU-0012": {
+      "reserve": [
+        "SHELF-F20009",
+        "SHELF-W0275"
+      ],
+      "pick_face": [
+        "SHELF-W0173"
+      ]
+    },
+    "SKU-0013": {
+      "reserve": [
+        "SHELF-F30001",
+        "SHELF-W0276"
+      ],
+      "pick_face": [
+        "SHELF-W0174"
+      ]
+    },
+    "SKU-0014": {
+      "reserve": [
+        "SHELF-F30005",
+        "SHELF-W0277"
+      ],
+      "pick_face": [
+        "SHELF-W0175"
+      ]
+    },
+    "SKU-0015": {
+      "reserve": [
+        "SHELF-F30009",
+        "SHELF-W0278"
+      ],
+      "pick_face": [
+        "SHELF-W0176"
+      ]
+    },
+    "SKU-0016": {
+      "reserve": [
+        "SHELF-W0003",
+        "SHELF-W0280"
+      ],
+      "pick_face": [
+        "SHELF-W0177"
+      ]
+    },
+    "SKU-0017": {
+      "reserve": [
+        "SHELF-W0017",
+        "SHELF-W0281"
+      ],
+      "pick_face": [
+        "SHELF-W0178"
+      ]
+    },
+    "SKU-0018": {
+      "reserve": [
+        "SHELF-W0083",
+        "SHELF-W0282"
+      ],
+      "pick_face": [
+        "SHELF-W0179"
+      ]
+    },
+    "SKU-0019": {
+      "reserve": [
+        "SHELF-W0097",
+        "SHELF-W0283"
+      ],
+      "pick_face": [
+        "SHELF-W0180"
+      ]
+    },
+    "SKU-0020": {
+      "reserve": [
+        "SHELF-W0005",
+        "SHELF-W0182",
+        "SHELF-W0284"
+      ],
+      "pick_face": []
+    },
+    "SKU-0021": {
+      "reserve": [
+        "SHELF-W0019",
+        "SHELF-W0183",
+        "SHELF-W0285"
+      ],
+      "pick_face": []
+    },
+    "SKU-0022": {
+      "reserve": [
+        "SHELF-W0085",
+        "SHELF-W0184",
+        "SHELF-W0286"
+      ],
+      "pick_face": []
+    },
+    "SKU-0023": {
+      "reserve": [
+        "SHELF-W0099",
+        "SHELF-W0185",
+        "SHELF-W0287"
+      ],
+      "pick_face": []
+    },
+    "SKU-0024": {
+      "reserve": [
+        "SHELF-F10007",
+        "SHELF-W0186",
+        "SHELF-W0288"
+      ],
+      "pick_face": []
+    },
+    "SKU-0025": {
+      "reserve": [
+        "SHELF-F20007",
+        "SHELF-W0187",
+        "SHELF-W0289"
+      ],
+      "pick_face": []
+    },
+    "SKU-0026": {
+      "reserve": [
+        "SHELF-F30007",
+        "SHELF-W0188",
+        "SHELF-W0290"
+      ],
+      "pick_face": []
+    },
+    "SKU-0027": {
+      "reserve": [
+        "SHELF-W0001",
+        "SHELF-W0291"
+      ],
+      "pick_face": [
+        "SHELF-W0189"
+      ]
+    },
+    "SKU-0028": {
+      "reserve": [
+        "SHELF-W0015",
+        "SHELF-W0190",
+        "SHELF-W0292"
+      ],
+      "pick_face": []
+    },
+    "SKU-0029": {
+      "reserve": [
+        "SHELF-W0081",
+        "SHELF-W0293"
+      ],
+      "pick_face": [
+        "SHELF-W0191"
+      ]
+    },
+    "SKU-0030": {
+      "reserve": [
+        "SHELF-W0095",
+        "SHELF-W0192",
+        "SHELF-W0294"
+      ],
+      "pick_face": []
+    },
+    "SKU-0031": {
+      "reserve": [
+        "SHELF-W0007",
+        "SHELF-W0295"
+      ],
+      "pick_face": [
+        "SHELF-W0193"
+      ]
+    },
+    "SKU-0032": {
+      "reserve": [
+        "SHELF-W0087",
+        "SHELF-W0194",
+        "SHELF-W0296"
+      ],
+      "pick_face": []
+    },
+    "SKU-0033": {
+      "reserve": [
+        "SHELF-F10012",
+        "SHELF-W0297"
+      ],
+      "pick_face": [
+        "SHELF-W0195"
+      ]
+    },
+    "SKU-0034": {
+      "reserve": [
+        "SHELF-F10023",
+        "SHELF-W0196",
+        "SHELF-W0298"
+      ],
+      "pick_face": []
+    },
+    "SKU-0035": {
+      "reserve": [
+        "SHELF-F20012",
+        "SHELF-W0299"
+      ],
+      "pick_face": [
+        "SHELF-W0197"
+      ]
+    },
+    "SKU-0036": {
+      "reserve": [
+        "SHELF-F20023",
+        "SHELF-W0198",
+        "SHELF-W0300"
+      ],
+      "pick_face": []
+    },
+    "SKU-0037": {
+      "reserve": [
+        "SHELF-F30012",
+        "SHELF-W0301"
+      ],
+      "pick_face": [
+        "SHELF-W0199"
+      ]
+    },
+    "SKU-0038": {
+      "reserve": [
+        "SHELF-F30023",
+        "SHELF-W0200",
+        "SHELF-W0302"
+      ],
+      "pick_face": []
+    },
+    "SKU-0039": {
+      "reserve": [
+        "SHELF-W0013",
+        "SHELF-W0201",
+        "SHELF-W0303"
+      ],
+      "pick_face": []
+    },
+    "SKU-0040": {
+      "reserve": [
+        "SHELF-W0093",
+        "SHELF-W0202",
+        "SHELF-W0304"
+      ],
+      "pick_face": []
+    },
+    "SKU-0041": {
+      "reserve": [
+        "SHELF-W0009",
+        "SHELF-W0203",
+        "SHELF-W0305"
+      ],
+      "pick_face": []
+    },
+    "SKU-0042": {
+      "reserve": [
+        "SHELF-W0089",
+        "SHELF-W0204",
+        "SHELF-W0306"
+      ],
+      "pick_face": []
+    },
+    "SKU-0043": {
+      "reserve": [
+        "SHELF-F10002",
+        "SHELF-W0205",
+        "SHELF-W0307"
+      ],
+      "pick_face": []
+    },
+    "SKU-0044": {
+      "reserve": [
+        "SHELF-F10010",
+        "SHELF-W0206",
+        "SHELF-W0308"
+      ],
+      "pick_face": []
+    },
+    "SKU-0045": {
+      "reserve": [
+        "SHELF-F10013",
+        "SHELF-W0207",
+        "SHELF-W0309"
+      ],
+      "pick_face": []
+    },
+    "SKU-0046": {
+      "reserve": [
+        "SHELF-F10021",
+        "SHELF-W0208",
+        "SHELF-W0310"
+      ],
+      "pick_face": []
+    },
+    "SKU-0047": {
+      "reserve": [
+        "SHELF-F20002",
+        "SHELF-W0209",
+        "SHELF-W0311"
+      ],
+      "pick_face": []
+    },
+    "SKU-0048": {
+      "reserve": [
+        "SHELF-F20010",
+        "SHELF-W0210",
+        "SHELF-W0312"
+      ],
+      "pick_face": []
+    },
+    "SKU-0049": {
+      "reserve": [
+        "SHELF-F20013",
+        "SHELF-W0211",
+        "SHELF-W0313"
+      ],
+      "pick_face": []
+    },
+    "SKU-0050": {
+      "reserve": [
+        "SHELF-F20021",
+        "SHELF-W0212",
+        "SHELF-W0314"
+      ],
+      "pick_face": []
+    },
+    "SKU-0051": {
+      "reserve": [
+        "SHELF-F30002",
+        "SHELF-W0213",
+        "SHELF-W0315"
+      ],
+      "pick_face": []
+    },
+    "SKU-0052": {
+      "reserve": [
+        "SHELF-F30010",
+        "SHELF-W0214",
+        "SHELF-W0316"
+      ],
+      "pick_face": []
+    },
+    "SKU-0053": {
+      "reserve": [
+        "SHELF-F30013",
+        "SHELF-W0215",
+        "SHELF-W0317"
+      ],
+      "pick_face": []
+    },
+    "SKU-0054": {
+      "reserve": [
+        "SHELF-F30021",
+        "SHELF-W0216",
+        "SHELF-W0318"
+      ],
+      "pick_face": []
+    },
+    "SKU-0055": {
+      "reserve": [
+        "SHELF-F10024",
+        "SHELF-W0217",
+        "SHELF-W0319"
+      ],
+      "pick_face": []
+    },
+    "SKU-0056": {
+      "reserve": [
+        "SHELF-F20024",
+        "SHELF-W0218",
+        "SHELF-W0320"
+      ],
+      "pick_face": []
+    },
+    "SKU-0057": {
+      "reserve": [
+        "SHELF-F30024",
+        "SHELF-W0219"
+      ],
+      "pick_face": []
+    },
+    "SKU-0058": {
+      "reserve": [
+        "SHELF-W0011",
+        "SHELF-W0220"
+      ],
+      "pick_face": []
+    },
+    "SKU-0059": {
+      "reserve": [
+        "SHELF-W0020",
+        "SHELF-W0221"
+      ],
+      "pick_face": []
+    },
+    "SKU-0060": {
+      "reserve": [
+        "SHELF-W0091",
+        "SHELF-W0222"
+      ],
+      "pick_face": []
+    },
+    "SKU-0061": {
+      "reserve": [
+        "SHELF-W0100",
+        "SHELF-W0223"
+      ],
+      "pick_face": []
+    },
+    "SKU-0062": {
+      "reserve": [
+        "SHELF-W0039",
+        "SHELF-W0224"
+      ],
+      "pick_face": []
+    },
+    "SKU-0063": {
+      "reserve": [
+        "SHELF-W0119",
+        "SHELF-W0225"
+      ],
+      "pick_face": []
+    },
+    "SKU-0064": {
+      "reserve": [
+        "SHELF-F10004",
+        "SHELF-W0226"
+      ],
+      "pick_face": []
+    },
+    "SKU-0065": {
+      "reserve": [
+        "SHELF-F10008",
+        "SHELF-W0227"
+      ],
+      "pick_face": []
+    },
+    "SKU-0066": {
+      "reserve": [
+        "SHELF-F10015",
+        "SHELF-W0228"
+      ],
+      "pick_face": []
+    },
+    "SKU-0067": {
+      "reserve": [
+        "SHELF-F10019",
+        "SHELF-W0229"
+      ],
+      "pick_face": []
+    },
+    "SKU-0068": {
+      "reserve": [
+        "SHELF-F20004",
+        "SHELF-W0230"
+      ],
+      "pick_face": []
+    },
+    "SKU-0069": {
+      "reserve": [
+        "SHELF-F20008",
+        "SHELF-W0231"
+      ],
+      "pick_face": []
+    },
+    "SKU-0070": {
+      "reserve": [
+        "SHELF-F20015",
+        "SHELF-W0232"
+      ],
+      "pick_face": []
+    },
+    "SKU-0071": {
+      "reserve": [
+        "SHELF-F20019",
+        "SHELF-W0233"
+      ],
+      "pick_face": []
+    },
+    "SKU-0072": {
+      "reserve": [
+        "SHELF-F30004",
+        "SHELF-W0234"
+      ],
+      "pick_face": []
+    },
+    "SKU-0073": {
+      "reserve": [
+        "SHELF-F30008",
+        "SHELF-W0235"
+      ],
+      "pick_face": []
+    },
+    "SKU-0074": {
+      "reserve": [
+        "SHELF-F30015",
+        "SHELF-W0236"
+      ],
+      "pick_face": []
+    },
+    "SKU-0075": {
+      "reserve": [
+        "SHELF-F30019",
+        "SHELF-W0237"
+      ],
+      "pick_face": []
+    },
+    "SKU-0076": {
+      "reserve": [
+        "SHELF-W0002",
+        "SHELF-W0238"
+      ],
+      "pick_face": []
+    },
+    "SKU-0077": {
+      "reserve": [
+        "SHELF-W0082",
+        "SHELF-W0239"
+      ],
+      "pick_face": []
+    },
+    "SKU-0078": {
+      "reserve": [
+        "SHELF-W0018",
+        "SHELF-W0240"
+      ],
+      "pick_face": []
+    },
+    "SKU-0079": {
+      "reserve": [
+        "SHELF-W0098"
+      ],
+      "pick_face": [
+        "SHELF-W0241"
+      ]
+    },
+    "SKU-0080": {
+      "reserve": [
+        "SHELF-F10014",
+        "SHELF-W0242"
+      ],
+      "pick_face": []
+    },
+    "SKU-0081": {
+      "reserve": [
+        "SHELF-F10022"
+      ],
+      "pick_face": [
+        "SHELF-W0243"
+      ]
+    },
+    "SKU-0082": {
+      "reserve": [
+        "SHELF-F20014",
+        "SHELF-W0244"
+      ],
+      "pick_face": []
+    },
+    "SKU-0083": {
+      "reserve": [
+        "SHELF-F20022",
+        "SHELF-W0245"
+      ],
+      "pick_face": []
+    },
+    "SKU-0084": {
+      "reserve": [
+        "SHELF-F30014",
+        "SHELF-W0246"
+      ],
+      "pick_face": []
+    },
+    "SKU-0085": {
+      "reserve": [
+        "SHELF-F30022",
+        "SHELF-W0247"
+      ],
+      "pick_face": []
+    },
+    "SKU-0086": {
+      "reserve": [
+        "SHELF-W0021",
+        "SHELF-W0248"
+      ],
+      "pick_face": []
+    },
+    "SKU-0087": {
+      "reserve": [
+        "SHELF-W0101",
+        "SHELF-W0249"
+      ],
+      "pick_face": []
+    },
+    "SKU-0088": {
+      "reserve": [
+        "SHELF-W0037",
+        "SHELF-W0250"
+      ],
+      "pick_face": []
+    },
+    "SKU-0089": {
+      "reserve": [
+        "SHELF-W0117",
+        "SHELF-W0251"
+      ],
+      "pick_face": []
+    },
+    "SKU-0090": {
+      "reserve": [
+        "SHELF-W0040",
+        "SHELF-W0252"
+      ],
+      "pick_face": []
+    },
+    "SKU-0091": {
+      "reserve": [
+        "SHELF-W0120",
+        "SHELF-W0253"
+      ],
+      "pick_face": []
+    },
+    "SKU-0092": {
+      "reserve": [
+        "SHELF-W0059",
+        "SHELF-W0254"
+      ],
+      "pick_face": []
+    },
+    "SKU-0093": {
+      "reserve": [
+        "SHELF-W0139",
+        "SHELF-W0256"
+      ],
+      "pick_face": []
+    },
+    "SKU-0094": {
+      "reserve": [
+        "SHELF-F10006",
+        "SHELF-W0261"
+      ],
+      "pick_face": []
+    },
+    "SKU-0095": {
+      "reserve": [
+        "SHELF-F10017",
+        "SHELF-W0262"
+      ],
+      "pick_face": []
+    },
+    "SKU-0096": {
+      "reserve": [
+        "SHELF-F20006",
+        "SHELF-W0263"
+      ],
+      "pick_face": []
+    },
+    "SKU-0097": {
+      "reserve": [
+        "SHELF-F20017"
+      ],
+      "pick_face": []
+    },
+    "SKU-0098": {
+      "reserve": [
+        "SHELF-F30006"
+      ],
+      "pick_face": []
+    },
+    "SKU-0099": {
+      "reserve": [
+        "SHELF-F30017"
+      ],
+      "pick_face": []
+    },
+    "SKU-0100": {
+      "reserve": [
+        "SHELF-W0004"
+      ],
+      "pick_face": []
+    },
+    "SKU-0101": {
+      "reserve": [
+        "SHELF-W0084"
+      ],
+      "pick_face": []
+    },
+    "SKU-0102": {
+      "reserve": [
+        "SHELF-W0016"
+      ],
+      "pick_face": []
+    },
+    "SKU-0103": {
+      "reserve": [
+        "SHELF-W0096"
+      ],
+      "pick_face": []
+    },
+    "SKU-0104": {
+      "reserve": [
+        "SHELF-F10016"
+      ],
+      "pick_face": []
+    },
+    "SKU-0105": {
+      "reserve": [
+        "SHELF-F10020"
+      ],
+      "pick_face": []
+    },
+    "SKU-0106": {
+      "reserve": [
+        "SHELF-F20016"
+      ],
+      "pick_face": []
+    },
+    "SKU-0107": {
+      "reserve": [
+        "SHELF-F20020"
+      ],
+      "pick_face": []
+    },
+    "SKU-0108": {
+      "reserve": [
+        "SHELF-F30016"
+      ],
+      "pick_face": []
+    },
+    "SKU-0109": {
+      "reserve": [
+        "SHELF-F30020"
+      ],
+      "pick_face": []
+    },
+    "SKU-0110": {
+      "reserve": [
+        "SHELF-W0023"
+      ],
+      "pick_face": []
+    },
+    "SKU-0111": {
+      "reserve": [
+        "SHELF-W0103"
+      ],
+      "pick_face": []
+    },
+    "SKU-0112": {
+      "reserve": [
+        "SHELF-W0022"
+      ],
+      "pick_face": []
+    },
+    "SKU-0113": {
+      "reserve": [
+        "SHELF-W0035"
+      ],
+      "pick_face": []
+    },
+    "SKU-0114": {
+      "reserve": [
+        "SHELF-W0102"
+      ],
+      "pick_face": []
+    },
+    "SKU-0115": {
+      "reserve": [
+        "SHELF-W0115"
+      ],
+      "pick_face": []
+    },
+    "SKU-0116": {
+      "reserve": [
+        "SHELF-W0038"
+      ],
+      "pick_face": []
+    },
+    "SKU-0117": {
+      "reserve": [
+        "SHELF-W0118"
+      ],
+      "pick_face": []
+    },
+    "SKU-0118": {
+      "reserve": [
+        "SHELF-W0041"
+      ],
+      "pick_face": []
+    },
+    "SKU-0119": {
+      "reserve": [
+        "SHELF-W0121"
+      ],
+      "pick_face": []
+    },
+    "SKU-0120": {
+      "reserve": [
+        "SHELF-W0057"
+      ],
+      "pick_face": []
+    },
+    "SKU-0121": {
+      "reserve": [
+        "SHELF-W0137"
+      ],
+      "pick_face": []
+    },
+    "SKU-0122": {
+      "reserve": [
+        "SHELF-W0006"
+      ],
+      "pick_face": []
+    },
+    "SKU-0123": {
+      "reserve": [
+        "SHELF-W0086"
+      ],
+      "pick_face": []
+    },
+    "SKU-0124": {
+      "reserve": [
+        "SHELF-W0014"
+      ],
+      "pick_face": []
+    },
+    "SKU-0125": {
+      "reserve": [
+        "SHELF-W0060"
+      ],
+      "pick_face": []
+    },
+    "SKU-0126": {
+      "reserve": [
+        "SHELF-W0094"
+      ],
+      "pick_face": []
+    },
+    "SKU-0127": {
+      "reserve": [
+        "SHELF-W0140"
+      ],
+      "pick_face": []
+    },
+    "SKU-0128": {
+      "reserve": [
+        "SHELF-F10018"
+      ],
+      "pick_face": []
+    },
+    "SKU-0129": {
+      "reserve": [
+        "SHELF-F20018"
+      ],
+      "pick_face": []
+    },
+    "SKU-0130": {
+      "reserve": [
+        "SHELF-F30018"
+      ],
+      "pick_face": []
+    },
+    "SKU-0131": {
+      "reserve": [
+        "SHELF-W0025"
+      ],
+      "pick_face": []
+    },
+    "SKU-0132": {
+      "reserve": [
+        "SHELF-W0105"
+      ],
+      "pick_face": []
+    },
+    "SKU-0133": {
+      "reserve": [
+        "SHELF-W0024"
+      ],
+      "pick_face": []
+    },
+    "SKU-0134": {
+      "reserve": [
+        "SHELF-W0033"
+      ],
+      "pick_face": []
+    },
+    "SKU-0135": {
+      "reserve": [
+        "SHELF-W0079"
+      ],
+      "pick_face": []
+    },
+    "SKU-0136": {
+      "reserve": [
+        "SHELF-W0104"
+      ],
+      "pick_face": []
+    },
+    "SKU-0137": {
+      "reserve": [
+        "SHELF-W0113"
+      ],
+      "pick_face": []
+    },
+    "SKU-0138": {
+      "reserve": [
+        "SHELF-W0159"
+      ],
+      "pick_face": []
+    },
+    "SKU-0139": {
+      "reserve": [
+        "SHELF-W0036"
+      ],
+      "pick_face": []
+    },
+    "SKU-0140": {
+      "reserve": [
+        "SHELF-W0116"
+      ],
+      "pick_face": []
+    },
+    "SKU-0141": {
+      "reserve": [
+        "SHELF-W0043"
+      ],
+      "pick_face": []
+    },
+    "SKU-0142": {
+      "reserve": [
+        "SHELF-W0123"
+      ],
+      "pick_face": []
+    },
+    "SKU-0143": {
+      "reserve": [
+        "SHELF-W0055"
+      ],
+      "pick_face": []
+    },
+    "SKU-0144": {
+      "reserve": [
+        "SHELF-W0135"
+      ],
+      "pick_face": []
+    },
+    "SKU-0145": {
+      "reserve": [
+        "SHELF-W0008"
+      ],
+      "pick_face": []
+    },
+    "SKU-0146": {
+      "reserve": [
+        "SHELF-W0042"
+      ],
+      "pick_face": []
+    },
+    "SKU-0147": {
+      "reserve": [
+        "SHELF-W0088"
+      ],
+      "pick_face": []
+    },
+    "SKU-0148": {
+      "reserve": [
+        "SHELF-W0122"
+      ],
+      "pick_face": []
+    },
+    "SKU-0149": {
+      "reserve": [
+        "SHELF-W0012"
+      ],
+      "pick_face": []
+    },
+    "SKU-0150": {
+      "reserve": [
+        "SHELF-W0058"
+      ],
+      "pick_face": []
+    },
+    "SKU-0151": {
+      "reserve": [
+        "SHELF-W0092"
+      ],
+      "pick_face": []
+    },
+    "SKU-0152": {
+      "reserve": [
+        "SHELF-W0138"
+      ],
+      "pick_face": []
+    },
+    "SKU-0153": {
+      "reserve": [
+        "SHELF-W0027"
+      ],
+      "pick_face": []
+    },
+    "SKU-0154": {
+      "reserve": [
+        "SHELF-W0061"
+      ],
+      "pick_face": []
+    },
+    "SKU-0155": {
+      "reserve": [
+        "SHELF-W0107"
+      ],
+      "pick_face": []
+    },
+    "SKU-0156": {
+      "reserve": [
+        "SHELF-W0141"
+      ],
+      "pick_face": []
+    },
+    "SKU-0157": {
+      "reserve": [
+        "SHELF-W0026"
+      ],
+      "pick_face": []
+    },
+    "SKU-0158": {
+      "reserve": [
+        "SHELF-W0031"
+      ],
+      "pick_face": []
+    },
+    "SKU-0159": {
+      "reserve": [
+        "SHELF-W0077"
+      ],
+      "pick_face": []
+    },
+    "SKU-0160": {
+      "reserve": [
+        "SHELF-W0106"
+      ],
+      "pick_face": []
+    },
+    "SKU-0161": {
+      "reserve": [
+        "SHELF-W0111"
+      ],
+      "pick_face": []
+    },
+    "SKU-0162": {
+      "reserve": [
+        "SHELF-W0157"
+      ],
+      "pick_face": []
+    },
+    "SKU-0163": {
+      "reserve": [
+        "SHELF-W0034"
+      ],
+      "pick_face": []
+    },
+    "SKU-0164": {
+      "reserve": [
+        "SHELF-W0080"
+      ],
+      "pick_face": []
+    },
+    "SKU-0165": {
+      "reserve": [
+        "SHELF-W0114"
+      ],
+      "pick_face": []
+    },
+    "SKU-0166": {
+      "reserve": [
+        "SHELF-W0160"
+      ],
+      "pick_face": []
+    },
+    "SKU-0167": {
+      "reserve": [
+        "SHELF-W0045"
+      ],
+      "pick_face": []
+    },
+    "SKU-0168": {
+      "reserve": [
+        "SHELF-W0125"
+      ],
+      "pick_face": []
+    },
+    "SKU-0169": {
+      "reserve": [
+        "SHELF-W0053"
+      ],
+      "pick_face": []
+    },
+    "SKU-0170": {
+      "reserve": [
+        "SHELF-W0133"
+      ],
+      "pick_face": []
+    },
+    "SKU-0171": {
+      "reserve": [
+        "SHELF-W0010"
+      ],
+      "pick_face": []
+    },
+    "SKU-0172": {
+      "reserve": [
+        "SHELF-W0044"
+      ],
+      "pick_face": []
+    },
+    "SKU-0173": {
+      "reserve": [
+        "SHELF-W0090"
+      ],
+      "pick_face": []
+    },
+    "SKU-0174": {
+      "reserve": [
+        "SHELF-W0124"
+      ],
+      "pick_face": []
+    },
+    "SKU-0175": {
+      "reserve": [
+        "SHELF-W0056"
+      ],
+      "pick_face": []
+    },
+    "SKU-0176": {
+      "reserve": [
+        "SHELF-W0136"
+      ],
+      "pick_face": []
+    },
+    "SKU-0177": {
+      "reserve": [
+        "SHELF-W0029"
+      ],
+      "pick_face": []
+    },
+    "SKU-0178": {
+      "reserve": [
+        "SHELF-W0063"
+      ],
+      "pick_face": []
+    },
+    "SKU-0179": {
+      "reserve": [
+        "SHELF-W0109"
+      ],
+      "pick_face": []
+    },
+    "SKU-0180": {
+      "reserve": [
+        "SHELF-W0143"
+      ],
+      "pick_face": []
+    },
+    "SKU-0181": {
+      "reserve": [
+        "SHELF-W0028"
+      ],
+      "pick_face": []
+    },
+    "SKU-0182": {
+      "reserve": [
+        "SHELF-W0062"
+      ],
+      "pick_face": []
+    },
+    "SKU-0183": {
+      "reserve": [
+        "SHELF-W0075"
+      ],
+      "pick_face": []
+    },
+    "SKU-0184": {
+      "reserve": [
+        "SHELF-W0108"
+      ],
+      "pick_face": []
+    },
+    "SKU-0185": {
+      "reserve": [
+        "SHELF-W0142"
+      ],
+      "pick_face": []
+    },
+    "SKU-0186": {
+      "reserve": [
+        "SHELF-W0155"
+      ],
+      "pick_face": []
+    },
+    "SKU-0187": {
+      "reserve": [
+        "SHELF-W0032"
+      ],
+      "pick_face": []
+    },
+    "SKU-0188": {
+      "reserve": [
+        "SHELF-W0078"
+      ],
+      "pick_face": []
+    },
+    "SKU-0189": {
+      "reserve": [
+        "SHELF-W0112"
+      ],
+      "pick_face": []
+    },
+    "SKU-0190": {
+      "reserve": [
+        "SHELF-W0158"
+      ],
+      "pick_face": []
+    },
+    "SKU-0191": {
+      "reserve": [
+        "SHELF-W0047"
+      ],
+      "pick_face": []
+    },
+    "SKU-0192": {
+      "reserve": [
+        "SHELF-W0127"
+      ],
+      "pick_face": []
+    },
+    "SKU-0193": {
+      "reserve": [
+        "SHELF-W0051"
+      ],
+      "pick_face": []
+    },
+    "SKU-0194": {
+      "reserve": [
+        "SHELF-W0131"
+      ],
+      "pick_face": []
+    },
+    "SKU-0195": {
+      "reserve": [
+        "SHELF-W0046"
+      ],
+      "pick_face": []
+    },
+    "SKU-0196": {
+      "reserve": [
+        "SHELF-W0126"
+      ],
+      "pick_face": []
+    },
+    "SKU-0197": {
+      "reserve": [
+        "SHELF-W0054"
+      ],
+      "pick_face": []
+    },
+    "SKU-0198": {
+      "reserve": [
+        "SHELF-W0134"
+      ],
+      "pick_face": []
+    },
+    "SKU-0199": {
+      "reserve": [
+        "SHELF-W0065"
+      ],
+      "pick_face": []
+    },
+    "SKU-0200": {
+      "reserve": [
+        "SHELF-W0145"
+      ],
+      "pick_face": []
+    },
+    "SKU-0201": {
+      "reserve": [
+        "SHELF-W0030"
+      ],
+      "pick_face": []
+    },
+    "SKU-0202": {
+      "reserve": [
+        "SHELF-W0064"
+      ],
+      "pick_face": []
+    },
+    "SKU-0203": {
+      "reserve": [
+        "SHELF-W0073"
+      ],
+      "pick_face": []
+    },
+    "SKU-0204": {
+      "reserve": [
+        "SHELF-W0110"
+      ],
+      "pick_face": []
+    },
+    "SKU-0205": {
+      "reserve": [
+        "SHELF-W0144"
+      ],
+      "pick_face": []
+    },
+    "SKU-0206": {
+      "reserve": [
+        "SHELF-W0153"
+      ],
+      "pick_face": []
+    },
+    "SKU-0207": {
+      "reserve": [
+        "SHELF-W0076"
+      ],
+      "pick_face": []
+    },
+    "SKU-0208": {
+      "reserve": [
+        "SHELF-W0156"
+      ],
+      "pick_face": []
+    },
+    "SKU-0209": {
+      "reserve": [
+        "SHELF-W0049"
+      ],
+      "pick_face": []
+    },
+    "SKU-0210": {
+      "reserve": [
+        "SHELF-W0129"
+      ],
+      "pick_face": []
+    },
+    "SKU-0211": {
+      "reserve": [
+        "SHELF-W0048"
+      ],
+      "pick_face": []
+    },
+    "SKU-0212": {
+      "reserve": [
+        "SHELF-W0128"
+      ],
+      "pick_face": []
+    },
+    "SKU-0213": {
+      "reserve": [
+        "SHELF-W0259"
+      ],
+      "pick_face": []
+    },
+    "SKU-0214": {
+      "reserve": [
+        "SHELF-W0052"
+      ],
+      "pick_face": []
+    },
+    "SKU-0215": {
+      "reserve": [
+        "SHELF-W0132"
+      ],
+      "pick_face": []
+    },
+    "SKU-0216": {
+      "reserve": [
+        "SHELF-W0067"
+      ],
+      "pick_face": []
+    },
+    "SKU-0217": {
+      "reserve": [
+        "SHELF-W0147"
+      ],
+      "pick_face": []
+    },
+    "SKU-0218": {
+      "reserve": [
+        "SHELF-W0066"
+      ],
+      "pick_face": []
+    },
+    "SKU-0219": {
+      "reserve": [
+        "SHELF-W0071"
+      ],
+      "pick_face": []
+    },
+    "SKU-0220": {
+      "reserve": [
+        "SHELF-W0146"
+      ],
+      "pick_face": []
+    },
+    "SKU-0221": {
+      "reserve": [
+        "SHELF-W0151"
+      ],
+      "pick_face": []
+    },
+    "SKU-0222": {
+      "reserve": [
+        "SHELF-W0074"
+      ],
+      "pick_face": []
+    },
+    "SKU-0223": {
+      "reserve": [
+        "SHELF-W0154"
+      ],
+      "pick_face": []
+    },
+    "SKU-0224": {
+      "reserve": [
+        "SHELF-W0161"
+      ],
+      "pick_face": []
+    },
+    "SKU-0225": {
+      "reserve": [
+        "SHELF-W0050"
+      ],
+      "pick_face": []
+    },
+    "SKU-0226": {
+      "reserve": [
+        "SHELF-W0130"
+      ],
+      "pick_face": []
+    },
+    "SKU-0227": {
+      "reserve": [
+        "SHELF-W0257"
+      ],
+      "pick_face": []
+    },
+    "SKU-0228": {
+      "reserve": [
+        "SHELF-W0260"
+      ],
+      "pick_face": []
+    },
+    "SKU-0229": {
+      "reserve": [
+        "SHELF-W0069"
+      ],
+      "pick_face": []
+    },
+    "SKU-0230": {
+      "reserve": [
+        "SHELF-W0149"
+      ],
+      "pick_face": []
+    },
+    "SKU-0231": {
+      "reserve": [
+        "SHELF-W0068"
+      ],
+      "pick_face": []
+    },
+    "SKU-0232": {
+      "reserve": [
+        "SHELF-W0148"
+      ],
+      "pick_face": []
+    },
+    "SKU-0233": {
+      "reserve": [
+        "SHELF-W0279"
+      ],
+      "pick_face": []
+    },
+    "SKU-0234": {
+      "reserve": [
+        "SHELF-W0072"
+      ],
+      "pick_face": []
+    },
+    "SKU-0235": {
+      "reserve": [
+        "SHELF-W0152"
+      ],
+      "pick_face": []
+    },
+    "SKU-0236": {
+      "reserve": [
+        "SHELF-W0163"
+      ],
+      "pick_face": []
+    },
+    "SKU-0237": {
+      "reserve": [
+        "SHELF-W0162"
+      ],
+      "pick_face": []
+    },
+    "SKU-0238": {
+      "reserve": [
+        "SHELF-W0255"
+      ],
+      "pick_face": []
+    },
+    "SKU-0239": {
+      "reserve": [
+        "SHELF-W0258"
+      ],
+      "pick_face": []
+    },
+    "SKU-0240": {
+      "reserve": [
+        "SHELF-W0181"
+      ],
+      "pick_face": []
+    }
+  },
+  "locations": [
+    {
+      "location_id": "SHELF-F10001",
+      "warehouse_id": "F1",
+      "sku": "SKU-0007",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F10002",
+      "warehouse_id": "F1",
+      "sku": "SKU-0043",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F10003",
+      "warehouse_id": "F1",
+      "sku": "SKU-0001",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F10004",
+      "warehouse_id": "F1",
+      "sku": "SKU-0064",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F10005",
+      "warehouse_id": "F1",
+      "sku": "SKU-0008",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F10006",
+      "warehouse_id": "F1",
+      "sku": "SKU-0094",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F10007",
+      "warehouse_id": "F1",
+      "sku": "SKU-0024",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F10008",
+      "warehouse_id": "F1",
+      "sku": "SKU-0065",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F10009",
+      "warehouse_id": "F1",
+      "sku": "SKU-0009",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F10010",
+      "warehouse_id": "F1",
+      "sku": "SKU-0044",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F10011",
+      "warehouse_id": "F1",
+      "sku": "SKU-0004",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F10012",
+      "warehouse_id": "F1",
+      "sku": "SKU-0033",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F10013",
+      "warehouse_id": "F1",
+      "sku": "SKU-0045",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F10014",
+      "warehouse_id": "F1",
+      "sku": "SKU-0080",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F10015",
+      "warehouse_id": "F1",
+      "sku": "SKU-0066",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F10016",
+      "warehouse_id": "F1",
+      "sku": "SKU-0104",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F10017",
+      "warehouse_id": "F1",
+      "sku": "SKU-0095",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F10018",
+      "warehouse_id": "F1",
+      "sku": "SKU-0128",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F10019",
+      "warehouse_id": "F1",
+      "sku": "SKU-0067",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F10020",
+      "warehouse_id": "F1",
+      "sku": "SKU-0105",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F10021",
+      "warehouse_id": "F1",
+      "sku": "SKU-0046",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F10022",
+      "warehouse_id": "F1",
+      "sku": "SKU-0081",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F10023",
+      "warehouse_id": "F1",
+      "sku": "SKU-0034",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F10024",
+      "warehouse_id": "F1",
+      "sku": "SKU-0055",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F20001",
+      "warehouse_id": "F2",
+      "sku": "SKU-0010",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F20002",
+      "warehouse_id": "F2",
+      "sku": "SKU-0047",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F20003",
+      "warehouse_id": "F2",
+      "sku": "SKU-0002",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F20004",
+      "warehouse_id": "F2",
+      "sku": "SKU-0068",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F20005",
+      "warehouse_id": "F2",
+      "sku": "SKU-0011",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F20006",
+      "warehouse_id": "F2",
+      "sku": "SKU-0096",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F20007",
+      "warehouse_id": "F2",
+      "sku": "SKU-0025",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F20008",
+      "warehouse_id": "F2",
+      "sku": "SKU-0069",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F20009",
+      "warehouse_id": "F2",
+      "sku": "SKU-0012",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F20010",
+      "warehouse_id": "F2",
+      "sku": "SKU-0048",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F20011",
+      "warehouse_id": "F2",
+      "sku": "SKU-0005",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F20012",
+      "warehouse_id": "F2",
+      "sku": "SKU-0035",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F20013",
+      "warehouse_id": "F2",
+      "sku": "SKU-0049",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F20014",
+      "warehouse_id": "F2",
+      "sku": "SKU-0082",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F20015",
+      "warehouse_id": "F2",
+      "sku": "SKU-0070",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F20016",
+      "warehouse_id": "F2",
+      "sku": "SKU-0106",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F20017",
+      "warehouse_id": "F2",
+      "sku": "SKU-0097",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F20018",
+      "warehouse_id": "F2",
+      "sku": "SKU-0129",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F20019",
+      "warehouse_id": "F2",
+      "sku": "SKU-0071",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F20020",
+      "warehouse_id": "F2",
+      "sku": "SKU-0107",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F20021",
+      "warehouse_id": "F2",
+      "sku": "SKU-0050",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F20022",
+      "warehouse_id": "F2",
+      "sku": "SKU-0083",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F20023",
+      "warehouse_id": "F2",
+      "sku": "SKU-0036",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F20024",
+      "warehouse_id": "F2",
+      "sku": "SKU-0056",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F30001",
+      "warehouse_id": "F3",
+      "sku": "SKU-0013",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F30002",
+      "warehouse_id": "F3",
+      "sku": "SKU-0051",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F30003",
+      "warehouse_id": "F3",
+      "sku": "SKU-0003",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F30004",
+      "warehouse_id": "F3",
+      "sku": "SKU-0072",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F30005",
+      "warehouse_id": "F3",
+      "sku": "SKU-0014",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F30006",
+      "warehouse_id": "F3",
+      "sku": "SKU-0098",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F30007",
+      "warehouse_id": "F3",
+      "sku": "SKU-0026",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F30008",
+      "warehouse_id": "F3",
+      "sku": "SKU-0073",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F30009",
+      "warehouse_id": "F3",
+      "sku": "SKU-0015",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F30010",
+      "warehouse_id": "F3",
+      "sku": "SKU-0052",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F30011",
+      "warehouse_id": "F3",
+      "sku": "SKU-0006",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F30012",
+      "warehouse_id": "F3",
+      "sku": "SKU-0037",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F30013",
+      "warehouse_id": "F3",
+      "sku": "SKU-0053",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F30014",
+      "warehouse_id": "F3",
+      "sku": "SKU-0084",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F30015",
+      "warehouse_id": "F3",
+      "sku": "SKU-0074",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F30016",
+      "warehouse_id": "F3",
+      "sku": "SKU-0108",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F30017",
+      "warehouse_id": "F3",
+      "sku": "SKU-0099",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F30018",
+      "warehouse_id": "F3",
+      "sku": "SKU-0130",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F30019",
+      "warehouse_id": "F3",
+      "sku": "SKU-0075",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F30020",
+      "warehouse_id": "F3",
+      "sku": "SKU-0109",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F30021",
+      "warehouse_id": "F3",
+      "sku": "SKU-0054",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F30022",
+      "warehouse_id": "F3",
+      "sku": "SKU-0085",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F30023",
+      "warehouse_id": "F3",
+      "sku": "SKU-0038",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-F30024",
+      "warehouse_id": "F3",
+      "sku": "SKU-0057",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0001",
+      "warehouse_id": "W",
+      "sku": "SKU-0027",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0002",
+      "warehouse_id": "W",
+      "sku": "SKU-0076",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0003",
+      "warehouse_id": "W",
+      "sku": "SKU-0016",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0004",
+      "warehouse_id": "W",
+      "sku": "SKU-0100",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0005",
+      "warehouse_id": "W",
+      "sku": "SKU-0020",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0006",
+      "warehouse_id": "W",
+      "sku": "SKU-0122",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0007",
+      "warehouse_id": "W",
+      "sku": "SKU-0031",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0008",
+      "warehouse_id": "W",
+      "sku": "SKU-0145",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0009",
+      "warehouse_id": "W",
+      "sku": "SKU-0041",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0010",
+      "warehouse_id": "W",
+      "sku": "SKU-0171",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0011",
+      "warehouse_id": "W",
+      "sku": "SKU-0058",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0012",
+      "warehouse_id": "W",
+      "sku": "SKU-0149",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0013",
+      "warehouse_id": "W",
+      "sku": "SKU-0039",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0014",
+      "warehouse_id": "W",
+      "sku": "SKU-0124",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0015",
+      "warehouse_id": "W",
+      "sku": "SKU-0028",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0016",
+      "warehouse_id": "W",
+      "sku": "SKU-0102",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0017",
+      "warehouse_id": "W",
+      "sku": "SKU-0017",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0018",
+      "warehouse_id": "W",
+      "sku": "SKU-0078",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0019",
+      "warehouse_id": "W",
+      "sku": "SKU-0021",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0020",
+      "warehouse_id": "W",
+      "sku": "SKU-0059",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0021",
+      "warehouse_id": "W",
+      "sku": "SKU-0086",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0022",
+      "warehouse_id": "W",
+      "sku": "SKU-0112",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0023",
+      "warehouse_id": "W",
+      "sku": "SKU-0110",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0024",
+      "warehouse_id": "W",
+      "sku": "SKU-0133",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0025",
+      "warehouse_id": "W",
+      "sku": "SKU-0131",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0026",
+      "warehouse_id": "W",
+      "sku": "SKU-0157",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0027",
+      "warehouse_id": "W",
+      "sku": "SKU-0153",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0028",
+      "warehouse_id": "W",
+      "sku": "SKU-0181",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0029",
+      "warehouse_id": "W",
+      "sku": "SKU-0177",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0030",
+      "warehouse_id": "W",
+      "sku": "SKU-0201",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0031",
+      "warehouse_id": "W",
+      "sku": "SKU-0158",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0032",
+      "warehouse_id": "W",
+      "sku": "SKU-0187",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0033",
+      "warehouse_id": "W",
+      "sku": "SKU-0134",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0034",
+      "warehouse_id": "W",
+      "sku": "SKU-0163",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0035",
+      "warehouse_id": "W",
+      "sku": "SKU-0113",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0036",
+      "warehouse_id": "W",
+      "sku": "SKU-0139",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0037",
+      "warehouse_id": "W",
+      "sku": "SKU-0088",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0038",
+      "warehouse_id": "W",
+      "sku": "SKU-0116",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0039",
+      "warehouse_id": "W",
+      "sku": "SKU-0062",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0040",
+      "warehouse_id": "W",
+      "sku": "SKU-0090",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0041",
+      "warehouse_id": "W",
+      "sku": "SKU-0118",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0042",
+      "warehouse_id": "W",
+      "sku": "SKU-0146",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0043",
+      "warehouse_id": "W",
+      "sku": "SKU-0141",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0044",
+      "warehouse_id": "W",
+      "sku": "SKU-0172",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0045",
+      "warehouse_id": "W",
+      "sku": "SKU-0167",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0046",
+      "warehouse_id": "W",
+      "sku": "SKU-0195",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0047",
+      "warehouse_id": "W",
+      "sku": "SKU-0191",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0048",
+      "warehouse_id": "W",
+      "sku": "SKU-0211",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0049",
+      "warehouse_id": "W",
+      "sku": "SKU-0209",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0050",
+      "warehouse_id": "W",
+      "sku": "SKU-0225",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0051",
+      "warehouse_id": "W",
+      "sku": "SKU-0193",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0052",
+      "warehouse_id": "W",
+      "sku": "SKU-0214",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0053",
+      "warehouse_id": "W",
+      "sku": "SKU-0169",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0054",
+      "warehouse_id": "W",
+      "sku": "SKU-0197",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0055",
+      "warehouse_id": "W",
+      "sku": "SKU-0143",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0056",
+      "warehouse_id": "W",
+      "sku": "SKU-0175",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0057",
+      "warehouse_id": "W",
+      "sku": "SKU-0120",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0058",
+      "warehouse_id": "W",
+      "sku": "SKU-0150",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0059",
+      "warehouse_id": "W",
+      "sku": "SKU-0092",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0060",
+      "warehouse_id": "W",
+      "sku": "SKU-0125",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0061",
+      "warehouse_id": "W",
+      "sku": "SKU-0154",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0062",
+      "warehouse_id": "W",
+      "sku": "SKU-0182",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0063",
+      "warehouse_id": "W",
+      "sku": "SKU-0178",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0064",
+      "warehouse_id": "W",
+      "sku": "SKU-0202",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0065",
+      "warehouse_id": "W",
+      "sku": "SKU-0199",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0066",
+      "warehouse_id": "W",
+      "sku": "SKU-0218",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0067",
+      "warehouse_id": "W",
+      "sku": "SKU-0216",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0068",
+      "warehouse_id": "W",
+      "sku": "SKU-0231",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0069",
+      "warehouse_id": "W",
+      "sku": "SKU-0229",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0070",
+      "warehouse_id": "W",
+      "sku": "SKU-0001",
+      "role": "pick_face",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0071",
+      "warehouse_id": "W",
+      "sku": "SKU-0219",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0072",
+      "warehouse_id": "W",
+      "sku": "SKU-0234",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0073",
+      "warehouse_id": "W",
+      "sku": "SKU-0203",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0074",
+      "warehouse_id": "W",
+      "sku": "SKU-0222",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0075",
+      "warehouse_id": "W",
+      "sku": "SKU-0183",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0076",
+      "warehouse_id": "W",
+      "sku": "SKU-0207",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0077",
+      "warehouse_id": "W",
+      "sku": "SKU-0159",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0078",
+      "warehouse_id": "W",
+      "sku": "SKU-0188",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0079",
+      "warehouse_id": "W",
+      "sku": "SKU-0135",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0080",
+      "warehouse_id": "W",
+      "sku": "SKU-0164",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0081",
+      "warehouse_id": "W",
+      "sku": "SKU-0029",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0082",
+      "warehouse_id": "W",
+      "sku": "SKU-0077",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0083",
+      "warehouse_id": "W",
+      "sku": "SKU-0018",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0084",
+      "warehouse_id": "W",
+      "sku": "SKU-0101",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0085",
+      "warehouse_id": "W",
+      "sku": "SKU-0022",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0086",
+      "warehouse_id": "W",
+      "sku": "SKU-0123",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0087",
+      "warehouse_id": "W",
+      "sku": "SKU-0032",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0088",
+      "warehouse_id": "W",
+      "sku": "SKU-0147",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0089",
+      "warehouse_id": "W",
+      "sku": "SKU-0042",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0090",
+      "warehouse_id": "W",
+      "sku": "SKU-0173",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0091",
+      "warehouse_id": "W",
+      "sku": "SKU-0060",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0092",
+      "warehouse_id": "W",
+      "sku": "SKU-0151",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0093",
+      "warehouse_id": "W",
+      "sku": "SKU-0040",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0094",
+      "warehouse_id": "W",
+      "sku": "SKU-0126",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0095",
+      "warehouse_id": "W",
+      "sku": "SKU-0030",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0096",
+      "warehouse_id": "W",
+      "sku": "SKU-0103",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0097",
+      "warehouse_id": "W",
+      "sku": "SKU-0019",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0098",
+      "warehouse_id": "W",
+      "sku": "SKU-0079",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0099",
+      "warehouse_id": "W",
+      "sku": "SKU-0023",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0100",
+      "warehouse_id": "W",
+      "sku": "SKU-0061",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0101",
+      "warehouse_id": "W",
+      "sku": "SKU-0087",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0102",
+      "warehouse_id": "W",
+      "sku": "SKU-0114",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0103",
+      "warehouse_id": "W",
+      "sku": "SKU-0111",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0104",
+      "warehouse_id": "W",
+      "sku": "SKU-0136",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0105",
+      "warehouse_id": "W",
+      "sku": "SKU-0132",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0106",
+      "warehouse_id": "W",
+      "sku": "SKU-0160",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0107",
+      "warehouse_id": "W",
+      "sku": "SKU-0155",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0108",
+      "warehouse_id": "W",
+      "sku": "SKU-0184",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0109",
+      "warehouse_id": "W",
+      "sku": "SKU-0179",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0110",
+      "warehouse_id": "W",
+      "sku": "SKU-0204",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0111",
+      "warehouse_id": "W",
+      "sku": "SKU-0161",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0112",
+      "warehouse_id": "W",
+      "sku": "SKU-0189",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0113",
+      "warehouse_id": "W",
+      "sku": "SKU-0137",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0114",
+      "warehouse_id": "W",
+      "sku": "SKU-0165",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0115",
+      "warehouse_id": "W",
+      "sku": "SKU-0115",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0116",
+      "warehouse_id": "W",
+      "sku": "SKU-0140",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0117",
+      "warehouse_id": "W",
+      "sku": "SKU-0089",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0118",
+      "warehouse_id": "W",
+      "sku": "SKU-0117",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0119",
+      "warehouse_id": "W",
+      "sku": "SKU-0063",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0120",
+      "warehouse_id": "W",
+      "sku": "SKU-0091",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0121",
+      "warehouse_id": "W",
+      "sku": "SKU-0119",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0122",
+      "warehouse_id": "W",
+      "sku": "SKU-0148",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0123",
+      "warehouse_id": "W",
+      "sku": "SKU-0142",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0124",
+      "warehouse_id": "W",
+      "sku": "SKU-0174",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0125",
+      "warehouse_id": "W",
+      "sku": "SKU-0168",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0126",
+      "warehouse_id": "W",
+      "sku": "SKU-0196",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0127",
+      "warehouse_id": "W",
+      "sku": "SKU-0192",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0128",
+      "warehouse_id": "W",
+      "sku": "SKU-0212",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0129",
+      "warehouse_id": "W",
+      "sku": "SKU-0210",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0130",
+      "warehouse_id": "W",
+      "sku": "SKU-0226",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0131",
+      "warehouse_id": "W",
+      "sku": "SKU-0194",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0132",
+      "warehouse_id": "W",
+      "sku": "SKU-0215",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0133",
+      "warehouse_id": "W",
+      "sku": "SKU-0170",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0134",
+      "warehouse_id": "W",
+      "sku": "SKU-0198",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0135",
+      "warehouse_id": "W",
+      "sku": "SKU-0144",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0136",
+      "warehouse_id": "W",
+      "sku": "SKU-0176",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0137",
+      "warehouse_id": "W",
+      "sku": "SKU-0121",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0138",
+      "warehouse_id": "W",
+      "sku": "SKU-0152",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0139",
+      "warehouse_id": "W",
+      "sku": "SKU-0093",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0140",
+      "warehouse_id": "W",
+      "sku": "SKU-0127",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0141",
+      "warehouse_id": "W",
+      "sku": "SKU-0156",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0142",
+      "warehouse_id": "W",
+      "sku": "SKU-0185",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0143",
+      "warehouse_id": "W",
+      "sku": "SKU-0180",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0144",
+      "warehouse_id": "W",
+      "sku": "SKU-0205",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0145",
+      "warehouse_id": "W",
+      "sku": "SKU-0200",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0146",
+      "warehouse_id": "W",
+      "sku": "SKU-0220",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0147",
+      "warehouse_id": "W",
+      "sku": "SKU-0217",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0148",
+      "warehouse_id": "W",
+      "sku": "SKU-0232",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0149",
+      "warehouse_id": "W",
+      "sku": "SKU-0230",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0150",
+      "warehouse_id": "W",
+      "sku": "SKU-0002",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0151",
+      "warehouse_id": "W",
+      "sku": "SKU-0221",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0152",
+      "warehouse_id": "W",
+      "sku": "SKU-0235",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0153",
+      "warehouse_id": "W",
+      "sku": "SKU-0206",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0154",
+      "warehouse_id": "W",
+      "sku": "SKU-0223",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0155",
+      "warehouse_id": "W",
+      "sku": "SKU-0186",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0156",
+      "warehouse_id": "W",
+      "sku": "SKU-0208",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0157",
+      "warehouse_id": "W",
+      "sku": "SKU-0162",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0158",
+      "warehouse_id": "W",
+      "sku": "SKU-0190",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0159",
+      "warehouse_id": "W",
+      "sku": "SKU-0138",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0160",
+      "warehouse_id": "W",
+      "sku": "SKU-0166",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0161",
+      "warehouse_id": "W",
+      "sku": "SKU-0224",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0162",
+      "warehouse_id": "W",
+      "sku": "SKU-0237",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0163",
+      "warehouse_id": "W",
+      "sku": "SKU-0236",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0164",
+      "warehouse_id": "W",
+      "sku": "SKU-0003",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0165",
+      "warehouse_id": "W",
+      "sku": "SKU-0004",
+      "role": "pick_face",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0166",
+      "warehouse_id": "W",
+      "sku": "SKU-0005",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0167",
+      "warehouse_id": "W",
+      "sku": "SKU-0006",
+      "role": "pick_face",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0168",
+      "warehouse_id": "W",
+      "sku": "SKU-0007",
+      "role": "pick_face",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0169",
+      "warehouse_id": "W",
+      "sku": "SKU-0008",
+      "role": "pick_face",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0170",
+      "warehouse_id": "W",
+      "sku": "SKU-0009",
+      "role": "pick_face",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0171",
+      "warehouse_id": "W",
+      "sku": "SKU-0010",
+      "role": "pick_face",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0172",
+      "warehouse_id": "W",
+      "sku": "SKU-0011",
+      "role": "pick_face",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0173",
+      "warehouse_id": "W",
+      "sku": "SKU-0012",
+      "role": "pick_face",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0174",
+      "warehouse_id": "W",
+      "sku": "SKU-0013",
+      "role": "pick_face",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0175",
+      "warehouse_id": "W",
+      "sku": "SKU-0014",
+      "role": "pick_face",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0176",
+      "warehouse_id": "W",
+      "sku": "SKU-0015",
+      "role": "pick_face",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0177",
+      "warehouse_id": "W",
+      "sku": "SKU-0016",
+      "role": "pick_face",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0178",
+      "warehouse_id": "W",
+      "sku": "SKU-0017",
+      "role": "pick_face",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0179",
+      "warehouse_id": "W",
+      "sku": "SKU-0018",
+      "role": "pick_face",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0180",
+      "warehouse_id": "W",
+      "sku": "SKU-0019",
+      "role": "pick_face",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0181",
+      "warehouse_id": "W",
+      "sku": "SKU-0240",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0182",
+      "warehouse_id": "W",
+      "sku": "SKU-0020",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0183",
+      "warehouse_id": "W",
+      "sku": "SKU-0021",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0184",
+      "warehouse_id": "W",
+      "sku": "SKU-0022",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0185",
+      "warehouse_id": "W",
+      "sku": "SKU-0023",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0186",
+      "warehouse_id": "W",
+      "sku": "SKU-0024",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0187",
+      "warehouse_id": "W",
+      "sku": "SKU-0025",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0188",
+      "warehouse_id": "W",
+      "sku": "SKU-0026",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0189",
+      "warehouse_id": "W",
+      "sku": "SKU-0027",
+      "role": "pick_face",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0190",
+      "warehouse_id": "W",
+      "sku": "SKU-0028",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0191",
+      "warehouse_id": "W",
+      "sku": "SKU-0029",
+      "role": "pick_face",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0192",
+      "warehouse_id": "W",
+      "sku": "SKU-0030",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0193",
+      "warehouse_id": "W",
+      "sku": "SKU-0031",
+      "role": "pick_face",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0194",
+      "warehouse_id": "W",
+      "sku": "SKU-0032",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0195",
+      "warehouse_id": "W",
+      "sku": "SKU-0033",
+      "role": "pick_face",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0196",
+      "warehouse_id": "W",
+      "sku": "SKU-0034",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0197",
+      "warehouse_id": "W",
+      "sku": "SKU-0035",
+      "role": "pick_face",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0198",
+      "warehouse_id": "W",
+      "sku": "SKU-0036",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0199",
+      "warehouse_id": "W",
+      "sku": "SKU-0037",
+      "role": "pick_face",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0200",
+      "warehouse_id": "W",
+      "sku": "SKU-0038",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0201",
+      "warehouse_id": "W",
+      "sku": "SKU-0039",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0202",
+      "warehouse_id": "W",
+      "sku": "SKU-0040",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0203",
+      "warehouse_id": "W",
+      "sku": "SKU-0041",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0204",
+      "warehouse_id": "W",
+      "sku": "SKU-0042",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0205",
+      "warehouse_id": "W",
+      "sku": "SKU-0043",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0206",
+      "warehouse_id": "W",
+      "sku": "SKU-0044",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0207",
+      "warehouse_id": "W",
+      "sku": "SKU-0045",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0208",
+      "warehouse_id": "W",
+      "sku": "SKU-0046",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0209",
+      "warehouse_id": "W",
+      "sku": "SKU-0047",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0210",
+      "warehouse_id": "W",
+      "sku": "SKU-0048",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0211",
+      "warehouse_id": "W",
+      "sku": "SKU-0049",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0212",
+      "warehouse_id": "W",
+      "sku": "SKU-0050",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0213",
+      "warehouse_id": "W",
+      "sku": "SKU-0051",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0214",
+      "warehouse_id": "W",
+      "sku": "SKU-0052",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0215",
+      "warehouse_id": "W",
+      "sku": "SKU-0053",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0216",
+      "warehouse_id": "W",
+      "sku": "SKU-0054",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0217",
+      "warehouse_id": "W",
+      "sku": "SKU-0055",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0218",
+      "warehouse_id": "W",
+      "sku": "SKU-0056",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0219",
+      "warehouse_id": "W",
+      "sku": "SKU-0057",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0220",
+      "warehouse_id": "W",
+      "sku": "SKU-0058",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0221",
+      "warehouse_id": "W",
+      "sku": "SKU-0059",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0222",
+      "warehouse_id": "W",
+      "sku": "SKU-0060",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0223",
+      "warehouse_id": "W",
+      "sku": "SKU-0061",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0224",
+      "warehouse_id": "W",
+      "sku": "SKU-0062",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0225",
+      "warehouse_id": "W",
+      "sku": "SKU-0063",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0226",
+      "warehouse_id": "W",
+      "sku": "SKU-0064",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0227",
+      "warehouse_id": "W",
+      "sku": "SKU-0065",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0228",
+      "warehouse_id": "W",
+      "sku": "SKU-0066",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0229",
+      "warehouse_id": "W",
+      "sku": "SKU-0067",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0230",
+      "warehouse_id": "W",
+      "sku": "SKU-0068",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0231",
+      "warehouse_id": "W",
+      "sku": "SKU-0069",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0232",
+      "warehouse_id": "W",
+      "sku": "SKU-0070",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0233",
+      "warehouse_id": "W",
+      "sku": "SKU-0071",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0234",
+      "warehouse_id": "W",
+      "sku": "SKU-0072",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0235",
+      "warehouse_id": "W",
+      "sku": "SKU-0073",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0236",
+      "warehouse_id": "W",
+      "sku": "SKU-0074",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0237",
+      "warehouse_id": "W",
+      "sku": "SKU-0075",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0238",
+      "warehouse_id": "W",
+      "sku": "SKU-0076",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0239",
+      "warehouse_id": "W",
+      "sku": "SKU-0077",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0240",
+      "warehouse_id": "W",
+      "sku": "SKU-0078",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0241",
+      "warehouse_id": "W",
+      "sku": "SKU-0079",
+      "role": "pick_face",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0242",
+      "warehouse_id": "W",
+      "sku": "SKU-0080",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0243",
+      "warehouse_id": "W",
+      "sku": "SKU-0081",
+      "role": "pick_face",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0244",
+      "warehouse_id": "W",
+      "sku": "SKU-0082",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0245",
+      "warehouse_id": "W",
+      "sku": "SKU-0083",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0246",
+      "warehouse_id": "W",
+      "sku": "SKU-0084",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0247",
+      "warehouse_id": "W",
+      "sku": "SKU-0085",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0248",
+      "warehouse_id": "W",
+      "sku": "SKU-0086",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0249",
+      "warehouse_id": "W",
+      "sku": "SKU-0087",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0250",
+      "warehouse_id": "W",
+      "sku": "SKU-0088",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0251",
+      "warehouse_id": "W",
+      "sku": "SKU-0089",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0252",
+      "warehouse_id": "W",
+      "sku": "SKU-0090",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0253",
+      "warehouse_id": "W",
+      "sku": "SKU-0091",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0254",
+      "warehouse_id": "W",
+      "sku": "SKU-0092",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0255",
+      "warehouse_id": "W",
+      "sku": "SKU-0238",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0256",
+      "warehouse_id": "W",
+      "sku": "SKU-0093",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0257",
+      "warehouse_id": "W",
+      "sku": "SKU-0227",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0258",
+      "warehouse_id": "W",
+      "sku": "SKU-0239",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0259",
+      "warehouse_id": "W",
+      "sku": "SKU-0213",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0260",
+      "warehouse_id": "W",
+      "sku": "SKU-0228",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0261",
+      "warehouse_id": "W",
+      "sku": "SKU-0094",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0262",
+      "warehouse_id": "W",
+      "sku": "SKU-0095",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0263",
+      "warehouse_id": "W",
+      "sku": "SKU-0096",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0264",
+      "warehouse_id": "W",
+      "sku": "SKU-0001",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0265",
+      "warehouse_id": "W",
+      "sku": "SKU-0002",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0266",
+      "warehouse_id": "W",
+      "sku": "SKU-0003",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0267",
+      "warehouse_id": "W",
+      "sku": "SKU-0004",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0268",
+      "warehouse_id": "W",
+      "sku": "SKU-0005",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0269",
+      "warehouse_id": "W",
+      "sku": "SKU-0006",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0270",
+      "warehouse_id": "W",
+      "sku": "SKU-0007",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0271",
+      "warehouse_id": "W",
+      "sku": "SKU-0008",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0272",
+      "warehouse_id": "W",
+      "sku": "SKU-0009",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0273",
+      "warehouse_id": "W",
+      "sku": "SKU-0010",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0274",
+      "warehouse_id": "W",
+      "sku": "SKU-0011",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0275",
+      "warehouse_id": "W",
+      "sku": "SKU-0012",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0276",
+      "warehouse_id": "W",
+      "sku": "SKU-0013",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0277",
+      "warehouse_id": "W",
+      "sku": "SKU-0014",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0278",
+      "warehouse_id": "W",
+      "sku": "SKU-0015",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0279",
+      "warehouse_id": "W",
+      "sku": "SKU-0233",
+      "role": "reserve",
+      "source": "assigned"
+    },
+    {
+      "location_id": "SHELF-W0280",
+      "warehouse_id": "W",
+      "sku": "SKU-0016",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0281",
+      "warehouse_id": "W",
+      "sku": "SKU-0017",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0282",
+      "warehouse_id": "W",
+      "sku": "SKU-0018",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0283",
+      "warehouse_id": "W",
+      "sku": "SKU-0019",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0284",
+      "warehouse_id": "W",
+      "sku": "SKU-0020",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0285",
+      "warehouse_id": "W",
+      "sku": "SKU-0021",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0286",
+      "warehouse_id": "W",
+      "sku": "SKU-0022",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0287",
+      "warehouse_id": "W",
+      "sku": "SKU-0023",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0288",
+      "warehouse_id": "W",
+      "sku": "SKU-0024",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0289",
+      "warehouse_id": "W",
+      "sku": "SKU-0025",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0290",
+      "warehouse_id": "W",
+      "sku": "SKU-0026",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0291",
+      "warehouse_id": "W",
+      "sku": "SKU-0027",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0292",
+      "warehouse_id": "W",
+      "sku": "SKU-0028",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0293",
+      "warehouse_id": "W",
+      "sku": "SKU-0029",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0294",
+      "warehouse_id": "W",
+      "sku": "SKU-0030",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0295",
+      "warehouse_id": "W",
+      "sku": "SKU-0031",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0296",
+      "warehouse_id": "W",
+      "sku": "SKU-0032",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0297",
+      "warehouse_id": "W",
+      "sku": "SKU-0033",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0298",
+      "warehouse_id": "W",
+      "sku": "SKU-0034",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0299",
+      "warehouse_id": "W",
+      "sku": "SKU-0035",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0300",
+      "warehouse_id": "W",
+      "sku": "SKU-0036",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0301",
+      "warehouse_id": "W",
+      "sku": "SKU-0037",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0302",
+      "warehouse_id": "W",
+      "sku": "SKU-0038",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0303",
+      "warehouse_id": "W",
+      "sku": "SKU-0039",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0304",
+      "warehouse_id": "W",
+      "sku": "SKU-0040",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0305",
+      "warehouse_id": "W",
+      "sku": "SKU-0041",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0306",
+      "warehouse_id": "W",
+      "sku": "SKU-0042",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0307",
+      "warehouse_id": "W",
+      "sku": "SKU-0043",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0308",
+      "warehouse_id": "W",
+      "sku": "SKU-0044",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0309",
+      "warehouse_id": "W",
+      "sku": "SKU-0045",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0310",
+      "warehouse_id": "W",
+      "sku": "SKU-0046",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0311",
+      "warehouse_id": "W",
+      "sku": "SKU-0047",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0312",
+      "warehouse_id": "W",
+      "sku": "SKU-0048",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0313",
+      "warehouse_id": "W",
+      "sku": "SKU-0049",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0314",
+      "warehouse_id": "W",
+      "sku": "SKU-0050",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0315",
+      "warehouse_id": "W",
+      "sku": "SKU-0051",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0316",
+      "warehouse_id": "W",
+      "sku": "SKU-0052",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0317",
+      "warehouse_id": "W",
+      "sku": "SKU-0053",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0318",
+      "warehouse_id": "W",
+      "sku": "SKU-0054",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0319",
+      "warehouse_id": "W",
+      "sku": "SKU-0055",
+      "role": "reserve",
+      "source": "overflow"
+    },
+    {
+      "location_id": "SHELF-W0320",
+      "warehouse_id": "W",
+      "sku": "SKU-0056",
+      "role": "reserve",
+      "source": "overflow"
+    }
+  ]
+}
