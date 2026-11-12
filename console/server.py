@@ -33,7 +33,14 @@ HERE = Path(__file__).resolve().parent
 FROZEN = bool(getattr(sys, "frozen", False))
 if FROZEN:
     ROOT = Path(os.environ.get("DC_ROOT") or Path(sys.executable).resolve().parent)
+    # PyInstaller 6 把 --add-data 放进 _internal/，而 ROOT 指向 exe 同级目录：
+    # 只看 ROOT 会在 exe 版里 404（"页面全白/静态资源丢失"）。先找同级，
+    # 找不到就回落到打包内部目录，两条路都通。
     STATIC = ROOT / "console" / "static"
+    if not STATIC.is_dir():
+        _meipass = Path(getattr(sys, "_MEIPASS", ROOT))
+        if (_meipass / "console" / "static").is_dir():
+            STATIC = _meipass / "console" / "static"
 else:
     ROOT = HERE.parent
     STATIC = HERE / "static"

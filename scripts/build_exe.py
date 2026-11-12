@@ -205,9 +205,16 @@ def run_pyinstaller() -> None:
         "--noconfirm", "--clean", "--windowed",
         "--name", APP_NAME,
         "--distpath", str(DIST_ROOT),
-        "--workpath", str(BUILD_DIR),
-        "--specpath", str(BUILD_DIR),
+        # 每次用独立工作目录：上一次的 DC Twin.spec 常被扫描器/残留句柄锁住，
+        # 复用时 PyInstaller 直接 PermissionError，看起来像"打包脚本坏了"。
+        "--workpath", str(BUILD_DIR / "run"),
+        "--specpath", str(BUILD_DIR / "run"),
         "--add-data", f"{ROOT / 'console' / 'static'}{os.pathsep}console/static",
+        # scripts/ 不是包，只是被 console/server.py 直接 import 的目录：
+        # 不给 --paths，PyInstaller 打出来的 exe 一启动就 ModuleNotFoundError:
+        # scenario_tools。以前在 editable 安装的 venv 里跑恰好能过，属于运气。
+        "--paths", str(ROOT / "scripts"),
+        "--paths", str(ROOT),
         "--hidden-import", "webview.platforms.edgechromium",
         "--hidden-import", "webview.platforms.winforms",
         "--hidden-import", "scenario_tools",

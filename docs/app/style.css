@@ -267,28 +267,48 @@ body[data-tab="areas"] .layout { grid-template-columns: minmax(0, 1fr) minmax(43
 
 .tabs {
   display: flex;
+  flex-direction: column;
   flex: 0 0 auto;
-  flex-wrap: wrap;              /* 10 个页签：宁可换行，也别把字竖排 */
+  padding: 7px 8px 0;
   border-bottom: 1px solid var(--line);
-  background: var(--panel-2);
+  background: var(--panel);
+}
+/* 10 个页签固定 5×2：以前用 flex-wrap，宽一点就一行、窄一点就两行，
+   同一套界面在不同页签下跳来跳去，看着像渲染错位。 */
+.tab-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: center;
+  gap: 2px;
+}
+.tab-row + .tab-row {
+  margin-top: 2px;
+  padding-top: 3px;
+  border-top: 1px solid var(--line-2);
 }
 .tabs button {
-  flex: 1 1 auto;
-  min-width: 52px;
   appearance: none;
-  padding: 8px 6px;
+  min-width: 0;
+  padding: 7px 2px;
   border: 0;
-  border-bottom: 2px solid transparent;
+  border-radius: 7px;
   background: transparent;
-  color: var(--muted);
+  color: var(--text-2);
   font: inherit;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 550;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   cursor: pointer;
   transition: .13s;
 }
-.tabs button:hover { color: var(--text-2); background: #f4f6f9; }
-.tabs button.active { color: var(--accent); border-bottom-color: var(--accent); background: var(--panel); }
+.tabs button:hover { color: var(--text); background: #f2f5f9; }
+.tabs button.active {
+  color: var(--accent);
+  background: var(--accent-soft);
+  font-weight: 700;
+}
 
 .panes { flex: 1 1 auto; min-height: 0; position: relative; }
 .pane {
@@ -781,3 +801,155 @@ body[data-tab="plan"] .timeline { position: relative; z-index: 61; }
   padding: 6px 0 8px; margin-bottom: 2px;
   background: linear-gradient(var(--panel) 76%, transparent);
 }
+
+/* ---------------------------------------------------------------- 运营损益板 v4.8 */
+/* 损益是"看数"的活：400px 侧栏放不下瀑布+构成+敏感性+明细四张图，
+   直接做成整幅工作区（和计划书同一层），退出按钮回到原页签。 */
+#pane-ops.active {
+  position: fixed;
+  left: 0; right: 0; top: 0; bottom: 52px;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  background: var(--bg);
+  overflow: hidden;
+}
+body[data-tab="ops"] .timeline { position: relative; z-index: 71; }
+
+.board-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex: 0 0 auto;
+  padding: 10px 18px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+.board-title { font-size: 14px; font-weight: 700; display: flex; align-items: baseline; gap: 9px; }
+.board-title .muted { font-size: 11px; font-weight: 400; }
+.board-actions { display: flex; align-items: center; gap: 8px; }
+.board-actions select {
+  min-width: 220px; padding: 5px 8px; font: inherit; font-size: 11.5px;
+  color: var(--text); background: var(--panel-2);
+  border: 1px solid var(--line); border-radius: 7px;
+}
+
+.board-scroll {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto;
+  padding: 16px 18px 24px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+
+.badges { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr)); gap: 10px; }
+.kpi-card {
+  padding: 11px 13px; border-radius: 11px; background: var(--panel);
+  border: 1px solid var(--line); box-shadow: var(--sh);
+}
+.kpi-card .k { font-size: 10.5px; color: var(--muted); letter-spacing: .02em; }
+.kpi-card .v { font-size: 21px; font-weight: 700; letter-spacing: -.02em; margin-top: 2px;
+               font-variant-numeric: tabular-nums; }
+.kpi-card .u { font-size: 10.5px; color: var(--muted); margin-left: 3px; font-weight: 500; }
+.kpi-card .d { font-size: 10.5px; color: var(--muted); margin-top: 3px; }
+.kpi-card.good { border-color: #bfe6cd; }
+.kpi-card.bad { border-color: #f2cccc; }
+
+.board-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: start; }
+@media (max-width: 1180px) { .board-grid { grid-template-columns: 1fr; } }
+
+.card {
+  padding: 13px 15px 15px; border-radius: 12px;
+  background: var(--panel); border: 1px solid var(--line); box-shadow: var(--sh);
+  min-width: 0;
+}
+.card h3 { margin: 0 0 10px; font-size: 12.5px; font-weight: 700; display: flex; align-items: baseline; gap: 8px; }
+.card h3 small { font-size: 10.5px; color: var(--muted); font-weight: 400; }
+
+/* 表格 */
+.table-wrap { overflow-x: auto; }
+table.tbl { width: 100%; border-collapse: collapse; font-size: 11.5px; font-variant-numeric: tabular-nums; }
+table.tbl th {
+  position: sticky; top: 0; z-index: 1;
+  padding: 6px 9px; text-align: left; font-weight: 600; font-size: 10.5px;
+  letter-spacing: .02em; color: var(--muted);
+  background: var(--panel-2); border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+table.tbl td { padding: 6px 9px; border-bottom: 1px solid var(--line-2); }
+table.tbl td.n, table.tbl th.n { text-align: right; }
+table.tbl tr:hover td { background: #fafbfd; }
+table.tbl tr.sum td { font-weight: 700; background: var(--panel-2); border-top: 1px solid var(--line); }
+table.tbl tr.total td { font-weight: 700; font-size: 12.5px; }
+.pos { color: var(--ok); }
+.neg { color: var(--bad); }
+
+/* 图表容器 */
+.chart { width: 100%; max-height: 320px; display: block; overflow: visible; }
+.chart text { font-size: 10.5px; fill: var(--text-2); font-variant-numeric: tabular-nums; }
+.chart .ax { stroke: #dfe5ee; stroke-width: 1; }
+.chart .gl { stroke: var(--line-2); stroke-width: 1; stroke-dasharray: 3 3; }
+.chart .lbl { fill: var(--muted); font-size: 10px; }
+
+.legend-inline { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; font-size: 10.5px; color: var(--text-2); }
+.legend-inline i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+
+.diag { display: flex; flex-direction: column; gap: 8px; }
+.diag-row {
+  display: grid; grid-template-columns: 20px 1fr; gap: 9px;
+  padding: 9px 11px; border-radius: 9px; font-size: 11.5px; line-height: 1.6;
+  background: var(--panel-2); border: 1px solid var(--line-2);
+}
+.diag-row .ic { font-weight: 800; color: var(--accent); text-align: center; }
+.diag-row.warn { background: #fffaf0; border-color: #f6e3bb; }
+.diag-row.warn .ic { color: var(--warn); }
+.diag-row.bad { background: #fdf4f4; border-color: #f3d2d2; }
+.diag-row.bad .ic { color: var(--bad); }
+.diag-row.ok { background: var(--ok-soft); border-color: #c5e9d3; }
+.diag-row.ok .ic { color: var(--ok); }
+.diag-row b { font-variant-numeric: tabular-nums; }
+
+/* 场景列表：以前直接复用 .item 的三列栅格，标题被塞进 10px 的圆点列，
+   中文变成一字一行（截图里那堆竖排字）。场景条自带一套栅格。 */
+.scen-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  background: var(--panel);
+  cursor: pointer;
+  transition: .12s;
+}
+.scen-item:hover { border-color: #cfd6e0; background: #fafbfd; }
+.scen-item.sel { border-color: var(--accent); background: var(--accent-soft); }
+.scen-item .nm { font-size: 12px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.scen-item .mt { grid-column: 1 / -1; font-size: 10.5px; color: var(--muted);
+                 overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.scen-item .kd {
+  padding: 1px 7px; border-radius: 999px; font-size: 10px; font-weight: 600;
+  background: #eef2f8; color: #64748b; white-space: nowrap;
+}
+.scen-item .kd.custom { background: var(--accent-soft); color: var(--accent); }
+
+.form.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 8px 18px; }
+
+.mini-seg { display: inline-flex; padding: 1px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel-2); }
+.mini-seg button {
+  appearance: none; padding: 2px 8px; border: 0; border-radius: 4px;
+  background: transparent; color: var(--text-2); font: inherit; font-size: 10.5px; cursor: pointer;
+}
+.mini-seg button.on { background: var(--panel); color: var(--accent); font-weight: 650; box-shadow: 0 1px 2px rgba(16,24,40,.12); }
+
+.field select.sel {
+  width: 100%; padding: 5px 6px; font: inherit; font-size: 11.5px;
+  color: var(--text); background: var(--panel);
+  border: 1px solid var(--line); border-radius: 5px;
+}
+
+/* 策略下拉比数字输入框宽：96px 只够显示"最近的车优…" */
+.form .field { grid-template-columns: 1fr 132px; }

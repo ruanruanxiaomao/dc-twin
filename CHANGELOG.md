@@ -4,6 +4,59 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2026-11-12
+
+The console was readable but not usable: two of its ten tabs were a rendering bug,
+the P&L lived in a 400 px column with no chart, the 3D view was a wall of
+overlapping labels, and the dispatch rule was a constant in the engine.
+
+### Fixed
+
+- The tab bar wrapped at 7+3 in a 400 px sidebar and 10+0 at 40vw, so the same
+  screen looked broken depending on which tab you were on. It is now a fixed
+  5 x 2 grid at every width.
+- Scenario cards reused `.item`'s `10px 1fr auto` grid, so the title landed in
+  the 10 px dot column and Chinese text rendered one character per line
+  (screenshot evidence). They have their own `.scen-item` grid now.
+
+### Added
+
+- **Operations board.** The 运营 tab is a full-width workspace: 6 KPI cards,
+  a waterfall (revenue -> variable -> fixed -> operating profit), a cost donut,
+  a sensitivity tornado, a per-run profit comparison with a table, the full
+  P&L statement with subtotals, a diagnosis block ("short X orders of
+  breakeven, and a longer shift cannot close it"), and the ledger. Charts are
+  hand-written SVG - the packaged exe has no network, so no chart library.
+- **Pluggable policies.** `DISPATCH_RULES` (nearest_first / farthest_first /
+  highest_soc / lowest_soc / least_completed) and `CHARGE_POLICIES`
+  (opportunistic / threshold) replace the hard-coded picks in `_assign` and
+  `_run_robot`. A scenario's `overrides` now carries `dispatch.policy`,
+  `battery.charge_policy` and `dispatch.battery_reserve_pct`, so a policy is
+  saved the same way a scenario is - no second config format. Unknown names
+  raise instead of silently falling back (a silent fallback invalidates any
+  A/B result).
+- 3D label declutter: greedy screen-space culling over the 21 area labels, with
+  a 全部 / 仅分区 / 关 switch. Full-scene view keeps 8-10 non-overlapping
+  labels instead of 21 stacked ones.
+
+### Measured
+
+Same 1800 s baseline, only the dispatch rule changed:
+
+| rule | completed | distance | charge |
+|---|---|---|---|
+| nearest_first | 38 | 3561 m | 3 |
+| highest_soc | 27 | 3164 m | 3 |
+| farthest_first | 23 | 3330 m | 3 |
+
+nearest_first wins on throughput but is not the cheapest in metres - exactly the
+trade-off a saved policy pair is supposed to expose.
+
+### Verification
+
+pytest 65 (adds tests/test_policies.py), validate 40/40, KPI tick 50 / analytic
+25, WEBAPP_OK, DRIFT_OK, CLAIMS_OK.
+
 ## [0.10.0] - 2026-11-11
 
 Docks finally have a duration and an occupancy. Before this, a dock only had one

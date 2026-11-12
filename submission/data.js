@@ -1,5 +1,5 @@
 window.DC_SUBMISSION = {
-  "generated_at": "2026-11-11T15:43:49+00:00",
+  "generated_at": "2026-11-12T04:05:15+00:00",
   "project": {
     "name": "配送中心数字孪生 · DC Twin Studio",
     "tagline": "从一张布局图纸，到可仿真、可算账、可定制的运营孪生",
@@ -26721,8 +26721,8 @@ window.DC_SUBMISSION = {
       {
         "group": "核心脚本",
         "path": "scripts/sim_engine.py",
-        "bytes": 82323,
-        "size": "80.4 KB",
+        "bytes": 84426,
+        "size": "82.4 KB",
         "note": "tick 级离散事件仿真引擎"
       },
       {
@@ -26777,8 +26777,8 @@ window.DC_SUBMISSION = {
       {
         "group": "核心脚本",
         "path": "scripts/scenario_tools.py",
-        "bytes": 15322,
-        "size": "15.0 KB",
+        "bytes": 15976,
+        "size": "15.6 KB",
         "note": "自定义场景 校验/试算/保存/运行"
       },
       {
@@ -26903,8 +26903,8 @@ window.DC_SUBMISSION = {
       {
         "group": "开源交付 / 文档",
         "path": "README.md",
-        "bytes": 17826,
-        "size": "17.4 KB",
+        "bytes": 19786,
+        "size": "19.3 KB",
         "note": "Hero README 与能力边界"
       },
       {
@@ -26959,8 +26959,8 @@ window.DC_SUBMISSION = {
       {
         "group": "开源交付 / 文档",
         "path": "CHANGELOG.md",
-        "bytes": 20027,
-        "size": "19.6 KB",
+        "bytes": 22462,
+        "size": "21.9 KB",
         "note": "版本记录"
       },
       {
@@ -26987,8 +26987,8 @@ window.DC_SUBMISSION = {
       {
         "group": "开源交付 / 文档",
         "path": "console/server.py",
-        "bytes": 48671,
-        "size": "47.5 KB",
+        "bytes": 49125,
+        "size": "48.0 KB",
         "note": "本地控制台服务"
       },
       {

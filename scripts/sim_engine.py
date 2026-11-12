@@ -194,6 +194,18 @@ class EventLog:
         self.f.close()
 
 
+#: 派单规则表。键就是 config/scenarios/*.json 里 overrides["dispatch.policy"] 的取值。
+#: 加一个键 = 多一种可保存、可对比的策略；引擎里不再写死"最近的车"。
+DISPATCH_RULES = {
+    "nearest_first":   lambda r, o, sim: math.dist(r.pos, o["pick_xy"]),
+    "farthest_first":  lambda r, o, sim: -math.dist(r.pos, o["pick_xy"]),
+    "highest_soc":     lambda r, o, sim: -r.soc_pct,
+    "lowest_soc":      lambda r, o, sim: r.soc_pct,
+    "least_completed": lambda r, o, sim: r.completed,
+}
+CHARGE_POLICIES = ("opportunistic", "threshold")
+
+
 class Robot:
     STATES = ("IDLE", "ASSIGNED", "MOVING_PICK", "PICKING", "MOVING_DROP",
               "DROPPING", "RETURNING", "TO_CHARGER", "CHARGING", "FAULT", "WAITING")
@@ -364,6 +376,20 @@ class Simulation:
                                   + self.model["safety_margin_m"]), 4)
         self.dwell = cfg["agv"]["dwell_pick_s"]
         self.overrides = self.sc.get("overrides", {})
+        # 策略层：派单规则 / 充电策略 / 电量保留。全部可由场景 overrides 覆盖，
+        # 因为场景本来就能保存，所以"自定义策略"= 存一个场景，不需要第二套存档。
+        self.dispatch_rule = str(self.overrides.get(
+            "dispatch.policy", self.spec["dispatch"].get("policy", "nearest_first")))
+        if self.dispatch_rule not in DISPATCH_RULES:
+            raise ValueError("unknown dispatch.policy: %s (known: %s)"
+                             % (self.dispatch_rule, ", ".join(sorted(DISPATCH_RULES))))
+        self.charge_policy = str(self.overrides.get(
+            "battery.charge_policy", self.spec["battery"].get("charge_policy", "opportunistic")))
+        if self.charge_policy not in CHARGE_POLICIES:
+            raise ValueError("unknown battery.charge_policy: %s (known: %s)"
+                             % (self.charge_policy, ", ".join(CHARGE_POLICIES)))
+        self.reserve_pct = float(self.overrides.get(
+            "dispatch.battery_reserve_pct", self.reserve_pct))
         self.per_hour = float(self.overrides.get("demand.orders.per_hour",
                                                  self.demand["orders"]["per_hour"]))
         self.n_robots = self._fleet_size()
@@ -875,7 +901,8 @@ class Simulation:
             cand = [r for r in idle if r.wid == order["warehouse"]]
             if not cand:
                 continue
-            r = min(cand, key=lambda x: math.dist(x.pos, order["pick_xy"]))
+            rule = DISPATCH_RULES[self.dispatch_rule]
+            r = min(cand, key=lambda x: rule(x, order, self))
             # An explicit, independently recomputable preemption fact: the
             # nearest robot in the warehouse is unavailable (FAULT), so this
             # order is handed to the next-best idle robot. Without this event
@@ -1201,10 +1228,15 @@ class Simulation:
         if r.state == "IDLE":
             r.soc = max(0.0, r.soc - r.idle_kw * dt / 3600.0)
             r.energy_out += r.idle_kw * dt / 3600.0
-            if r.soc_pct < self.critical_pct:
-                self.log.emit(t, "BATTERY_CRITICAL", agent=r.id,
-                              soc_pct=round(r.soc_pct, 3))
-                self._start_charge(r, t)
+            # opportunistic（默认）：掉到 critical 才充，任务优先；
+            # threshold：低于 low_soc 就找空档充，牺牲一点可用率换"不趴窝"。
+            floor_pct = (self.spec["battery"]["low_soc_pct"]
+                         if self.charge_policy == "threshold" else self.critical_pct)
+            if r.soc_pct < floor_pct:
+                if r.soc_pct < self.critical_pct:
+                    self.log.emit(t, "BATTERY_CRITICAL", agent=r.id,
+                                  soc_pct=round(r.soc_pct, 3))
+                self._start_charge(r, t, mode=self.charge_policy)
                 return
         before = r.yields
         before_d = r.detours

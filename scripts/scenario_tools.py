@@ -117,6 +117,9 @@ def list_scenarios():
             "per_hour": d.get("overrides", {}).get("demand.orders.per_hour"),
             "fleet_size": d.get("overrides", {}).get("fleet.size"),
             "mix": d.get("overrides", {}).get("demand.orders.mix"),
+            # 策略也进列表：场景之间的差别不只是单量/车队，"怎么派单"同样是变量
+            "dispatch": d.get("overrides", {}).get("dispatch.policy", "nearest_first"),
+            "charge": d.get("overrides", {}).get("battery.charge_policy", "opportunistic"),
             "disruptions": d.get("disruptions", []),
             "assertions": d.get("assertions", []),
             "path": str(p.relative_to(ROOT)).replace("\\", "/"),

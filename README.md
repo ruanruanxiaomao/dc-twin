@@ -28,11 +28,53 @@ python dc_app.pyw          # or double-click 启动驾驶舱.bat
 window (pywebview → WebView2): it starts the console server in-process and loads
 the same UI described below. Ten panes cover the whole project — 3D twin,
 vehicles, orders, acceptance, parameters, artefacts, operations, scenarios,
-the 39-metric dictionary, the 21 functional areas, and the full plan document.
+the 50-metric dictionary, the 21 functional areas, and the full plan document.
+The pane list is a fixed 5 x 2 grid, so it does not reflow as the sidebar width
+changes between tabs.
 
 If pywebview/WebView2 is unavailable it falls back to an Edge/Chrome `--app`
 window, then to the default browser. `启动驾驶舱_Tk经典版.bat` still opens the
 legacy Tk cockpit.
+
+## Policies are data now, not constants
+
+Dispatch and charging used to be literals inside the engine — `min(idle, key=distance)`
+and "charge below critical". That made the console a viewer with a sliders panel.
+Both are now lookup tables, and the choice lives in the scenario document:
+
+```json
+{"overrides": {"dispatch.policy": "highest_soc",
+               "battery.charge_policy": "threshold",
+               "dispatch.battery_reserve_pct": 25}}
+```
+
+`DISPATCH_RULES` ships nearest_first / farthest_first / highest_soc / lowest_soc /
+least_completed; `CHARGE_POLICIES` ships opportunistic / threshold. An unknown
+name raises instead of falling back, because a silent fallback turns an A/B run
+into two copies of the same experiment. Saving a policy is saving a scenario —
+there is no second config format to keep in sync.
+
+Same 1800 s baseline, only the rule changed:
+
+| rule | completed | distance | charge starts |
+|---|---|---|---|
+| nearest_first | 38 | 3561 m | 3 |
+| highest_soc | 27 | 3164 m | 3 |
+| farthest_first | 23 | 3330 m | 3 |
+
+## Where the money goes
+
+The 运营 pane is a full-width workspace, not a card in a 400 px column: six KPI
+cards, a revenue → variable → fixed → operating-profit waterfall, a cost donut,
+a sensitivity tornado, per-run profit comparison, the P&L statement with
+subtotals, and a diagnosis paragraph that says how far the shift is from
+breakeven and which lever moves the number. Charts are hand-written SVG so the
+packaged exe works with no network.
+
+On the 1 h baseline the honest reading is uncomfortable and therefore useful:
+revenue 192.90, fixed cost 750.73, operating profit −566.63, breakeven 155
+orders against 38 completed. Fixed cost is 98.8% of total cost, so "run longer"
+cannot close the gap — only more orders or a higher price per order can.
 
 ## Docks have a duration now
 

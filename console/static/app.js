@@ -775,6 +775,12 @@ function bindView3d() {
   $('chkFollow').addEventListener('change', (e) => {
     if (viewer) viewer.setFollow(e.target.checked);
   });
+  $('labelMode').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-mode]');
+    if (!b) return;
+    [...$('labelMode').children].forEach((x) => x.classList.toggle('on', x === b));
+    if (viewer) viewer.setLabelMode(b.dataset.mode);
+  });
   $('btnFit3d').addEventListener('click', () => { if (viewer) viewer.preset('iso'); });
 }
 
@@ -1316,7 +1322,8 @@ function switchTab(name) {
   // 直接设栅格，不依赖属性选择器（媒体查询可能盖掉，调试过一次）
   const grid = document.querySelector('.layout');
   if (grid) grid.style.gridTemplateColumns = WIDE_TAB[name] || '';
-  [...$('tabs').children].forEach((b) => b.classList.toggle('active', b.dataset.tab === name));
+  [...$('tabs').querySelectorAll('button[data-tab]')]
+    .forEach((b) => b.classList.toggle('active', b.dataset.tab === name));
   document.querySelectorAll('.pane').forEach((p) => p.classList.toggle('active', p.id === 'pane-' + name));
   if (name === 'kpi') loadKpi().catch((e) => { $('kpiSub').textContent = '加载失败：' + e.message; });
   if (name === 'areas') areasOpen().catch((e) => {

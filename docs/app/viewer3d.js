@@ -117,8 +117,8 @@ export async function create(canvas, opts = {}) {
   }
 
   const PRESETS = {
-    iso: () => frameCamera(new THREE.Vector3(0.62, 0.78, 0.72), 0.84),
-    top: () => frameCamera(new THREE.Vector3(0.001, 1, 0.02), 0.86),
+    iso: () => frameCamera(new THREE.Vector3(0.62, 0.78, 0.72), 0.66),
+    top: () => frameCamera(new THREE.Vector3(0.001, 1, 0.02), 0.74),
     // 近景对准选中车；没选中就看 W 仓中部
     close: () => {
       const tgt = selId && agents[selId]
@@ -218,7 +218,7 @@ export async function create(canvas, opts = {}) {
                                            depthTest: false, depthWrite: false,
                                            sizeAttenuation: false });
     const sp = new THREE.Sprite(mat);
-    const h = 0.030;                       // 约占视口高度的 3%
+    const h = 0.026;                       // 约占视口高度的 2.6%（3% 时标签块太抢眼）
     sp.scale.set(h * cv.width / cv.height, h, 1);
     sp.renderOrder = 30;
     return sp;
@@ -263,6 +263,7 @@ export async function create(canvas, opts = {}) {
         const sp = labelSprite(a.name || a.id, a.color || '#0ea5e9');
         sp.position.set((x0 + x1) / 2, 2.4, -(z0 + z1) / 2);
         sp.userData.areaId = a.id;
+        sp.userData.kind = 'rect';
         areaGroup.add(sp);
         areaLabels.push(sp);
         areaPicks.push(sp);
@@ -280,6 +281,7 @@ export async function create(canvas, opts = {}) {
         const sp = labelSprite(a.name || a.id, a.color || '#0ea5e9');
         sp.position.set(a.xy[0], 1.5, -a.xy[1]);
         sp.userData.areaId = a.id;
+        sp.userData.kind = 'dot';
         areaGroup.add(sp);
         areaLabels.push(sp);
         areaPicks.push(sp);
@@ -289,6 +291,53 @@ export async function create(canvas, opts = {}) {
 
   setAreas(opts.areas || []);
   areaGroup.visible = opts.areasVisible !== false;
+
+  // ---- 标签降噪 ----
+  // 21 个功能区里 18 个是挂靠小圆点，从整场斜视看过去全挤在仓库中部；
+  // 关掉整层会丢信息、全开又糊成一片。做法：按屏幕矩形做贪心去重——
+  // 物理区（有地面板）优先，谁先占住屏幕位置谁留下，重叠的隐藏。
+  // 缩小到一定距离只留物理区，放大后再把小圆点放出来。
+  let labelMode = 'all';        // all | key | off
+  const _proj = new THREE.Vector3();
+
+  function declutter() {
+    if (!areaLabels.length) return;
+    const W = renderer.domElement.clientWidth || 1;
+    const H = renderer.domElement.clientHeight || 1;
+    if (labelMode === 'off' || !areaGroup.visible) {
+      for (const sp of areaLabels) sp.visible = false;
+      return;
+    }
+    // 小圆点（逻辑区）也一起参与去重：不按距离硬关，让贪心算法自己挑——
+    // 整场视角下平均能留下 6–9 个不重叠的，比"只剩 3 个物理区"信息量高。
+    const showDots = labelMode === 'all';
+
+    const cands = [];
+    for (const sp of areaLabels) {
+      const kind = sp.userData.kind || 'dot';
+      sp.getWorldPosition(_proj);
+      _proj.project(camera);
+      if (_proj.z > 1 || _proj.z < -1) { sp.visible = false; continue; }
+      const x = (_proj.x + 1) / 2 * W;
+      const y = (1 - _proj.y) / 2 * H;
+      if (x < -60 || x > W + 60 || y < -30 || y > H + 30) { sp.visible = false; continue; }
+      const hPx = sp.scale.y * H;
+      const wPx = sp.scale.x * H;
+      const box = [x - wPx / 2, y - hPx / 2, x + wPx / 2, y + hPx / 2];
+      const priority = (kind === 'rect' ? 0 : showDots ? 2 : 9) + _proj.z;
+      cands.push({ sp, box, priority, kind });
+    }
+    cands.sort((a, b) => a.priority - b.priority);
+
+    const taken = [];
+    const hit = (a, b) => a[0] < b[2] && b[0] < a[2] && a[1] < b[3] && b[1] < a[3];
+    for (const c of cands) {
+      if (c.kind === 'dot' && !showDots) { c.sp.visible = false; continue; }
+      if (taken.some((t) => hit(t, c.box))) { c.sp.visible = false; continue; }
+      taken.push(c.box);
+      c.sp.visible = true;
+    }
+  }
 
   // ---- 状态 ----
   let selId = null;
@@ -375,6 +424,7 @@ export async function create(canvas, opts = {}) {
     if (o) opts.onPick(o.name);
   });
 
+  let frameNo = 0;
   function loop() {
     if (disposed) return;
     raf = requestAnimationFrame(loop);
@@ -388,6 +438,8 @@ export async function create(canvas, opts = {}) {
       camera.position.copy(controls.target).add(offset);
     }
     controls.update();
+    // 标签去重每 4 帧做一次：字体大小随相机变，逐帧算没必要
+    if (++frameNo % 4 === 0) declutter();
     renderer.render(scene, camera);
   }
   loop();
@@ -410,6 +462,7 @@ export async function create(canvas, opts = {}) {
     setFollow(v) { follow = !!v; },
     setAreas,
     setAreasVisible(v) { areaGroup.visible = !!v; },
+    setLabelMode(m) { labelMode = m || 'all'; frameNo = 3; },
     areaCount() { return areaPicks.length / 2; },
     setVisible(v) {
       visible = !!v;

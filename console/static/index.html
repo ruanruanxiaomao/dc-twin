@@ -58,6 +58,12 @@
         <button class="btn mini" data-cam="top">俯视</button>
         <button class="btn mini" data-cam="close">近景</button>
         <span class="sep"></span>
+        <span class="muted">标签</span>
+        <div class="mini-seg" id="labelMode">
+          <button data-mode="all" class="on">全部</button>
+          <button data-mode="key">仅分区</button>
+          <button data-mode="off">关</button>
+        </div>
         <label class="tog"><input type="checkbox" id="chkFollow"> 跟随选中车</label>
         <label class="tog"><input type="checkbox" id="chkAreas3d" checked> 功能区</label>
         <span class="sep"></span>
@@ -77,16 +83,20 @@
 
   <aside class="side">
     <nav class="tabs" id="tabs">
-      <button data-tab="agv" class="active">车辆</button>
-      <button data-tab="orders">订单</button>
-      <button data-tab="audit">验收</button>
-      <button data-tab="params">参数</button>
-      <button data-tab="artifacts">产物</button>
-      <button data-tab="ops">运营</button>
-      <button data-tab="scenarios">场景</button>
-      <button data-tab="kpi">指标</button>
-      <button data-tab="areas">功能区</button>
-      <button data-tab="plan">计划书</button>
+      <div class="tab-row">
+        <button data-tab="agv" class="active">车辆</button>
+        <button data-tab="orders">订单</button>
+        <button data-tab="kpi">指标</button>
+        <button data-tab="ops">运营</button>
+        <button data-tab="scenarios">场景</button>
+      </div>
+      <div class="tab-row">
+        <button data-tab="areas">功能区</button>
+        <button data-tab="params">参数</button>
+        <button data-tab="audit">验收</button>
+        <button data-tab="artifacts">产物</button>
+        <button data-tab="plan">计划书</button>
+      </div>
     </nav>
 
     <div class="panes">
@@ -139,21 +149,62 @@
       </div>
 
       <div class="pane" id="pane-ops">
-        <div id="opsBadges"></div>
-        <div class="pane-sub">选择运行（损益来源：事件溯源账本）</div>
-        <select id="opsRun" style="width:100%;padding:6px;margin-bottom:8px"></select>
-        <div id="opsKpis"></div>
-        <div class="pane-sub">损益瀑布</div>
-        <div id="opsWaterfall"></div>
-        <div class="pane-sub">场景对比（利润差）</div>
-        <div id="opsCompare"></div>
-        <div class="pane-sub">账本分录（前 30 笔）</div>
-        <div class="list" id="opsLedger"></div>
-        <div class="pane-sub">价格参数（写回 config/cost_spec.json）</div>
-        <div class="form" id="opsPriceForm"></div>
-        <div class="row-actions">
-          <button class="btn" id="btnSavePrice">保存价格</button>
-          <span class="muted" id="priceMsg"></span>
+        <div class="board-bar">
+          <div class="board-title">运营与损益
+            <span class="muted" id="opsSub">事件溯源账本 · 内部管理会计口径</span>
+          </div>
+          <div class="board-actions">
+            <select id="opsRun" title="选择运行"></select>
+            <button class="btn mini" id="btnOpsClose">收起 ✕</button>
+          </div>
+        </div>
+
+        <div class="board-scroll">
+          <div id="opsBadges" class="badges"></div>
+          <div class="kpi-grid" id="opsKpis"></div>
+
+          <div class="board-grid">
+            <section class="card">
+              <h3>损益瀑布 <small>收入 → 变动成本 → 固定成本 → 运营利润</small></h3>
+              <div id="opsWaterfall"></div>
+            </section>
+            <section class="card">
+              <h3>成本构成 <small>按科目占比</small></h3>
+              <div id="opsDonut"></div>
+            </section>
+            <section class="card">
+              <h3>敏感性 <small>关键参数 ±20% 对利润的影响</small></h3>
+              <div id="opsTornado"></div>
+            </section>
+            <section class="card">
+              <h3>场景对比 <small>每个场景的运营利润</small></h3>
+              <div id="opsCompare"></div>
+            </section>
+          </div>
+
+          <section class="card">
+            <h3>损益明细 <small>来自 pnl.json 的科目余额</small></h3>
+            <div id="opsStatement"></div>
+          </section>
+
+          <section class="card">
+            <h3>亏损诊断 <small>与盈亏平衡点的差距</small></h3>
+            <div id="opsDiagnosis"></div>
+          </section>
+
+          <section class="card">
+            <h3>账本分录 <small>前 40 笔，可追溯至事件 seq</small></h3>
+            <div class="table-wrap" id="opsLedger"></div>
+          </section>
+
+          <section class="card">
+            <h3>价格参数 <small>写回 config/cost_spec.json</small></h3>
+            <div class="form cols" id="opsPriceForm"></div>
+            <div class="row-actions">
+              <button class="btn primary" id="btnSavePrice">保存价格</button>
+              <span class="muted" id="priceMsg"></span>
+            </div>
+          </section>
         </div>
       </div>
 
