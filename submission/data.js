@@ -1,5 +1,5 @@
 window.DC_SUBMISSION = {
-  "generated_at": "2026-11-12T04:05:15+00:00",
+  "generated_at": "2026-11-12T04:10:34+00:00",
   "project": {
     "name": "配送中心数字孪生 · DC Twin Studio",
     "tagline": "从一张布局图纸，到可仿真、可算账、可定制的运营孪生",

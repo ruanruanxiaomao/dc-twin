@@ -324,17 +324,20 @@
     body += `<text x="${cx}" y="${cy + 15}" text-anchor="middle" font-size="15" font-weight="700" `
       + `fill="#121821">${money(total)}</text>`;
     const legend = items.slice(0, 6).map(([name, v], i) =>
-      `<div><i style="background:${DONUT[i % DONUT.length]}"></i>${esc(name)} `
+      `<div class="lg"><i style="background:${DONUT[i % DONUT.length]}"></i>${esc(name)} `
       + `<b>${f2(v)}</b> <span class="muted">${pct(v / total)}</span></div>`).join('');
-    return svg(W, H, body, 'aria-label="成本构成"')
-      + `<div class="legend-inline">${legend}</div>`;
+    // 环形图跟着卡片宽度放大会变成一整屏的甜甜圈；限宽后居中
+    // 环形图跟着卡片宽度放大会变成一整屏的甜甜圈；限宽 + 图例挪到右侧
+    return `<div class="donut-row"><div class="donut-wrap">`
+      + `${svg(W, H, body, 'aria-label="成本构成"')}</div>`
+      + `<div class="legend-col">${legend}</div></div>`;
   }
 
   /* 敏感性龙卷风：每行一个参数，以基准利润为中线，左右各一条 */
   function tornado(sens, base) {
     const rows = Object.entries(sens || {}).map(([k, v]) => [k, v]);
     if (!rows.length) return '<div class="muted">没有敏感性数据</div>';
-    const W = 620, rowH = 44, H = rows.length * rowH + 34, padL = 168, padR = 74;
+    const W = 620, rowH = 44, H = rows.length * rowH + 34, padL = 196, padR = 74;
     const vals = rows.flatMap(([, v]) => [v.low, v.high, base]).filter((x) => typeof x === 'number');
     const lo = Math.min(...vals), hi = Math.max(...vals), span = Math.max(hi - lo, 1);
     const x = (v) => padL + (v - lo) / span * (W - padL - padR);
@@ -349,7 +352,7 @@
       b += `<circle cx="${x(v.high)}" cy="${cy + 6.5}" r="3.4" fill="${C.profit}"/>`;
       // 备注名最长 14 个汉字：再长就压到图里去了，宁可截断留 tooltip
       const note = (v.note || k).replace('，', ' · ');
-      const short = note.length > 15 ? note.slice(0, 14) + '…' : note;
+      const short = note.length > 17 ? note.slice(0, 16) + '…' : note;
       b += `<text x="${padL - 10}" y="${cy + 10}" text-anchor="end" class="lbl">`
         + `<title>${esc(note)}</title>${esc(short)}</text>`;
       const d = (x2) => (x2 - base >= 0 ? '+' : '') + f2(x2 - base);

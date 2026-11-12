@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
   "kind": "webapp_snapshot",
-  "generated_at": "2026-11-12T04:05:15+00:00",
-  "commit": "fc4c8d2",
+  "generated_at": "2026-11-12T04:09:24+00:00",
+  "commit": "a8dd8cf",
   "glb": "out/dc_preview.glb",
   "api": {
     "bootstrap": 218987,
@@ -89,8 +89,8 @@
       "sha256": "92b0349d03f257b0bb7bddd3ed55806e2e3490269f15bf8129dc80b41fc05906"
     },
     "ops.js": {
-      "bytes": 32107,
-      "sha256": "a0898dab91c77c6af7c1e6403c51476ae48c948be114ea31a3de43465b4f88d8"
+      "bytes": 32380,
+      "sha256": "c6efefa23aa17159f6933e31afcea6aff28e73df5982aaf5528828133cface45"
     },
     "out/dc_preview.glb": {
       "bytes": 830524,
@@ -101,8 +101,8 @@
       "sha256": "1b185ad0f1cf5dc86594e90eeb40318f44a768b65ceee69e134984712b7cc725"
     },
     "style.css": {
-      "bytes": 30484,
-      "sha256": "0b9a454abec0d4ef708919f2c123bde6f7d51bced52d6fa34603148583523c32"
+      "bytes": 31006,
+      "sha256": "f59ade932a7131688c40d04b56556fd1ac3db7b37be426b1efd2a0c23ec9acbb"
     },
     "vendor/addons/controls/OrbitControls.js": {
       "bytes": 29868,
@@ -127,7 +127,7 @@
   },
   "counts": {
     "files": 26,
-    "bytes": 3274479
+    "bytes": 3275274
   },
   "note": "静态快照：/api/* 已冻结为 api/*.json，POST 一律拒绝"
 }

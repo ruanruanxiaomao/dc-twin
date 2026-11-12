@@ -77,6 +77,12 @@ OUT_FILES = [
     "manifest.json",
     "cost_per_order.csv",
     "compare.md",
+    # 三个索引是"运行目录 -> 产物"的唯一入口：漏掉 pnl_index.json，
+    # exe 里的运营页整块空白（/api/pnl?all=1 返回 0 条），但接口本身是 200，
+    # 自检也抓不到——只有真的打开页面才看得出来。
+    "pnl_index.json",
+    "ledger_index.json",
+    "sim_index.json",
 ]
 
 #: out/ 整目录带走（渲染图是"看得见成果"的证据）
