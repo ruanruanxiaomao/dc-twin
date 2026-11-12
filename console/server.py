@@ -615,6 +615,7 @@ def build_bootstrap():
     routes = read_json(DATA / "routes.json", {}) or {}
     metrics = read_json(DATA / "path_metrics.json", {}) or {}
     slotting = read_json(DATA / "slotting.json", {}) or {}
+    yard = read_json(DATA / "yard_trucks.json", {}) or {}
 
     reports = {}
     for key, rel, label in REPORT_FILES:
@@ -655,6 +656,7 @@ def build_bootstrap():
         "layout": layout,
         "tasks": tasks,
         "cargo": cargo,
+        "yard": yard,
         "routes": routes,
         "metrics": metrics,
         "slotting": {

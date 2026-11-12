@@ -4,6 +4,38 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.0] - 2026-11-12
+
+Trucks were scenery: two box shapes parked on the yard lane, never at a dock,
+never leaving. The console also still looked like default controls.
+
+### Added
+
+- **Yard truck timetable.** `scripts/gen_yard.py` writes `data/yard_trucks.json`:
+  4 docks x 2 waves, each truck arrives through a southern gate, drives the lane,
+  backs into its bay, dwells 34 s, reverses out and disappears; the next one pulls
+  in behind it. One document is read by three consumers - Blender keyframes, the
+  three.js viewer, and anyone auditing `dock_served`.
+- Blender: `animate.py` writes arrival/berth/departure keyframes (position + a
+  constant heading while reversing) and `hide_render` outside the truck's window.
+- Viewer: `viewer3d.js` samples the same timetable when you scrub, so the 3D twin
+  and the rendered video agree frame for frame.
+- Site: southern truck gate with barrier, a 24-bay dock apron with painted bay
+  lines, and the site extended 10 m further south so a 10 m trailer fits.
+
+### Changed
+
+- **UI pass** (`style.css` v4.10 section): one accent colour (#2f6fd0, the same
+  blue as the rack uprights), three-layer depth (topbar / canvas / panel) with 1px
+  borders and near-invisible shadows instead of heavy dividers, one type scale
+  (11/12/13/15) with tabular numbers, one radius family (12/10/7), tabs as a
+  segmented control with a solid active pill, and a lighter timeline.
+- Truck orientation was measured, not guessed: the asset's cab faces local -Y, so
+  a docked truck is rotation 0 and the heading while driving is atan2(dx, -dz).
+
+Verification: validate 40/40, pytest 65, ARTIFACTS PASS (2284 nodes),
+942 frames re-rendered, truck keyframes 8, WEBAPP_OK, DRIFT_OK, CLAIMS_OK.
+
 ## [0.12.0] - 2026-11-12
 
 The model was rebuilt against a reference render: the site was four concrete slabs

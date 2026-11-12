@@ -962,3 +962,138 @@ table.tbl tr.total td { font-weight: 700; font-size: 12.5px; }
 .legend-col .lg { display: flex; align-items: center; gap: 6px; }
 .legend-col .lg i { width: 9px; height: 9px; border-radius: 2px; flex: 0 0 auto; }
 .legend-col .lg b { margin-left: auto; font-variant-numeric: tabular-nums; }
+
+/* ================================================================ v4.10 视觉规范
+ * 一次性的"设计层"覆盖：只改观感，不动结构与交互。
+ * 目标：让界面像一套工业软件，而不是一组默认控件。
+ *   1. 层级：顶栏(56) > 画布 > 侧栏；三者用 1px 边 + 极轻阴影分层，不靠粗线
+ *   2. 色彩：只保留一个强调色（#2f6fd0，与 3D 场景的蓝柱同源），其余为中性灰
+ *   3. 字号：11/12/13/15 四档，数字全部 tabular-nums，避免跳动
+ *   4. 圆角：面板 12、卡片 10、控件 7；不再混用 5/8/9
+ */
+
+:root {
+  --ink: #0d1420;
+  --ink-2: #3d4a5c;
+  --line: #e4e8ef;
+  --line-2: #eef1f6;
+  --panel-2: #f7f8fb;
+  --bg: #f1f3f7;
+  --accent: #2f6fd0;
+  --accent-soft: #eef3fd;
+  --sh-2: 0 1px 2px rgba(13, 20, 32, .04), 0 8px 24px -12px rgba(13, 20, 32, .18);
+}
+
+body { font-size: 12.5px; letter-spacing: .01em; }
+
+/* 顶栏：品牌 / 状态 / 操作 三段，中间用一条竖线分开 */
+.topbar {
+  height: 56px;
+  padding: 0 18px;
+  gap: 18px;
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 1px 2px rgba(13, 20, 32, .03);
+}
+.logo {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  font-size: 11px;
+  letter-spacing: .08em;
+  background: linear-gradient(150deg, #3f7fe0, #24559f);
+  box-shadow: 0 2px 8px -2px rgba(47, 111, 208, .55);
+}
+.brand-txt h1 { font-size: 13.5px; font-weight: 650; letter-spacing: .01em; }
+.brand-txt p { font-size: 10.5px; margin-top: 0; }
+
+.chips {
+  gap: 4px;
+  padding-left: 18px;
+  border-left: 1px solid var(--line-2);
+}
+.chip {
+  padding: 4px 9px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--panel-2);
+  font-size: 10.5px;
+  color: var(--ink-2);
+  gap: 6px;
+}
+.chip b { font-size: 11.5px; font-weight: 650; color: var(--ink); }
+.chip .k { color: #8b96a8; }
+.chip.pass { background: #edf9f1; }
+.chip.pass b { color: #128a45; }
+.chip.fail { background: #fdf0f0; }
+.chip.fail b { color: #c22a2a; }
+
+.top-actions .btn { height: 28px; }
+
+/* 侧栏：页签做成"两行分段器"，行间用极淡的底区分 */
+.side { background: #fff; border-left: 1px solid var(--line); }
+.tabs { padding: 8px 10px 6px; background: #fff; }
+.tab-row { gap: 3px; }
+.tab-row + .tab-row { margin-top: 3px; padding-top: 4px; border-top: 1px solid var(--line-2); }
+.tabs button {
+  height: 28px;
+  padding: 0 4px;
+  border-radius: 7px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+.tabs button:hover { background: var(--panel-2); }
+.tabs button.active {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 6px -2px rgba(47, 111, 208, .55);
+}
+
+/* 画布上方的工具条：把零散的复选框收成一组"胶囊" */
+.stage-head { padding: 8px 14px; gap: 10px; background: #fff; }
+.stage-head.sub { background: var(--panel-2); }
+.view-switch {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 2px;
+  background: var(--panel-2);
+}
+.view-switch button { padding: 4px 12px; border-radius: 6px; font-size: 11.5px; }
+.view-switch button.on { background: #fff; color: var(--accent); box-shadow: 0 1px 2px rgba(13,20,32,.12); }
+.stage-tools { gap: 8px; color: var(--ink-2); }
+.stage-tools .tog { padding: 3px 8px; border-radius: 6px; background: var(--panel-2); }
+.stage-tools .tog:hover { background: #eef1f6; }
+.stage-tools .sep { background: var(--line); }
+
+/* 列表项：hover 只换底色，不再变边框色（避免"抖"） */
+.item { border-color: transparent; background: var(--panel-2); border-radius: 8px; }
+.item:hover { background: #eef2f8; border-color: transparent; }
+.item.sel { background: var(--accent-soft); border-color: #b9cdf0; }
+
+/* 详情卡 / 指标行：统一成"浅底 + 无边框 + 内侧高光" */
+.dcard, .kpi-row, .area-row, .md, .area-sum {
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 1px 1px rgba(13, 20, 32, .02);
+}
+.kpi-head b { font-variant-numeric: tabular-nums; }
+
+/* 按钮：统一 28px 高、7px 圆角 */
+.btn { height: 28px; padding: 0 12px; border-radius: 7px; border-color: var(--line); }
+.btn.mini { height: 24px; padding: 0 9px; }
+.btn.primary { box-shadow: 0 2px 8px -3px rgba(47, 111, 208, .7); }
+.btn.danger { border-color: #f0cfcf; }
+
+/* 时间轴：变矮、变轻，进度条做成"细轨 + 大滑块" */
+.timeline { padding: 8px 18px 10px; border-top: 1px solid var(--line); box-shadow: 0 -1px 2px rgba(13,20,32,.02); }
+.play { width: 30px; height: 30px; font-size: 11px; }
+#scrub { height: 5px; }
+#scrub::-webkit-slider-thumb { width: 14px; height: 14px; border-width: 3px; }
+.speeds button { height: 22px; border-radius: 6px; }
+.tl-read strong { font-size: 12.5px; }
+
+/* 空态与提示 */
+.detail .empty { border-radius: 10px; background: var(--panel-2); }
+.toast { border-radius: 10px; box-shadow: var(--sh-2); }

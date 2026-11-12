@@ -59,6 +59,7 @@ PALETTE = {
     'rack_post': '#2f6fb5', 'rack_beam': '#e8791f',
 }
 
+YARD = json.load(open(os.path.join(DATA, 'yard_trucks.json'), encoding='utf-8'))
 SLOTTING = json.load(open(os.path.join(DATA, 'slotting.json'), encoding='utf-8'))
 HEAT = SLOTTING['heat_by_rack']
 SCHED = json.load(open(os.path.join(DATA, 'agent_schedules.json'),
@@ -499,12 +500,20 @@ def build_vehicles(assets):
             c.objects.link(o)
             o.location = (x, z, 0.05)
             o.rotation_euler[2] = math.pi
-    for i, (x, z) in enumerate(sc['trucks'], 1):
-        if truck:
-            o = bpy.data.objects.new('TRUCK_%02d' % i, truck)
+    # 月台挂车：位置与时刻来自 data/yard_trucks.json（gen_yard.py 生成），
+    # 这里只负责"停在哪、朝哪"；来去由 animate.py 打关键帧。
+    # 原来的 2 台静态货车停在园区通道上，既不靠台也不动，等于布景。
+    if truck:
+        for t in YARD['trucks']:
+            x, z = t['path'][-1]
+            o = bpy.data.objects.new(t['id'], truck)
             c.objects.link(o)
             o.location = (x, z, 0.05)
-            o.rotation_euler[2] = math.pi / 2
+            # 资产的车头朝局部 -Y：rotation=0 时车头朝南（倒车入位），
+            # 车尾顶住月台。之前按 π/2 放，车横在月台前，看着像停在路边。
+            o.rotation_euler[2] = 0.0
+            o['yard_dock'] = t['dock']
+            COUNTS['yard_trucks'] = COUNTS.get('yard_trucks', 0) + 1
 
 
 def build_route_lines():

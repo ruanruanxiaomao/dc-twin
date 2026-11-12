@@ -43,7 +43,8 @@ def _palette():
     B.PALETTE.setdefault('eave_f', '#0f9c8a')
 
 
-SITE = (-12.0, -12.0)                      # 园区左下角（比建筑范围各外扩 12 m）
+# 南侧要多留 22 m：10 m 的挂车倒进月台，车尾还得留出通行宽度。
+SITE = (-12.0, -22.0)                      # 园区左下角
 FENCE_H = 1.9
 WALL_H = 2.2                               # 女儿墙：够看出是"房子"，又不挡俯视
 
@@ -72,6 +73,26 @@ def ground(coll):
         B.plane('APRON_' + wh['id'], ox - 3, oz - 3, ox + w + 3, oz + d + 3,
                 0.004, 'concrete', coll)
 
+    # 月台装卸场：横向主车道 + 每扇门一个倒车位（挂车倒进来要看得见边界）
+    B.plane('TRUCK_LANE', 2, -15.4, 106, -13.0, 0.012, 'asphalt_light', coll)
+    for i in range(24):
+        x = 4 + i * 4.5
+        B.plane('TL_DASH_%d' % i, x, -14.25, x + 2.2, -14.15, 0.014, 'line_white', coll)
+    for wh in B.LAYOUT['warehouses']:
+        if wh['kind'] != 'REGIONAL':
+            continue
+        for dk in wh.get('docks', []):
+            dx0, dz0, dx1, dz1 = dk['rect']
+            if min(dz0, dz1) > 8:
+                continue
+            cx = (dx0 + dx1) / 2
+            for s2 in (-1, 1):
+                bx = cx + s2 * 1.85
+                B.plane('BAYL_%s_%d' % (dk['id'], s2), bx - 0.06, -10.0, bx + 0.06, -1.2,
+                        0.015, 'line_yellow', coll)
+            B.plane('BAYB_%s' % dk['id'], cx - 1.85, -10.0, cx + 1.85, -9.85,
+                    0.015, 'line_yellow', coll)
+
     # 车道：边线 + 中线虚线（道路坐标来自 config.scene.roads，仍是数据驱动）
     for i, (rx0, rz0, rx1, rz1) in enumerate(B.CFG['scene']['roads'], 1):
         cx = (rx0 + rx1) / 2
@@ -87,13 +108,15 @@ def ground(coll):
 def fence_and_gate(coll):
     x0, z0, x1, z1 = _site_extent()
     x0, z0, x1, z1 = x0 + 1.6, z0 + 1.6, x1 - 1.6, z1 - 1.6
-    gate0, gate1 = 96.0, 108.0                      # 东侧大门开口
+    gate0, gate1 = 96.0, 108.0                      # 东侧大门（人/小车）
+    sgate0, sgate1 = 46.0, 58.0                     # 南侧货车专用门
 
-    # 横杆：南/北墙沿 X，西/东墙沿 Y（东墙分两段，中间留大门）
-    for zz in (z0, z1):
-        for h in (0.55, 1.15, 1.75):
-            B.box('FENCE_NS_%.2f_%.0f' % (h, zz), ((x0 + x1) / 2, zz, h),
-                  (x1 - x0, 0.06, 0.06), 'fence', coll)
+    # 横杆：南/北墙沿 X（南墙留货车门），西/东墙沿 Y（东墙留人车门）
+    for h in (0.55, 1.15, 1.75):
+        B.box('FENCE_N_%.2f' % h, ((x0 + x1) / 2, z1, h), (x1 - x0, 0.06, 0.06), 'fence', coll)
+        for seg, (a, b) in enumerate(((x0, sgate0), (sgate1, x1))):
+            B.box('FENCE_S%d_%.2f' % (seg, h), ((a + b) / 2, z0, h),
+                  (b - a, 0.06, 0.06), 'fence', coll)
     for h in (0.55, 1.15, 1.75):
         B.box('FENCE_W_%.2f' % h, (x0, (z0 + z1) / 2, h), (0.06, z1 - z0, 0.06), 'fence', coll)
         for seg, (a, b) in enumerate(((z0, gate0), (gate1, z1))):
@@ -117,7 +140,8 @@ def fence_and_gate(coll):
         v += 8.0
     u = x0 + 8
     while u < x1 - 1:
-        post(u, z0)
+        if not (sgate0 - 1 < u < sgate1 + 1):
+            post(u, z0)
         post(u, z1)
         u += 8.0
 
@@ -127,6 +151,13 @@ def fence_and_gate(coll):
     B.box('GUARD_WIN', (x1 - 1.55, (gate0 + gate1) / 2, 1.75), (0.08, 3.0, 1.1), 'glass', coll)
     B.box('BARRIER_POST', (x1 - 0.4, gate0 + 1.0, 0.6), (0.3, 0.3, 1.2), 'steel', coll)
     B.box('BARRIER_ARM', (x1 - 0.4, gate0 + 4.0, 1.12), (0.14, 6.0, 0.14), 'line_yellow', coll)
+
+    # 南门：道闸 + 货车待检线
+    B.box('SGUARD_POST', (sgate0 + 0.8, z0 - 0.4, 0.7), (0.3, 0.3, 1.4), 'steel', coll)
+    B.box('SGUARD_ARM', (sgate0 + 4.0, z0 - 0.4, 1.3), (6.0, 0.14, 0.14), 'line_yellow', coll)
+    for i in range(2):
+        B.plane('SGATE_LINE_%d' % i, sgate0 + 0.6, z0 + 1.5 + i * 6.0,
+                sgate1 - 0.6, z0 + 1.65 + i * 6.0, 0.016, 'line_white', coll)
 
     # 标线：门口斑马线 + 东侧停车位
     for i in range(6):

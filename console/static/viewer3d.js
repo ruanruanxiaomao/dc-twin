@@ -103,18 +103,79 @@ export async function create(canvas, opts = {}) {
   scene.add(root);
 
   const agents = {};
+  const trucks = {};
   let agvCount = 0;
   root.traverse((o) => {
     if (AGV_RE.test(o.name)) {
       agents[o.name] = { obj: o, y: o.position.y };
       agvCount++;
+    } else if (/^TRK-\d+$/.test(o.name)) {
+      trucks[o.name] = { obj: o, y: o.position.y };
     }
   });
+
+  // ---- 月台挂车：由 yard_trucks.json 的时刻表驱动 ----
+  // 和 Blender 动画读同一份数据：进场沿折线走 → 停靠装卸 → 倒车出场 → 隐藏，
+  // 下一辆再进场。位置=匀速沿折线插值，朝向=当前段方向（停靠/出场朝月台）。
+  const yard = opts.yard || null;
+  const yardBy = {};
+  if (yard && Array.isArray(yard.trucks)) {
+    for (const tk of yard.trucks) {
+      const segs = [];
+      let total = 0;
+      for (let i = 0; i < tk.path.length - 1; i++) {
+        const d = Math.hypot(tk.path[i + 1][0] - tk.path[i][0],
+                             tk.path[i + 1][1] - tk.path[i][1]);
+        segs.push(d); total += d;
+      }
+      yardBy[tk.id] = Object.assign({}, tk, { segs, total });
+    }
+  }
+
+  function alongPath(tk, frac) {
+    const want = Math.max(0, Math.min(1, frac)) * tk.total;
+    let acc = 0;
+    for (let i = 0; i < tk.segs.length; i++) {
+      const d = tk.segs[i];
+      if (acc + d >= want || i === tk.segs.length - 1) {
+        const u = d > 0 ? Math.min(1, (want - acc) / d) : 0;
+        const a = tk.path[i], b = tk.path[i + 1];
+        return { x: a[0] + (b[0] - a[0]) * u, z: a[1] + (b[1] - a[1]) * u,
+                 // 车头朝局部 -Y：方向 (dx,dz) -> Z 旋转 atan2(dx,-dz)
+                 rot: Math.atan2(b[0] - a[0], -(b[1] - a[1])) };
+      }
+      acc += d;
+    }
+    const p = tk.path[tk.path.length - 1];
+    return { x: p[0], z: p[1], rot: Math.PI / 2 };
+  }
+
+  function updateTrucks(t) {
+    for (const id in yardBy) {
+      const tk = yardBy[id];
+      const rec = trucks[id];
+      if (!rec) continue;
+      const [t0, t1, t2, t3] = tk.times;
+      if (t < t0 - 0.01 || t > t3 + 0.01) { rec.obj.visible = false; continue; }
+      rec.obj.visible = true;
+      let p;
+      if (t < t1) p = alongPath(tk, (t - t0) / Math.max(0.01, t1 - t0));
+      else if (t < t2) {
+        const e = tk.path[tk.path.length - 1];
+        p = { x: e[0], z: e[1], rot: 0 };
+      } else p = alongPath(tk, 1 - (t - t2) / Math.max(0.01, t3 - t2));
+      // 停靠与出场阶段车头朝月台（倒车），不跟着折线转
+      const rot = (t < t1) ? p.rot : 0;
+      rec.obj.position.set(p.x, rec.y, -p.z);
+      rec.obj.rotation.set(0, Math.PI / 2 - rot, 0);
+      rec.obj.visible = true;
+    }
+  }
 
   // ---- 取景范围 ----
   // 不用 GLB 的 bbox：GROUND_EXTERIOR 是一整块大地面，会把包围盒撑大，
   // 导致仓库不在画面中心。改用 layout 的真实平面范围。
-  const bd = opts.bounds || { x0: -12, z0: -12, x1: 124, z1: 126 };
+  const bd = opts.bounds || { x0: -12, z0: -22, x1: 124, z1: 126 };
   const center = new THREE.Vector3((bd.x0 + bd.x1) / 2, 0, -(bd.z0 + bd.z1) / 2);
   const size = new THREE.Vector3(bd.x1 - bd.x0, 12, bd.z1 - bd.z0);
 
@@ -138,7 +199,7 @@ export async function create(canvas, opts = {}) {
   const PRESETS = {
     // 视角压低到约 30°：俯视太陡时只能看到一片屋顶和地板，
     // 压低后能看到墙面、雨棚和货架的侧面，体量才出来。
-    iso: () => frameCamera(new THREE.Vector3(0.80, 0.56, 0.86), 0.62),
+    iso: () => frameCamera(new THREE.Vector3(0.80, 0.56, 0.86), 0.52),
     top: () => frameCamera(new THREE.Vector3(0.001, 1, 0.02), 0.74),
     // 作业区：直接飞到分拣/包装作业带（W 仓北侧 x 55–80），
     // 2–3 m 的设备在整场视角里只有一个点，必须有一个"凑近看"的机位。
@@ -378,6 +439,7 @@ export async function create(canvas, opts = {}) {
 
   function update(t, sel, sampler) {
     selId = sel;
+    updateTrucks(t);
     for (const id in agents) {
       const a = agents[id];
       const p = sampler(id, t);

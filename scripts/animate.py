@@ -20,6 +20,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 BLEND = os.path.join(ROOT, 'out', 'distribution_center.blend')
 PATHS = os.path.join(ROOT, 'data', 'paths.jsonl')
 CARGO = os.path.join(ROOT, 'data', 'cargo_state.json')
+YARD = os.path.join(ROOT, 'data', 'yard_trucks.json')
 
 
 def fcurves_of(obj):
@@ -39,7 +40,7 @@ def main():
     bpy.ops.wm.open_mainfile(filepath=BLEND)
     scene = bpy.context.scene
     fps = scene.render.fps
-    samples = [json.loads(l) for l in open(PATHS, encoding='utf-8') if l.strip()]
+    samples = [json.loads(ln) for ln in open(PATHS, encoding='utf-8') if ln.strip()]
     cargo_state = json.load(open(CARGO, encoding='utf-8'))
     by = defaultdict(list)
     for p in samples:
@@ -104,6 +105,60 @@ def main():
         touched.add(o.name)
         n_cargo += 1
 
+    # --- 月台挂车：进场 → 倒车入位 → 装卸 → 倒车出场 → 下一辆 ---
+    # 时刻表来自 gen_yard.py，和 three.js 用的是同一份数据。
+    yard = json.load(open(YARD, encoding='utf-8'))
+    n_truck = 0
+    for tk in yard['trucks']:
+        o = bpy.data.objects.get(tk['id'])
+        if o is None:
+            continue
+        path = tk['path']
+        t0, t1, t2, t3 = tk['times']
+        segs = [math.dist(path[i], path[i + 1]) for i in range(len(path) - 1)]
+        total = sum(segs) or 1.0
+
+        # 进场：沿折线逐点打帧，别只打首尾——只打首尾会从大门直接斜切到月台
+        acc = 0.0
+        for i, (x, z) in enumerate(path):
+            if i > 0:
+                acc += segs[i - 1]
+            f = frame(t0 + (t1 - t0) * acc / total)
+            if i < len(path) - 1:
+                nx, nz = path[i + 1]
+                # 车头朝局部 -Y：行驶方向 (dx,dz) 对应的 Z 旋转是 atan2(dx,-dz)
+                rot = math.atan2(nx - x, -(nz - z))
+            else:
+                rot = 0.0                             # 倒车入位，车头朝南
+            o.location = (x, z, 0.05)
+            o.rotation_euler = (0.0, 0.0, rot)
+            o.keyframe_insert(data_path='location', frame=f)
+            o.keyframe_insert(data_path='rotation_euler', frame=f)
+
+        # 停靠：原地不动，保持朝向
+        o.location = (path[-1][0], path[-1][1], 0.05)
+        o.rotation_euler = (0.0, 0.0, 0.0)
+        o.keyframe_insert(data_path='location', frame=frame(t2))
+        # 出场：倒车出去（车头仍朝月台），走同一条折线反向
+        acc = 0.0
+        for i in range(len(path) - 1, -1, -1):
+            if i < len(path) - 1:
+                acc += segs[i]
+            f = frame(t2 + (t3 - t2) * acc / total)
+            o.location = (path[i][0], path[i][1], 0.05)
+            o.rotation_euler = (0.0, 0.0, 0.0)
+            o.keyframe_insert(data_path='location', frame=f)
+
+        # 不在场的时间段隐藏（进场前 / 出场后）
+        o.hide_render = True
+        o.keyframe_insert(data_path='hide_render', frame=1)
+        o.hide_render = False
+        o.keyframe_insert(data_path='hide_render', frame=frame(t0))
+        o.hide_render = True
+        o.keyframe_insert(data_path='hide_render', frame=frame(t3))
+        touched.add(o.name)
+        n_truck += 1
+
     for name in touched:
         o = bpy.data.objects[name]
         if not o.animation_data or not o.animation_data.action:
@@ -117,8 +172,8 @@ def main():
     bpy.context.preferences.filepaths.save_version = 0
     bpy.ops.wm.save_as_mainfile(filepath=BLEND)
     print('ANIMATE_OK', 'samples', len(samples), 'agents', len(by),
-          'cargo', n_cargo, 'frames', scene.frame_start, '->', scene.frame_end,
-          'fps', fps)
+          'cargo', n_cargo, 'trucks', n_truck,
+          'frames', scene.frame_start, '->', scene.frame_end, 'fps', fps)
 
 
 if __name__ == '__main__':

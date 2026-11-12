@@ -1,5 +1,5 @@
 window.DC_SUBMISSION = {
-  "generated_at": "2026-11-12T04:52:23+00:00",
+  "generated_at": "2026-11-12T05:20:46+00:00",
   "project": {
     "name": "配送中心数字孪生 · DC Twin Studio",
     "tagline": "从一张布局图纸，到可仿真、可算账、可定制的运营孪生",
@@ -26763,15 +26763,15 @@ window.DC_SUBMISSION = {
       {
         "group": "核心脚本",
         "path": "scripts/build_dc.py",
-        "bytes": 46964,
-        "size": "45.9 KB",
+        "bytes": 47622,
+        "size": "46.5 KB",
         "note": "Blender 程序化建模"
       },
       {
         "group": "核心脚本",
         "path": "scripts/animate.py",
-        "bytes": 4316,
-        "size": "4.2 KB",
+        "bytes": 6952,
+        "size": "6.8 KB",
         "note": "Blender 关键帧动画"
       },
       {
@@ -26812,43 +26812,43 @@ window.DC_SUBMISSION = {
       {
         "group": "3D / 动画交付",
         "path": "out/distribution_center.blend",
-        "bytes": 850528,
-        "size": "830.6 KB",
+        "bytes": 871748,
+        "size": "851.3 KB",
         "note": "Blender 5.2 工程（914 对象）"
       },
       {
         "group": "3D / 动画交付",
         "path": "out/dc_preview.glb",
-        "bytes": 1187868,
-        "size": "1.13 MB",
+        "bytes": 1213660,
+        "size": "1.16 MB",
         "note": "glTF 2.0 静态预览"
       },
       {
         "group": "3D / 动画交付",
         "path": "out/anim_dc.mp4",
-        "bytes": 853172,
-        "size": "833.2 KB",
+        "bytes": 849296,
+        "size": "829.4 KB",
         "note": "21 车闭环作业动画"
       },
       {
         "group": "3D / 动画交付",
         "path": "out/renders/01_overview.png",
-        "bytes": 2261251,
-        "size": "2.16 MB",
+        "bytes": 2400325,
+        "size": "2.29 MB",
         "note": "1920×1080 总览渲染"
       },
       {
         "group": "3D / 动画交付",
         "path": "docs/assets/demo.gif",
-        "bytes": 899456,
-        "size": "878.4 KB",
+        "bytes": 714568,
+        "size": "697.8 KB",
         "note": "演示动图（大文件，未内嵌至网页）"
       },
       {
         "group": "报告 / 验收",
         "path": "out/manifest.json",
-        "bytes": 14073,
-        "size": "13.7 KB",
+        "bytes": 13600,
+        "size": "13.3 KB",
         "note": "58 个产物 + sidecar 哈希清单"
       },
       {
@@ -26875,7 +26875,7 @@ window.DC_SUBMISSION = {
       {
         "group": "报告 / 验收",
         "path": "out/blend_audit.json",
-        "bytes": 1672,
+        "bytes": 1676,
         "size": "1.6 KB",
         "note": "Blender 场景审计"
       },
@@ -26959,8 +26959,8 @@ window.DC_SUBMISSION = {
       {
         "group": "开源交付 / 文档",
         "path": "CHANGELOG.md",
-        "bytes": 25175,
-        "size": "24.6 KB",
+        "bytes": 26929,
+        "size": "26.3 KB",
         "note": "版本记录"
       },
       {
@@ -26987,8 +26987,8 @@ window.DC_SUBMISSION = {
       {
         "group": "开源交付 / 文档",
         "path": "console/server.py",
-        "bytes": 49125,
-        "size": "48.0 KB",
+        "bytes": 49207,
+        "size": "48.1 KB",
         "note": "本地控制台服务"
       },
       {
@@ -27021,7 +27021,7 @@ window.DC_SUBMISSION = {
     {
       "file": "data/config.json",
       "lines": 227,
-      "bytes": 3892,
+      "bytes": 3904,
       "size": "3.8 KB",
       "fields": "binary / n/a"
     },
@@ -28186,7 +28186,7 @@ window.DC_SUBMISSION = {
       {
         "id": "A11 GLB/PNG/MP4 与 .blend 重开实测一致",
         "status": "PASS",
-        "detail": "glb nodes=2233 forbidden=[] DC_ROOT=True；png尺寸全对=True；objects 2294/2294 meshes 355/355"
+        "detail": "glb nodes=2284 forbidden=[] DC_ROOT=True；png尺寸全对=True；objects 2345/2345 meshes 394/394"
       },
       {
         "id": "A12 自身 Apache-2.0 + 第三方 MIT 全文与资产哈希",
@@ -28784,43 +28784,43 @@ window.DC_SUBMISSION = {
       {
         "file": "assets/01_overview.webp",
         "caption": "全场总览 · 一区域仓 + 三前置仓",
-        "bytes": 39050,
-        "size": "38.1 KB",
+        "bytes": 50630,
+        "size": "49.4 KB",
         "resolution": "1920×1080"
       },
       {
         "file": "assets/02_interior.webp",
         "caption": "仓内视角 · 货架与通道",
-        "bytes": 127064,
-        "size": "124.1 KB",
+        "bytes": 129172,
+        "size": "126.1 KB",
         "resolution": "1920×1080"
       },
       {
         "file": "assets/03_dock.webp",
         "caption": "月台与装卸门",
-        "bytes": 136260,
-        "size": "133.1 KB",
+        "bytes": 134758,
+        "size": "131.6 KB",
         "resolution": "1920×1080"
       },
       {
         "file": "assets/04_agv_route.webp",
         "caption": "AGV 行驶路径与发光导引带",
-        "bytes": 72720,
-        "size": "71.0 KB",
+        "bytes": 72990,
+        "size": "71.3 KB",
         "resolution": "1920×1080"
       },
       {
         "file": "assets/05_slotting_heatmap.webp",
         "caption": "ABC / COI 货位优化热力板",
-        "bytes": 51126,
-        "size": "49.9 KB",
+        "bytes": 50360,
+        "size": "49.2 KB",
         "resolution": "1920×1080"
       },
       {
         "file": "assets/06_corridor_check.webp",
         "caption": "通道净距几何校验",
-        "bytes": 56374,
-        "size": "55.1 KB",
+        "bytes": 56160,
+        "size": "54.8 KB",
         "resolution": "1920×1080"
       },
       {
@@ -28856,46 +28856,46 @@ window.DC_SUBMISSION = {
       {
         "file": "assets/anim_dc.mp4",
         "note": "AGV 闭环作业动画（8 fps，942 帧编码）",
-        "bytes": 853172,
-        "size": "833.2 KB",
+        "bytes": 849296,
+        "size": "829.4 KB",
         "exists": true
       },
       {
         "file": "assets/dc_preview.glb",
         "note": "glTF 静态场景预览（无动画，动画在 mp4 / .blend）",
-        "bytes": 1187868,
-        "size": "1.13 MB",
+        "bytes": 1213660,
+        "size": "1.16 MB",
         "exists": true
       },
       {
         "file": "assets/distribution_center.blend",
         "note": "Blender 5.2 工程源文件（含 42 个动作）",
-        "bytes": 850528,
-        "size": "830.6 KB",
+        "bytes": 871748,
+        "size": "851.3 KB",
         "exists": true
       }
     ],
     "blend": {
-      "objects": 2294,
-      "meshes": 355,
+      "objects": 2345,
+      "meshes": 394,
       "materials": 86,
       "cameras": 6,
       "lights": 4,
-      "actions": 42,
+      "actions": 50,
       "fps": 8,
       "frames": 942,
       "bbox": [
         136.1,
-        138.2,
+        150.925,
         12.03
       ],
       "engine": "BLENDER_EEVEE",
       "blender": "5.2.3 LTS"
     },
     "glb": {
-      "bytes": 1187868,
-      "nodes": 2233,
-      "meshes": 353,
+      "bytes": 1213660,
+      "nodes": 2284,
+      "meshes": 392,
       "materials": 84,
       "animations": 0,
       "generator": "Khronos glTF Blender I/O v5.2.41"
