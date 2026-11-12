@@ -18,7 +18,10 @@ export async function create(canvas, opts = {}) {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.05;
+  renderer.toneMappingExposure = 1.0;
+  // 阴影是"看起来像真厂房"的关键：没有投影，货架就是贴在地板上的色块
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#eaf0f8');
@@ -27,11 +30,24 @@ export async function create(canvas, opts = {}) {
   camera.position.set(140, 120, 90);
 
   // ---- 光照（GLB 不含灯光，需自建）----
-  scene.add(new THREE.HemisphereLight(0xffffff, 0xa8b8cc, 1.55));
+  // 环境光压低、主光提亮：以前 1.55 的半球光把地板和墙照得一样白，
+  // 于是整个场景"糊"成一片浅灰，看不出体量与层次。
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xa8b8cc, 0.85));
 
-  const sun = new THREE.DirectionalLight(0xfff4e2, 2.5);
+  const sun = new THREE.DirectionalLight(0xfff4e2, 2.6);
   sun.position.set(-90, 140, 70);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.camera.left = -110;
+  sun.shadow.camera.right = 110;
+  sun.shadow.camera.top = 110;
+  sun.shadow.camera.bottom = -110;
+  sun.shadow.camera.near = 20;
+  sun.shadow.camera.far = 320;
+  sun.shadow.bias = -0.0006;
+  sun.shadow.normalBias = 0.6;
   scene.add(sun);
+  scene.add(sun.target);
 
   const fill = new THREE.DirectionalLight(0xdce9ff, 0.95);
   fill.position.set(110, 80, -110);
@@ -81,6 +97,9 @@ export async function create(canvas, opts = {}) {
   });
 
   const root = gltf.scene;
+  root.traverse((o) => {
+    if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; }
+  });
   scene.add(root);
 
   const agents = {};
@@ -95,7 +114,7 @@ export async function create(canvas, opts = {}) {
   // ---- 取景范围 ----
   // 不用 GLB 的 bbox：GROUND_EXTERIOR 是一整块大地面，会把包围盒撑大，
   // 导致仓库不在画面中心。改用 layout 的真实平面范围。
-  const bd = opts.bounds || { x0: 0, z0: 0, x1: 112, z1: 114 };
+  const bd = opts.bounds || { x0: -12, z0: -12, x1: 124, z1: 126 };
   const center = new THREE.Vector3((bd.x0 + bd.x1) / 2, 0, -(bd.z0 + bd.z1) / 2);
   const size = new THREE.Vector3(bd.x1 - bd.x0, 12, bd.z1 - bd.z0);
 
@@ -117,8 +136,19 @@ export async function create(canvas, opts = {}) {
   }
 
   const PRESETS = {
-    iso: () => frameCamera(new THREE.Vector3(0.62, 0.78, 0.72), 0.66),
+    // 视角压低到约 30°：俯视太陡时只能看到一片屋顶和地板，
+    // 压低后能看到墙面、雨棚和货架的侧面，体量才出来。
+    iso: () => frameCamera(new THREE.Vector3(0.80, 0.56, 0.86), 0.62),
     top: () => frameCamera(new THREE.Vector3(0.001, 1, 0.02), 0.74),
+    // 作业区：直接飞到分拣/包装作业带（W 仓北侧 x 55–80），
+    // 2–3 m 的设备在整场视角里只有一个点，必须有一个"凑近看"的机位。
+    zone: () => {
+      const tgt = new THREE.Vector3(66, 1.0, -64.5);
+      // 站位比货架(6–7 m)更高、更靠外：站在巷道里会被整排货架挡住
+      camera.position.copy(tgt).add(new THREE.Vector3(6, 22, 13));
+      controls.target.copy(tgt);
+      controls.update();
+    },
     // 近景对准选中车；没选中就看 W 仓中部
     close: () => {
       const tgt = selId && agents[selId]

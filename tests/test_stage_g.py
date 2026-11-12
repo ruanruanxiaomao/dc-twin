@@ -110,7 +110,9 @@ def test_submission_full_showcase_snapshot():
     assert len(d["checks"]["A"]) == 40
     assert len(d["media"]["renders"]) == 10
     assert len(d["media"]["binary"]) == 3
-    assert 900 <= d["media"]["blend"]["objects"] <= 2000   # 随场景对象增减，别钉死
+    # 区间只用来抓"场景被清空/炸开"，不钉死具体数字。v4.9 加了园区表现层
+    # （围墙/雨棚/绿化/作业线），对象数从 ~1.8k 涨到 ~2.3k，上界要跟着放。
+    assert 900 <= d["media"]["blend"]["objects"] <= 3400
     assert (ROOT / "submission" / d["project"]["hero_image"]).exists()
     assert d["project"]["site_url"].startswith("https://")
 

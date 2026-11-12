@@ -1,3 +1,3 @@
 """dc-twin: distribution-center digital twin CLI and shared helpers."""
 
-__version__ = "0.11.0"
+__version__ = "0.12.0"

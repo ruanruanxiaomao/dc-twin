@@ -54,6 +54,9 @@ PALETTE = {
     'crate': '#c99b62', 'light': '#fff6e0',
     'rack_cold': '#3b82f6', 'rack_cool': '#22c55e', 'rack_mid': '#eab308',
     'rack_warm': '#f97316', 'rack_hot': '#ef4444',
+    # 货架本体用行业配色（蓝立柱 + 橙横梁）。以前整个货架按热力刷成红/绿/黄，
+    # 远看像撒了一地彩带；热力信息改由顶部 0.9 m 色块承担，一样可读。
+    'rack_post': '#2f6fb5', 'rack_beam': '#e8791f',
 }
 
 SLOTTING = json.load(open(os.path.join(DATA, 'slotting.json'), encoding='utf-8'))
@@ -167,7 +170,7 @@ def add_bm_box(bm, lo, hi, mat_index):
         face.material_index = mat_index
 
 
-def unit_rack_mesh(levels=4, frame_key='rack_frame'):
+def unit_rack_mesh(levels=4, frame_key='rack_post'):
     """[0,1]^3 标准托盘货架：立柱 + 前后层梁 + 横撑。
 
     以前每层是一整块 1×1 的板，等于把四层"橘色大抽屉"叠起来：托盘全被挡住，
@@ -189,16 +192,18 @@ def unit_rack_mesh(levels=4, frame_key='rack_frame'):
     # 每层：前后两根层梁 + 三根横撑（托盘就落在横撑上）
     for i in range(levels):
         z = (i + 1) / levels - 0.02
+        # 层梁只占货架高度的 2%：原来 5.5% 在 6 m 高的货架上就是 0.33 m 的
+        # 厚板，渲染出来像"四层橘色抽屉"，一点不像横梁。
         for sy in (0.0, 0.94):
-            add_bm_box(bm, (0.0, sy, z - 0.055), (1.0, sy + 0.06, z), 1)
+            add_bm_box(bm, (0.0, sy, z - 0.02), (1.0, sy + 0.06, z), 1)
         for sx in (0.03, 0.487, 0.94):
-            add_bm_box(bm, (sx, 0.0, z - 0.045), (sx + 0.025, 1.0, z), 1)
+            add_bm_box(bm, (sx, 0.0, z - 0.015), (sx + 0.025, 1.0, z), 1)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     m = bpy.data.meshes.new('UNIT_RACK_%d' % levels)
     bm.to_mesh(m)
     bm.free()
     m.materials.append(material(frame_key))
-    m.materials.append(material('rack_deck'))
+    m.materials.append(material('rack_beam'))
     return m
 
 
@@ -212,7 +217,8 @@ def rack_mesh_for_heat(heat, levels=4):
     key = HEAT_KEYS[idx]
     k = (key, levels)
     if k not in RACK_MESHES:
-        RACK_MESHES[k] = unit_rack_mesh(levels, key)
+        # 颜色不再随热力变：同一层数共用一份 mesh，实例数也顺带少一半
+        RACK_MESHES[k] = unit_rack_mesh(levels, 'rack_post')
     return RACK_MESHES[k]
 
 
@@ -313,6 +319,17 @@ def build_ground_and_buildings(assets, coll_ground, coll_build):
         box('BEAM_%s_E' % wh['id'], (ox + W - 0.15, oz + D / 2, H - 0.15), (0.3, D, 0.3), 'roof_beam', c)
         box('WALL_%s_BACK' % wh['id'], (ox + W / 2, oz + D - 0.1, H / 2),
             (W, 0.2, H), 'wall', c)
+        # 西墙也补满（相机在东南侧，西侧是远墙，不挡视线）：两片高墙一立，
+        # 从斜视看就是"有体量的厂房"，而不是一块铺在地上的色卡。
+        box('WALL_%s_WEST' % wh['id'], (ox + 0.1, oz + D / 2, H / 2),
+            (0.2, D, H), 'wall', c)
+        for i in range(1, int(D / 1.2)):
+            zz = oz + i * 1.2
+            box('RIBW_%s_%d' % (wh['id'], i), (ox + 0.16, zz, H / 2),
+                (0.1, 0.05, H - 0.3), 'wall', c)
+        # 高侧窗：墙上一条深色带，远看能读出"这是有采光的厂房"
+        box('WINW_%s' % wh['id'], (ox + 0.14, oz + D / 2, H - 1.6),
+            (0.1, D - 4, 1.1), 'glass', c)
         # 墙面竖肋（压型钢板）：每 1.2 m 一道，背墙上像"波纹"，不再是白纸板
         for i in range(1, int(W / 1.2)):
             x = ox + i * 1.2
@@ -334,22 +351,25 @@ def build_ground_and_buildings(assets, coll_ground, coll_build):
                 box('LAMP_%s_%d_%d' % (wh['id'], ix, iz), (lx, lz, H - 0.75),
                     (1.3, 0.35, 0.08), 'light', c)
         # 月台：门框 + 防撞块 + 黄色安全线（不然月台就是几个灰方块）
+        # 注意：layout 里的 dock rect 是**绝对坐标**（F1 的 rect 已经含 origin），
+        # 这里再 +ox/+oz 会把前置仓的月台画到园区外面去——之前 F1–F3 那几块
+        # 悬在 y≈180 的白板就是这个 bug，只是 W 的 origin 是 (0,0) 才一直没暴露。
         for dk in wh.get('docks', []):
             dx0, dz0, dx1, dz1 = dk['rect']
             dw = dx1 - dx0
-            sign = 1 if dz0 < D / 2 else -1          # 靠南墙还是北墙
-            wz = oz + (dz0 if sign > 0 else dz1)     # 门所在的墙面 z
+            north = dz1 > oz + D / 2                  # 靠南墙还是北墙
+            wz = dz1 if north else dz0                # 门所在墙面的 z
+            sign = -1 if north else 1                 # 出库方向（朝园区）
             for px in (dx0, dx1):
                 box('DOCKPOST_%s_%.1f' % (dk['id'], px),
-                    (ox + px, wz, 2.2), (0.25, 0.3, 4.4), 'steel', c)
-            box('DOCKLINTEL_' + dk['id'], (ox + dw / 2 + dx0, wz, 4.35),
+                    (px, wz, 2.2), (0.25, 0.3, 4.4), 'steel', c)
+            box('DOCKLINTEL_' + dk['id'], ((dx0 + dx1) / 2, wz, 4.35),
                 (dw, 0.3, 0.25), 'steel', c)
             for px in (dx0 + 0.6, dx1 - 0.6):
-                box('BUMPER_%s_%.1f' % (dk['id'], px), (ox + px, wz + sign * -0.35, 0.55),
+                box('BUMPER_%s_%.1f' % (dk['id'], px), (px, wz + sign * 0.35, 0.55),
                     (0.3, 0.25, 0.45), 'bumper', c)
-            plane('DOCKLINE_' + dk['id'], ox + dx0, oz + (dz1 - 0.6 if sign < 0 else dz0),
-                  ox + dx1, oz + (dz1 if sign < 0 else dz0 + 0.6), 0.031,
-                  'line_yellow', c)
+            ly0, ly1 = (dz1 - 0.6, dz1) if north else (dz0, dz0 + 0.6)
+            plane('DOCKLINE_' + dk['id'], dx0, ly0, dx1, ly1, 0.031, 'line_yellow', c)
         # 地面 5S 标线
         for i, (x0, z0, x1, z1) in enumerate((
                 (2, 2, W - 2, 2.16), (2, D - 2.16, W - 2, D - 2))):
@@ -385,8 +405,10 @@ def build_racks_and_cargo(assets):
             c.objects.link(o)
             o.location = (x, z, h + 0.03)
             o.scale = (rl, rd, rh)
-            box('HEAT_' + rk['id'], (x + rl / 2, z + rd / 2, h + rh + 0.06),
-                label, heat_key, c)
+            # 热力不再用"货架顶上盖一块色板"：那 0.9 m 的方板在渲染里像托盘，
+            # 而且是唯一比货架本身更抢眼的东西。改成一枚贴在端头的窄标签。
+            box('HEAT_' + rk['id'], (x + rl / 2, z + rd / 2, h + rh - 0.55),
+                (label[0] * 0.45, 0.05, label[1] * 0.45), heat_key, c)
             COUNTS['racks_built'] += 1
             if pallet_mesh:
                 lh = rh / levels
@@ -418,19 +440,21 @@ def build_docks_conveyors(assets):
                 (min(x1 - x0, 6.0), 0.15, 4.4), 'glass', c)
             plane('APRON_' + d['id'], x0, z1, x1, z1 + 3, 0.035, 'line_yellow', c)
             COUNTS['docks_built'] += 1
+        # 输送线交给 zone_detail.py 画（皮带/护栏/支腿/线上包裹）：
+        # 这里原来是一个 1.1 m 高的实心方块，远看就是两根灰梁。
         for cv in wh['conveyors']:
-            pts = cv['path']
-            for i in range(len(pts) - 1):
-                a, b = pts[i], pts[i + 1]
-                box('CV_%s_%d' % (cv['id'], i),
-                    ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, 0.55),
-                    (abs(b[0] - a[0]) or cv['width'], abs(b[1] - a[1]) or cv['width'], 1.1),
-                    'conveyor', c)
-                COUNTS['conveyors_built'] += 1
+            COUNTS['conveyors_built'] += 1
         for st in wh['stations']:
             x0, z0, x1, z1 = st['rect']
-            box('STATION_' + st['id'], ((x0 + x1) / 2, (z0 + z1) / 2, 0.5),
-                (x1 - x0, z1 - z0, 1.0), 'rack_deck', c)
+            # 工位只铺一块 8 cm 的地台 + 一圈黄边：原来做成 1 m 高的实心台，
+            # 分拣线/打包台全被托在半空，看着像展台而不是作业区。
+            plane('STATION_PAD_' + st['id'], x0, z0, x1, z1, 0.045, 'rack_deck', c)
+            e = 0.12
+            for nm, (ax0, az0, ax1, az1) in (
+                    ('S', (x0, z0, x1, z0 + e)), ('N', (x0, z1 - e, x1, z1)),
+                    ('W', (x0, z0, x0 + e, z1)), ('E', (x1 - e, z0, x1, z1))):
+                plane('STATION_EDGE_%s_%s' % (st['id'], nm), ax0, az0, ax1, az1,
+                      0.05, 'line_yellow', c)
         for ch in wh['charging_stations']:
             p = B3(ch['position'])
             box('CHG_' + ch['id'], (p[0], p[1], 0.35), (1.6, 0.8, 0.7), 'line_cyan', c)
@@ -991,8 +1015,14 @@ def main():
     assets = import_assets()
     coll_ground = collection('GROUND')
     build_ground_and_buildings(assets, coll_ground, None)
+    # 园区表现层（场地/围墙/雨棚/招牌/绿化）：独立成 site_detail.py，
+    # 只加"看得懂这是什么"的东西，不动任何布局坐标。
+    import site_detail
+    site_detail.build(sys.modules[__name__])
     build_racks_and_cargo(assets)
     build_docks_conveyors(assets)
+    import zone_detail
+    zone_detail.build(sys.modules[__name__])
     build_functional_areas()
     build_area_props(anchor_centers())
     build_vehicles(assets)

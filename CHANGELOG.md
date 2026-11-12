@@ -4,6 +4,54 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0] - 2026-11-12
+
+The model was rebuilt against a reference render: the site was four concrete slabs
+floating in green, the racks were painted by heat index (red/green/yellow confetti),
+and the sorting area was two grey boxes. Two of those were bugs, not taste.
+
+### Fixed
+
+- **Dock rects are absolute layout coordinates, but the builder added each
+  warehouse's origin a second time.** W (origin 0,0) looked fine; F1-F3's docks,
+  bumpers and dock lines were drawn at y ~ 180 m, outside the site — the white
+  plates floating beside the front warehouses in the old screenshots. Docks are
+  now placed once, from the rect.
+- Station platforms were 1 m tall boxes, so every sorting/packing line sat on a
+  plinth like an exhibition stand. They are 8 cm pads with a painted border now.
+- Rack beams were 5.5% of the rack height (0.33 m on a 6 m rack): four orange
+  drawers stacked up. 2% reads as a beam.
+
+### Added
+
+- `scripts/site_detail.py`: asphalt yard + grass verges, perimeter fence with posts
+  and rails, east gate with guard house and barrier, kerbs, lane edge lines and
+  centre dashes, trailer bays, 24 trees and 6 lamp masts, and per-building
+  building envelope — 2.2 m parapet walls, outward eave with a thin colour band,
+  full-height west wall with ribs and a high window strip, dock canopies with
+  posts, and a facade sign on every warehouse.
+- `scripts/zone_detail.py`: conveyors became belts with rails, legs and parcels
+  (was: one 1.1 m solid box); the sorting line is a conveyor with four sloped
+  chutes, two sort stations with monitors, and operators; packing lines get
+  benches, cartons and operators. Sloped chutes are explicit meshes — tilting a
+  cube with `rotation_euler[1]` broke as soon as the run turned 90 degrees.
+- Racks are blue uprights + orange beams (industry palette). Heat is still in the
+  model, but as a small end-cap tag instead of a 0.9 m colour plate on top of
+  every rack — that plate was the loudest thing in the interior render.
+- 3D viewer: shadow map on (no shadow = racks look like stickers), hemisphere
+  light 1.55 -> 0.85 with a stronger sun for contrast, lower iso angle, a
+  `作业区` camera preset, and the framing bounds now include the site margin.
+
+### Changed
+
+- `CAM_overview` / `CAM_heatmap` / `CAM_route` ortho scales: `ortho_scale` is the
+  vertical extent at 16:9, so 205 was showing 115 m across — the new 136 m site
+  was cropped. `CAM_interior` now points at the sorting line; `CAM_dock` at the
+  dock face from the yard.
+- Baseline render re-shot (942 frames + 6 stills), objects 1.8k -> 2.3k.
+
+Verification: validate 40/40, pytest 65, WEBAPP_OK, DRIFT_OK, CLAIMS_OK.
+
 ## [0.11.0] - 2026-11-12
 
 The console was readable but not usable: two of its ten tabs were a rendering bug,

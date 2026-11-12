@@ -44,37 +44,37 @@
           57,
           0
         ],
-        "scale": 205,
+        "scale": 268,
         "type": "ORTHO"
       },
       {
         "name": "CAM_interior",
         "loc": [
-          12,
-          18,
-          9
+          54.0,
+          69.0,
+          6.0
         ],
         "target": [
-          50,
-          35,
-          3
+          67.0,
+          63.0,
+          1.2
         ],
-        "scale": 42,
+        "scale": 22,
         "type": "PERSP"
       },
       {
         "name": "CAM_dock",
         "loc": [
-          44,
-          14,
-          9
+          24.0,
+          -26.0,
+          13.0
         ],
         "target": [
-          36,
-          4,
-          1
+          32.0,
+          3.0,
+          2.5
         ],
-        "scale": 24,
+        "scale": 34,
         "type": "PERSP"
       },
       {
@@ -89,7 +89,7 @@
           35,
           0
         ],
-        "scale": 100,
+        "scale": 132,
         "type": "ORTHO"
       },
       {
@@ -104,7 +104,7 @@
           35,
           0
         ],
-        "scale": 150,
+        "scale": 190,
         "type": "ORTHO"
       },
       {

@@ -710,7 +710,9 @@ async function ensureViewer() {
       const ls = lay.size || { width: 112, depth: 114 };
       viewer = await mod.create($('cv3d'), {
         url: '/out/dc_preview.glb',
-        bounds: { x0: 0, z0: 0, x1: ls.width, z1: ls.depth },
+        // 场地比建筑范围各外扩 12 m（围墙/绿化/大门），取景必须按园区算，
+        // 否则 fence 与前置仓会被裁在画面外
+        bounds: { x0: -12, z0: -12, x1: ls.width + 12, z1: ls.depth + 12 },
         onProgress: (r) => { stat.textContent = `加载中 ${Math.round(r * 100)}%`; },
         onPick: (id) => selectAgent(id),
         areas: (typeof areasFor3d === 'function') ? areasFor3d() : [],
