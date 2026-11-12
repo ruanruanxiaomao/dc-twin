@@ -4,6 +4,73 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] — P6b 批次 / 效期 / FEFO
+
+P6a gave the engine a (SKU × location) ledger, but not **lots**: the same SKU's stock
+was one number, so "先到期先出" could not be expressed and nothing could ever expire.
+P6b adds lots, expiry, FEFO/FIFO and write-off — and a third golden generation,
+because that necessarily changes the event stream again.
+
+### Added
+
+- **Data**: `inventory_initial.json` now carries `lots` (796 lots over 392 locations),
+  `sku_master.json` carries `shelf_life_s`. Deterministic (integer arithmetic, no clock,
+  no `hash()`), byte-identical across runs.
+- **Engine**: lots per (SKU, location); `STOCK_DECREMENT` carries `lots: [{lot_id, qty,
+  expiry_t}]` so "which lot went out" is auditable; `STOCK_RECEIPT` carries
+  `lot_id`/`expiry_t`; `STOCK_EXPIRED` for write-off; `SET_LOT_POLICY` (FEFO ↔ FIFO).
+- **KPI** (tick layer 56 → 62): `expiry_enabled`, `expired_units`, `expired_value`,
+  `lots_opened`, `open_lots`, `fefo_violations`.
+- **HUD**: 过期报废 card, deliberately **not** folded into variable cost.
+- **Gates**: `check_fefo.py` (FEFO_OK — replays the lot ledger and requires consumption
+  to be a prefix of the policy order; also "never ship expired"), `check_expiry.py`
+  (EXPIRY_OK — no premature write-off, no missed write-off, state vs events),
+  `dc run --scope inventory` 4 → 6 steps.
+
+### Changed
+
+- **Third golden generation**: `step_baseline_v3.json` / `kpi_baseline_v3.json`;
+  `--check=v1|v2|v3`, `--freeze-v3`; default follows the newest that exists.
+  v1 and v2 are never overwritten.
+- **KPI baseline now covers inventory** (30 → 42 metrics, 336 frozen values). P6a's
+  metrics were never in `kpi_baseline.METRICS`, which is why its refreeze said
+  "KPI 变 0 项" — that was a gap in the gate, not a fact.
+- **Snapshot 3.0**, `inventory.schema` 2.0: lots are part of the snapshot, a save
+  whose lots disagree with the aggregate (`sum(lots) != stock`) is rejected, and a
+  save with expiry enabled but no lots is rejected rather than silently degrading FEFO.
+- `check_reorder` pressure window re-calibrated (scale 0.10 → 0.18): write-off shrinks
+  available stock, so the old window degenerated to 9→9.
+
+### Fixed (found while wiring it)
+
+- **Expiry was invisible to the tick scheduler.** `step()` jumps idle ticks; a lot
+  expiring between two jumps was skipped forever, so nothing ever expired. Expiry
+  times now join the scheduled-event list and block the jump (same class of bug as
+  the t=0 fault that was skipped).
+- **FEFO and FIFO produced identical results**, because every later arrival also
+  expired later. Data now contains date-code inversion (a later delivery with a
+  shorter date code) — the real reason FEFO exists.
+- **Reconciliation ignored write-off.** `_inv_reconcile` replayed only receipts and
+  picks, so after the first expiry every (sku, location) looked "over-stocked".
+- `check_inventory` conservation ignored `STOCK_EXPIRED` for the same reason; expired
+  units are now an explicit term (期初 + 入 − 出 − 报废 = 期末).
+
+### Verified
+
+| Gate | Evidence |
+|---|---|
+| FEFO_OK | 27 picks replayed, 0 wrong-order, 0 expired shipped; injection of both is caught |
+| EXPIRY_OK | 124 lots / 1657 units written off, 0 premature, 0 missed; ghost lot caught |
+| STOCK_OK | 392 pairs, residual 0, 报废 1657 in the equation |
+| SAVE_OK+ | snapshot 3.0 round-trip keeps lots; 2.0 and lot-less saves rejected; tampered qtys rejected |
+| DETERMINISM+ | same seed → identical `STOCK_*` stream and closing lots |
+| EXPIRY_OFF | with `expiry.enabled=false` the event stream is byte-identical to the v2 golden |
+| REFREEZE_OK | v3 byte-identical, v2 differs by construction, A1–A40 40/40 |
+
+**Not done**: level_06. Measured effect of FEFO vs FIFO is 3–5 units (≈0.2%) because
+completions are capped at ~40/h by fleet capacity while 392 locations compete for those
+picks; a level whose lever is indistinguishable is a fake choice. See ADR-GAME-10 §6.
+
 ## [Unreleased] — P6a 库存层（SKU / 安全库存 / 补货点）
 
 The twin could move boxes but had no stock: `cargo_state.json` is order-level cargo

@@ -270,7 +270,7 @@ ORDER_TYPES = ("INBOUND", "OUTBOUND", "PICK", "REPLENISH", "TRANSFER")
 #: （两份表必然分叉，最后会出现"登记了但没有人接"的命令）。
 COMMANDS = ("BUY_AGV", "SELL_AGV", "SET_PRICE", "SET_POLICY",
             "SET_DEMAND", "INJECT_FAULT", "BUILD_STATION", "MANUAL_ASSIGN",
-            "SET_REORDER_POINT")
+            "SET_REORDER_POINT", "SET_LOT_POLICY")
 #: 已登记但尚未实现：入队即抛，不静默空转（静默 = 玩家点了没反应还以为生效了）。
 NOT_IMPLEMENTED = ("BUILD_STATION", "MANUAL_ASSIGN")
 
@@ -506,6 +506,9 @@ class Robot:
 
 class Simulation:
     station_slots_override = None       # 验证排队用：把所有工位并行位强制为 N
+    #: 验证"效期开关"用：覆写 inventory_spec（只给测试/实验，产线走 config 文件）。
+    #: 和 station_slots_override 同一套路——可证伪必须能构造反例，否则只能读代码相信。
+    inventory_spec_override = None
     dock_slots_override = None          # 同上，但只改月台门（工位不动）
     # 验证"跳 tick 分支真的在起作用"用：置 False 时关闭空闲跳 tick。
     # 这不是给人用的开关，是给 tests/test_step_gate.py 证明 STEP_OK 门会失败用的
@@ -666,14 +669,27 @@ class Simulation:
         self.inv_holding = 0.0
         self.reorder_factor = 1.0
         self.reorder_factor_by_sku = {}
+        # ---- P6b 批次层：inv 仍是"聚合结存"，lots 是它的明细。
+        # 两套账同时存在就有对不上的风险，所以每次写都在 `_inv_lot_check()` 里断言
+        # sum(lots) == inv —— 宁可当场 raise，也不要让期末对账时才发现差 3 件。
+        self.lots = {}           # (sku, location) -> [{lot_id,qty,t_in,expiry_t}] 按 expiry 升序
+        self.lot_heap = []       # (expiry_t, lot_id, sku, location)：到期扫描用，可惰性删除
+        self.lot_seq = 0         # 新批次编号（新收货用 LOT-N……，期初用 LOT-I……，不撞号）
+        self.lot_policy = "FEFO"  # 玩家可用 SET_LOT_POLICY 切到 FIFO
+        self.lot_opened_n = 0
+        self.lot_expired_n = 0
+        self.lot_expired_units = 0.0
+        self.lot_expired_value = 0.0
+        self.fefo_violations = 0
 
         sp = CONFIG / "inventory_spec.json"
+        spec_override = Simulation.inventory_spec_override
         slot_f = DATA / "inventory_slotting.json"
         init_f = DATA / "inventory_initial.json"
         master_f = DATA / "sku_master.json"
         if not (sp.exists() and slot_f.exists() and init_f.exists() and master_f.exists()):
             return False
-        spec = jload(sp)
+        spec = spec_override if spec_override else jload(sp)
         slotting = jload(slot_f)
         initial = jload(init_f)
         master = jload(master_f)
@@ -687,11 +703,28 @@ class Simulation:
                             "pick_face": list(v["pick_face"])}
                         for s, v in slotting["by_sku"].items()}
         self.inv_cost = {s["id"]: float(s["unit_cost"]) for s in master["skus"]}
+        self.inv_shelf_life = {s["id"]: float(s.get("shelf_life_s") or 0.0) for s in master["skus"]}
         vel = {s["id"]: float(s.get("velocity") or 0.0) for s in master["skus"]}
         for sku, rows in initial["stock"].items():
             self.inv[sku] = {loc: float(q) for loc, q in rows.items()}
             for loc, q in rows.items():
                 self.inv_par[(sku, loc)] = float(q)      # 期初水位 = 拣选面 par
+
+        # ---- 期初批次（P6b）。expiry.enabled=false 时整层不装载，行为退回 P6a。
+        exp = spec.get("expiry") or {}
+        self.lot_expiry_enabled = bool(exp.get("enabled", False))
+        self.lot_policy = str(exp.get("policy", "FEFO"))
+        self.lot_waste_posting = str(exp.get("waste_posting", "none"))
+        if self.lot_expiry_enabled:
+            for sku, per_loc in (initial.get("lots") or {}).items():
+                for loc, lst in per_loc.items():
+                    for lot in lst:
+                        self._lot_push(sku, loc, {"lot_id": lot["lot_id"],
+                                                  "qty": float(lot["qty"]),
+                                                  "t_in": float(lot.get("t_in", 0.0)),
+                                                  "expiry_t": float(lot["expiry_t"])})
+                        self.lot_opened_n += 1
+            self._inv_lot_check(fatal=True)
 
         # 补货点：按"本 SKU 的期望小时出库量"推，不用"周均"——这套引擎的 horizon
         # 是 1 小时，周均在跑动中不可观测。写死成常量就等于没有补货逻辑。
@@ -719,6 +752,89 @@ class Simulation:
         factor = float(self.reorder_factor_by_sku.get(sku, self.reorder_factor))
         return self.inv_reorder.get(sku, 0.0) * factor
 
+    # ---------- 批次层（P6b）：FEFO / 到期报废 ----------
+    # 设计要点：`inv`（聚合结存）仍是唯一被广泛读取的口径，`lots` 是它的明细。
+    # 两套账必然有对不上的风险，所以每次写都断言 sum(lots) == inv；宁可当场 raise，
+    # 也不要等到期末对账时才发现少了 3 件（那时已经无法归因）。
+    def _lot_push(self, sku, loc, lot):
+        arr = self.lots.setdefault((sku, loc), [])
+        arr.append(lot)
+        arr.sort(key=lambda l: (l["expiry_t"], l["lot_id"]))
+        heapq.heappush(self.lot_heap, (lot["expiry_t"], lot["lot_id"], sku, loc))
+
+    def _inv_lot_check(self, fatal=False):
+        """sum(lots) 必须等于聚合结存。返回不一致项，fatal=True 时直接 raise。"""
+        bad = []
+        for (sku, loc), arr in self.lots.items():
+            s = sum(l["qty"] for l in arr)
+            agg = self.inv.get(sku, {}).get(loc, 0.0)
+            if abs(s - agg) > 1e-9:
+                bad.append((sku, loc, round(s, 6), round(agg, 6)))
+        if bad and fatal:
+            raise ValueError("批次明细与聚合结存不一致（%d 处），前 3 处：%s"
+                             % (len(bad), bad[:3]))
+        return bad
+
+    def _lot_order(self, arr):
+        """FEFO 按效期、FIFO 按入库时间。同键用 lot_id 兜底，保证确定性。"""
+        if self.lot_policy == "FIFO":
+            return sorted(arr, key=lambda l: (l["t_in"], l["lot_id"]))
+        return sorted(arr, key=lambda l: (l["expiry_t"], l["lot_id"]))
+
+    def _lot_consume(self, sku, loc, qty, t):
+        """按当前策略扣批次，返回 [(lot_id, qty, expiry_t)]；不足额即 raise。"""
+        arr = self.lots.get((sku, loc)) or []
+        need, out = float(qty), []
+        for lot in self._lot_order(arr):
+            if need <= 1e-9:
+                break
+            take = min(need, lot["qty"])
+            if take <= 1e-9:
+                continue
+            lot["qty"] -= take
+            need -= take
+            out.append((lot["lot_id"], take, lot["expiry_t"]))
+        if need > 1e-9:
+            # 聚合账说够、批次账说不够：两套账已经分叉，不许硬扣成负数
+            raise ValueError("批次不足以扣减：%s@%s 缺 %s" % (sku, loc, round(need, 6)))
+        self.lots[(sku, loc)] = [l for l in arr if l["qty"] > 1e-9]
+        # FEFO 下"先扣晚到期的、却留着早到期的"就是违规，计数而不是静默。
+        # 正常实现应恒为 0；一旦排序写错，这个 KPI 会立刻非零（check_fefo 断言它）。
+        if out and self.lot_policy == "FEFO":
+            first = min(e for _, _, e in out)
+            if any(l["expiry_t"] < first - 1e-9 for l in self.lots[(sku, loc)]):
+                self.fefo_violations += 1
+        return out
+
+    def _inv_expire_sweep(self, t):
+        """把到期批次报废。用最小堆 + 惰性删除，不遍历全库（392 库位 × 3600 tick 太贵）。
+
+        "到期"按 `expiry_t <= t` 判：批次在到期那一刻就不可再发，而不是等下一次
+        盘点。否则同一 tick 里"刚过期"的货还能被拣出去，效期就成了装饰。
+        """
+        if not self.lot_expiry_enabled:
+            return
+        while self.lot_heap and self.lot_heap[0][0] <= t + 1e-9:
+            expiry, lot_id, sku, loc = heapq.heappop(self.lot_heap)
+            arr = self.lots.get((sku, loc)) or []
+            hit = next((l for l in arr if l["lot_id"] == lot_id), None)
+            if hit is None or hit["qty"] <= 1e-9:
+                continue                       # 已扣完/已报废：堆里的惰性条目
+            q = hit["qty"]
+            hit["qty"] = 0.0
+            self.lots[(sku, loc)] = [l for l in arr if l["qty"] > 1e-9]
+            self.inv.setdefault(sku, {})
+            before = self.inv[sku].get(loc, 0.0)
+            self.inv[sku][loc] = max(0.0, before - q)
+            value = q * self.inv_cost.get(sku, 0.0)
+            self.lot_expired_n += 1
+            self.lot_expired_units += q
+            self.lot_expired_value += value
+            self.log.emit(t, "STOCK_EXPIRED", sku=sku, location=loc, lot_id=lot_id,
+                          qty=q, expiry_t=expiry, value=round(value, 6),
+                          on_hand_after=round(self.inv[sku][loc], 6),
+                          waste_posting=self.lot_waste_posting)
+
     def _inv_dec(self, sku, loc, qty, order, cause):
         cur = self.inv.setdefault(sku, {}).get(loc, 0.0)
         if cur + 1e-9 < qty:
@@ -727,18 +843,51 @@ class Simulation:
                              % (sku, loc, cur, qty))
         self.inv[sku][loc] = cur - qty
         self.inv_units_out += qty
+        extra = {}
+        if self.lot_expiry_enabled:
+            consumed = self._lot_consume(sku, loc, qty, self.t)
+            # 批次明细写进事件：这样"这一单从哪批货出的"可查，FEFO 才不只是口头承诺
+            extra["lots"] = [{"lot_id": lid, "qty": round(q, 6), "expiry_t": e}
+                             for lid, q, e in consumed]
         self.log.emit(self.t, "STOCK_DECREMENT", sku=sku, location=loc, qty=qty,
                       order_id=(order or {}).get("order_id"), cause=cause,
-                      on_hand_after=round(self.inv[sku][loc], 6))
+                      on_hand_after=round(self.inv[sku][loc], 6), **extra)
         return self.inv[sku][loc]
 
-    def _inv_inc(self, sku, loc, qty, order_id=None, cause="inbound"):
+    def _inv_inc(self, sku, loc, qty, order_id=None, cause="inbound",
+                 etype="STOCK_RECEIPT"):
         self.inv.setdefault(sku, {})
         self.inv[sku][loc] = self.inv[sku].get(loc, 0.0) + qty
-        self.log.emit(self.t, "STOCK_RECEIPT", sku=sku, location=loc, qty=qty,
+        extra = {}
+        if self.lot_expiry_enabled:
+            # 新批次：效期 = 现在 + 该 SKU 的保质期。**不再发 LOT_OPENED**——
+            # STOCK_RECEIPT 自带 lot_id/expiry_t，事件流已经足以重建批次，多发一条纯噪音。
+            shelf = float(self.inv_shelf_life.get(sku, 0.0))
+            self.lot_seq += 1
+            lot = {"lot_id": "LOT-N%06d" % self.lot_seq, "qty": float(qty),
+                   "t_in": round(self.t, 3),
+                   "expiry_t": round(self.t + shelf if shelf > 0 else float("inf"), 3)}
+            self._lot_push(sku, loc, lot)
+            self.lot_opened_n += 1
+            extra = {"lot_id": lot["lot_id"], "expiry_t": lot["expiry_t"]}
+        self.log.emit(self.t, etype, sku=sku, location=loc, qty=qty,
                       order_id=order_id, cause=cause,
-                      on_hand_after=round(self.inv[sku][loc], 6))
+                      on_hand_after=round(self.inv[sku][loc], 6), **extra)
         return self.inv[sku][loc]
+
+    def _inv_move_lots(self, sku_src, src, sku_dst, dst, qty):
+        """内部移库：批次跟着走，**但不重算效期**。
+
+        这是仓储里一个经典错：货搬到拣选面就当成新收货、重新给一个保质期，
+        结果临期货永远不过期。这里显式保留 expiry_t。
+        """
+        if not self.lot_expiry_enabled:
+            return []
+        moved = self._lot_consume(sku_src, src, qty, self.t)
+        for lid, q, e in moved:
+            self._lot_push(sku_dst, dst, {"lot_id": lid, "qty": float(q),
+                                          "t_in": round(self.t, 3), "expiry_t": e})
+        return moved
 
     def _inv_settle(self, order):
         """完成时结算库存；返回 (delivered, ok)。ok=False 表示缺货不得完成。
@@ -778,10 +927,16 @@ class Simulation:
             self.inv[si["sku"]][src] = avail - qty
             self.inv.setdefault(di["sku"], {})
             self.inv[di["sku"]][dst] = self.inv[di["sku"]].get(dst, 0.0) + qty
+            moved = self._inv_move_lots(si["sku"], src, di["sku"], dst, qty)
             self.inv_refill_n += 1
+            extra = {}
+            if self.lot_expiry_enabled:
+                # 移库的批次明细：验"搬过去还是原来的效期"，不重算
+                extra["lots"] = [{"lot_id": lid, "qty": round(q, 6), "expiry_t": e}
+                                 for lid, q, e in moved]
             self.log.emit(self.t, "PICKFACE_REFILL", sku=si["sku"],
                           reserve_location=src, pickface_location=dst, qty=qty,
-                          order_id=order.get("order_id"))
+                          order_id=order.get("order_id"), **extra)
             self.inv_pending.pop(order.get("order_id"), None)
             self._inv_reorder_check(si["sku"], src)
             return qty, True
@@ -825,12 +980,9 @@ class Simulation:
                 raise ValueError("订单 %s 的交货位 %r 没有库存映射（未知即抛错）"
                                  % (order.get("order_id"), dst))
             sku_dst = info2["sku"]
-            self.inv.setdefault(sku_dst, {})
-            self.inv[sku_dst][dst] = self.inv[sku_dst].get(dst, 0.0) + delivered
             etype = "STOCK_REPLENISH_ARRIVED" if typ == "REPLENISH" else "STOCK_RECEIPT"
-            self.log.emit(self.t, etype, sku=sku_dst, location=dst, qty=delivered,
-                          order_id=order.get("order_id"), cause=typ.lower(),
-                          on_hand_after=round(self.inv[sku_dst][dst], 6))
+            self._inv_inc(sku_dst, dst, delivered, order.get("order_id"),
+                          typ.lower(), etype)
         if dec and sku_src:
             self._inv_reorder_check(sku_src, order["pick_loc"])
         return delivered, True
@@ -1589,6 +1741,12 @@ class Simulation:
             f = p.get("factor")
             if isinstance(f, bool) or not isinstance(f, (int, float)) or not 0.1 <= f <= 10:
                 raise ValueError("factor 必须在 [0.1, 10]")
+        elif typ == "SET_LOT_POLICY":
+            pol = p.get("policy")
+            if pol not in ("FEFO", "FIFO"):
+                raise ValueError("SET_LOT_POLICY 只接受 FEFO / FIFO，收到 %r" % (pol,))
+            if not self.lot_expiry_enabled:
+                raise ValueError("本局没有启用批次效期，无法设置批次策略")
         elif typ == "SET_PRICE":
             typ_ = p.get("order_type")
             if typ_ not in ORDER_TYPES:
@@ -1660,6 +1818,14 @@ class Simulation:
         self.per_hour = max(0.0, self._base_per_hour * self.demand_multiplier
                             * self._price_factor())
         self.lam = self.per_hour / 3600.0
+
+    def _cmd_set_lot_policy(self, cmd):
+        """切 FEFO / FIFO。这是关卡里可玩的杠杆：FIFO 更"公平"但会先出掉
+        早入库的货而不顾效期，于是过期报废上升——两个指标同时动，才叫决策。"""
+        pol = cmd["payload"]["policy"]
+        before = self.lot_policy
+        self.lot_policy = pol
+        self.log.emit(self.t, "CMD_SET_LOT_POLICY", policy=pol, before=before)
 
     def _cmd_set_reorder_point(self, cmd):
         p = cmd["payload"]
@@ -1795,6 +1961,15 @@ class Simulation:
                 due = True
             else:
                 scheduled.append(f["end"])
+        # 到期批次也是**调度事件**：不把它算进 next_t，空闲跳 tick 会直接跨过到期时刻，
+        # 于是批次永远不会过期。这和"t=0 的故障被跳过"是同一类 bug（见上面的注释），
+        # 区别只是这次被跳过的是效期，而效期是 P6b 的全部意义。
+        if self.lot_expiry_enabled and self.lot_heap:
+            nxt = self.lot_heap[0][0]
+            if nxt <= t + 1e-9:
+                due = True
+            else:
+                scheduled.append(nxt)
         future = [x for x in scheduled if x > t + 1e-9]
         next_t = min(future) if future else float("inf")
         if Simulation.jump_ticks_override is not False \
@@ -1806,6 +1981,9 @@ class Simulation:
                 jump = int((next_t - t) / self.tick)
                 self.tick_i = min(self.n_ticks, self.tick_i + jump)
                 return self.tick_i >= self.n_ticks
+
+        # 0) 到期报废：必须在派单前做，否则"刚到期的货"还能被拣出去
+        self._inv_expire_sweep(t)
 
         # 1) demand
         if self.ext:
@@ -2329,6 +2507,20 @@ class Simulation:
         m["inventory_enabled"] = M(1 if self.inv_enabled else 0, "bool",
                                    "本场景是否装载了库存层（缺数据时为 0）",
                                    "inventory_slotting.json 存在且已装载")
+        m["expiry_enabled"] = M(1 if self.lot_expiry_enabled else 0, "bool",
+                                "是否启用批次效期（P6b）", "inventory_spec.expiry.enabled")
+        m["expired_units"] = M(round(self.lot_expired_units, 6), "units",
+                               "期内到期报废数量", "STOCK_EXPIRED 求和")
+        m["expired_value"] = M(round(self.lot_expired_value, 2), "CNY",
+                               "到期报废的账面价值（按 unit_cost 估值，不进 P&L）",
+                               "STOCK_EXPIRED.value 求和")
+        m["lots_opened"] = M(self.lot_opened_n, "lots", "期内批次总数（期初批次 + 新收货）",
+                             "inventory_initial.lots + STOCK_RECEIPT 派生")
+        m["open_lots"] = M(sum(len(v) for v in self.lots.values()), "lots",
+                           "期末未结批次", "lots 中 qty>0 的条目数")
+        m["fefo_violations"] = M(self.fefo_violations, "times",
+                                 "FEFO 违规次数（应恒为 0）",
+                                 "扣减后仍有更早到期批次却已扣晚到期批次")
         m["wall_clock_s"] = M(round(wall_s, 3), "s", "Wall clock", "time.time() delta")
         return {"schema_version": "1.0", "kind": "sim_kpi", "engine": "sim",
                 "scenario": self.sc["id"], "seed": self.seed,
@@ -2338,6 +2530,9 @@ class Simulation:
 
     def _state(self):
         return {"schema_version": "1.0", "kind": "sim_state", "scenario": self.sc["id"],
+                # horizon 进状态：check_expiry 要判"到期时刻是否落在窗口内"，
+                # 不能靠读配置猜——场景可以覆盖 horizon，读配置会判错一整批。
+                "horizon_s": self.horizon,
                 "robots": {r.id: {"state": r.state, "pos": [round(v, 3) for v in r.pos],
                                   "soc_initial_kwh": round(r.soc_initial, 6),
                                   "soc_final_kwh": round(r.soc, 6),
@@ -2356,23 +2551,51 @@ class Simulation:
                                            "units": round(self.inv_units_out, 6),
                                            "value": round(self.inv_value(), 2),
                                            "holding": round(self.inv_holding, 6),
-                                           "stockout": self.inv_stockout_n}}
+                                           "stockout": self.inv_stockout_n,
+                                           # 效期这一块要给 check_expiry 独立核对：
+                                           # 只有状态没有事件、或只有事件没有状态，都不算证据。
+                                           "expiry_enabled": self.lot_expiry_enabled,
+                                           "expired_units": round(self.lot_expired_units, 6),
+                                           "expired_value": round(self.lot_expired_value, 2),
+                                           "expired_lots": self.lot_expired_n,
+                                           "open_lots": sum(len(v) for v in self.lots.values()),
+                                           "fefo_violations": self.fefo_violations}}
                               if self.inv_enabled else None)}
 
     # ---------- 快照（ADR-GAME-05 / 方案书 §2.4.2）----------
     # `_state()` 是给 KPI 对账用的**终态摘要**，故意保持原样不动（A 系列验收依赖它）。
     # 下面是另一个东西：可恢复的全量状态。字段必须穷举——少一块，续跑要几十个 tick
     # 之后才会"莫名偏了"，那时候已经查不出是哪块缺了。
-    SNAPSHOT_SCHEMA = "2.0"
+    SNAPSHOT_SCHEMA = "3.0"
+
+    def _lots_by_sku_loc(self):
+        out = {}
+        for (sku, loc), arr in sorted(self.lots.items()):
+            if not arr:
+                continue
+            out.setdefault(sku, {})[loc] = [dict(l) for l in arr]
+        return out
 
     def _inv_snapshot(self):
         """库存状态入快照。schema 1.0 的旧档没有这一块，restore 会显式拒绝
         （ADR-GAME-09 决策二）：补空账比报错危险得多。"""
         return {
-            "schema": "1.0",
+            # 1.0 → 2.0：加入批次明细。旧档没有 lots，restore 会显式拒绝
+            # （补一份"每个库位一个批次"的假账看起来能跑，但效期全是错的）。
+            "schema": "2.0",
             "enabled": bool(self.inv_enabled),
             "stock": {sku: {loc: q for loc, q in rows.items()}
                       for sku, rows in self.inv.items()},
+            # self.lots 的键是 (sku, loc) 元组，快照里按 sku → loc 两层更好读，
+            # 也和第 1 层的 stock 结构对齐（对账时可以直接 zip 两层）。
+            "lots": self._lots_by_sku_loc(),
+            "lot_seq": self.lot_seq,
+            "lot_policy": self.lot_policy,
+            "lot_counters": {"opened": self.lot_opened_n,
+                             "expired": self.lot_expired_n,
+                             "expired_units": self.lot_expired_units,
+                             "expired_value": self.lot_expired_value,
+                             "fefo_violations": self.fefo_violations},
             "pending_replenish": {oid: dict(v) for oid, v in self.inv_pending.items()},
             "holding_accrued": self.inv_holding,
             "hold_t": self.inv_hold_t,
@@ -2556,6 +2779,28 @@ class Simulation:
         self.inv_enabled = bool(inv.get("enabled", True))
         self.inv = {sku: {loc: float(q) for loc, q in rows.items()}
                     for sku, rows in (inv.get("stock") or {}).items()}
+        # 批次：快照里有就必须重建；**效期开着却没有 lots 直接拒绝**，
+        # 因为那种档"能跑但所有批次都消失了"，FEFO 会在续玩后静默退化成先到先出。
+        self.lots, self.lot_heap = {}, []
+        self.lot_seq = int(inv.get("lot_seq", 0))
+        self.lot_policy = str(inv.get("lot_policy", self.lot_policy))
+        lc = inv.get("lot_counters") or {}
+        self.lot_opened_n = int(lc.get("opened", 0))
+        self.lot_expired_n = int(lc.get("expired", 0))
+        self.lot_expired_units = float(lc.get("expired_units", 0.0))
+        self.lot_expired_value = float(lc.get("expired_value", 0.0))
+        self.fefo_violations = int(lc.get("fefo_violations", 0))
+        if self.lot_expiry_enabled:
+            if "lots" not in inv:
+                raise ValueError("快照缺少 inventory.lots（效期已启用，不能补空账续玩）")
+            for sku, per in (inv.get("lots") or {}).items():
+                for loc, arr in per.items():
+                    for lot in arr:
+                        self._lot_push(sku, loc, {"lot_id": lot["lot_id"],
+                                                  "qty": float(lot["qty"]),
+                                                  "t_in": float(lot.get("t_in", 0.0)),
+                                                  "expiry_t": float(lot["expiry_t"])})
+            self._inv_lot_check(fatal=True)
         self.inv_pending = {oid: dict(v)
                             for oid, v in (inv.get("pending_replenish") or {}).items()}
         self.inv_holding = float(inv.get("holding_accrued", 0.0))
@@ -2589,7 +2834,7 @@ class Simulation:
                 e = json.loads(line)
                 typ = e.get("type")
                 sku, loc, q = e.get("sku"), e.get("location"), float(e.get("qty") or 0)
-                if typ == "STOCK_DECREMENT":
+                if typ in ("STOCK_DECREMENT", "STOCK_EXPIRED"):
                     replay.setdefault(sku, {})[loc] = replay.get(sku, {}).get(loc, 0.0) - q
                 elif typ in ("STOCK_RECEIPT", "STOCK_REPLENISH_ARRIVED"):
                     replay.setdefault(sku, {})[loc] = replay.get(sku, {}).get(loc, 0.0) + q

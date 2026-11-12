@@ -93,11 +93,14 @@ def compare(lo, hi, min_witness=3):
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="门 2 · 补货可证伪（双向）")
     ap.add_argument("--scenario", default="baseline")
-    # 标定记录（2026-11-12 实测）：压力太狠（scale 0.03）时补货量被"现有可用量"卡死，
-    # 机制不可观测；需求太高（dm 3+）或因子太大（≥4）时补货单会挤占运力，
-    # 出现"补货点越高、完成单越少"（77→37）。这台机器上唯一稳定的可观测窗口是
-    # scale 0.10 / dm 2.0 / factor 1↔3：缺货 4→3、持有 0.255→0.274、完成 77→90。
-    ap.add_argument("--stock-scale", type=float, default=0.10)
+    # 标定记录（2026-11-12 实测，P6b 改动数据后**重新标定过一次**）：
+    # 压力太狠（scale 0.03）时补货量被"现有可用量"卡死，机制不可观测；需求太高
+    # （dm 3+）或因子太大（≥4）时补货单会挤占运力，出现"补货点越高、完成单越少"
+    # （77→37）。P6b 引入批次效期后，旧窗口 scale 0.10 / dm 2.0 退化成了 9→9
+    # （过期报废把可用量削掉一截，补货补不回来），所以重标为：
+    # scale 0.18 / dm 2.0 / factor 1↔3 → 缺货 8→4、持有 0.3653→0.3725。
+    # **参数要跟着数据走**：换了库存数据就必须重跑这张网格，不能沿用旧默认值。
+    ap.add_argument("--stock-scale", type=float, default=0.18)
     ap.add_argument("--demand-mult", type=float, default=2.0)
     ap.add_argument("--self-test", action="store_true",
                     help="把补货点写死成常量，验证这道门会 FAIL")

@@ -31,6 +31,9 @@ DATA, OUT, RUNS = ROOT / "data", ROOT / "out", ROOT / "runs"
 TOL = 1e-9
 
 DEC = ("STOCK_DECREMENT",)
+#: 报废也是出库。P6b 之前这里只有补货/拣选，漏掉报废的话，第一次过期之后
+#: 每一对 (sku, loc) 都会差出报废量 —— 看起来像"引擎多记了库存"，其实是审计漏项。
+EXP = ("STOCK_EXPIRED",)
 INC = ("STOCK_RECEIPT", "STOCK_REPLENISH_ARRIVED")
 
 
@@ -48,10 +51,10 @@ def latest_run(scenario="baseline"):
 
 
 def replay(initial, events):
-    """从期初 + 事件流重放期末。返回 (stock, receipts, decrements)。"""
+    """从期初 + 事件流重放期末。返回 (stock, receipts, decrements, expired)。"""
     stock = {sku: {loc: float(q) for loc, q in rows.items()}
              for sku, rows in initial["stock"].items()}
-    inc, dec = {}, {}
+    inc, dec, exp = {}, {}, {}
     for e in events:
         typ, sku, loc = e.get("type"), e.get("sku"), e.get("location")
         qty = float(e.get("qty") or 0.0)
@@ -63,6 +66,10 @@ def replay(initial, events):
             stock.setdefault(sku, {})
             stock[sku][loc] = stock[sku].get(loc, 0.0) - qty
             dec[(sku, loc)] = dec.get((sku, loc), 0.0) + qty
+        elif typ in EXP:
+            stock.setdefault(sku, {})
+            stock[sku][loc] = stock[sku].get(loc, 0.0) - qty
+            exp[(sku, loc)] = exp.get((sku, loc), 0.0) + qty
         elif typ == "PICKFACE_REFILL":
             # 内部移库：源减、目标加。必须显式处理，否则重放会少一块库存，
             # 而"少的那块"恰好会被误判成"引擎多记了"。
@@ -72,7 +79,7 @@ def replay(initial, events):
             stock[sku][pf] = stock[sku].get(pf, 0.0) + qty
             dec[(sku, rs)] = dec.get((sku, rs), 0.0) + qty
             inc[(sku, pf)] = inc.get((sku, pf), 0.0) + qty
-    return stock, inc, dec
+    return stock, inc, dec, exp
 
 
 def audit(run_dir, initial, tamper=None):
@@ -86,7 +93,7 @@ def audit(run_dir, initial, tamper=None):
         tamper(reported)
     events = [json.loads(x) for x in (run_dir / "sim_events.jsonl")
               .read_text(encoding="utf-8").splitlines() if x.strip()]
-    stock, inc, dec = replay(initial, events)
+    stock, inc, dec, exp = replay(initial, events)
 
     rows, bad = [], []
     for sku in sorted(set(stock) | set(reported)):
@@ -94,11 +101,13 @@ def audit(run_dir, initial, tamper=None):
             opening = float(initial["stock"].get(sku, {}).get(loc, 0.0))
             got_in = inc.get((sku, loc), 0.0)
             got_out = dec.get((sku, loc), 0.0)
-            expect = opening + got_in - got_out
+            got_exp = exp.get((sku, loc), 0.0)
+            expect = opening + got_in - got_out - got_exp
             actual = reported.get(sku, {}).get(loc, 0.0)
             residual = actual - expect
             rows.append({"sku": sku, "location": loc, "opening": opening,
                          "in": round(got_in, 6), "out": round(got_out, 6),
+                         "expired": round(got_exp, 6),
                          "closing_expected": round(expect, 6),
                          "closing_reported": round(actual, 6),
                          "residual": residual})
@@ -110,6 +119,7 @@ def audit(run_dir, initial, tamper=None):
         e = sum(float(initial["stock"].get(sku, {}).get(l, 0.0)) for l in initial["stock"].get(sku, {}))
         e += sum(v for (s, _l), v in inc.items() if s == sku)
         e -= sum(v for (s, _l), v in dec.items() if s == sku)
+        e -= sum(v for (s, _l), v in exp.items() if s == sku)
         a = sum(reported.get(sku, {}).values())
         if abs(a - e) > TOL:
             sku_bad.append({"sku": sku, "expected": round(e, 6), "reported": round(a, 6)})
@@ -122,6 +132,7 @@ def audit(run_dir, initial, tamper=None):
                   float(q) for rows_ in initial["stock"].values() for q in rows_.values()), 6),
                   "in_units": round(sum(inc.values()), 6),
                   "out_units": round(sum(dec.values()), 6),
+                  "expired_units": round(sum(exp.values()), 6),
                   "closing_units": round(sum(q for rows_ in reported.values()
                                              for q in rows_.values()), 6)},
               "sample_mismatch": bad[:5]}
@@ -166,10 +177,11 @@ def main(argv=None) -> int:
     report, rows = audit(run_dir, initial)
     write_report(report, rows)
     if not a.quiet:
-        print("INVENTORY_%s %s pairs=%d mismatched=%d units(期初 %s / 入 %s / 出 %s / 期末 %s)"
+        print("INVENTORY_%s %s pairs=%d mismatched=%d units(期初 %s / 入 %s / 出 %s / 报废 %s / 期末 %s)"
               % (report["verdict"], run_dir.name, report["pairs"],
                  report["mismatched_pairs"], report["summary"]["initial_units"],
                  report["summary"]["in_units"], report["summary"]["out_units"],
+                 report["summary"]["expired_units"],
                  report["summary"]["closing_units"]))
         for r in report.get("sample_mismatch") or []:
             print("  - %s@%s 期望 %s 实报 %s（残差 %.2e）"

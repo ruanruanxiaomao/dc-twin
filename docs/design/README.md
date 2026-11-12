@@ -34,3 +34,4 @@ contradict the engine. They are recorded here because the *reasons* outlive the 
 | [GAME-07](ADR-GAME-07.md) | Level = scenario + business objectives | objectives stay separate from `assertions` |
 | [GAME-08](ADR-GAME-08.md) | Override whitelist derives from the engine | never keep a second copy of policy names |
 | [GAME-09](ADR-GAME-09.md) | Inventory: procurement stays out of P&L; snapshot 2.0; one v2 refreeze | COGS needs its own ADR + retariff + refreeze; SKU is derived from location, never sampled |
+| [GAME-10](ADR-GAME-10.md) | Lots/expiry/FEFO: demo-time shelf life, waste is not a P&L line, expiry times join the scheduler | Waste costing needs the COGS ADR; batch policy is a weak lever under ~40 picks/h, so no level_06 |

@@ -24,11 +24,17 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 RUNS = ROOT / "runs"
 GOLDEN = ROOT / "tests" / "golden" / "kpi_baseline.json"        # v1（永久保留）
-GOLDEN_V2 = ROOT / "tests" / "golden" / "kpi_baseline_v2.json"   # P6a 之后的默认基准
+GOLDEN_V2 = ROOT / "tests" / "golden" / "kpi_baseline_v2.json"   # P6a：库存层
+GOLDEN_V3 = ROOT / "tests" / "golden" / "kpi_baseline_v3.json"   # P6b：批次效期
+
+VERSIONS = {"v1": GOLDEN, "v2": GOLDEN_V2, "v3": GOLDEN_V3}
 
 
 def default_golden():
-    return GOLDEN_V2 if GOLDEN_V2.exists() else GOLDEN
+    for tag in ("v3", "v2", "v1"):
+        if VERSIONS[tag].exists():
+            return VERSIONS[tag]
+    return GOLDEN
 
 #: 冻结哪些指标。刻意不含 wall_clock_s（跟机器有关）、不含诊断计数之外的随机量。
 METRICS = [
@@ -42,6 +48,14 @@ METRICS = [
     # 月台层（v4.7）：装卸次数与占用率一并冻结，否则"月台接进来了"没法防回退
     "dock_served", "dock_doors", "dock_utilization", "dock_service_mean_s",
     "dock_queue_max", "dock_queue_wait_avg_s",
+    # 库存层（P6a）与批次效期层（P6b）。
+    # **这两个阶段各自的 KPI 之前都没进这张清单**——重冻报告显示"KPI 变 0 项"，
+    # 不是真的没变，而是基准根本没收录它们。缺货率、报废量这类指标不冻结，
+    # 回退时没有任何一道门会红，所以现在一次补齐。
+    "stockout_count", "fill_rate", "holding_cost", "inventory_value",
+    "reorder_triggers", "inventory_enabled",
+    "expiry_enabled", "expired_units", "expired_value",
+    "lots_opened", "open_lots", "fefo_violations",
 ]
 
 #: 计数类：必须精确相等，容差为 0
@@ -181,9 +195,10 @@ def self_test(path: Path = None) -> int:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="KPI 基准快照")
     ap.add_argument("--freeze", action="store_true", help="冻结 v1（历史）")
-    ap.add_argument("--freeze-v2", action="store_true", help="冻结 v2（默认基准）")
+    ap.add_argument("--freeze-v2", action="store_true", help="冻结 v2（P6a）")
+    ap.add_argument("--freeze-v3", action="store_true", help="冻结 v3（P6b）")
     ap.add_argument("--check", nargs="?", const="auto", default=None,
-                    choices=["auto", "v1", "v2"], help="与快照比对")
+                    choices=["auto", "v1", "v2", "v3"], help="与快照比对")
     ap.add_argument("--self-test", action="store_true", help="证明比对会失败")
     a = ap.parse_args(argv)
     if a.self_test:
@@ -192,8 +207,10 @@ def main(argv=None) -> int:
         return freeze(GOLDEN, tag="v1")
     if a.freeze_v2:
         return freeze(GOLDEN_V2, tag="v2")
+    if a.freeze_v3:
+        return freeze(GOLDEN_V3, tag="v3")
     which = a.check or "auto"
-    return check(GOLDEN if which == "v1" else (GOLDEN_V2 if which == "v2" else default_golden()))
+    return check(default_golden() if which == "auto" else VERSIONS[which])
 
 
 if __name__ == "__main__":

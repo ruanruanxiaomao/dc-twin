@@ -116,7 +116,14 @@ async function main() {
   await sleep(2200);
   const hud1 = await cdp.eval(readHud);
   const cashCard = (hud1.cards || []).find((c) => c.k === '现金');
-  record('HUD 六张经营卡片', hud1.count === 6, `cards=${hud1.count}`);
+  // 按**标签**判断而不是数张数：加一张"过期报废"卡就会让写死 6 的断言假失败，
+  // 而那张卡恰恰是 P6b 要展示的东西。要求的是"该有的都在"，不是"恰好这么多"。
+  const need = ['现金', '营收', '变动成本', '固定成本', '经营利润', '完成/流失'];
+  const labels = (hud1.cards || []).map((c) => c.k);
+  const missing = need.filter((k) => !labels.includes(k));
+  record('HUD 经营卡片齐全', missing.length === 0, `cards=${hud1.count} missing=${missing.join(',')}`);
+  record('HUD 有过期报废卡（P6b）', labels.includes('过期报废'),
+    labels.includes('过期报废') ? (hud1.cards.find((c) => c.k === '过期报废').v) : 'absent');
   record('现金数字可读', !!cashCard && /¥\d+/.test(cashCard.v),
     cashCard ? cashCard.v : 'no cash card');
 

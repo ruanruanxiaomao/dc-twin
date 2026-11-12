@@ -14,7 +14,7 @@
 
 三份产物：
   - `sim_events.jsonl`：事件溯源的全部事实（seq 连续、类型计数、时序）
-  - `sim_kpi.json`：56 项 tick 层指标（除墙钟外全部冻结）
+  - `sim_kpi.json`：62 项 tick 层指标（除墙钟外全部冻结）
   - `sim_state.json`：终态摘要（机器人 11 态终值、队列深度、封门集合）
 
 用法：
@@ -34,12 +34,20 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 RUNS = ROOT / "runs"
 GOLDEN = ROOT / "tests" / "golden" / "step_baseline.json"          # v1（永久保留）
-GOLDEN_V2 = ROOT / "tests" / "golden" / "step_baseline_v2.json"     # P6a 之后的默认基准
+GOLDEN_V2 = ROOT / "tests" / "golden" / "step_baseline_v2.json"     # P6a：库存层
+GOLDEN_V3 = ROOT / "tests" / "golden" / "step_baseline_v3.json"     # P6b：批次效期
+
+#: 基准是**累积**的：每加一代就多一个文件，旧的一律不覆盖。
+#: 谁"清理"掉旧基准，谁就抹掉了"这次改了什么"的唯一证据。
+VERSIONS = {"v1": GOLDEN, "v2": GOLDEN_V2, "v3": GOLDEN_V3}
 
 
 def default_golden():
-    """默认比 v2；v2 还没冻时退回 v1（P6a-5 之前的行为保持不变）。"""
-    return GOLDEN_V2 if GOLDEN_V2.exists() else GOLDEN
+    """默认比最新的一代；没冻过就退回上一代（新阶段未冻结时行为不变）。"""
+    for tag in ("v3", "v2", "v1"):
+        if VERSIONS[tag].exists():
+            return VERSIONS[tag]
+    return GOLDEN
 
 ARTIFACTS = ("sim_events.jsonl", "sim_kpi.json", "sim_state.json")
 
@@ -197,20 +205,23 @@ def self_test(path: Path = None) -> int:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="批跑产物逐字节基准（step 化回归门）")
     ap.add_argument("--freeze", action="store_true", help="冻结 v1（历史，只在重建历史时用）")
-    ap.add_argument("--freeze-v2", action="store_true", help="冻结 v2（P6a 之后的默认基准）")
+    ap.add_argument("--freeze-v2", action="store_true", help="冻结 v2（P6a：库存层）")
+    ap.add_argument("--freeze-v3", action="store_true", help="冻结 v3（P6b：批次效期）")
     ap.add_argument("--check", nargs="?", const="auto", default=None,
-                    choices=["auto", "v1", "v2"],
-                    help="与基准比对：默认 auto（有 v2 比 v2）；v1/v2 显式指定")
+                    choices=["auto", "v1", "v2", "v3"],
+                    help="与基准比对：默认 auto（比最新一代）；v1/v2/v3 显式指定")
     ap.add_argument("--self-test", action="store_true", help="证明比对会失败")
     a = ap.parse_args(argv)
     if a.self_test:
         return self_test(default_golden())
     if a.freeze:
-        return freeze(GOLDEN)
+        return freeze(GOLDEN, tag="v1")
     if a.freeze_v2:
         return freeze(GOLDEN_V2, tag="v2")
+    if a.freeze_v3:
+        return freeze(GOLDEN_V3, tag="v3")
     which = a.check or "auto"
-    return check(GOLDEN if which == "v1" else (GOLDEN_V2 if which == "v2" else default_golden()))
+    return check(default_golden() if which == "auto" else VERSIONS[which])
 
 
 if __name__ == "__main__":

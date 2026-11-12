@@ -253,6 +253,16 @@ class GameSession:
                 "robots": robots,
                 "counts": dict(sim.log.counts),
             }
+            # 效期/批次是**独立一块**而不是塞进 economy：报废不进 P&L
+            # （ADR-GAME-10 决策三），把它放经济体里会诱导前端当成成本去加总。
+            out["expiry"] = {
+                "enabled": bool(getattr(sim, "lot_expiry_enabled", False)),
+                "policy": getattr(sim, "lot_policy", None),
+                "expired_units": round(float(getattr(sim, "lot_expired_units", 0.0)), 3),
+                "expired_value": round(float(getattr(sim, "lot_expired_value", 0.0)), 2),
+                "open_lots": sum(len(v) for v in getattr(sim, "lots", {}).values()),
+                "fefo_violations": int(getattr(sim, "fefo_violations", 0)),
+            }
             econ = getattr(sim, "economy", None)
             if econ is not None:
                 out["economy"] = econ.snapshot()

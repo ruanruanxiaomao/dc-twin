@@ -3,11 +3,18 @@
   "kind": "inventory_initial",
   "generated_from": "data/inventory_slotting.json + config/inventory_spec.json",
   "seed": 20261106,
-  "note": "期初结存按 ABC 基准量；拣选面按 fill_ratio_of_reserve 取小批量",
+  "note": "期初结存按 ABC 基准量；拣选面按 fill_ratio_of_reserve 取小批量。lots 是同一批货的批次拆分：qty 之和必须等于 stock（引擎会断言，对不上即 raise）",
   "summary": {
     "total_units": 10512,
     "inventory_value": 92696.06,
-    "skus": 240
+    "skus": 240,
+    "lots": 796,
+    "expiring_lots": 124,
+    "expiring_units": 1664,
+    "aging_locations": 131,
+    "inverted_locations": 66,
+    "expiry_enabled": true,
+    "horizon_s": 3600.0
   },
   "stock": {
     "SKU-0001": {
@@ -881,6 +888,7640 @@
     },
     "SKU-0240": {
       "SHELF-W0181": 8
+    }
+  },
+  "lots": {
+    "SKU-0001": {
+      "SHELF-F10003": [
+        {
+          "lot_id": "LOT-I000001",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 5808.96,
+          "remaining_frac": 0.8068,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000002",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 5819.04,
+          "remaining_frac": 0.8082,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000003",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 5829.12,
+          "remaining_frac": 0.8096,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0002": {
+      "SHELF-F20003": [
+        {
+          "lot_id": "LOT-I000004",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6585.12,
+          "remaining_frac": 0.9146,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000005",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6595.2,
+          "remaining_frac": 0.916,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000006",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6605.28,
+          "remaining_frac": 0.9174,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0003": {
+      "SHELF-F30003": [
+        {
+          "lot_id": "LOT-I000007",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 5921.28,
+          "remaining_frac": 0.8224,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000008",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 5931.36,
+          "remaining_frac": 0.8238,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000009",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 5941.44,
+          "remaining_frac": 0.8252,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0004": {
+      "SHELF-F10011": [
+        {
+          "lot_id": "LOT-I000010",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6570.72,
+          "remaining_frac": 0.9126,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000011",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6580.8,
+          "remaining_frac": 0.914,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000012",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6590.88,
+          "remaining_frac": 0.9154,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0005": {
+      "SHELF-F20011": [
+        {
+          "lot_id": "LOT-I000013",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 5906.88,
+          "remaining_frac": 0.8204,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000014",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 5916.96,
+          "remaining_frac": 0.8218,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000015",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 5927.04,
+          "remaining_frac": 0.8232,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0006": {
+      "SHELF-F30011": [
+        {
+          "lot_id": "LOT-I000016",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6683.04,
+          "remaining_frac": 0.9282,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000017",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6693.12,
+          "remaining_frac": 0.9296,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000018",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6703.2,
+          "remaining_frac": 0.931,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0007": {
+      "SHELF-F10001": [
+        {
+          "lot_id": "LOT-I000019",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6891.84,
+          "remaining_frac": 0.9572,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000020",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 4878.36,
+          "remaining_frac": 0.6776,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000021",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 2044.8,
+          "remaining_frac": 0.284,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0008": {
+      "SHELF-F10005": [
+        {
+          "lot_id": "LOT-I000022",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 7178.4,
+          "remaining_frac": 0.997,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000023",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 7188.48,
+          "remaining_frac": 0.9984,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000024",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 7198.56,
+          "remaining_frac": 0.9998,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0009": {
+      "SHELF-F10009": [
+        {
+          "lot_id": "LOT-I000025",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6024.96,
+          "remaining_frac": 0.8368,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000026",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6035.04,
+          "remaining_frac": 0.8382,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000027",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6045.12,
+          "remaining_frac": 0.8396,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0010": {
+      "SHELF-F20001": [
+        {
+          "lot_id": "LOT-I000028",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6605.28,
+          "remaining_frac": 0.9174,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000029",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 4376.88,
+          "remaining_frac": 0.6079,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000030",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 1571.976,
+          "remaining_frac": 0.2183,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0011": {
+      "SHELF-F20005": [
+        {
+          "lot_id": "LOT-I000031",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6891.84,
+          "remaining_frac": 0.9572,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000032",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6901.92,
+          "remaining_frac": 0.9586,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000033",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6912.0,
+          "remaining_frac": 0.96,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0012": {
+      "SHELF-F20009": [
+        {
+          "lot_id": "LOT-I000034",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 7178.4,
+          "remaining_frac": 0.997,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000035",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 7188.48,
+          "remaining_frac": 0.9984,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000036",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 7198.56,
+          "remaining_frac": 0.9998,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0013": {
+      "SHELF-F30001": [
+        {
+          "lot_id": "LOT-I000037",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6318.72,
+          "remaining_frac": 0.8776,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000038",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 3875.4,
+          "remaining_frac": 0.5383,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000039",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 1099.152,
+          "remaining_frac": 0.1527,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0014": {
+      "SHELF-F30005": [
+        {
+          "lot_id": "LOT-I000040",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6605.28,
+          "remaining_frac": 0.9174,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000041",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6615.36,
+          "remaining_frac": 0.9188,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000042",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6625.44,
+          "remaining_frac": 0.9202,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0015": {
+      "SHELF-F30009": [
+        {
+          "lot_id": "LOT-I000043",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6891.84,
+          "remaining_frac": 0.9572,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000044",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6901.92,
+          "remaining_frac": 0.9586,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000045",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6912.0,
+          "remaining_frac": 0.96,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0016": {
+      "SHELF-W0003": [
+        {
+          "lot_id": "LOT-I000046",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6081.12,
+          "remaining_frac": 0.8446,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000047",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6091.2,
+          "remaining_frac": 0.846,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000048",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6101.28,
+          "remaining_frac": 0.8474,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0070": [
+        {
+          "lot_id": "LOT-I000049",
+          "qty": 14,
+          "t_in": -0.0,
+          "expiry_t": 1004.112,
+          "remaining_frac": 0.1395,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0199": [
+        {
+          "lot_id": "LOT-I000050",
+          "qty": 14,
+          "t_in": -0.0,
+          "expiry_t": 1462.68,
+          "remaining_frac": 0.2031,
+          "date_code_inverted": true
+        }
+      ],
+      "SHELF-W0235": [
+        {
+          "lot_id": "LOT-I000051",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 3300.84,
+          "remaining_frac": 0.4585,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000052",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 557.424,
+          "remaining_frac": 0.0774,
+          "date_code_inverted": true
+        }
+      ],
+      "SHELF-W0276": [
+        {
+          "lot_id": "LOT-I000053",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 7004.16,
+          "remaining_frac": 0.9728,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000054",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 7014.24,
+          "remaining_frac": 0.9742,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0313": [
+        {
+          "lot_id": "LOT-I000055",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 4122.36,
+          "remaining_frac": 0.5726,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000056",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 1332.0,
+          "remaining_frac": 0.185,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0017": {
+      "SHELF-W0017": [
+        {
+          "lot_id": "LOT-I000057",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6612.48,
+          "remaining_frac": 0.9184,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000058",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6622.56,
+          "remaining_frac": 0.9198,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000059",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6632.64,
+          "remaining_frac": 0.9212,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0150": [
+        {
+          "lot_id": "LOT-I000060",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6988.32,
+          "remaining_frac": 0.9706,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000061",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6998.4,
+          "remaining_frac": 0.972,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0200": [
+        {
+          "lot_id": "LOT-I000062",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6772.32,
+          "remaining_frac": 0.9406,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000063",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6782.4,
+          "remaining_frac": 0.942,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0236": [
+        {
+          "lot_id": "LOT-I000064",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6213.6,
+          "remaining_frac": 0.863,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000065",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6223.68,
+          "remaining_frac": 0.8644,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0277": [
+        {
+          "lot_id": "LOT-I000066",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 2910.24,
+          "remaining_frac": 0.4042,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000067",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 189.144,
+          "remaining_frac": 0.0263,
+          "date_code_inverted": true
+        }
+      ],
+      "SHELF-W0314": [
+        {
+          "lot_id": "LOT-I000068",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6683.04,
+          "remaining_frac": 0.9282,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000069",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6693.12,
+          "remaining_frac": 0.9296,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0018": {
+      "SHELF-W0083": [
+        {
+          "lot_id": "LOT-I000070",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6976.8,
+          "remaining_frac": 0.969,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000071",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6986.88,
+          "remaining_frac": 0.9704,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000072",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6996.96,
+          "remaining_frac": 0.9718,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0164": [
+        {
+          "lot_id": "LOT-I000073",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6079.68,
+          "remaining_frac": 0.8444,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000074",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6089.76,
+          "remaining_frac": 0.8458,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0201": [
+        {
+          "lot_id": "LOT-I000075",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6985.44,
+          "remaining_frac": 0.9702,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000076",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6995.52,
+          "remaining_frac": 0.9716,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0237": [
+        {
+          "lot_id": "LOT-I000077",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6426.72,
+          "remaining_frac": 0.8926,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000078",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6436.8,
+          "remaining_frac": 0.894,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0278": [
+        {
+          "lot_id": "LOT-I000079",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 5990.4,
+          "remaining_frac": 0.832,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000080",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6000.48,
+          "remaining_frac": 0.8334,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0315": [
+        {
+          "lot_id": "LOT-I000081",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6896.16,
+          "remaining_frac": 0.9578,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000082",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6906.24,
+          "remaining_frac": 0.9592,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0019": {
+      "SHELF-W0097": [
+        {
+          "lot_id": "LOT-I000083",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6068.16,
+          "remaining_frac": 0.8428,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000084",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 3436.92,
+          "remaining_frac": 0.4774,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000085",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 685.728,
+          "remaining_frac": 0.0952,
+          "date_code_inverted": true
+        }
+      ],
+      "SHELF-W0165": [
+        {
+          "lot_id": "LOT-I000086",
+          "qty": 14,
+          "t_in": -0.0,
+          "expiry_t": 6292.8,
+          "remaining_frac": 0.874,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0202": [
+        {
+          "lot_id": "LOT-I000087",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 2517.624,
+          "remaining_frac": 0.3497,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000088",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 2895.12,
+          "remaining_frac": 0.4021,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0238": [
+        {
+          "lot_id": "LOT-I000089",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 1595.736,
+          "remaining_frac": 0.2216,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000090",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 4437.36,
+          "remaining_frac": 0.6163,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0280": [
+        {
+          "lot_id": "LOT-I000091",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 916.2,
+          "remaining_frac": 0.1272,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000092",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 3716.64,
+          "remaining_frac": 0.5162,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0316": [
+        {
+          "lot_id": "LOT-I000093",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 2370.312,
+          "remaining_frac": 0.3292,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000094",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 5258.88,
+          "remaining_frac": 0.7304,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0020": {
+      "SHELF-W0005": [
+        {
+          "lot_id": "LOT-I000095",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6884.64,
+          "remaining_frac": 0.9562,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000096",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6894.72,
+          "remaining_frac": 0.9576,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000097",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6904.8,
+          "remaining_frac": 0.959,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0166": [
+        {
+          "lot_id": "LOT-I000098",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 1374.768,
+          "remaining_frac": 0.1909,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000099",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 4203.0,
+          "remaining_frac": 0.5837,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0203": [
+        {
+          "lot_id": "LOT-I000100",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 5971.68,
+          "remaining_frac": 0.8294,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000101",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 5981.76,
+          "remaining_frac": 0.8308,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0239": [
+        {
+          "lot_id": "LOT-I000102",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6852.96,
+          "remaining_frac": 0.9518,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000103",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6863.04,
+          "remaining_frac": 0.9532,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0281": [
+        {
+          "lot_id": "LOT-I000104",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6441.12,
+          "remaining_frac": 0.8946,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000105",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6451.2,
+          "remaining_frac": 0.896,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0317": [
+        {
+          "lot_id": "LOT-I000106",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 5882.4,
+          "remaining_frac": 0.817,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000107",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 5892.48,
+          "remaining_frac": 0.8184,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0021": {
+      "SHELF-W0019": [
+        {
+          "lot_id": "LOT-I000108",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 5976.0,
+          "remaining_frac": 0.83,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000109",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 3275.64,
+          "remaining_frac": 0.455,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000110",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 533.664,
+          "remaining_frac": 0.0741,
+          "date_code_inverted": true
+        }
+      ],
+      "SHELF-W0167": [
+        {
+          "lot_id": "LOT-I000111",
+          "qty": 14,
+          "t_in": -0.0,
+          "expiry_t": 6719.04,
+          "remaining_frac": 0.9332,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0204": [
+        {
+          "lot_id": "LOT-I000112",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6184.8,
+          "remaining_frac": 0.859,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000113",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6194.88,
+          "remaining_frac": 0.8604,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0240": [
+        {
+          "lot_id": "LOT-I000114",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 7066.08,
+          "remaining_frac": 0.9814,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000115",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 7076.16,
+          "remaining_frac": 0.9828,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0282": [
+        {
+          "lot_id": "LOT-I000116",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6654.24,
+          "remaining_frac": 0.9242,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000117",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6664.32,
+          "remaining_frac": 0.9256,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0318": [
+        {
+          "lot_id": "LOT-I000118",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6095.52,
+          "remaining_frac": 0.8466,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000119",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6105.6,
+          "remaining_frac": 0.848,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0022": {
+      "SHELF-W0085": [
+        {
+          "lot_id": "LOT-I000120",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6340.32,
+          "remaining_frac": 0.8806,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000121",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 3913.2,
+          "remaining_frac": 0.5435,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000122",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 1134.792,
+          "remaining_frac": 0.1576,
+          "date_code_inverted": true
+        }
+      ],
+      "SHELF-W0168": [
+        {
+          "lot_id": "LOT-I000123",
+          "qty": 14,
+          "t_in": -0.0,
+          "expiry_t": 6932.16,
+          "remaining_frac": 0.9628,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0205": [
+        {
+          "lot_id": "LOT-I000124",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 3996.36,
+          "remaining_frac": 0.5551,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000125",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 1213.2,
+          "remaining_frac": 0.1685,
+          "date_code_inverted": true
+        }
+      ],
+      "SHELF-W0241": [
+        {
+          "lot_id": "LOT-I000126",
+          "qty": 14,
+          "t_in": -0.0,
+          "expiry_t": 274.68,
+          "remaining_frac": 0.0382,
+          "date_code_inverted": true
+        }
+      ],
+      "SHELF-W0283": [
+        {
+          "lot_id": "LOT-I000127",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 4817.88,
+          "remaining_frac": 0.6692,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000128",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 1987.776,
+          "remaining_frac": 0.2761,
+          "date_code_inverted": true
+        }
+      ],
+      "SHELF-W0319": [
+        {
+          "lot_id": "LOT-I000129",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 3840.12,
+          "remaining_frac": 0.5333,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000130",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 1065.888,
+          "remaining_frac": 0.148,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0023": {
+      "SHELF-W0099": [
+        {
+          "lot_id": "LOT-I000131",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6871.68,
+          "remaining_frac": 0.9544,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000132",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6881.76,
+          "remaining_frac": 0.9558,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000133",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6891.84,
+          "remaining_frac": 0.9572,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0169": [
+        {
+          "lot_id": "LOT-I000134",
+          "qty": 14,
+          "t_in": -0.0,
+          "expiry_t": 2429.712,
+          "remaining_frac": 0.3375,
+          "date_code_inverted": true
+        }
+      ],
+      "SHELF-W0206": [
+        {
+          "lot_id": "LOT-I000135",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6611.04,
+          "remaining_frac": 0.9182,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000136",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6621.12,
+          "remaining_frac": 0.9196,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0242": [
+        {
+          "lot_id": "LOT-I000137",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6052.32,
+          "remaining_frac": 0.8406,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000138",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6062.4,
+          "remaining_frac": 0.842,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0284": [
+        {
+          "lot_id": "LOT-I000139",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 7080.48,
+          "remaining_frac": 0.9834,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000140",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 7090.56,
+          "remaining_frac": 0.9848,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0320": [
+        {
+          "lot_id": "LOT-I000141",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6521.76,
+          "remaining_frac": 0.9058,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000142",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6531.84,
+          "remaining_frac": 0.9072,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0024": {
+      "SHELF-F10007": [
+        {
+          "lot_id": "LOT-I000143",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 5925.6,
+          "remaining_frac": 0.823,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000144",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 3187.44,
+          "remaining_frac": 0.4427,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000145",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 450.504,
+          "remaining_frac": 0.0626,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0025": {
+      "SHELF-F20007": [
+        {
+          "lot_id": "LOT-I000146",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6701.76,
+          "remaining_frac": 0.9308,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000147",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 4545.72,
+          "remaining_frac": 0.6314,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000148",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 1731.168,
+          "remaining_frac": 0.2404,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0026": {
+      "SHELF-F30007": [
+        {
+          "lot_id": "LOT-I000149",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6037.92,
+          "remaining_frac": 0.8386,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000150",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 3384.0,
+          "remaining_frac": 0.47,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000151",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 635.832,
+          "remaining_frac": 0.0883,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0027": {
+      "SHELF-W0001": [
+        {
+          "lot_id": "LOT-I000152",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6667.2,
+          "remaining_frac": 0.926,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000153",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 4485.24,
+          "remaining_frac": 0.623,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000154",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 1674.144,
+          "remaining_frac": 0.2325,
+          "date_code_inverted": true
+        }
+      ],
+      "SHELF-W0170": [
+        {
+          "lot_id": "LOT-I000155",
+          "qty": 14,
+          "t_in": -0.0,
+          "expiry_t": 6484.32,
+          "remaining_frac": 0.9006,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0207": [
+        {
+          "lot_id": "LOT-I000156",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 5950.08,
+          "remaining_frac": 0.8264,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000157",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 5960.16,
+          "remaining_frac": 0.8278,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0243": [
+        {
+          "lot_id": "LOT-I000158",
+          "qty": 14,
+          "t_in": -0.0,
+          "expiry_t": 6831.36,
+          "remaining_frac": 0.9488,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0285": [
+        {
+          "lot_id": "LOT-I000159",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6419.52,
+          "remaining_frac": 0.8916,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000160",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6429.6,
+          "remaining_frac": 0.893,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0028": {
+      "SHELF-W0015": [
+        {
+          "lot_id": "LOT-I000161",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 7198.56,
+          "remaining_frac": 0.9998,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000162",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 5768.64,
+          "remaining_frac": 0.8012,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000163",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 5778.72,
+          "remaining_frac": 0.8026,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0171": [
+        {
+          "lot_id": "LOT-I000164",
+          "qty": 14,
+          "t_in": -0.0,
+          "expiry_t": 6697.44,
+          "remaining_frac": 0.9302,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0208": [
+        {
+          "lot_id": "LOT-I000165",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 809.28,
+          "remaining_frac": 0.1124,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000166",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 3603.24,
+          "remaining_frac": 0.5005,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0244": [
+        {
+          "lot_id": "LOT-I000167",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 2263.392,
+          "remaining_frac": 0.3144,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000168",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 5145.48,
+          "remaining_frac": 0.7147,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0286": [
+        {
+          "lot_id": "LOT-I000169",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 1583.856,
+          "remaining_frac": 0.22,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000170",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 4424.76,
+          "remaining_frac": 0.6146,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0029": {
+      "SHELF-W0081": [
+        {
+          "lot_id": "LOT-I000171",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6122.88,
+          "remaining_frac": 0.8504,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000172",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6132.96,
+          "remaining_frac": 0.8518,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000173",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6143.04,
+          "remaining_frac": 0.8532,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0172": [
+        {
+          "lot_id": "LOT-I000174",
+          "qty": 14,
+          "t_in": -0.0,
+          "expiry_t": 2042.424,
+          "remaining_frac": 0.2837,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0209": [
+        {
+          "lot_id": "LOT-I000175",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6376.32,
+          "remaining_frac": 0.8856,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000176",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6386.4,
+          "remaining_frac": 0.887,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0245": [
+        {
+          "lot_id": "LOT-I000177",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 5817.6,
+          "remaining_frac": 0.808,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000178",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 5827.68,
+          "remaining_frac": 0.8094,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0287": [
+        {
+          "lot_id": "LOT-I000179",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6845.76,
+          "remaining_frac": 0.9508,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000180",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6855.84,
+          "remaining_frac": 0.9522,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0030": {
+      "SHELF-W0095": [
+        {
+          "lot_id": "LOT-I000181",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6654.24,
+          "remaining_frac": 0.9242,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000182",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6664.32,
+          "remaining_frac": 0.9256,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000183",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6674.4,
+          "remaining_frac": 0.927,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0173": [
+        {
+          "lot_id": "LOT-I000184",
+          "qty": 14,
+          "t_in": -0.0,
+          "expiry_t": 7123.68,
+          "remaining_frac": 0.9894,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0210": [
+        {
+          "lot_id": "LOT-I000185",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6589.44,
+          "remaining_frac": 0.9152,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000186",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6599.52,
+          "remaining_frac": 0.9166,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0246": [
+        {
+          "lot_id": "LOT-I000187",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6030.72,
+          "remaining_frac": 0.8376,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000188",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6040.8,
+          "remaining_frac": 0.839,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0288": [
+        {
+          "lot_id": "LOT-I000189",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 7058.88,
+          "remaining_frac": 0.9804,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000190",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 7068.96,
+          "remaining_frac": 0.9818,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0031": {
+      "SHELF-W0007": [
+        {
+          "lot_id": "LOT-I000191",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6128.64,
+          "remaining_frac": 0.8512,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000192",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 3542.76,
+          "remaining_frac": 0.492,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000193",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 785.52,
+          "remaining_frac": 0.1091,
+          "date_code_inverted": true
+        }
+      ],
+      "SHELF-W0174": [
+        {
+          "lot_id": "LOT-I000194",
+          "qty": 14,
+          "t_in": -0.0,
+          "expiry_t": 5896.8,
+          "remaining_frac": 0.819,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0211": [
+        {
+          "lot_id": "LOT-I000195",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 4704.48,
+          "remaining_frac": 0.6534,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000196",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 1880.856,
+          "remaining_frac": 0.2612,
+          "date_code_inverted": true
+        }
+      ],
+      "SHELF-W0247": [
+        {
+          "lot_id": "LOT-I000197",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 3726.72,
+          "remaining_frac": 0.5176,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000198",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 958.968,
+          "remaining_frac": 0.1332,
+          "date_code_inverted": true
+        }
+      ],
+      "SHELF-W0289": [
+        {
+          "lot_id": "LOT-I000199",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 3006.0,
+          "remaining_frac": 0.4175,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000200",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 279.432,
+          "remaining_frac": 0.0388,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0032": {
+      "SHELF-W0087": [
+        {
+          "lot_id": "LOT-I000201",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6835.68,
+          "remaining_frac": 0.9494,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000202",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6845.76,
+          "remaining_frac": 0.9508,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000203",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6855.84,
+          "remaining_frac": 0.9522,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0175": [
+        {
+          "lot_id": "LOT-I000204",
+          "qty": 14,
+          "t_in": -0.0,
+          "expiry_t": 721.368,
+          "remaining_frac": 0.1002,
+          "date_code_inverted": true
+        }
+      ],
+      "SHELF-W0212": [
+        {
+          "lot_id": "LOT-I000205",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 7015.68,
+          "remaining_frac": 0.9744,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000206",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 7025.76,
+          "remaining_frac": 0.9758,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0248": [
+        {
+          "lot_id": "LOT-I000207",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6456.96,
+          "remaining_frac": 0.8968,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000208",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6467.04,
+          "remaining_frac": 0.8982,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0290": [
+        {
+          "lot_id": "LOT-I000209",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6045.12,
+          "remaining_frac": 0.8396,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000210",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6055.2,
+          "remaining_frac": 0.841,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0033": {
+      "SHELF-F10012": [
+        {
+          "lot_id": "LOT-I000211",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6305.76,
+          "remaining_frac": 0.8758,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000212",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6315.84,
+          "remaining_frac": 0.8772,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000213",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6325.92,
+          "remaining_frac": 0.8786,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0034": {
+      "SHELF-F10023": [
+        {
+          "lot_id": "LOT-I000214",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6763.68,
+          "remaining_frac": 0.9394,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000215",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6773.76,
+          "remaining_frac": 0.9408,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000216",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6783.84,
+          "remaining_frac": 0.9422,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0035": {
+      "SHELF-F20012": [
+        {
+          "lot_id": "LOT-I000217",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 5830.56,
+          "remaining_frac": 0.8098,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000218",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 5840.64,
+          "remaining_frac": 0.8112,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000219",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 5850.72,
+          "remaining_frac": 0.8126,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0036": {
+      "SHELF-F20023": [
+        {
+          "lot_id": "LOT-I000220",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6288.48,
+          "remaining_frac": 0.8734,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000221",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6298.56,
+          "remaining_frac": 0.8748,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000222",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6308.64,
+          "remaining_frac": 0.8762,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0037": {
+      "SHELF-F30012": [
+        {
+          "lot_id": "LOT-I000223",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6795.36,
+          "remaining_frac": 0.9438,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000224",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6805.44,
+          "remaining_frac": 0.9452,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000225",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6815.52,
+          "remaining_frac": 0.9466,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0038": {
+      "SHELF-F30023": [
+        {
+          "lot_id": "LOT-I000226",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 5813.28,
+          "remaining_frac": 0.8074,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000227",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 5823.36,
+          "remaining_frac": 0.8088,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000228",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 5833.44,
+          "remaining_frac": 0.8102,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0039": {
+      "SHELF-W0013": [
+        {
+          "lot_id": "LOT-I000229",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6344.64,
+          "remaining_frac": 0.8812,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000230",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 3920.76,
+          "remaining_frac": 0.5445,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000231",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 1141.92,
+          "remaining_frac": 0.1586,
+          "date_code_inverted": true
+        }
+      ],
+      "SHELF-W0176": [
+        {
+          "lot_id": "LOT-I000232",
+          "qty": 14,
+          "t_in": -0.0,
+          "expiry_t": 6014.88,
+          "remaining_frac": 0.8354,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0213": [
+        {
+          "lot_id": "LOT-I000233",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6920.64,
+          "remaining_frac": 0.9612,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000234",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6930.72,
+          "remaining_frac": 0.9626,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0249": [
+        {
+          "lot_id": "LOT-I000235",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6361.92,
+          "remaining_frac": 0.8836,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000236",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6372.0,
+          "remaining_frac": 0.885,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0291": [
+        {
+          "lot_id": "LOT-I000237",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 5950.08,
+          "remaining_frac": 0.8264,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000238",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 5960.16,
+          "remaining_frac": 0.8278,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0040": {
+      "SHELF-W0093": [
+        {
+          "lot_id": "LOT-I000239",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 7051.68,
+          "remaining_frac": 0.9794,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000240",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 7061.76,
+          "remaining_frac": 0.9808,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000241",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 7071.84,
+          "remaining_frac": 0.9822,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0177": [
+        {
+          "lot_id": "LOT-I000242",
+          "qty": 14,
+          "t_in": -0.0,
+          "expiry_t": 6228.0,
+          "remaining_frac": 0.865,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0214": [
+        {
+          "lot_id": "LOT-I000243",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 2410.704,
+          "remaining_frac": 0.3348,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000244",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 5301.72,
+          "remaining_frac": 0.7364,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0250": [
+        {
+          "lot_id": "LOT-I000245",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 1488.816,
+          "remaining_frac": 0.2068,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000246",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 4323.96,
+          "remaining_frac": 0.6006,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0292": [
+        {
+          "lot_id": "LOT-I000247",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 809.28,
+          "remaining_frac": 0.1124,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000248",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 3603.24,
+          "remaining_frac": 0.5005,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0041": {
+      "SHELF-W0009": [
+        {
+          "lot_id": "LOT-I000249",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6624.0,
+          "remaining_frac": 0.92,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000250",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6634.08,
+          "remaining_frac": 0.9214,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000251",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6644.16,
+          "remaining_frac": 0.9228,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0178": [
+        {
+          "lot_id": "LOT-I000252",
+          "qty": 14,
+          "t_in": -0.0,
+          "expiry_t": 1267.848,
+          "remaining_frac": 0.1761,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0215": [
+        {
+          "lot_id": "LOT-I000253",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 5906.88,
+          "remaining_frac": 0.8204,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000254",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 5916.96,
+          "remaining_frac": 0.8218,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0251": [
+        {
+          "lot_id": "LOT-I000255",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6788.16,
+          "remaining_frac": 0.9428,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000256",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6798.24,
+          "remaining_frac": 0.9442,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0293": [
+        {
+          "lot_id": "LOT-I000257",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6376.32,
+          "remaining_frac": 0.8856,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000258",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6386.4,
+          "remaining_frac": 0.887,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0042": {
+      "SHELF-W0089": [
+        {
+          "lot_id": "LOT-I000259",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 5891.04,
+          "remaining_frac": 0.8182,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000260",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 5901.12,
+          "remaining_frac": 0.8196,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000261",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 5911.2,
+          "remaining_frac": 0.821,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0179": [
+        {
+          "lot_id": "LOT-I000262",
+          "qty": 14,
+          "t_in": -0.0,
+          "expiry_t": 6654.24,
+          "remaining_frac": 0.9242,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0216": [
+        {
+          "lot_id": "LOT-I000263",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6120.0,
+          "remaining_frac": 0.85,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000264",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6130.08,
+          "remaining_frac": 0.8514,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0252": [
+        {
+          "lot_id": "LOT-I000265",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 7001.28,
+          "remaining_frac": 0.9724,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000266",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 7011.36,
+          "remaining_frac": 0.9738,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0294": [
+        {
+          "lot_id": "LOT-I000267",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6589.44,
+          "remaining_frac": 0.9152,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000268",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6599.52,
+          "remaining_frac": 0.9166,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0043": {
+      "SHELF-F10002": [
+        {
+          "lot_id": "LOT-I000269",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6507.36,
+          "remaining_frac": 0.9038,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000270",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6517.44,
+          "remaining_frac": 0.9052,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000271",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6527.52,
+          "remaining_frac": 0.9066,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0044": {
+      "SHELF-F10010": [
+        {
+          "lot_id": "LOT-I000272",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 2011.536,
+          "remaining_frac": 0.2794,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000273",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 4878.36,
+          "remaining_frac": 0.6776,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000274",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6912.0,
+          "remaining_frac": 0.96,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0045": {
+      "SHELF-F10013": [
+        {
+          "lot_id": "LOT-I000275",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 7153.92,
+          "remaining_frac": 0.9936,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000276",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 5337.0,
+          "remaining_frac": 0.7412,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000277",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 2477.232,
+          "remaining_frac": 0.3441,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0046": {
+      "SHELF-F10021": [
+        {
+          "lot_id": "LOT-I000278",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6098.4,
+          "remaining_frac": 0.847,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000279",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6108.48,
+          "remaining_frac": 0.8484,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000280",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6118.56,
+          "remaining_frac": 0.8498,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0047": {
+      "SHELF-F20002": [
+        {
+          "lot_id": "LOT-I000281",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6409.44,
+          "remaining_frac": 0.8902,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000282",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6419.52,
+          "remaining_frac": 0.8916,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000283",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6429.6,
+          "remaining_frac": 0.893,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0048": {
+      "SHELF-F20010": [
+        {
+          "lot_id": "LOT-I000284",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 1849.968,
+          "remaining_frac": 0.2569,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000285",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 4707.0,
+          "remaining_frac": 0.6538,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000286",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6814.08,
+          "remaining_frac": 0.9464,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0049": {
+      "SHELF-F20013": [
+        {
+          "lot_id": "LOT-I000287",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 7056.0,
+          "remaining_frac": 0.98,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000288",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 5165.64,
+          "remaining_frac": 0.7175,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000289",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 2315.664,
+          "remaining_frac": 0.3216,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0050": {
+      "SHELF-F20021": [
+        {
+          "lot_id": "LOT-I000290",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6000.48,
+          "remaining_frac": 0.8334,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000291",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6010.56,
+          "remaining_frac": 0.8348,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000292",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6020.64,
+          "remaining_frac": 0.8362,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0051": {
+      "SHELF-F30002": [
+        {
+          "lot_id": "LOT-I000293",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6311.52,
+          "remaining_frac": 0.8766,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000294",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6321.6,
+          "remaining_frac": 0.878,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000295",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6331.68,
+          "remaining_frac": 0.8794,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0052": {
+      "SHELF-F30010": [
+        {
+          "lot_id": "LOT-I000296",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 1688.4,
+          "remaining_frac": 0.2345,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000297",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 4535.64,
+          "remaining_frac": 0.63,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000298",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6716.16,
+          "remaining_frac": 0.9328,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0053": {
+      "SHELF-F30013": [
+        {
+          "lot_id": "LOT-I000299",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6958.08,
+          "remaining_frac": 0.9664,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000300",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 4994.28,
+          "remaining_frac": 0.6936,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000301",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 2154.096,
+          "remaining_frac": 0.2992,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0054": {
+      "SHELF-F30021": [
+        {
+          "lot_id": "LOT-I000302",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 5902.56,
+          "remaining_frac": 0.8198,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000303",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 5912.64,
+          "remaining_frac": 0.8212,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000304",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 5922.72,
+          "remaining_frac": 0.8226,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0055": {
+      "SHELF-F10024": [
+        {
+          "lot_id": "LOT-I000305",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6429.6,
+          "remaining_frac": 0.893,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000306",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6439.68,
+          "remaining_frac": 0.8944,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000307",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6449.76,
+          "remaining_frac": 0.8958,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0056": {
+      "SHELF-F20024": [
+        {
+          "lot_id": "LOT-I000308",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 5765.76,
+          "remaining_frac": 0.8008,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000309",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 5775.84,
+          "remaining_frac": 0.8022,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000310",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 5785.92,
+          "remaining_frac": 0.8036,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0057": {
+      "SHELF-F30024": [
+        {
+          "lot_id": "LOT-I000311",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6541.92,
+          "remaining_frac": 0.9086,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000312",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6552.0,
+          "remaining_frac": 0.91,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000313",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6562.08,
+          "remaining_frac": 0.9114,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0058": {
+      "SHELF-W0011": [
+        {
+          "lot_id": "LOT-I000314",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6999.84,
+          "remaining_frac": 0.9722,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000315",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 7009.92,
+          "remaining_frac": 0.9736,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000316",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 7020.0,
+          "remaining_frac": 0.975,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0180": [
+        {
+          "lot_id": "LOT-I000317",
+          "qty": 14,
+          "t_in": -0.0,
+          "expiry_t": 6816.96,
+          "remaining_frac": 0.9468,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0217": [
+        {
+          "lot_id": "LOT-I000318",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 3794.76,
+          "remaining_frac": 0.5271,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000319",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 1023.12,
+          "remaining_frac": 0.1421,
+          "date_code_inverted": true
+        }
+      ],
+      "SHELF-W0253": [
+        {
+          "lot_id": "LOT-I000320",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 5337.0,
+          "remaining_frac": 0.7412,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000321",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 2477.232,
+          "remaining_frac": 0.3441,
+          "date_code_inverted": true
+        }
+      ],
+      "SHELF-W0295": [
+        {
+          "lot_id": "LOT-I000322",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 4616.28,
+          "remaining_frac": 0.6411,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000323",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 1797.696,
+          "remaining_frac": 0.2497,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0059": {
+      "SHELF-W0020": [
+        {
+          "lot_id": "LOT-I000324",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 5968.8,
+          "remaining_frac": 0.829,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000325",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 5978.88,
+          "remaining_frac": 0.8304,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000326",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 5988.96,
+          "remaining_frac": 0.8318,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0182": [
+        {
+          "lot_id": "LOT-I000327",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 7054.56,
+          "remaining_frac": 0.9798,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000328",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 7064.64,
+          "remaining_frac": 0.9812,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0218": [
+        {
+          "lot_id": "LOT-I000329",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6495.84,
+          "remaining_frac": 0.9022,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000330",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6505.92,
+          "remaining_frac": 0.9036,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0254": [
+        {
+          "lot_id": "LOT-I000331",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 5937.12,
+          "remaining_frac": 0.8246,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000332",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 5947.2,
+          "remaining_frac": 0.826,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0296": [
+        {
+          "lot_id": "LOT-I000333",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6965.28,
+          "remaining_frac": 0.9674,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000334",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6975.36,
+          "remaining_frac": 0.9688,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0060": {
+      "SHELF-W0091": [
+        {
+          "lot_id": "LOT-I000335",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6455.52,
+          "remaining_frac": 0.8966,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000336",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 4114.8,
+          "remaining_frac": 0.5715,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000337",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 1324.872,
+          "remaining_frac": 0.184,
+          "date_code_inverted": true
+        }
+      ],
+      "SHELF-W0183": [
+        {
+          "lot_id": "LOT-I000338",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 5827.68,
+          "remaining_frac": 0.8094,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000339",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 5837.76,
+          "remaining_frac": 0.8108,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0219": [
+        {
+          "lot_id": "LOT-I000340",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6708.96,
+          "remaining_frac": 0.9318,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000341",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6719.04,
+          "remaining_frac": 0.9332,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0256": [
+        {
+          "lot_id": "LOT-I000342",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 828.288,
+          "remaining_frac": 0.115,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000343",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 3623.4,
+          "remaining_frac": 0.5032,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0297": [
+        {
+          "lot_id": "LOT-I000344",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 7178.4,
+          "remaining_frac": 0.997,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000345",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 7188.48,
+          "remaining_frac": 0.9984,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0061": {
+      "SHELF-W0100": [
+        {
+          "lot_id": "LOT-I000346",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 1966.392,
+          "remaining_frac": 0.2731,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000347",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 4830.48,
+          "remaining_frac": 0.6709,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000348",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6884.64,
+          "remaining_frac": 0.9562,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0184": [
+        {
+          "lot_id": "LOT-I000349",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 607.32,
+          "remaining_frac": 0.0843,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000350",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 3389.04,
+          "remaining_frac": 0.4707,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0220": [
+        {
+          "lot_id": "LOT-I000351",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 2061.432,
+          "remaining_frac": 0.2863,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000352",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 4931.28,
+          "remaining_frac": 0.6849,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0261": [
+        {
+          "lot_id": "LOT-I000353",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6485.76,
+          "remaining_frac": 0.9008,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000354",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6495.84,
+          "remaining_frac": 0.9022,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0298": [
+        {
+          "lot_id": "LOT-I000355",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 460.008,
+          "remaining_frac": 0.0639,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000356",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 3232.8,
+          "remaining_frac": 0.449,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0062": {
+      "SHELF-W0039": [
+        {
+          "lot_id": "LOT-I000357",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6999.84,
+          "remaining_frac": 0.9722,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000358",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 7009.92,
+          "remaining_frac": 0.9736,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000359",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 7020.0,
+          "remaining_frac": 0.975,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0185": [
+        {
+          "lot_id": "LOT-I000360",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6253.92,
+          "remaining_frac": 0.8686,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000361",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6264.0,
+          "remaining_frac": 0.87,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0221": [
+        {
+          "lot_id": "LOT-I000362",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 7135.2,
+          "remaining_frac": 0.991,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000363",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 7145.28,
+          "remaining_frac": 0.9924,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0262": [
+        {
+          "lot_id": "LOT-I000364",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 1693.152,
+          "remaining_frac": 0.2352,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000365",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 4540.68,
+          "remaining_frac": 0.6307,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0299": [
+        {
+          "lot_id": "LOT-I000366",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6164.64,
+          "remaining_frac": 0.8562,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000367",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6174.72,
+          "remaining_frac": 0.8576,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0063": {
+      "SHELF-W0119": [
+        {
+          "lot_id": "LOT-I000368",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6266.88,
+          "remaining_frac": 0.8704,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000369",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6276.96,
+          "remaining_frac": 0.8718,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000370",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6287.04,
+          "remaining_frac": 0.8732,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0186": [
+        {
+          "lot_id": "LOT-I000371",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6467.04,
+          "remaining_frac": 0.8982,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000372",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6477.12,
+          "remaining_frac": 0.8996,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0222": [
+        {
+          "lot_id": "LOT-I000373",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 5908.32,
+          "remaining_frac": 0.8206,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000374",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 5918.4,
+          "remaining_frac": 0.822,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0263": [
+        {
+          "lot_id": "LOT-I000375",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6912.0,
+          "remaining_frac": 0.96,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000376",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6922.08,
+          "remaining_frac": 0.9614,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0300": [
+        {
+          "lot_id": "LOT-I000377",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6377.76,
+          "remaining_frac": 0.8858,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000378",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6387.84,
+          "remaining_frac": 0.8872,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0064": {
+      "SHELF-F10004": [
+        {
+          "lot_id": "LOT-I000379",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 866.304,
+          "remaining_frac": 0.1203,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000380",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 3663.72,
+          "remaining_frac": 0.5089,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000381",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6217.92,
+          "remaining_frac": 0.8636,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0065": {
+      "SHELF-F10008": [
+        {
+          "lot_id": "LOT-I000382",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6484.32,
+          "remaining_frac": 0.9006,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000383",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6494.4,
+          "remaining_frac": 0.902,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000384",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6504.48,
+          "remaining_frac": 0.9034,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0066": {
+      "SHELF-F10015": [
+        {
+          "lot_id": "LOT-I000385",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6844.32,
+          "remaining_frac": 0.9506,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000386",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6854.4,
+          "remaining_frac": 0.952,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000387",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6864.48,
+          "remaining_frac": 0.9534,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0067": {
+      "SHELF-F10019": [
+        {
+          "lot_id": "LOT-I000388",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 7130.88,
+          "remaining_frac": 0.9904,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000389",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 5296.68,
+          "remaining_frac": 0.7356,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000390",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 2439.216,
+          "remaining_frac": 0.3388,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0068": {
+      "SHELF-F20004": [
+        {
+          "lot_id": "LOT-I000391",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 704.736,
+          "remaining_frac": 0.0979,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000392",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 3492.36,
+          "remaining_frac": 0.485,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000393",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6120.0,
+          "remaining_frac": 0.85,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0069": {
+      "SHELF-F20008": [
+        {
+          "lot_id": "LOT-I000394",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6386.4,
+          "remaining_frac": 0.887,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000395",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6396.48,
+          "remaining_frac": 0.8884,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000396",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6406.56,
+          "remaining_frac": 0.8898,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0070": {
+      "SHELF-F20015": [
+        {
+          "lot_id": "LOT-I000397",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6746.4,
+          "remaining_frac": 0.937,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000398",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6756.48,
+          "remaining_frac": 0.9384,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000399",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6766.56,
+          "remaining_frac": 0.9398,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0071": {
+      "SHELF-F20019": [
+        {
+          "lot_id": "LOT-I000400",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 7032.96,
+          "remaining_frac": 0.9768,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000401",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 5125.32,
+          "remaining_frac": 0.7118,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000402",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 2277.648,
+          "remaining_frac": 0.3163,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0072": {
+      "SHELF-F30004": [
+        {
+          "lot_id": "LOT-I000403",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 543.168,
+          "remaining_frac": 0.0754,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000404",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 3321.0,
+          "remaining_frac": 0.4612,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000405",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6022.08,
+          "remaining_frac": 0.8364,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0073": {
+      "SHELF-F30008": [
+        {
+          "lot_id": "LOT-I000406",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6288.48,
+          "remaining_frac": 0.8734,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000407",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6298.56,
+          "remaining_frac": 0.8748,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000408",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6308.64,
+          "remaining_frac": 0.8762,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0074": {
+      "SHELF-F30015": [
+        {
+          "lot_id": "LOT-I000409",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6648.48,
+          "remaining_frac": 0.9234,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000410",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6658.56,
+          "remaining_frac": 0.9248,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000411",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6668.64,
+          "remaining_frac": 0.9262,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0075": {
+      "SHELF-F30019": [
+        {
+          "lot_id": "LOT-I000412",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6935.04,
+          "remaining_frac": 0.9632,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000413",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 4953.96,
+          "remaining_frac": 0.6881,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000414",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 2116.08,
+          "remaining_frac": 0.2939,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0076": {
+      "SHELF-W0002": [
+        {
+          "lot_id": "LOT-I000415",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 5855.04,
+          "remaining_frac": 0.8132,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000416",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 5865.12,
+          "remaining_frac": 0.8146,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000417",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 5875.2,
+          "remaining_frac": 0.816,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0187": [
+        {
+          "lot_id": "LOT-I000418",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 3411.72,
+          "remaining_frac": 0.4738,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000419",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 661.968,
+          "remaining_frac": 0.0919,
+          "date_code_inverted": true
+        }
+      ],
+      "SHELF-W0223": [
+        {
+          "lot_id": "LOT-I000420",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 4953.96,
+          "remaining_frac": 0.6881,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000421",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 2116.08,
+          "remaining_frac": 0.2939,
+          "date_code_inverted": true
+        }
+      ],
+      "SHELF-W0264": [
+        {
+          "lot_id": "LOT-I000422",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6508.8,
+          "remaining_frac": 0.904,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000423",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6518.88,
+          "remaining_frac": 0.9054,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0301": [
+        {
+          "lot_id": "LOT-I000424",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 3255.48,
+          "remaining_frac": 0.4521,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000425",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 514.656,
+          "remaining_frac": 0.0715,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0077": {
+      "SHELF-W0082": [
+        {
+          "lot_id": "LOT-I000426",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 1467.432,
+          "remaining_frac": 0.2038,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000427",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 4301.28,
+          "remaining_frac": 0.5974,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000428",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6582.24,
+          "remaining_frac": 0.9142,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0188": [
+        {
+          "lot_id": "LOT-I000429",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6276.96,
+          "remaining_frac": 0.8718,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000430",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6287.04,
+          "remaining_frac": 0.8732,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0224": [
+        {
+          "lot_id": "LOT-I000431",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 7158.24,
+          "remaining_frac": 0.9942,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000432",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 7168.32,
+          "remaining_frac": 0.9956,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0265": [
+        {
+          "lot_id": "LOT-I000433",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 4563.36,
+          "remaining_frac": 0.6338,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000434",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 1747.8,
+          "remaining_frac": 0.2427,
+          "date_code_inverted": true
+        }
+      ],
+      "SHELF-W0302": [
+        {
+          "lot_id": "LOT-I000435",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6187.68,
+          "remaining_frac": 0.8594,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000436",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6197.76,
+          "remaining_frac": 0.8608,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0078": {
+      "SHELF-W0018": [
+        {
+          "lot_id": "LOT-I000437",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6624.0,
+          "remaining_frac": 0.92,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000438",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6634.08,
+          "remaining_frac": 0.9214,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000439",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6644.16,
+          "remaining_frac": 0.9228,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0189": [
+        {
+          "lot_id": "LOT-I000440",
+          "qty": 14,
+          "t_in": -0.0,
+          "expiry_t": 6490.08,
+          "remaining_frac": 0.9014,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0225": [
+        {
+          "lot_id": "LOT-I000441",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 5931.36,
+          "remaining_frac": 0.8238,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000442",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 5941.44,
+          "remaining_frac": 0.8252,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0266": [
+        {
+          "lot_id": "LOT-I000443",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6935.04,
+          "remaining_frac": 0.9632,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000444",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6945.12,
+          "remaining_frac": 0.9646,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0303": [
+        {
+          "lot_id": "LOT-I000445",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6400.8,
+          "remaining_frac": 0.889,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000446",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6410.88,
+          "remaining_frac": 0.8904,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0079": {
+      "SHELF-W0098": [
+        {
+          "lot_id": "LOT-I000447",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 5891.04,
+          "remaining_frac": 0.8182,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000448",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 5901.12,
+          "remaining_frac": 0.8196,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000449",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 5911.2,
+          "remaining_frac": 0.821,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0190": [
+        {
+          "lot_id": "LOT-I000450",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 1700.28,
+          "remaining_frac": 0.2361,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000451",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 4548.24,
+          "remaining_frac": 0.6317,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0226": [
+        {
+          "lot_id": "LOT-I000452",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 778.392,
+          "remaining_frac": 0.1081,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000453",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 3570.48,
+          "remaining_frac": 0.4959,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0267": [
+        {
+          "lot_id": "LOT-I000454",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 7148.16,
+          "remaining_frac": 0.9928,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000455",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 7158.24,
+          "remaining_frac": 0.9942,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0304": [
+        {
+          "lot_id": "LOT-I000456",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 1552.968,
+          "remaining_frac": 0.2157,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000457",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 4392.0,
+          "remaining_frac": 0.61,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0080": {
+      "SHELF-F10014": [
+        {
+          "lot_id": "LOT-I000458",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6580.8,
+          "remaining_frac": 0.914,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000459",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6590.88,
+          "remaining_frac": 0.9154,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000460",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6600.96,
+          "remaining_frac": 0.9168,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0081": {
+      "SHELF-F10022": [
+        {
+          "lot_id": "LOT-I000461",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 2132.712,
+          "remaining_frac": 0.2962,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000462",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 5006.88,
+          "remaining_frac": 0.6954,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000463",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6985.44,
+          "remaining_frac": 0.9702,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0082": {
+      "SHELF-F20014": [
+        {
+          "lot_id": "LOT-I000464",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6105.6,
+          "remaining_frac": 0.848,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000465",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6115.68,
+          "remaining_frac": 0.8494,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000466",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6125.76,
+          "remaining_frac": 0.8508,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0083": {
+      "SHELF-F20022": [
+        {
+          "lot_id": "LOT-I000467",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 1348.632,
+          "remaining_frac": 0.1873,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000468",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 4175.28,
+          "remaining_frac": 0.5799,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000469",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6510.24,
+          "remaining_frac": 0.9042,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0084": {
+      "SHELF-F30014": [
+        {
+          "lot_id": "LOT-I000470",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 7070.4,
+          "remaining_frac": 0.982,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000471",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 7080.48,
+          "remaining_frac": 0.9834,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000472",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 7090.56,
+          "remaining_frac": 0.9848,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0085": {
+      "SHELF-F30022": [
+        {
+          "lot_id": "LOT-I000473",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 564.552,
+          "remaining_frac": 0.0784,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000474",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 3343.68,
+          "remaining_frac": 0.4644,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000475",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6035.04,
+          "remaining_frac": 0.8382,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0086": {
+      "SHELF-W0021": [
+        {
+          "lot_id": "LOT-I000476",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6766.56,
+          "remaining_frac": 0.9398,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000477",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6776.64,
+          "remaining_frac": 0.9412,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000478",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6786.72,
+          "remaining_frac": 0.9426,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0191": [
+        {
+          "lot_id": "LOT-I000479",
+          "qty": 14,
+          "t_in": -0.0,
+          "expiry_t": 6608.16,
+          "remaining_frac": 0.9178,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0227": [
+        {
+          "lot_id": "LOT-I000480",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6049.44,
+          "remaining_frac": 0.8402,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000481",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6059.52,
+          "remaining_frac": 0.8416,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0268": [
+        {
+          "lot_id": "LOT-I000482",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 2277.648,
+          "remaining_frac": 0.3163,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000483",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 5160.6,
+          "remaining_frac": 0.7167,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0305": [
+        {
+          "lot_id": "LOT-I000484",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6518.88,
+          "remaining_frac": 0.9054,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000485",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6528.96,
+          "remaining_frac": 0.9068,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0087": {
+      "SHELF-W0101": [
+        {
+          "lot_id": "LOT-I000486",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6033.6,
+          "remaining_frac": 0.838,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000487",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6043.68,
+          "remaining_frac": 0.8394,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000488",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6053.76,
+          "remaining_frac": 0.8408,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0192": [
+        {
+          "lot_id": "LOT-I000489",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6821.28,
+          "remaining_frac": 0.9474,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000490",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6831.36,
+          "remaining_frac": 0.9488,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0228": [
+        {
+          "lot_id": "LOT-I000491",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6262.56,
+          "remaining_frac": 0.8698,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000492",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6272.64,
+          "remaining_frac": 0.8712,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0269": [
+        {
+          "lot_id": "LOT-I000493",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 5826.24,
+          "remaining_frac": 0.8092,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000494",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 5836.32,
+          "remaining_frac": 0.8106,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0306": [
+        {
+          "lot_id": "LOT-I000495",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6732.0,
+          "remaining_frac": 0.935,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000496",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6742.08,
+          "remaining_frac": 0.9364,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0088": {
+      "SHELF-W0037": [
+        {
+          "lot_id": "LOT-I000497",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6095.52,
+          "remaining_frac": 0.8466,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000498",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 3484.8,
+          "remaining_frac": 0.484,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000499",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 730.872,
+          "remaining_frac": 0.1015,
+          "date_code_inverted": true
+        }
+      ],
+      "SHELF-W0193": [
+        {
+          "lot_id": "LOT-I000500",
+          "qty": 14,
+          "t_in": -0.0,
+          "expiry_t": 2246.76,
+          "remaining_frac": 0.312,
+          "date_code_inverted": true
+        }
+      ],
+      "SHELF-W0229": [
+        {
+          "lot_id": "LOT-I000501",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 4132.44,
+          "remaining_frac": 0.5739,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000502",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 1341.504,
+          "remaining_frac": 0.1863,
+          "date_code_inverted": true
+        }
+      ],
+      "SHELF-W0270": [
+        {
+          "lot_id": "LOT-I000503",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6039.36,
+          "remaining_frac": 0.8388,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000504",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6049.44,
+          "remaining_frac": 0.8402,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0307": [
+        {
+          "lot_id": "LOT-I000505",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 4953.96,
+          "remaining_frac": 0.6881,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000506",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 2116.08,
+          "remaining_frac": 0.2939,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0089": {
+      "SHELF-W0117": [
+        {
+          "lot_id": "LOT-I000507",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6802.56,
+          "remaining_frac": 0.9448,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000508",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6812.64,
+          "remaining_frac": 0.9462,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000509",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6822.72,
+          "remaining_frac": 0.9476,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0194": [
+        {
+          "lot_id": "LOT-I000510",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 5807.52,
+          "remaining_frac": 0.8066,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000511",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 5817.6,
+          "remaining_frac": 0.808,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0230": [
+        {
+          "lot_id": "LOT-I000512",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6688.8,
+          "remaining_frac": 0.929,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000513",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6698.88,
+          "remaining_frac": 0.9304,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0271": [
+        {
+          "lot_id": "LOT-I000514",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 3741.84,
+          "remaining_frac": 0.5197,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000515",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 973.224,
+          "remaining_frac": 0.1352,
+          "date_code_inverted": true
+        }
+      ],
+      "SHELF-W0308": [
+        {
+          "lot_id": "LOT-I000516",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 7158.24,
+          "remaining_frac": 0.9942,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000517",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 7168.32,
+          "remaining_frac": 0.9956,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0090": {
+      "SHELF-W0040": [
+        {
+          "lot_id": "LOT-I000518",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 1441.296,
+          "remaining_frac": 0.2002,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000519",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 4273.56,
+          "remaining_frac": 0.5936,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000520",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6566.4,
+          "remaining_frac": 0.912,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0195": [
+        {
+          "lot_id": "LOT-I000521",
+          "qty": 14,
+          "t_in": -0.0,
+          "expiry_t": 6020.64,
+          "remaining_frac": 0.8362,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0231": [
+        {
+          "lot_id": "LOT-I000522",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6901.92,
+          "remaining_frac": 0.9586,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000523",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6912.0,
+          "remaining_frac": 0.96,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0272": [
+        {
+          "lot_id": "LOT-I000524",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6465.6,
+          "remaining_frac": 0.898,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000525",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6475.68,
+          "remaining_frac": 0.8994,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0309": [
+        {
+          "lot_id": "LOT-I000526",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 5931.36,
+          "remaining_frac": 0.8238,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000527",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 5941.44,
+          "remaining_frac": 0.8252,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0091": {
+      "SHELF-W0120": [
+        {
+          "lot_id": "LOT-I000528",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 5813.28,
+          "remaining_frac": 0.8074,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000529",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 5823.36,
+          "remaining_frac": 0.8088,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000530",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 5833.44,
+          "remaining_frac": 0.8102,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0196": [
+        {
+          "lot_id": "LOT-I000531",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 925.704,
+          "remaining_frac": 0.1286,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000532",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 3726.72,
+          "remaining_frac": 0.5176,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0232": [
+        {
+          "lot_id": "LOT-I000533",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 2379.816,
+          "remaining_frac": 0.3305,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000534",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 5268.96,
+          "remaining_frac": 0.7318,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0273": [
+        {
+          "lot_id": "LOT-I000535",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6678.72,
+          "remaining_frac": 0.9276,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000536",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6688.8,
+          "remaining_frac": 0.929,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0310": [
+        {
+          "lot_id": "LOT-I000537",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 778.392,
+          "remaining_frac": 0.1081,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000538",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 3570.48,
+          "remaining_frac": 0.4959,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0092": {
+      "SHELF-W0059": [
+        {
+          "lot_id": "LOT-I000539",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 5948.64,
+          "remaining_frac": 0.8262,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000540",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 5958.72,
+          "remaining_frac": 0.8276,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000541",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 5968.8,
+          "remaining_frac": 0.829,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0197": [
+        {
+          "lot_id": "LOT-I000542",
+          "qty": 14,
+          "t_in": -0.0,
+          "expiry_t": 6446.88,
+          "remaining_frac": 0.8954,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0233": [
+        {
+          "lot_id": "LOT-I000543",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 5888.16,
+          "remaining_frac": 0.8178,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000544",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 5898.24,
+          "remaining_frac": 0.8192,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0274": [
+        {
+          "lot_id": "LOT-I000545",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 2011.536,
+          "remaining_frac": 0.2794,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000546",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 4878.36,
+          "remaining_frac": 0.6776,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0311": [
+        {
+          "lot_id": "LOT-I000547",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6357.6,
+          "remaining_frac": 0.883,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000548",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6367.68,
+          "remaining_frac": 0.8844,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0093": {
+      "SHELF-W0139": [
+        {
+          "lot_id": "LOT-I000549",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6655.68,
+          "remaining_frac": 0.9244,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000550",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 4465.08,
+          "remaining_frac": 0.6201,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000551",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 1655.136,
+          "remaining_frac": 0.2299,
+          "date_code_inverted": true
+        }
+      ],
+      "SHELF-W0198": [
+        {
+          "lot_id": "LOT-I000552",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6660.0,
+          "remaining_frac": 0.925,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000553",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6670.08,
+          "remaining_frac": 0.9264,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0234": [
+        {
+          "lot_id": "LOT-I000554",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6101.28,
+          "remaining_frac": 0.8474,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000555",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6111.36,
+          "remaining_frac": 0.8488,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0275": [
+        {
+          "lot_id": "LOT-I000556",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 7104.96,
+          "remaining_frac": 0.9868,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000557",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 7115.04,
+          "remaining_frac": 0.9882,
+          "date_code_inverted": false
+        }
+      ],
+      "SHELF-W0312": [
+        {
+          "lot_id": "LOT-I000558",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6570.72,
+          "remaining_frac": 0.9126,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000559",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6580.8,
+          "remaining_frac": 0.914,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0094": {
+      "SHELF-F10006": [
+        {
+          "lot_id": "LOT-I000560",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6145.92,
+          "remaining_frac": 0.8536,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000561",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6156.0,
+          "remaining_frac": 0.855,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000562",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6166.08,
+          "remaining_frac": 0.8564,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0095": {
+      "SHELF-F10017": [
+        {
+          "lot_id": "LOT-I000563",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 6603.84,
+          "remaining_frac": 0.9172,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000564",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 6613.92,
+          "remaining_frac": 0.9186,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000565",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 6624.0,
+          "remaining_frac": 0.92,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0096": {
+      "SHELF-F20006": [
+        {
+          "lot_id": "LOT-I000566",
+          "qty": 16,
+          "t_in": -120.0,
+          "expiry_t": 7110.72,
+          "remaining_frac": 0.9876,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000567",
+          "qty": 16,
+          "t_in": -60.0,
+          "expiry_t": 7120.8,
+          "remaining_frac": 0.989,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000568",
+          "qty": 16,
+          "t_in": -0.0,
+          "expiry_t": 7130.88,
+          "remaining_frac": 0.9904,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0097": {
+      "SHELF-F20017": [
+        {
+          "lot_id": "LOT-I000569",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 12257.28,
+          "remaining_frac": 0.8512,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000570",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 12277.44,
+          "remaining_frac": 0.8526,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0098": {
+      "SHELF-F30006": [
+        {
+          "lot_id": "LOT-I000571",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 13271.04,
+          "remaining_frac": 0.9216,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000572",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 13291.2,
+          "remaining_frac": 0.923,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0099": {
+      "SHELF-F30017": [
+        {
+          "lot_id": "LOT-I000573",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 14186.88,
+          "remaining_frac": 0.9852,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000574",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 14207.04,
+          "remaining_frac": 0.9866,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0100": {
+      "SHELF-W0004": [
+        {
+          "lot_id": "LOT-I000575",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 1447.488,
+          "remaining_frac": 0.1005,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000576",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 7025.04,
+          "remaining_frac": 0.4879,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0101": {
+      "SHELF-W0084": [
+        {
+          "lot_id": "LOT-I000577",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 13636.8,
+          "remaining_frac": 0.947,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000578",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 13656.96,
+          "remaining_frac": 0.9484,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0102": {
+      "SHELF-W0016": [
+        {
+          "lot_id": "LOT-I000579",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 3661.92,
+          "remaining_frac": 0.2543,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000580",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 9373.68,
+          "remaining_frac": 0.6509,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0103": {
+      "SHELF-W0096": [
+        {
+          "lot_id": "LOT-I000581",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 12098.88,
+          "remaining_frac": 0.8402,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000582",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 12119.04,
+          "remaining_frac": 0.8416,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0104": {
+      "SHELF-F10016": [
+        {
+          "lot_id": "LOT-I000583",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 3842.496,
+          "remaining_frac": 0.2668,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000584",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 9565.2,
+          "remaining_frac": 0.6643,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0105": {
+      "SHELF-F10020": [
+        {
+          "lot_id": "LOT-I000585",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 14247.36,
+          "remaining_frac": 0.9894,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000586",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 14267.52,
+          "remaining_frac": 0.9908,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0106": {
+      "SHELF-F20016": [
+        {
+          "lot_id": "LOT-I000587",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 2274.336,
+          "remaining_frac": 0.1579,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000588",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 7902.0,
+          "remaining_frac": 0.5488,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0107": {
+      "SHELF-F20020": [
+        {
+          "lot_id": "LOT-I000589",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 13296.96,
+          "remaining_frac": 0.9234,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000590",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 13317.12,
+          "remaining_frac": 0.9248,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0108": {
+      "SHELF-F30016": [
+        {
+          "lot_id": "LOT-I000591",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 706.176,
+          "remaining_frac": 0.049,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000592",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6238.8,
+          "remaining_frac": 0.4333,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0109": {
+      "SHELF-F30020": [
+        {
+          "lot_id": "LOT-I000593",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 12346.56,
+          "remaining_frac": 0.8574,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000594",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 12366.72,
+          "remaining_frac": 0.8588,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0110": {
+      "SHELF-W0023": [
+        {
+          "lot_id": "LOT-I000595",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 14045.76,
+          "remaining_frac": 0.9754,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000596",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 14065.92,
+          "remaining_frac": 0.9768,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0111": {
+      "SHELF-W0103": [
+        {
+          "lot_id": "LOT-I000597",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 7614.72,
+          "remaining_frac": 0.5288,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000598",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 2070.0,
+          "remaining_frac": 0.1437,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0112": {
+      "SHELF-W0022": [
+        {
+          "lot_id": "LOT-I000599",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 867.744,
+          "remaining_frac": 0.0603,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000600",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6410.16,
+          "remaining_frac": 0.4452,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0113": {
+      "SHELF-W0035": [
+        {
+          "lot_id": "LOT-I000601",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 12885.12,
+          "remaining_frac": 0.8948,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000602",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 12905.28,
+          "remaining_frac": 0.8962,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0114": {
+      "SHELF-W0102": [
+        {
+          "lot_id": "LOT-I000603",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 13662.72,
+          "remaining_frac": 0.9488,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000604",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 13682.88,
+          "remaining_frac": 0.9502,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0115": {
+      "SHELF-W0115": [
+        {
+          "lot_id": "LOT-I000605",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6243.84,
+          "remaining_frac": 0.4336,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000606",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 777.456,
+          "remaining_frac": 0.054,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0116": {
+      "SHELF-W0038": [
+        {
+          "lot_id": "LOT-I000607",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 14163.84,
+          "remaining_frac": 0.9836,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000608",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 14184.0,
+          "remaining_frac": 0.985,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0117": {
+      "SHELF-W0118": [
+        {
+          "lot_id": "LOT-I000609",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 2231.568,
+          "remaining_frac": 0.155,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000610",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 7856.64,
+          "remaining_frac": 0.5456,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0118": {
+      "SHELF-W0041": [
+        {
+          "lot_id": "LOT-I000611",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 12185.28,
+          "remaining_frac": 0.8462,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000612",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 12205.44,
+          "remaining_frac": 0.8476,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0119": {
+      "SHELF-W0121": [
+        {
+          "lot_id": "LOT-I000613",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 9398.88,
+          "remaining_frac": 0.6527,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000614",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 3752.208,
+          "remaining_frac": 0.2606,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0120": {
+      "SHELF-W0057": [
+        {
+          "lot_id": "LOT-I000615",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 13723.2,
+          "remaining_frac": 0.953,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000616",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 13743.36,
+          "remaining_frac": 0.9544,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0121": {
+      "SHELF-W0137": [
+        {
+          "lot_id": "LOT-I000617",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 12257.28,
+          "remaining_frac": 0.8512,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000618",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 12277.44,
+          "remaining_frac": 0.8526,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0122": {
+      "SHELF-W0006": [
+        {
+          "lot_id": "LOT-I000619",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 11980.8,
+          "remaining_frac": 0.832,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000620",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 12000.96,
+          "remaining_frac": 0.8334,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0123": {
+      "SHELF-W0086": [
+        {
+          "lot_id": "LOT-I000621",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 13394.88,
+          "remaining_frac": 0.9302,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000622",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 13415.04,
+          "remaining_frac": 0.9316,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0124": {
+      "SHELF-W0014": [
+        {
+          "lot_id": "LOT-I000623",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 13127.04,
+          "remaining_frac": 0.9116,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000624",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 13147.2,
+          "remaining_frac": 0.913,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0125": {
+      "SHELF-W0060": [
+        {
+          "lot_id": "LOT-I000625",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 12876.48,
+          "remaining_frac": 0.8942,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000626",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 12896.64,
+          "remaining_frac": 0.8956,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0126": {
+      "SHELF-W0094": [
+        {
+          "lot_id": "LOT-I000627",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 1143.36,
+          "remaining_frac": 0.0794,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000628",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 6702.48,
+          "remaining_frac": 0.4655,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0127": {
+      "SHELF-W0140": [
+        {
+          "lot_id": "LOT-I000629",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 11787.84,
+          "remaining_frac": 0.8186,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000630",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 11808.0,
+          "remaining_frac": 0.82,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0128": {
+      "SHELF-F10018": [
+        {
+          "lot_id": "LOT-I000631",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 14186.88,
+          "remaining_frac": 0.9852,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000632",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 14207.04,
+          "remaining_frac": 0.9866,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0129": {
+      "SHELF-F20018": [
+        {
+          "lot_id": "LOT-I000633",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 12859.2,
+          "remaining_frac": 0.893,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000634",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 12879.36,
+          "remaining_frac": 0.8944,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0130": {
+      "SHELF-F30018": [
+        {
+          "lot_id": "LOT-I000635",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 11531.52,
+          "remaining_frac": 0.8008,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000636",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 11551.68,
+          "remaining_frac": 0.8022,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0131": {
+      "SHELF-W0025": [
+        {
+          "lot_id": "LOT-I000637",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 9096.48,
+          "remaining_frac": 0.6317,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000638",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 3467.088,
+          "remaining_frac": 0.2408,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0132": {
+      "SHELF-W0105": [
+        {
+          "lot_id": "LOT-I000639",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 11960.64,
+          "remaining_frac": 0.8306,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000640",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 11980.8,
+          "remaining_frac": 0.832,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0133": {
+      "SHELF-W0024": [
+        {
+          "lot_id": "LOT-I000641",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 14132.16,
+          "remaining_frac": 0.9814,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000642",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 14152.32,
+          "remaining_frac": 0.9828,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0134": {
+      "SHELF-W0033": [
+        {
+          "lot_id": "LOT-I000643",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 12070.08,
+          "remaining_frac": 0.8382,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000644",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 12090.24,
+          "remaining_frac": 0.8396,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0135": {
+      "SHELF-W0079": [
+        {
+          "lot_id": "LOT-I000645",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 6284.16,
+          "remaining_frac": 0.4364,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000646",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 815.472,
+          "remaining_frac": 0.0566,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0136": {
+      "SHELF-W0104": [
+        {
+          "lot_id": "LOT-I000647",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 13420.8,
+          "remaining_frac": 0.932,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000648",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 13440.96,
+          "remaining_frac": 0.9334,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0137": {
+      "SHELF-W0113": [
+        {
+          "lot_id": "LOT-I000649",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 14238.72,
+          "remaining_frac": 0.9888,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000650",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 14258.88,
+          "remaining_frac": 0.9902,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0138": {
+      "SHELF-W0159": [
+        {
+          "lot_id": "LOT-I000651",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 13988.16,
+          "remaining_frac": 0.9714,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000652",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 14008.32,
+          "remaining_frac": 0.9728,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0139": {
+      "SHELF-W0036": [
+        {
+          "lot_id": "LOT-I000653",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 14103.36,
+          "remaining_frac": 0.9794,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000654",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 14123.52,
+          "remaining_frac": 0.9808,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0140": {
+      "SHELF-W0116": [
+        {
+          "lot_id": "LOT-I000655",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 12637.44,
+          "remaining_frac": 0.8776,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000656",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 12657.6,
+          "remaining_frac": 0.879,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0141": {
+      "SHELF-W0043": [
+        {
+          "lot_id": "LOT-I000657",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 7161.12,
+          "remaining_frac": 0.4973,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000658",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 1642.32,
+          "remaining_frac": 0.114,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0142": {
+      "SHELF-W0123": [
+        {
+          "lot_id": "LOT-I000659",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 13734.72,
+          "remaining_frac": 0.9538,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000660",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 13754.88,
+          "remaining_frac": 0.9552,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0143": {
+      "SHELF-W0055": [
+        {
+          "lot_id": "LOT-I000661",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 9509.76,
+          "remaining_frac": 0.6604,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000662",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 3856.752,
+          "remaining_frac": 0.2678,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0144": {
+      "SHELF-W0135": [
+        {
+          "lot_id": "LOT-I000663",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 12196.8,
+          "remaining_frac": 0.847,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000664",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 12216.96,
+          "remaining_frac": 0.8484,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0145": {
+      "SHELF-W0008": [
+        {
+          "lot_id": "LOT-I000665",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 12116.16,
+          "remaining_frac": 0.8414,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000666",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 12136.32,
+          "remaining_frac": 0.8428,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0146": {
+      "SHELF-W0042": [
+        {
+          "lot_id": "LOT-I000667",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 14158.08,
+          "remaining_frac": 0.9832,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000668",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 14178.24,
+          "remaining_frac": 0.9846,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0147": {
+      "SHELF-W0088": [
+        {
+          "lot_id": "LOT-I000669",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 4227.408,
+          "remaining_frac": 0.2936,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000670",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 9973.44,
+          "remaining_frac": 0.6926,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0148": {
+      "SHELF-W0122": [
+        {
+          "lot_id": "LOT-I000671",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 13069.44,
+          "remaining_frac": 0.9076,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000672",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 13089.6,
+          "remaining_frac": 0.909,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0149": {
+      "SHELF-W0012": [
+        {
+          "lot_id": "LOT-I000673",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 13821.12,
+          "remaining_frac": 0.9598,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000674",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 13841.28,
+          "remaining_frac": 0.9612,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0150": {
+      "SHELF-W0058": [
+        {
+          "lot_id": "LOT-I000675",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 3671.424,
+          "remaining_frac": 0.255,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000676",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 9383.76,
+          "remaining_frac": 0.6517,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0151": {
+      "SHELF-W0092": [
+        {
+          "lot_id": "LOT-I000677",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 12732.48,
+          "remaining_frac": 0.8842,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000678",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 12752.64,
+          "remaining_frac": 0.8856,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0152": {
+      "SHELF-W0138": [
+        {
+          "lot_id": "LOT-I000679",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 12481.92,
+          "remaining_frac": 0.8668,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000680",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 12502.08,
+          "remaining_frac": 0.8682,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0153": {
+      "SHELF-W0027": [
+        {
+          "lot_id": "LOT-I000681",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 13184.64,
+          "remaining_frac": 0.9156,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000682",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 13204.8,
+          "remaining_frac": 0.917,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0154": {
+      "SHELF-W0061": [
+        {
+          "lot_id": "LOT-I000683",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 7206.48,
+          "remaining_frac": 0.5005,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000684",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 1685.088,
+          "remaining_frac": 0.117,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0155": {
+      "SHELF-W0107": [
+        {
+          "lot_id": "LOT-I000685",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 12096.0,
+          "remaining_frac": 0.84,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000686",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 12116.16,
+          "remaining_frac": 0.8414,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0156": {
+      "SHELF-W0141": [
+        {
+          "lot_id": "LOT-I000687",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 14137.92,
+          "remaining_frac": 0.9818,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000688",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 14158.08,
+          "remaining_frac": 0.9832,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0157": {
+      "SHELF-W0026": [
+        {
+          "lot_id": "LOT-I000689",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 11764.8,
+          "remaining_frac": 0.817,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000690",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 11784.96,
+          "remaining_frac": 0.8184,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0158": {
+      "SHELF-W0031": [
+        {
+          "lot_id": "LOT-I000691",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 7277.04,
+          "remaining_frac": 0.5053,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000692",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 1751.616,
+          "remaining_frac": 0.1216,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0159": {
+      "SHELF-W0077": [
+        {
+          "lot_id": "LOT-I000693",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 12136.32,
+          "remaining_frac": 0.8428,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000694",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 12156.48,
+          "remaining_frac": 0.8442,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0160": {
+      "SHELF-W0106": [
+        {
+          "lot_id": "LOT-I000695",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 4270.176,
+          "remaining_frac": 0.2965,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000696",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 10018.8,
+          "remaining_frac": 0.6957,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0161": {
+      "SHELF-W0111": [
+        {
+          "lot_id": "LOT-I000697",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 11675.52,
+          "remaining_frac": 0.8108,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000698",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 11695.68,
+          "remaining_frac": 0.8122,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0162": {
+      "SHELF-W0157": [
+        {
+          "lot_id": "LOT-I000699",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 10633.68,
+          "remaining_frac": 0.7385,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000700",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 4916.448,
+          "remaining_frac": 0.3414,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0163": {
+      "SHELF-W0034": [
+        {
+          "lot_id": "LOT-I000701",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 321.264,
+          "remaining_frac": 0.0223,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000702",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 5830.56,
+          "remaining_frac": 0.4049,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0164": {
+      "SHELF-W0080": [
+        {
+          "lot_id": "LOT-I000703",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 14169.6,
+          "remaining_frac": 0.984,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000704",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 14189.76,
+          "remaining_frac": 0.9854,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0165": {
+      "SHELF-W0114": [
+        {
+          "lot_id": "LOT-I000705",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 13331.52,
+          "remaining_frac": 0.9258,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000706",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 13351.68,
+          "remaining_frac": 0.9272,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0166": {
+      "SHELF-W0160": [
+        {
+          "lot_id": "LOT-I000707",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 2863.584,
+          "remaining_frac": 0.1989,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000708",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 8526.96,
+          "remaining_frac": 0.5922,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0167": {
+      "SHELF-W0045": [
+        {
+          "lot_id": "LOT-I000709",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 13587.84,
+          "remaining_frac": 0.9436,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000710",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 13608.0,
+          "remaining_frac": 0.945,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0168": {
+      "SHELF-W0125": [
+        {
+          "lot_id": "LOT-I000711",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 12121.92,
+          "remaining_frac": 0.8418,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000712",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 12142.08,
+          "remaining_frac": 0.8432,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0169": {
+      "SHELF-W0053": [
+        {
+          "lot_id": "LOT-I000713",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 11854.08,
+          "remaining_frac": 0.8232,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000714",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 11874.24,
+          "remaining_frac": 0.8246,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0170": {
+      "SHELF-W0133": [
+        {
+          "lot_id": "LOT-I000715",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 8819.28,
+          "remaining_frac": 0.6124,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000716",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 3205.728,
+          "remaining_frac": 0.2226,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0171": {
+      "SHELF-W0010": [
+        {
+          "lot_id": "LOT-I000717",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 3362.544,
+          "remaining_frac": 0.2335,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000718",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 9056.16,
+          "remaining_frac": 0.6289,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0172": {
+      "SHELF-W0044": [
+        {
+          "lot_id": "LOT-I000719",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 12545.28,
+          "remaining_frac": 0.8712,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000720",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 12565.44,
+          "remaining_frac": 0.8726,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0173": {
+      "SHELF-W0090": [
+        {
+          "lot_id": "LOT-I000721",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 12294.72,
+          "remaining_frac": 0.8538,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000722",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 12314.88,
+          "remaining_frac": 0.8552,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0174": {
+      "SHELF-W0124": [
+        {
+          "lot_id": "LOT-I000723",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 4935.456,
+          "remaining_frac": 0.3427,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000724",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 10724.4,
+          "remaining_frac": 0.7448,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0175": {
+      "SHELF-W0056": [
+        {
+          "lot_id": "LOT-I000725",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 14264.64,
+          "remaining_frac": 0.9906,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000726",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 14284.8,
+          "remaining_frac": 0.992,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0176": {
+      "SHELF-W0136": [
+        {
+          "lot_id": "LOT-I000727",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 2397.888,
+          "remaining_frac": 0.1665,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000728",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 8033.04,
+          "remaining_frac": 0.5578,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0177": {
+      "SHELF-W0029": [
+        {
+          "lot_id": "LOT-I000729",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 13697.28,
+          "remaining_frac": 0.9512,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000730",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 13717.44,
+          "remaining_frac": 0.9526,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0178": {
+      "SHELF-W0063": [
+        {
+          "lot_id": "LOT-I000731",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 12859.2,
+          "remaining_frac": 0.893,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000732",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 12879.36,
+          "remaining_frac": 0.8944,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0179": {
+      "SHELF-W0109": [
+        {
+          "lot_id": "LOT-I000733",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 7665.12,
+          "remaining_frac": 0.5323,
+          "date_code_inverted": true
+        },
+        {
+          "lot_id": "LOT-I000734",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 2117.52,
+          "remaining_frac": 0.147,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0180": {
+      "SHELF-W0143": [
+        {
+          "lot_id": "LOT-I000735",
+          "qty": 12,
+          "t_in": -60.0,
+          "expiry_t": 11770.56,
+          "remaining_frac": 0.8174,
+          "date_code_inverted": false
+        },
+        {
+          "lot_id": "LOT-I000736",
+          "qty": 12,
+          "t_in": -0.0,
+          "expiry_t": 11790.72,
+          "remaining_frac": 0.8188,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0181": {
+      "SHELF-W0028": [
+        {
+          "lot_id": "LOT-I000737",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 3075.552,
+          "remaining_frac": 0.1068,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0182": {
+      "SHELF-W0062": [
+        {
+          "lot_id": "LOT-I000738",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 28638.72,
+          "remaining_frac": 0.9944,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0183": {
+      "SHELF-W0075": [
+        {
+          "lot_id": "LOT-I000739",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 24906.24,
+          "remaining_frac": 0.8648,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0184": {
+      "SHELF-W0108": [
+        {
+          "lot_id": "LOT-I000740",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 23132.16,
+          "remaining_frac": 0.8032,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0185": {
+      "SHELF-W0142": [
+        {
+          "lot_id": "LOT-I000741",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 7466.4,
+          "remaining_frac": 0.2592,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0186": {
+      "SHELF-W0155": [
+        {
+          "lot_id": "LOT-I000742",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 23483.52,
+          "remaining_frac": 0.8154,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0187": {
+      "SHELF-W0032": [
+        {
+          "lot_id": "LOT-I000743",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 23713.92,
+          "remaining_frac": 0.8234,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0188": {
+      "SHELF-W0078": [
+        {
+          "lot_id": "LOT-I000744",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 23212.8,
+          "remaining_frac": 0.806,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0189": {
+      "SHELF-W0112": [
+        {
+          "lot_id": "LOT-I000745",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 7599.456,
+          "remaining_frac": 0.2639,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0190": {
+      "SHELF-W0158": [
+        {
+          "lot_id": "LOT-I000746",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 26795.52,
+          "remaining_frac": 0.9304,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0191": {
+      "SHELF-W0047": [
+        {
+          "lot_id": "LOT-I000747",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 28200.96,
+          "remaining_frac": 0.9792,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0192": {
+      "SHELF-W0127": [
+        {
+          "lot_id": "LOT-I000748",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 4254.048,
+          "remaining_frac": 0.1477,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0193": {
+      "SHELF-W0051": [
+        {
+          "lot_id": "LOT-I000749",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 24341.76,
+          "remaining_frac": 0.8452,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0194": {
+      "SHELF-W0131": [
+        {
+          "lot_id": "LOT-I000750",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 27169.92,
+          "remaining_frac": 0.9434,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0195": {
+      "SHELF-W0046": [
+        {
+          "lot_id": "LOT-I000751",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 4406.112,
+          "remaining_frac": 0.153,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0196": {
+      "SHELF-W0126": [
+        {
+          "lot_id": "LOT-I000752",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 28189.44,
+          "remaining_frac": 0.9788,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0197": {
+      "SHELF-W0054": [
+        {
+          "lot_id": "LOT-I000753",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 27653.76,
+          "remaining_frac": 0.9602,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0198": {
+      "SHELF-W0134": [
+        {
+          "lot_id": "LOT-I000754",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 24721.92,
+          "remaining_frac": 0.8584,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0199": {
+      "SHELF-W0065": [
+        {
+          "lot_id": "LOT-I000755",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 24480.0,
+          "remaining_frac": 0.85,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0200": {
+      "SHELF-W0145": [
+        {
+          "lot_id": "LOT-I000756",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 7618.464,
+          "remaining_frac": 0.2645,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0201": {
+      "SHELF-W0030": [
+        {
+          "lot_id": "LOT-I000757",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 28321.92,
+          "remaining_frac": 0.9834,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0202": {
+      "SHELF-W0064": [
+        {
+          "lot_id": "LOT-I000758",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 6525.504,
+          "remaining_frac": 0.2266,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0203": {
+      "SHELF-W0073": [
+        {
+          "lot_id": "LOT-I000759",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 9224.64,
+          "remaining_frac": 0.3203,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0204": {
+      "SHELF-W0110": [
+        {
+          "lot_id": "LOT-I000760",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 26899.2,
+          "remaining_frac": 0.934,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0205": {
+      "SHELF-W0144": [
+        {
+          "lot_id": "LOT-I000761",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 25223.04,
+          "remaining_frac": 0.8758,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0206": {
+      "SHELF-W0153": [
+        {
+          "lot_id": "LOT-I000762",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 26858.88,
+          "remaining_frac": 0.9326,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0207": {
+      "SHELF-W0076": [
+        {
+          "lot_id": "LOT-I000763",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 5185.44,
+          "remaining_frac": 0.18,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0208": {
+      "SHELF-W0156": [
+        {
+          "lot_id": "LOT-I000764",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 28661.76,
+          "remaining_frac": 0.9952,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0209": {
+      "SHELF-W0049": [
+        {
+          "lot_id": "LOT-I000765",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 3313.152,
+          "remaining_frac": 0.115,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0210": {
+      "SHELF-W0129": [
+        {
+          "lot_id": "LOT-I000766",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 27527.04,
+          "remaining_frac": 0.9558,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0211": {
+      "SHELF-W0048": [
+        {
+          "lot_id": "LOT-I000767",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 26110.08,
+          "remaining_frac": 0.9066,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0212": {
+      "SHELF-W0128": [
+        {
+          "lot_id": "LOT-I000768",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 23178.24,
+          "remaining_frac": 0.8048,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0213": {
+      "SHELF-W0259": [
+        {
+          "lot_id": "LOT-I000769",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 4206.528,
+          "remaining_frac": 0.1461,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0214": {
+      "SHELF-W0052": [
+        {
+          "lot_id": "LOT-I000770",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 10022.976,
+          "remaining_frac": 0.348,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0215": {
+      "SHELF-W0132": [
+        {
+          "lot_id": "LOT-I000771",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 25833.6,
+          "remaining_frac": 0.897,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0216": {
+      "SHELF-W0067": [
+        {
+          "lot_id": "LOT-I000772",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 5432.544,
+          "remaining_frac": 0.1886,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0217": {
+      "SHELF-W0147": [
+        {
+          "lot_id": "LOT-I000773",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 23051.52,
+          "remaining_frac": 0.8004,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0218": {
+      "SHELF-W0066": [
+        {
+          "lot_id": "LOT-I000774",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 27394.56,
+          "remaining_frac": 0.9512,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0219": {
+      "SHELF-W0071": [
+        {
+          "lot_id": "LOT-I000775",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 28638.72,
+          "remaining_frac": 0.9944,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0220": {
+      "SHELF-W0146": [
+        {
+          "lot_id": "LOT-I000776",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 25217.28,
+          "remaining_frac": 0.8756,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0221": {
+      "SHELF-W0151": [
+        {
+          "lot_id": "LOT-I000777",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 6221.376,
+          "remaining_frac": 0.216,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0222": {
+      "SHELF-W0074": [
+        {
+          "lot_id": "LOT-I000778",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 25436.16,
+          "remaining_frac": 0.8832,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0223": {
+      "SHELF-W0154": [
+        {
+          "lot_id": "LOT-I000779",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 9196.128,
+          "remaining_frac": 0.3193,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0224": {
+      "SHELF-W0161": [
+        {
+          "lot_id": "LOT-I000780",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 23944.32,
+          "remaining_frac": 0.8314,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0225": {
+      "SHELF-W0050": [
+        {
+          "lot_id": "LOT-I000781",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 25349.76,
+          "remaining_frac": 0.8802,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0226": {
+      "SHELF-W0130": [
+        {
+          "lot_id": "LOT-I000782",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 9053.568,
+          "remaining_frac": 0.3144,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0227": {
+      "SHELF-W0257": [
+        {
+          "lot_id": "LOT-I000783",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 24088.32,
+          "remaining_frac": 0.8364,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0228": {
+      "SHELF-W0260": [
+        {
+          "lot_id": "LOT-I000784",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 25136.64,
+          "remaining_frac": 0.8728,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0229": {
+      "SHELF-W0069": [
+        {
+          "lot_id": "LOT-I000785",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 24468.48,
+          "remaining_frac": 0.8496,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0230": {
+      "SHELF-W0149": [
+        {
+          "lot_id": "LOT-I000786",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 27296.64,
+          "remaining_frac": 0.9478,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0231": {
+      "SHELF-W0068": [
+        {
+          "lot_id": "LOT-I000787",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 25879.68,
+          "remaining_frac": 0.8986,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0232": {
+      "SHELF-W0148": [
+        {
+          "lot_id": "LOT-I000788",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 9927.936,
+          "remaining_frac": 0.3447,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0233": {
+      "SHELF-W0279": [
+        {
+          "lot_id": "LOT-I000789",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 25009.92,
+          "remaining_frac": 0.8684,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0234": {
+      "SHELF-W0072": [
+        {
+          "lot_id": "LOT-I000790",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 28535.04,
+          "remaining_frac": 0.9908,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0235": {
+      "SHELF-W0152": [
+        {
+          "lot_id": "LOT-I000791",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 25603.2,
+          "remaining_frac": 0.889,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0236": {
+      "SHELF-W0163": [
+        {
+          "lot_id": "LOT-I000792",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 7827.552,
+          "remaining_frac": 0.2718,
+          "date_code_inverted": true
+        }
+      ]
+    },
+    "SKU-0237": {
+      "SHELF-W0162": [
+        {
+          "lot_id": "LOT-I000793",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 28091.52,
+          "remaining_frac": 0.9754,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0238": {
+      "SHELF-W0255": [
+        {
+          "lot_id": "LOT-I000794",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 26432.64,
+          "remaining_frac": 0.9178,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0239": {
+      "SHELF-W0258": [
+        {
+          "lot_id": "LOT-I000795",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 27480.96,
+          "remaining_frac": 0.9542,
+          "date_code_inverted": false
+        }
+      ]
+    },
+    "SKU-0240": {
+      "SHELF-W0181": [
+        {
+          "lot_id": "LOT-I000796",
+          "qty": 8,
+          "t_in": -0.0,
+          "expiry_t": 6211.872,
+          "remaining_frac": 0.2157,
+          "date_code_inverted": true
+        }
+      ]
     }
   }
 }

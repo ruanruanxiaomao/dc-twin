@@ -3,7 +3,7 @@
   "kind": "sku_master",
   "generated_from": "data/skus.json + config/inventory_spec.json",
   "seed": 20261106,
-  "note": "unit_cost / pack_size 为演示 placeholder；只用于库存占用资金展示，不进 P&L",
+  "note": "unit_cost / pack_size 为演示 placeholder；只用于库存占用资金展示，不进 P&L。shelf_life_s 同理：按仿真秒计的演示效期，不是真实保质期",
   "count": 240,
   "skus": [
     {
@@ -15,7 +15,8 @@
       "weight_kg": 15.54,
       "unit_cost": 10.29,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0002",
@@ -26,7 +27,8 @@
       "weight_kg": 20.63,
       "unit_cost": 10.23,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0003",
@@ -37,7 +39,8 @@
       "weight_kg": 25.09,
       "unit_cost": 13.13,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0004",
@@ -48,7 +51,8 @@
       "weight_kg": 17.09,
       "unit_cost": 10.18,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0005",
@@ -59,7 +63,8 @@
       "weight_kg": 7.81,
       "unit_cost": 7.93,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0006",
@@ -70,7 +75,8 @@
       "weight_kg": 6.15,
       "unit_cost": 7.73,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0007",
@@ -81,7 +87,8 @@
       "weight_kg": 8.2,
       "unit_cost": 6.14,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0008",
@@ -92,7 +99,8 @@
       "weight_kg": 14.45,
       "unit_cost": 8.16,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0009",
@@ -103,7 +111,8 @@
       "weight_kg": 11.61,
       "unit_cost": 7.69,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0010",
@@ -114,7 +123,8 @@
       "weight_kg": 4.77,
       "unit_cost": 4.34,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0011",
@@ -125,7 +135,8 @@
       "weight_kg": 18.92,
       "unit_cost": 10.61,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0012",
@@ -136,7 +147,8 @@
       "weight_kg": 8.66,
       "unit_cost": 7.87,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0013",
@@ -147,7 +159,8 @@
       "weight_kg": 6.62,
       "unit_cost": 7.18,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0014",
@@ -158,7 +171,8 @@
       "weight_kg": 16.83,
       "unit_cost": 8.33,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0015",
@@ -169,7 +183,8 @@
       "weight_kg": 5.98,
       "unit_cost": 6.08,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0016",
@@ -180,7 +195,8 @@
       "weight_kg": 4.58,
       "unit_cost": 5.97,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0017",
@@ -191,7 +207,8 @@
       "weight_kg": 15.38,
       "unit_cost": 7.03,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0018",
@@ -202,7 +219,8 @@
       "weight_kg": 15.47,
       "unit_cost": 8.06,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0019",
@@ -213,7 +231,8 @@
       "weight_kg": 10.72,
       "unit_cost": 9.01,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0020",
@@ -224,7 +243,8 @@
       "weight_kg": 17.8,
       "unit_cost": 8.79,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0021",
@@ -235,7 +255,8 @@
       "weight_kg": 10.93,
       "unit_cost": 7.07,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0022",
@@ -246,7 +267,8 @@
       "weight_kg": 26.22,
       "unit_cost": 9.56,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0023",
@@ -257,7 +279,8 @@
       "weight_kg": 27.16,
       "unit_cost": 11.54,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0024",
@@ -268,7 +291,8 @@
       "weight_kg": 18.65,
       "unit_cost": 9.66,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0025",
@@ -279,7 +303,8 @@
       "weight_kg": 10.92,
       "unit_cost": 8.78,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0026",
@@ -290,7 +315,8 @@
       "weight_kg": 15.42,
       "unit_cost": 9.77,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0027",
@@ -301,7 +327,8 @@
       "weight_kg": 23.53,
       "unit_cost": 11.62,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0028",
@@ -312,7 +339,8 @@
       "weight_kg": 4.68,
       "unit_cost": 8.09,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0029",
@@ -323,7 +351,8 @@
       "weight_kg": 13.3,
       "unit_cost": 8.43,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0030",
@@ -334,7 +363,8 @@
       "weight_kg": 20.97,
       "unit_cost": 9.72,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0031",
@@ -345,7 +375,8 @@
       "weight_kg": 12.63,
       "unit_cost": 7.6,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0032",
@@ -356,7 +387,8 @@
       "weight_kg": 12.73,
       "unit_cost": 6.22,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0033",
@@ -367,7 +399,8 @@
       "weight_kg": 27.99,
       "unit_cost": 11.82,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0034",
@@ -378,7 +411,8 @@
       "weight_kg": 15.5,
       "unit_cost": 9.71,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0035",
@@ -389,7 +423,8 @@
       "weight_kg": 13.71,
       "unit_cost": 8.18,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0036",
@@ -400,7 +435,8 @@
       "weight_kg": 9.67,
       "unit_cost": 8.36,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0037",
@@ -411,7 +447,8 @@
       "weight_kg": 17.56,
       "unit_cost": 8.13,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0038",
@@ -422,7 +459,8 @@
       "weight_kg": 17.23,
       "unit_cost": 10.29,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0039",
@@ -433,7 +471,8 @@
       "weight_kg": 7.97,
       "unit_cost": 6.64,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0040",
@@ -444,7 +483,8 @@
       "weight_kg": 19.72,
       "unit_cost": 9.16,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0041",
@@ -455,7 +495,8 @@
       "weight_kg": 22.43,
       "unit_cost": 11.76,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0042",
@@ -466,7 +507,8 @@
       "weight_kg": 23.44,
       "unit_cost": 9.14,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0043",
@@ -477,7 +519,8 @@
       "weight_kg": 19.95,
       "unit_cost": 8.83,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0044",
@@ -488,7 +531,8 @@
       "weight_kg": 19.94,
       "unit_cost": 8.83,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0045",
@@ -499,7 +543,8 @@
       "weight_kg": 21.41,
       "unit_cost": 11.33,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0046",
@@ -510,7 +555,8 @@
       "weight_kg": 21.68,
       "unit_cost": 12.41,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0047",
@@ -521,7 +567,8 @@
       "weight_kg": 22.52,
       "unit_cost": 10.66,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0048",
@@ -532,7 +579,8 @@
       "weight_kg": 23.65,
       "unit_cost": 9.34,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0049",
@@ -543,7 +591,8 @@
       "weight_kg": 12.87,
       "unit_cost": 6.19,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0050",
@@ -554,7 +603,8 @@
       "weight_kg": 26.18,
       "unit_cost": 13.29,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0051",
@@ -565,7 +615,8 @@
       "weight_kg": 20.23,
       "unit_cost": 12.02,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0052",
@@ -576,7 +627,8 @@
       "weight_kg": 11.05,
       "unit_cost": 6.92,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0053",
@@ -587,7 +639,8 @@
       "weight_kg": 22.67,
       "unit_cost": 11.44,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0054",
@@ -598,7 +651,8 @@
       "weight_kg": 25.94,
       "unit_cost": 11.41,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0055",
@@ -609,7 +663,8 @@
       "weight_kg": 13.98,
       "unit_cost": 7.48,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0056",
@@ -620,7 +675,8 @@
       "weight_kg": 7.31,
       "unit_cost": 7.07,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0057",
@@ -631,7 +687,8 @@
       "weight_kg": 23.14,
       "unit_cost": 9.88,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0058",
@@ -642,7 +699,8 @@
       "weight_kg": 9.11,
       "unit_cost": 6.51,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0059",
@@ -653,7 +711,8 @@
       "weight_kg": 7.75,
       "unit_cost": 6.59,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0060",
@@ -664,7 +723,8 @@
       "weight_kg": 18.99,
       "unit_cost": 11.01,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0061",
@@ -675,7 +735,8 @@
       "weight_kg": 16.79,
       "unit_cost": 10.88,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0062",
@@ -686,7 +747,8 @@
       "weight_kg": 10.7,
       "unit_cost": 7.88,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0063",
@@ -697,7 +759,8 @@
       "weight_kg": 6.55,
       "unit_cost": 6.5,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0064",
@@ -708,7 +771,8 @@
       "weight_kg": 12.83,
       "unit_cost": 7.51,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0065",
@@ -719,7 +783,8 @@
       "weight_kg": 11.51,
       "unit_cost": 8.51,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0066",
@@ -730,7 +795,8 @@
       "weight_kg": 24.1,
       "unit_cost": 12.63,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0067",
@@ -741,7 +807,8 @@
       "weight_kg": 10.79,
       "unit_cost": 8.99,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0068",
@@ -752,7 +819,8 @@
       "weight_kg": 24.08,
       "unit_cost": 9.41,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0069",
@@ -763,7 +831,8 @@
       "weight_kg": 16.53,
       "unit_cost": 10.43,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0070",
@@ -774,7 +843,8 @@
       "weight_kg": 5.97,
       "unit_cost": 5.02,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0071",
@@ -785,7 +855,8 @@
       "weight_kg": 21.85,
       "unit_cost": 9.9,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0072",
@@ -796,7 +867,8 @@
       "weight_kg": 19.57,
       "unit_cost": 8.42,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0073",
@@ -807,7 +879,8 @@
       "weight_kg": 24.29,
       "unit_cost": 9.39,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0074",
@@ -818,7 +891,8 @@
       "weight_kg": 10.89,
       "unit_cost": 5.9,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0075",
@@ -829,7 +903,8 @@
       "weight_kg": 27.55,
       "unit_cost": 13.71,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0076",
@@ -840,7 +915,8 @@
       "weight_kg": 12.05,
       "unit_cost": 7.45,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0077",
@@ -851,7 +927,8 @@
       "weight_kg": 5.26,
       "unit_cost": 6.77,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0078",
@@ -862,7 +939,8 @@
       "weight_kg": 20.73,
       "unit_cost": 9.13,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0079",
@@ -873,7 +951,8 @@
       "weight_kg": 6.82,
       "unit_cost": 5.06,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0080",
@@ -884,7 +963,8 @@
       "weight_kg": 20.94,
       "unit_cost": 10.13,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0081",
@@ -895,7 +975,8 @@
       "weight_kg": 9.96,
       "unit_cost": 8.64,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0082",
@@ -906,7 +987,8 @@
       "weight_kg": 18.42,
       "unit_cost": 11.43,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0083",
@@ -917,7 +999,8 @@
       "weight_kg": 14.96,
       "unit_cost": 8.14,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0084",
@@ -928,7 +1011,8 @@
       "weight_kg": 26.06,
       "unit_cost": 11.3,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0085",
@@ -939,7 +1023,8 @@
       "weight_kg": 26.22,
       "unit_cost": 12.36,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0086",
@@ -950,7 +1035,8 @@
       "weight_kg": 13.34,
       "unit_cost": 7.53,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0087",
@@ -961,7 +1047,8 @@
       "weight_kg": 22.91,
       "unit_cost": 10.27,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0088",
@@ -972,7 +1059,8 @@
       "weight_kg": 26.56,
       "unit_cost": 11.22,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0089",
@@ -983,7 +1071,8 @@
       "weight_kg": 7.73,
       "unit_cost": 8.33,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0090",
@@ -994,7 +1083,8 @@
       "weight_kg": 14.29,
       "unit_cost": 9.13,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0091",
@@ -1005,7 +1095,8 @@
       "weight_kg": 21.51,
       "unit_cost": 11.5,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0092",
@@ -1016,7 +1107,8 @@
       "weight_kg": 21.94,
       "unit_cost": 9.93,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0093",
@@ -1027,7 +1119,8 @@
       "weight_kg": 10.57,
       "unit_cost": 7.99,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0094",
@@ -1038,7 +1131,8 @@
       "weight_kg": 20.01,
       "unit_cost": 9.86,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0095",
@@ -1049,7 +1143,8 @@
       "weight_kg": 12.95,
       "unit_cost": 9.22,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0096",
@@ -1060,7 +1155,8 @@
       "weight_kg": 20.56,
       "unit_cost": 8.67,
       "pack_size": 12,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 7200.0
     },
     {
       "id": "SKU-0097",
@@ -1071,7 +1167,8 @@
       "weight_kg": 22.52,
       "unit_cost": 10.18,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0098",
@@ -1082,7 +1179,8 @@
       "weight_kg": 4.15,
       "unit_cost": 7.26,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0099",
@@ -1093,7 +1191,8 @@
       "weight_kg": 8.52,
       "unit_cost": 7.93,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0100",
@@ -1104,7 +1203,8 @@
       "weight_kg": 13.98,
       "unit_cost": 9.72,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0101",
@@ -1115,7 +1215,8 @@
       "weight_kg": 18.9,
       "unit_cost": 10.46,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0102",
@@ -1126,7 +1227,8 @@
       "weight_kg": 10.48,
       "unit_cost": 5.94,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0103",
@@ -1137,7 +1239,8 @@
       "weight_kg": 22.54,
       "unit_cost": 8.68,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0104",
@@ -1148,7 +1251,8 @@
       "weight_kg": 7.83,
       "unit_cost": 7.76,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0105",
@@ -1159,7 +1263,8 @@
       "weight_kg": 16.17,
       "unit_cost": 7.36,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0106",
@@ -1170,7 +1275,8 @@
       "weight_kg": 24.52,
       "unit_cost": 10.43,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0107",
@@ -1181,7 +1287,8 @@
       "weight_kg": 12.72,
       "unit_cost": 6.85,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0108",
@@ -1192,7 +1299,8 @@
       "weight_kg": 27.1,
       "unit_cost": 11.11,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0109",
@@ -1203,7 +1311,8 @@
       "weight_kg": 7.48,
       "unit_cost": 6.7,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0110",
@@ -1214,7 +1323,8 @@
       "weight_kg": 25.88,
       "unit_cost": 11.4,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0111",
@@ -1225,7 +1335,8 @@
       "weight_kg": 27.97,
       "unit_cost": 10.03,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0112",
@@ -1236,7 +1347,8 @@
       "weight_kg": 22.3,
       "unit_cost": 10.19,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0113",
@@ -1247,7 +1359,8 @@
       "weight_kg": 13.93,
       "unit_cost": 7.5,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0114",
@@ -1258,7 +1371,8 @@
       "weight_kg": 18.92,
       "unit_cost": 10.15,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0115",
@@ -1269,7 +1383,8 @@
       "weight_kg": 25.51,
       "unit_cost": 11.06,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0116",
@@ -1280,7 +1395,8 @@
       "weight_kg": 24.49,
       "unit_cost": 10.07,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0117",
@@ -1291,7 +1407,8 @@
       "weight_kg": 6.1,
       "unit_cost": 5.16,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0118",
@@ -1302,7 +1419,8 @@
       "weight_kg": 6.66,
       "unit_cost": 4.63,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0119",
@@ -1313,7 +1431,8 @@
       "weight_kg": 12.79,
       "unit_cost": 7.6,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0120",
@@ -1324,7 +1443,8 @@
       "weight_kg": 15.09,
       "unit_cost": 7.9,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0121",
@@ -1335,7 +1455,8 @@
       "weight_kg": 17.07,
       "unit_cost": 8.88,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0122",
@@ -1346,7 +1467,8 @@
       "weight_kg": 13.85,
       "unit_cost": 9.27,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0123",
@@ -1357,7 +1479,8 @@
       "weight_kg": 19.9,
       "unit_cost": 10.99,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0124",
@@ -1368,7 +1491,8 @@
       "weight_kg": 15.84,
       "unit_cost": 10.54,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0125",
@@ -1379,7 +1503,8 @@
       "weight_kg": 26.49,
       "unit_cost": 10.43,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0126",
@@ -1390,7 +1515,8 @@
       "weight_kg": 20.13,
       "unit_cost": 9.05,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0127",
@@ -1401,7 +1527,8 @@
       "weight_kg": 9.36,
       "unit_cost": 6.46,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0128",
@@ -1412,7 +1539,8 @@
       "weight_kg": 21.48,
       "unit_cost": 12.05,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0129",
@@ -1423,7 +1551,8 @@
       "weight_kg": 25.53,
       "unit_cost": 13.24,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0130",
@@ -1434,7 +1563,8 @@
       "weight_kg": 22.85,
       "unit_cost": 10.05,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0131",
@@ -1445,7 +1575,8 @@
       "weight_kg": 26.97,
       "unit_cost": 10.59,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0132",
@@ -1456,7 +1587,8 @@
       "weight_kg": 4.72,
       "unit_cost": 5.3,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0133",
@@ -1467,7 +1599,8 @@
       "weight_kg": 14.62,
       "unit_cost": 9.78,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0134",
@@ -1478,7 +1611,8 @@
       "weight_kg": 10.69,
       "unit_cost": 5.75,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0135",
@@ -1489,7 +1623,8 @@
       "weight_kg": 24.62,
       "unit_cost": 11.19,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0136",
@@ -1500,7 +1635,8 @@
       "weight_kg": 12.8,
       "unit_cost": 8.34,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0137",
@@ -1511,7 +1647,8 @@
       "weight_kg": 6.9,
       "unit_cost": 8.3,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0138",
@@ -1522,7 +1659,8 @@
       "weight_kg": 10.94,
       "unit_cost": 7.63,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0139",
@@ -1533,7 +1671,8 @@
       "weight_kg": 15.25,
       "unit_cost": 7.24,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0140",
@@ -1544,7 +1683,8 @@
       "weight_kg": 21.01,
       "unit_cost": 9.69,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0141",
@@ -1555,7 +1695,8 @@
       "weight_kg": 5.59,
       "unit_cost": 6.47,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0142",
@@ -1566,7 +1707,8 @@
       "weight_kg": 11.42,
       "unit_cost": 6.24,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0143",
@@ -1577,7 +1719,8 @@
       "weight_kg": 8.45,
       "unit_cost": 7.11,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0144",
@@ -1588,7 +1731,8 @@
       "weight_kg": 15.85,
       "unit_cost": 10.54,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0145",
@@ -1599,7 +1743,8 @@
       "weight_kg": 20.39,
       "unit_cost": 8.66,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0146",
@@ -1610,7 +1755,8 @@
       "weight_kg": 12.83,
       "unit_cost": 9.22,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0147",
@@ -1621,7 +1767,8 @@
       "weight_kg": 17.19,
       "unit_cost": 10.38,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0148",
@@ -1632,7 +1779,8 @@
       "weight_kg": 7.49,
       "unit_cost": 8.62,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0149",
@@ -1643,7 +1791,8 @@
       "weight_kg": 11.99,
       "unit_cost": 6.91,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0150",
@@ -1654,7 +1803,8 @@
       "weight_kg": 20.67,
       "unit_cost": 9.82,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0151",
@@ -1665,7 +1815,8 @@
       "weight_kg": 6.86,
       "unit_cost": 8.57,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0152",
@@ -1676,7 +1827,8 @@
       "weight_kg": 19.77,
       "unit_cost": 11.87,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0153",
@@ -1687,7 +1839,8 @@
       "weight_kg": 12.08,
       "unit_cost": 6.27,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0154",
@@ -1698,7 +1851,8 @@
       "weight_kg": 4.06,
       "unit_cost": 4.75,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0155",
@@ -1709,7 +1863,8 @@
       "weight_kg": 16.42,
       "unit_cost": 9.25,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0156",
@@ -1720,7 +1875,8 @@
       "weight_kg": 16.25,
       "unit_cost": 6.96,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0157",
@@ -1731,7 +1887,8 @@
       "weight_kg": 18.04,
       "unit_cost": 10.18,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0158",
@@ -1742,7 +1899,8 @@
       "weight_kg": 6.51,
       "unit_cost": 8.13,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0159",
@@ -1753,7 +1911,8 @@
       "weight_kg": 14.59,
       "unit_cost": 10.26,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0160",
@@ -1764,7 +1923,8 @@
       "weight_kg": 6.86,
       "unit_cost": 5.91,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0161",
@@ -1775,7 +1935,8 @@
       "weight_kg": 26.37,
       "unit_cost": 10.4,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0162",
@@ -1786,7 +1947,8 @@
       "weight_kg": 19.24,
       "unit_cost": 9.56,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0163",
@@ -1797,7 +1959,8 @@
       "weight_kg": 25.73,
       "unit_cost": 9.96,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0164",
@@ -1808,7 +1971,8 @@
       "weight_kg": 9.64,
       "unit_cost": 7.34,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0165",
@@ -1819,7 +1983,8 @@
       "weight_kg": 20.78,
       "unit_cost": 11.18,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0166",
@@ -1830,7 +1995,8 @@
       "weight_kg": 25.94,
       "unit_cost": 12.32,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0167",
@@ -1841,7 +2007,8 @@
       "weight_kg": 11.18,
       "unit_cost": 6.08,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0168",
@@ -1852,7 +2019,8 @@
       "weight_kg": 23.51,
       "unit_cost": 11.68,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0169",
@@ -1863,7 +2031,8 @@
       "weight_kg": 25.26,
       "unit_cost": 11.77,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0170",
@@ -1874,7 +2043,8 @@
       "weight_kg": 19.04,
       "unit_cost": 8.15,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0171",
@@ -1885,7 +2055,8 @@
       "weight_kg": 20.32,
       "unit_cost": 8.89,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0172",
@@ -1896,7 +2067,8 @@
       "weight_kg": 12.02,
       "unit_cost": 6.01,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0173",
@@ -1907,7 +2079,8 @@
       "weight_kg": 6.22,
       "unit_cost": 4.73,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0174",
@@ -1918,7 +2091,8 @@
       "weight_kg": 22.94,
       "unit_cost": 11.54,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0175",
@@ -1929,7 +2103,8 @@
       "weight_kg": 18.88,
       "unit_cost": 8.74,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0176",
@@ -1940,7 +2115,8 @@
       "weight_kg": 6.28,
       "unit_cost": 8.6,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0177",
@@ -1951,7 +2127,8 @@
       "weight_kg": 8.09,
       "unit_cost": 6.01,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0178",
@@ -1962,7 +2139,8 @@
       "weight_kg": 17.42,
       "unit_cost": 11.14,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0179",
@@ -1973,7 +2151,8 @@
       "weight_kg": 14.72,
       "unit_cost": 9.31,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0180",
@@ -1984,7 +2163,8 @@
       "weight_kg": 10.39,
       "unit_cost": 6.9,
       "pack_size": 6,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 14400.0
     },
     {
       "id": "SKU-0181",
@@ -1995,7 +2175,8 @@
       "weight_kg": 21.86,
       "unit_cost": 12.07,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0182",
@@ -2006,7 +2187,8 @@
       "weight_kg": 13.26,
       "unit_cost": 7.58,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0183",
@@ -2017,7 +2199,8 @@
       "weight_kg": 23.59,
       "unit_cost": 10.86,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0184",
@@ -2028,7 +2211,8 @@
       "weight_kg": 13.13,
       "unit_cost": 6.5,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0185",
@@ -2039,7 +2223,8 @@
       "weight_kg": 23.54,
       "unit_cost": 9.77,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0186",
@@ -2050,7 +2235,8 @@
       "weight_kg": 7.71,
       "unit_cost": 8.61,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0187",
@@ -2061,7 +2247,8 @@
       "weight_kg": 13.18,
       "unit_cost": 10.15,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0188",
@@ -2072,7 +2259,8 @@
       "weight_kg": 7.42,
       "unit_cost": 6.37,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0189",
@@ -2083,7 +2271,8 @@
       "weight_kg": 16.57,
       "unit_cost": 11.14,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0190",
@@ -2094,7 +2283,8 @@
       "weight_kg": 8.41,
       "unit_cost": 8.5,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0191",
@@ -2105,7 +2295,8 @@
       "weight_kg": 23.09,
       "unit_cost": 8.78,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0192",
@@ -2116,7 +2307,8 @@
       "weight_kg": 12.5,
       "unit_cost": 9.53,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0193",
@@ -2127,7 +2319,8 @@
       "weight_kg": 16.09,
       "unit_cost": 8.74,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0194",
@@ -2138,7 +2331,8 @@
       "weight_kg": 20.36,
       "unit_cost": 10.09,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0195",
@@ -2149,7 +2343,8 @@
       "weight_kg": 17.79,
       "unit_cost": 7.56,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0196",
@@ -2160,7 +2355,8 @@
       "weight_kg": 27.56,
       "unit_cost": 10.46,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0197",
@@ -2171,7 +2367,8 @@
       "weight_kg": 12.7,
       "unit_cost": 6.49,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0198",
@@ -2182,7 +2379,8 @@
       "weight_kg": 14.83,
       "unit_cost": 7.9,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0199",
@@ -2193,7 +2391,8 @@
       "weight_kg": 18.82,
       "unit_cost": 7.61,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0200",
@@ -2204,7 +2403,8 @@
       "weight_kg": 17.04,
       "unit_cost": 10.31,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0201",
@@ -2215,7 +2415,8 @@
       "weight_kg": 13.13,
       "unit_cost": 7.79,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0202",
@@ -2226,7 +2427,8 @@
       "weight_kg": 12.47,
       "unit_cost": 7.42,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0203",
@@ -2237,7 +2439,8 @@
       "weight_kg": 25.62,
       "unit_cost": 11.37,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0204",
@@ -2248,7 +2451,8 @@
       "weight_kg": 20.89,
       "unit_cost": 12.15,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0205",
@@ -2259,7 +2463,8 @@
       "weight_kg": 7.92,
       "unit_cost": 6.31,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0206",
@@ -2270,7 +2475,8 @@
       "weight_kg": 8.72,
       "unit_cost": 7.32,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0207",
@@ -2281,7 +2487,8 @@
       "weight_kg": 4.68,
       "unit_cost": 8.09,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0208",
@@ -2292,7 +2499,8 @@
       "weight_kg": 24.76,
       "unit_cost": 12.14,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0209",
@@ -2303,7 +2511,8 @@
       "weight_kg": 20.84,
       "unit_cost": 8.84,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0210",
@@ -2314,7 +2523,8 @@
       "weight_kg": 5.08,
       "unit_cost": 6.06,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0211",
@@ -2325,7 +2535,8 @@
       "weight_kg": 25.8,
       "unit_cost": 9.35,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0212",
@@ -2336,7 +2547,8 @@
       "weight_kg": 27.3,
       "unit_cost": 11.3,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0213",
@@ -2347,7 +2559,8 @@
       "weight_kg": 6.55,
       "unit_cost": 7.76,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0214",
@@ -2358,7 +2571,8 @@
       "weight_kg": 24.85,
       "unit_cost": 9.43,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0215",
@@ -2369,7 +2583,8 @@
       "weight_kg": 7.27,
       "unit_cost": 5.21,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0216",
@@ -2380,7 +2595,8 @@
       "weight_kg": 8.1,
       "unit_cost": 8.74,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0217",
@@ -2391,7 +2607,8 @@
       "weight_kg": 14.95,
       "unit_cost": 9.51,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0218",
@@ -2402,7 +2619,8 @@
       "weight_kg": 14.19,
       "unit_cost": 8.58,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0219",
@@ -2413,7 +2631,8 @@
       "weight_kg": 21.18,
       "unit_cost": 12.36,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0220",
@@ -2424,7 +2643,8 @@
       "weight_kg": 15.82,
       "unit_cost": 8.78,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0221",
@@ -2435,7 +2655,8 @@
       "weight_kg": 11.35,
       "unit_cost": 9.66,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0222",
@@ -2446,7 +2667,8 @@
       "weight_kg": 5.31,
       "unit_cost": 5.94,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0223",
@@ -2457,7 +2679,8 @@
       "weight_kg": 23.93,
       "unit_cost": 11.19,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0224",
@@ -2468,7 +2691,8 @@
       "weight_kg": 23.86,
       "unit_cost": 10.62,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0225",
@@ -2479,7 +2703,8 @@
       "weight_kg": 15.56,
       "unit_cost": 6.83,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0226",
@@ -2490,7 +2715,8 @@
       "weight_kg": 9.33,
       "unit_cost": 8.52,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0227",
@@ -2501,7 +2727,8 @@
       "weight_kg": 24.56,
       "unit_cost": 11.18,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0228",
@@ -2512,7 +2739,8 @@
       "weight_kg": 23.62,
       "unit_cost": 10.0,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0229",
@@ -2523,7 +2751,8 @@
       "weight_kg": 7.32,
       "unit_cost": 5.88,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0230",
@@ -2534,7 +2763,8 @@
       "weight_kg": 25.78,
       "unit_cost": 11.59,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0231",
@@ -2545,7 +2775,8 @@
       "weight_kg": 6.72,
       "unit_cost": 7.76,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0232",
@@ -2556,7 +2787,8 @@
       "weight_kg": 7.04,
       "unit_cost": 7.84,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0233",
@@ -2567,7 +2799,8 @@
       "weight_kg": 12.15,
       "unit_cost": 7.41,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0234",
@@ -2578,7 +2811,8 @@
       "weight_kg": 23.36,
       "unit_cost": 11.12,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0235",
@@ -2589,7 +2823,8 @@
       "weight_kg": 24.53,
       "unit_cost": 11.13,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0236",
@@ -2600,7 +2835,8 @@
       "weight_kg": 17.08,
       "unit_cost": 8.25,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0237",
@@ -2611,7 +2847,8 @@
       "weight_kg": 17.4,
       "unit_cost": 9.8,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0238",
@@ -2622,7 +2859,8 @@
       "weight_kg": 9.2,
       "unit_cost": 5.34,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0239",
@@ -2633,7 +2871,8 @@
       "weight_kg": 7.72,
       "unit_cost": 5.63,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     },
     {
       "id": "SKU-0240",
@@ -2644,7 +2883,8 @@
       "weight_kg": 23.19,
       "unit_cost": 8.87,
       "pack_size": 1,
-      "storage": "SHELF"
+      "storage": "SHELF",
+      "shelf_life_s": 28800.0
     }
   ]
 }

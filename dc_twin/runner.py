@@ -93,10 +93,12 @@ GAME_CHAIN = [
 #: 库存层的门（P6a §9）。与 game/full 都分开：它跑的是**实验**（压库存、调补货点），
 #: 不是产线；混进 full 会让"交付链"带上实验参数，反而说不清产物是哪一套。
 INVENTORY_CHAIN = [
-    ("scripts/check_inventory.py", ("--quiet",), "python"),   # 门 1 STOCK_OK
+    ("scripts/check_inventory.py", ("--quiet",), "python"),   # 门 1 STOCK_OK（含报废）
     ("scripts/check_reorder.py", (), "python"),               # 门 2 REORDER_OK（双向）
     ("scripts/check_pickface.py", ("--quiet",), "python"),    # 门 4 PICKFACE_OK
-    ("scripts/report_refreeze.py", ("--quiet",), "python"),   # 门 6 REFREEZE_OK
+    ("scripts/check_fefo.py", ("--quiet",), "python"),        # 门 5 FEFO_OK（P6b）
+    ("scripts/check_expiry.py", ("--quiet",), "python"),      # 门 6 EXPIRY_OK（P6b）
+    ("scripts/report_refreeze.py", ("--quiet",), "python"),   # 门 7 REFREEZE_OK
 ]
 
 SCOPES = {

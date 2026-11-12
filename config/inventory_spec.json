@@ -32,5 +32,15 @@
     "base_qty": { "A": 48, "B": 24, "C": 8 },
     "overflow_multiplier": 0.5,
     "qty_is_integer": true
+  },
+  "expiry": {
+    "enabled": true,
+    "policy": "FEFO",
+    "shelf_life_s_by_class": { "A": 7200, "B": 14400, "C": 28800 },
+    "initial_lot_life_fraction": [[0.02, 0.35], [0.40, 0.75], [0.80, 1.0]],
+    "aging_every_n_locations": 3,
+    "max_lots_per_location": 3,
+    "waste_posting": "none",
+    "note": "演示压缩：真实效期按天/月，这里按仿真秒。baseline horizon=3600s，若按 30 天计效期，一个批次都不会过期，P6b 的核心行为在验证窗口里不可观测（等于死代码）。故 A/B/C 取 2h/4h/8h，与 cost_spec 的 demo 价同性质。initial_lot_life_fraction 是'期初这批货还剩多少寿命'的区间，按库位序号确定性取值；aging_every_n_locations 只让每 N 个库位有一个临期货，避免整仓同时报废（那不叫效期管理，叫一次性事故）。waste_posting=none 的理由见 ADR-GAME-10：采购从未进 P&L，把报废记成费用会凭空造出一笔从未支付的成本。"
   }
 }

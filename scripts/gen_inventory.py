@@ -61,6 +61,24 @@ def pack_size(abc):
     return {"A": 12, "B": 6, "C": 1}.get(abc, 1)
 
 
+def lot_split(qty, n_lots):
+    """把 qty 拆成 n_lots 份，余数给前几份。**整数除法 + 固定顺序**，保证确定性。"""
+    base, rem = divmod(int(qty), int(n_lots))
+    return [base + (1 if i < rem else 0) for i in range(n_lots)]
+
+
+def life_fraction(ranges, lot_i, mix):
+    """取第 lot_i 个批次的"剩余寿命占比"。
+
+    用 `mix`（由 SKU/库位/批次序号的整数算术得到）在区间内取点，**不用 rng、
+    不用 hash()**：`hash()` 对字符串有进程级随机化，跨进程/跨平台会漂，
+    而这份数据必须两次生成逐字节一致（测试会跑两次比字节）。
+    """
+    lo, hi = ranges[min(lot_i, len(ranges) - 1)]
+    p = (mix % 1000) / 1000.0
+    return lo + (hi - lo) * p
+
+
 def build():
     layout = jload(DATA / "layout.json")
     skus = jload(DATA / "skus.json")
@@ -149,8 +167,22 @@ def build():
         v["reserve"].sort()
         v["pick_face"].sort()
 
-    # ---- 期初结存
-    stock, total_units, total_value = {}, 0, 0.0
+    # ---- 期初结存 + 期初批次（P6b）
+    exp = spec.get("expiry", {})
+    exp_enabled = bool(exp.get("enabled", False))
+    shelf_by_class = {k: float(v) for k, v in (exp.get("shelf_life_s_by_class") or {}).items()}
+    life_ranges = exp.get("initial_lot_life_fraction") or [[1.0, 1.0]]
+    aging_n = int(exp.get("aging_every_n_locations", 1) or 1)
+    max_lots = int(exp.get("max_lots_per_location", 1) or 1)
+    horizon_s = float(jload(CONFIG / "sim_spec.json").get("horizon_s", 3600))
+
+    stock, lots, total_units, total_value = {}, {}, 0, 0.0
+    lot_seq = 0
+    expiring_units, expiring_lots, aging_locs = 0, 0, 0
+    loc_order = sorted(rows)                     # 库位全局序号：确定性取模用
+    loc_idx = {lid: i for i, lid in enumerate(loc_order)}
+    sku_idx = {s: i for i, s in enumerate(order_skus)}
+
     for sku in sorted(by_sku):
         abc = sku_by_id[sku].get("abc", "C")
         base = int(base_qty.get(abc, 8))
@@ -166,13 +198,58 @@ def build():
             total_units += q
             total_value += q * cost
 
+        shelf = shelf_by_class.get(abc, 0.0)
+        lots[sku] = {}
+        for lid in sorted(per_loc):
+            q = per_loc[lid]
+            if not exp_enabled or shelf <= 0:
+                continue
+            # 批量拆批次：A 类 48 件 → 3 批，B 类 24 → 2 批，C 类 8 → 1 批。
+            # 批次数按量而不是"每库位固定"，是为了让"先进先出"在快消品上真有意义。
+            n = max(1, min(max_lots, 1 + q // 24))
+            # 只让每 N 个库位有一批临期货：整仓同时到期不是效期管理，是一次性事故，
+            # 而且会把 baseline 的库存整体打掉，掩盖真正想观测的周转行为。
+            aging = (loc_idx[lid] % aging_n == 0)
+            if aging:
+                aging_locs += 1
+            ranges = life_ranges if aging else [[0.80, 1.0]]
+            # **日期码倒挂**：一半的临期库位里，"最后到货的那批"日期码反而最短。
+            #
+            # 这个不是编出来的巧合，而是 FEFO 存在的理由：供应商后送来的货常常
+            # 是更早生产的批次（清库存、拼车、调拨）。如果所有库位都让"后到 = 晚到期"，
+            # FIFO 与 FEFO 会给出**完全相同**的结果——实测确实如此（expired 1657 对 1657），
+            # 那样"批次策略"就是个假开关：玩家切了也不会变。
+            reverse_life = aging and (loc_idx[lid] % (2 * aging_n) < aging_n)
+            qtys = lot_split(q, n)
+            out = []
+            for i, lq in enumerate(qtys):
+                if lq <= 0:
+                    continue
+                lot_seq += 1
+                mix = (sku_idx[sku] * 131 + loc_idx[lid] * 17 + i * 7) % 1000
+                li = (n - 1 - i) if reverse_life else i
+                frac = life_fraction(ranges, li, mix)
+                expiry = round(frac * shelf, 3)
+                # t_in 递减：i=0 是最早入库的批次。同效期时 FIFO 仍有确定次序。
+                t_in = round(-60.0 * (n - 1 - i), 3)
+                out.append({"lot_id": "LOT-I%06d" % lot_seq, "qty": lq,
+                            "t_in": t_in, "expiry_t": expiry,
+                            "remaining_frac": round(frac, 4),
+                            "date_code_inverted": bool(reverse_life)})
+                if expiry <= horizon_s:
+                    expiring_units += lq
+                    expiring_lots += 1
+            if out:
+                lots[sku][lid] = out
+
     # ---- 产出 1：SKU 主数据（派生，不新增 SKU）
     master = {
         "schema_version": SCHEMA_VERSION,
         "kind": "sku_master",
         "generated_from": "data/skus.json + config/inventory_spec.json",
         "seed": SEED,
-        "note": "unit_cost / pack_size 为演示 placeholder；只用于库存占用资金展示，不进 P&L",
+        "note": "unit_cost / pack_size 为演示 placeholder；只用于库存占用资金展示，不进 P&L。"
+                "shelf_life_s 同理：按仿真秒计的演示效期，不是真实保质期",
         "count": len(order_skus),
         "skus": [{
             "id": s,
@@ -184,6 +261,7 @@ def build():
             "unit_cost": unit_cost(sku_by_id[s]),
             "pack_size": pack_size(sku_by_id[s].get("abc", "C")),
             "storage": "SHELF",
+            "shelf_life_s": shelf_by_class.get(sku_by_id[s].get("abc", "C"), 0.0),
         } for s in order_skus],
     }
 
@@ -219,16 +297,28 @@ def build():
         "locations": slot_rows,
     }
 
-    # ---- 产出 3：期初结存
+    # ---- 产出 3：期初结存 + 期初批次
     initial = {
         "schema_version": SCHEMA_VERSION,
         "kind": "inventory_initial",
         "generated_from": "data/inventory_slotting.json + config/inventory_spec.json",
         "seed": SEED,
-        "note": "期初结存按 ABC 基准量；拣选面按 fill_ratio_of_reserve 取小批量",
+        "note": "期初结存按 ABC 基准量；拣选面按 fill_ratio_of_reserve 取小批量。"
+                "lots 是同一批货的批次拆分：qty 之和必须等于 stock（引擎会断言，对不上即 raise）",
         "summary": {"total_units": total_units, "inventory_value": round(total_value, 2),
-                    "skus": len(stock)},
+                    "skus": len(stock),
+                    "lots": sum(len(lst) for per_loc in lots.values()
+                                for lst in per_loc.values()),
+                    "expiring_lots": expiring_lots,
+                    "expiring_units": expiring_units,
+                    "aging_locations": aging_locs,
+                    "inverted_locations": sum(1 for per in lots.values()
+                                              for arr in per.values()
+                                              if any(l.get("date_code_inverted") for l in arr)),
+                    "expiry_enabled": exp_enabled,
+                    "horizon_s": horizon_s},
         "stock": {s: stock[s] for s in sorted(stock)},
+        "lots": {s: {l: lots[s][l] for l in sorted(lots[s])} for s in sorted(lots)},
     }
     return master, inventory_slotting, initial
 

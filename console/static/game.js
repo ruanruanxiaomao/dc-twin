@@ -116,6 +116,7 @@
     const done = (c.TASK_COMPLETED || 0);
     const lost = (c.ORDER_LOST || 0);
 
+    const xp = s.expiry && s.expiry.enabled ? s.expiry : null;
     const cards = [
       ['现金', '¥' + money(e.cash), e.cash < 0 ? 'bad' : ''],
       ['营收', '¥' + money(e.revenue), ''],
@@ -124,6 +125,10 @@
       ['经营利润', '¥' + money(e.operating_profit),
         Number(e.operating_profit) >= 0 ? 'good' : 'bad'],
       ['完成/流失', done + ' / ' + lost, lost > 0 ? 'bad' : ''],
+      // 过期报废：**不并进成本卡片**。它不计现金（采购从未入账），
+      // 混进"变动成本"会让玩家以为扔货和发货同价，那是错的引导。
+      ['过期报废', xp ? (xp.expired_units + ' 件 · ' + (xp.policy || '-')) : '—',
+        xp && xp.expired_units > 0 ? 'bad' : ''],
     ];
     const hud = hudBox;
     hud.innerHTML = '';

@@ -37,7 +37,15 @@ RUNS = ROOT / "runs"
 OUT = ROOT / "out"
 
 NEW_TYPES = ("STOCK_DECREMENT", "STOCK_RECEIPT", "STOCK_REPLENISH_ARRIVED", "STOCKOUT",
-             "REORDER_TRIGGERED", "PICKFACE_REFILL", "HOLDING_ACCRUED")
+             "REORDER_TRIGGERED", "PICKFACE_REFILL", "HOLDING_ACCRUED",
+             # P6b
+             "STOCK_EXPIRED")
+
+#: 基准代次 → 文件名模板。加一代只加一行，不改比较逻辑。
+STEP_FILES = {"v1": "step_baseline.json", "v2": "step_baseline_v2.json",
+              "v3": "step_baseline_v3.json"}
+KPI_FILES = {"v1": "kpi_baseline.json", "v2": "kpi_baseline_v2.json",
+             "v3": "kpi_baseline_v3.json"}
 
 
 def jload(p):
@@ -70,32 +78,36 @@ def event_census(run_dir):
 
 
 def main(argv=None) -> int:
-    ap = argparse.ArgumentParser(description="门 6 · v1→v2 归因报告")
+    ap = argparse.ArgumentParser(description="门 6 · 重冻归因报告（base → target）")
+    ap.add_argument("--base", default="v2", choices=sorted(STEP_FILES))
+    ap.add_argument("--target", default="v3", choices=sorted(STEP_FILES))
     ap.add_argument("--quiet", action="store_true")
     a = ap.parse_args(argv)
 
-    v1 = jload(GOLDEN / "step_baseline.json")
-    v2_path = GOLDEN / "step_baseline_v2.json"
-    if not v2_path.exists():
-        print("还没有 v2 基准：先跑 `python scripts/step_baseline.py --freeze-v2`",
-              file=sys.stderr)
+    base_p = GOLDEN / STEP_FILES[a.base]
+    tgt_p = GOLDEN / STEP_FILES[a.target]
+    if not tgt_p.exists():
+        print("还没有 %s 基准：先跑 `python scripts/step_baseline.py --freeze-%s`"
+              % (a.target, a.target), file=sys.stderr)
         return 2
-    v2 = jload(v2_path)
-    k1 = jload(GOLDEN / "kpi_baseline.json")
-    kv2 = jload(GOLDEN / "kpi_baseline_v2.json")
+    base = jload(base_p)
+    tgt = jload(tgt_p)
+    kb = jload(GOLDEN / KPI_FILES[a.base])
+    kt = jload(GOLDEN / KPI_FILES[a.target])
     runs = latest_runs()
 
     report = {"schema_version": "1.0", "kind": "refreeze_report",
-              "note": "v1 永不覆盖；本报告把'变了什么'逐条落到场景/产物/KPI/事件类型上",
+              "base": a.base, "target": a.target,
+              "note": "旧基准永不覆盖；本报告把'变了什么'逐条落到场景/产物/KPI/事件类型上",
               "scenarios": {}}
-    for scen in sorted(set(v1["scenarios"]) | set(v2["scenarios"])):
-        s1 = (v1["scenarios"].get(scen) or {})
-        s2 = (v2["scenarios"].get(scen) or {})
+    for scen in sorted(set(base["scenarios"]) | set(tgt["scenarios"])):
+        s1 = (base["scenarios"].get(scen) or {})
+        s2 = (tgt["scenarios"].get(scen) or {})
         changed = sorted(k for k in set(s1) | set(s2)
                          if (s1.get(k) or {}).get("sha256") != (s2.get(k) or {}).get("sha256"))
         kd = {}
-        a1 = (k1["scenarios"].get(scen) or {}).get("values") or {}
-        a2 = (kv2["scenarios"].get(scen) or {}).get("values") or {}
+        a1 = (kb["scenarios"].get(scen) or {}).get("values") or {}
+        a2 = (kt["scenarios"].get(scen) or {}).get("values") or {}
         for k in sorted(set(a1) | set(a2)):
             if k not in a1:
                 kd[k] = [None, a2[k]]
@@ -114,32 +126,30 @@ def main(argv=None) -> int:
 
     # 工程不变量：A1–A40 必须全过（重冻不许放过任何一项）
     vr = jload(OUT / "validate_report.json") if (OUT / "validate_report.json").exists() else {}
-    # validate_report.json 是**数组**：[{item, status, detail}, ...]
-    checks = vr if isinstance(vr, list) else (vr.get("checks") or [])
-    failed = [c.get("item") or c.get("name") for c in checks
+    checks_raw = vr if isinstance(vr, list) else (vr.get("checks") or [])
+    failed = [c.get("item") or c.get("name") for c in checks_raw
               if str(c.get("status") or "").upper() != "PASS" and c.get("ok") is not True]
     report["assertions_impact"] = {
-        "total": len(checks), "failed": failed,
-        "verdict": "PASS" if checks and not failed else "FAIL",
+        "total": len(checks_raw), "failed": failed,
+        "verdict": "PASS" if checks_raw and not failed else "FAIL",
         "note": "工程不变量（零碰撞/几何/交通/电量）不得因重冻放宽；失败即引擎坏了",
     }
 
-    # 三条硬判据
     def rc(args):
         r = subprocess.run([sys.executable] + args, cwd=str(ROOT),
                            capture_output=True, text=True)
         return r.returncode
 
-    c_v2 = rc(["scripts/step_baseline.py", "--check=v2"])
-    c_v1 = rc(["scripts/step_baseline.py", "--check=v1"])
-    c_k2 = rc(["scripts/kpi_baseline.py", "--check=v2"])
+    c_tgt = rc(["scripts/step_baseline.py", "--check=" + a.target])
+    c_base = rc(["scripts/step_baseline.py", "--check=" + a.base])
+    c_ktgt = rc(["scripts/kpi_baseline.py", "--check=" + a.target])
     c_st = rc(["scripts/step_baseline.py", "--self-test"])
     per_scen_ok = all(bool(v["changed_artifacts"]) for v in report["scenarios"].values())
 
     checks = {
-        "v2_byte_identical": c_v2 == 0,
-        "v1_expected_to_differ": c_v1 != 0,
-        "v2_kpi_consistent": c_k2 == 0,
+        "target_byte_identical": c_tgt == 0,
+        "base_expected_to_differ": c_base != 0,
+        "target_kpi_consistent": c_ktgt == 0,
         "self_test_still_fails": c_st == 0,
         "every_scenario_changed": per_scen_ok,
         "engineering_invariants_pass": report["assertions_impact"]["verdict"] == "PASS",
@@ -147,27 +157,27 @@ def main(argv=None) -> int:
     ok = all(checks.values())
     report["checks"] = checks
     report["verdict"] = "REFREEZE_OK" if ok else "REFREEZE_FAIL"
-    if c_v1 == 0:
-        # v1 与 v2 完全一致 → 库存改动根本没进事件流，这本身是 bug
-        report["diagnosis"] = ("v1 与 v2 完全一致：库存事件没有进入事件流，"
-                              "重冻是空操作，必须判红")
+    if c_base == 0:
+        # 旧基准与新基准完全一致 → 新机制根本没进事件流，这本身是 bug
+        report["diagnosis"] = ("%s 与 %s 完全一致：新机制没有进入事件流，"
+                               "重冻是空操作，必须判红" % (a.base, a.target))
 
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "refreeze_report.json").write_text(
         json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     if not a.quiet:
-        print("%s  场景 %d · 验收 %d 项/%s · v1 差异=%s"
-              % (report["verdict"], len(report["scenarios"]),
+        print("%s  %s→%s · 场景 %d · 验收 %d 项/%s · 旧基准差异=%s"
+              % (report["verdict"], a.base, a.target, len(report["scenarios"]),
                  report["assertions_impact"]["total"],
                  report["assertions_impact"]["verdict"],
-                 "是" if c_v1 != 0 else "否（异常）"))
+                 "是" if c_base != 0 else "否（异常）"))
         for scen, v in report["scenarios"].items():
             print("  %-18s 变 %d 份产物 · KPI 变 %d 项 · 新事件 %s"
                   % (scen, len(v["changed_artifacts"]), len(v["kpi_changes"]),
                      {k: n for k, n in v["new_event_counts"].items() if n}))
-        for k, ok in checks.items():
-            if not ok:
+        for k, v in checks.items():
+            if not v:
                 print("  - 未通过：" + k)
     return 0 if ok else 1
 

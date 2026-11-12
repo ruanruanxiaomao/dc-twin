@@ -14,7 +14,7 @@
 | A1–A3 | `scripts/sim_engine.py`：对象化 Mulberry32、tick 循环（含故障事件跳步修正）、持续订单流、nearest-first 派单、9 态 FSM、四档电量 | `out/sim_validation.json` S1/S3/S5 |
 | A4 | 反应式门控（到达互斥 + 车间距）+ 逐 tick 格点占用 + 0.05 s 全对采样，`MIN_SEP=1.4592 m` 未降级 | S6：433650 对采样、0 违规 |
 | A5 | 8 场景真执行；`robot_failure` 采用场景声明的 `fault_target_policy: preempt_busy`，真实中断在途任务 | S4：3 个故障窗口、1 次 TASK_REASSIGNED、窗口内 0 完成 |
-| A6 | 56 项 measured KPI，全部带 definition/formula/source；analytic 与 measured 分开 | S8：0 处复算偏差 |
+| A6 | 62 项 measured KPI，全部带 definition/formula/source；analytic 与 measured 分开 | S8：0 处复算偏差 |
 | A7 | scale_50 真 50 车 | S7：50 条独立轨迹，其中 30 台实际移动（**空闲车如实报告，不伪造**） |
 | A8 | **D3 降级**：L3 CBS 标 experimental，不进默认链 | `docs/GITHUB_REFERENCE_AUDIT.md` §2.1 实测：MAPF-CBS 依赖外部 `stastar` 包 + numpy/multiprocessing，且 `LICENSE.txt ` 尾随空格导致 Windows 检出失败 |
 
