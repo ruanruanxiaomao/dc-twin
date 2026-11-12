@@ -4,6 +4,78 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] — P6a 库存层（SKU / 安全库存 / 补货点）
+
+The twin could move boxes but had no stock: `cargo_state.json` is order-level cargo
+state, not an inventory ledger, so "缺货" could not happen, be asserted, or be played.
+P6a adds a (SKU × location) ledger, safety stock, reorder points, stockout events and
+holding cost — and, because that **must** change the event stream, a v1/v2 double
+golden instead of pretending nothing moved.
+
+### Added
+
+- **`config/inventory_spec.json` + schema** — reorder / holding / stockout / shrink /
+  pick_face / stock_policy. Behaviour in JSON, not Python.
+- **`scripts/gen_inventory.py`** → `sku_master` / `inventory_slotting` / `inventory_initial`,
+  derived from the existing `skus.json` + `slotting.json` (no second SKU master).
+  Deterministic: fixed seed, sorted, no clock, no timestamp in output.
+  All 392 SHELF locations now map to exactly one SKU (the 152 empty ones become
+  A-class overflow), so the P6a-1 reverse lookup can never fall through.
+- **Engine**: `STOCK_DECREMENT` / `STOCK_RECEIPT` / `STOCK_REPLENISH_ARRIVED` /
+  `STOCKOUT` / `REORDER_TRIGGERED` / `PICKFACE_REFILL` / `HOLDING_ACCRUED`;
+  stock settlement before `TASK_COMPLETED` (a stockout can no longer be counted as
+  delivered); reorder → `REPLENISH` from the inbound dock; `SET_REORDER_POINT` command.
+- **Snapshot 2.0**: inventory ledger is part of the snapshot and `restore` refuses a
+  save whose stock disagrees with an event-stream replay.
+- **Economy**: `Cost:Stockout_Penalty`, `Cost:Holding` (separate from per-order
+  variable cost), and internal moves earn no revenue.
+- **KPI** (tick layer): `stockout_count`, `fill_rate`, `holding_cost`,
+  `inventory_value`, `reorder_triggers`, `inventory_enabled` (50 → 56).
+- **Levels**: `lose_conditions.stockouts`, plus `level_05` where the reorder point is
+  the actual lever (fill rate vs holding cost).
+- **Gates**: `check_inventory.py` (STOCK_OK), `check_reorder.py` (REORDER_OK, both
+  directions), `check_pickface.py` (PICKFACE_OK), `report_refreeze.py` (REFREEZE_OK),
+  `dc run --scope inventory`.
+
+### Changed
+
+- **v1 golden kept, v2 added.** `step_baseline` / `kpi_baseline` take `--check=v1|v2`
+  and `--freeze-v2`; the default follows v2 when it exists. `REFREEZE_OK` requires
+  `--check=v1` to FAIL — if v1 ever turns green, the inventory events never reached
+  the event stream and the gate must go red.
+- `gen_inventory` joins `DATA_CHAIN` (13 → 14); cleanroom STEPS/COMPARE grow to
+  10 steps / 11 files, so A40 reproduces the inventory data from scratch.
+
+### Fixed (found while wiring the engine)
+
+- **Replenishment was moving stock the wrong way.** Implemented as reserve → pick
+  face first, which made `stockout` go *up* with the reorder point (5 → 6): orders
+  pick from `pick_loc`, and only 24 of 392 locations are pick faces. Now it
+  replenishes from the inbound dock to the depleted location (4 → 3).
+- **Internal moves competed with customers.** At P2 they consumed fleet capacity and
+  completions fell 90 → 37 as the reorder point rose. Internal orders are P3.
+- **Stress experiments overwrote the byte-level baseline.** `check_reorder` wrote its
+  scaled-stock runs into `runs/baseline/`, which is exactly where the golden picks the
+  "latest run". Experiments now write `out/exp/`.
+- **Cross-warehouse pick-face pairing.** An F1 SKU could get a pick face in W, which
+  would need a cross-warehouse transfer. Pick faces are now same-warehouse, and the
+  engine rejects cross-warehouse internal orders outright.
+- Holding cost was initially folded into per-order variable cost, which made unit cost
+  drift with stock level; it is now its own line.
+
+### Verified
+
+| Gate | Evidence |
+|---|---|
+| STOCK_OK | 392 (sku, location) pairs, residual < 1e-9; +1e-6 tamper caught |
+| REORDER_OK | factor 1→3: stockout 4→3 **and** holding 0.255→0.274; disabled logic fails |
+| STOCKOUT_NEG | zeroed stock → `STOCKOUT` + `ORDER_LOST`, no `TASK_COMPLETED` |
+| PICKFACE_OK | 24 face locations, 0 unexplained increase; +5 without event caught |
+| REFREEZE_OK | v2 byte-identical, v1 differs by construction, A1–A40 40/40 |
+| SAVE_OK+ | snapshot 2.0 round-trip; old 1.0 saves rejected; tampered stock rejected |
+| DETERMINISM+ | same seed → identical `STOCK_*` stream and closing stock |
+| ECONOMY_OK+ | Δcash == Σcredit − Σdebit − fixed accrual, holding included as a posting |
+
 ## [Unreleased] — 模拟运营游戏层（P0–P5 第一轮）
 
 The twin could only be watched: `run()` was a single `while` loop from t=0 to

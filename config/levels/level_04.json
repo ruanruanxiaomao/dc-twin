@@ -6,21 +6,78 @@
   "scenario": "../scenarios/holiday.json",
   "initial_capital": 800000,
   "objectives": [
-    {"metric": "operating_profit", "op": ">=", "value": 600, "primary": true,
-     "label": "经营利润 ≥ 600 元"},
-    {"metric": "on_time_rate", "op": ">=", "value": 0.90, "primary": true,
-     "label": "准时率 ≥ 90%"},
-    {"metric": "orders_lost", "op": "<=", "value": 30, "primary": false,
-     "label": "流失单 ≤ 30"}
+    {
+      "metric": "operating_profit",
+      "op": ">=",
+      "value": 600,
+      "primary": true,
+      "label": "经营利润 ≥ 600 元"
+    },
+    {
+      "metric": "on_time_rate",
+      "op": ">=",
+      "value": 0.9,
+      "primary": true,
+      "label": "准时率 ≥ 90%"
+    },
+    {
+      "metric": "orders_lost",
+      "op": "<=",
+      "value": 30,
+      "primary": false,
+      "label": "流失单 ≤ 30"
+    }
   ],
   "stars": [
-    {"stars": 1, "require": [{"metric": "operating_profit", "op": ">=", "value": 600}]},
-    {"stars": 2, "require": [{"metric": "operating_profit", "op": ">=", "value": 900}]},
-    {"stars": 3, "require": [{"metric": "operating_profit", "op": ">=", "value": 900},
-                             {"metric": "orders_lost", "op": "<=", "value": 20}]}
+    {
+      "stars": 1,
+      "require": [
+        {
+          "metric": "operating_profit",
+          "op": ">=",
+          "value": 600
+        }
+      ]
+    },
+    {
+      "stars": 2,
+      "require": [
+        {
+          "metric": "operating_profit",
+          "op": ">=",
+          "value": 900
+        }
+      ]
+    },
+    {
+      "stars": 3,
+      "require": [
+        {
+          "metric": "operating_profit",
+          "op": ">=",
+          "value": 900
+        },
+        {
+          "metric": "orders_lost",
+          "op": "<=",
+          "value": 20
+        }
+      ]
+    }
   ],
-  "lose_conditions": [{"type": "bankrupt", "grace_s": 300}],
-  "unlocks_on_win": [],
-  "carry_over": {"cash": true, "reputation": true, "unlocks": true},
+  "lose_conditions": [
+    {
+      "type": "bankrupt",
+      "grace_s": 300
+    }
+  ],
+  "unlocks_on_win": [
+    "level_05"
+  ],
+  "carry_over": {
+    "cash": true,
+    "reputation": true,
+    "unlocks": true
+  },
   "calibration": "2026-11-12 实测：holiday 完成 65 单 / 流失 27 单 / 准时率 1.000 / 经营利润 987.8 元"
 }

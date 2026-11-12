@@ -20,6 +20,8 @@ artifacts/
 data/scene_variant.json
 data/areas_variant.json
 out/variant/
+# 实验产物（check_reorder 等压力实验）：不许与产线 runs/ 混放
+out/exp/
 
 # Python / tooling
 __pycache__/

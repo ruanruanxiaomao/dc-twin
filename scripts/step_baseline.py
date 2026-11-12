@@ -14,7 +14,7 @@
 
 三份产物：
   - `sim_events.jsonl`：事件溯源的全部事实（seq 连续、类型计数、时序）
-  - `sim_kpi.json`：50 项 tick 层指标（除墙钟外全部冻结）
+  - `sim_kpi.json`：56 项 tick 层指标（除墙钟外全部冻结）
   - `sim_state.json`：终态摘要（机器人 11 态终值、队列深度、封门集合）
 
 用法：
@@ -33,7 +33,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 RUNS = ROOT / "runs"
-GOLDEN = ROOT / "tests" / "golden" / "step_baseline.json"
+GOLDEN = ROOT / "tests" / "golden" / "step_baseline.json"          # v1（永久保留）
+GOLDEN_V2 = ROOT / "tests" / "golden" / "step_baseline_v2.json"     # P6a 之后的默认基准
+
+
+def default_golden():
+    """默认比 v2；v2 还没冻时退回 v1（P6a-5 之前的行为保持不变）。"""
+    return GOLDEN_V2 if GOLDEN_V2.exists() else GOLDEN
 
 ARTIFACTS = ("sim_events.jsonl", "sim_kpi.json", "sim_state.json")
 
@@ -78,7 +84,7 @@ def digest(path: Path) -> dict:
     }
 
 
-def freeze(path: Path = GOLDEN) -> int:
+def freeze(path: Path = GOLDEN, tag: str = "v1") -> int:
     runs = latest_runs()
     if not runs:
         print("没有找到 runs/*/*/sim_kpi.json，先跑 `dc run --scope scenarios`", file=sys.stderr)
@@ -109,8 +115,9 @@ def freeze(path: Path = GOLDEN) -> int:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     total = sum(len(v) for v in data["scenarios"].values())
-    print("STEP_BASELINE_FROZEN %d 场景 / %d 份产物 -> %s"
-          % (len(data["scenarios"]), total, path.relative_to(ROOT).as_posix()))
+    print("STEP_BASELINE_FROZEN[%s] %d 场景 / %d 份产物 -> %s" % (tag,
+                                       len(data["scenarios"]), total,
+                                       path.relative_to(ROOT).as_posix()))
     return 0
 
 
@@ -164,8 +171,9 @@ def check(path: Path = GOLDEN) -> int:
     return 0
 
 
-def self_test(path: Path = GOLDEN) -> int:
+def self_test(path: Path = None) -> int:
     """证明门会失败：原样必须过，改一位必须挂，三种产物都要能抓到。"""
+    path = path or default_golden()
     golden = json.loads(path.read_text(encoding="utf-8"))
     expected = golden["scenarios"]
     if compare(expected, {k: dict(v) for k, v in expected.items()}):
@@ -188,15 +196,21 @@ def self_test(path: Path = GOLDEN) -> int:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="批跑产物逐字节基准（step 化回归门）")
-    ap.add_argument("--freeze", action="store_true", help="重新冻结（重构前必须做）")
-    ap.add_argument("--check", action="store_true", help="与基准比对")
+    ap.add_argument("--freeze", action="store_true", help="冻结 v1（历史，只在重建历史时用）")
+    ap.add_argument("--freeze-v2", action="store_true", help="冻结 v2（P6a 之后的默认基准）")
+    ap.add_argument("--check", nargs="?", const="auto", default=None,
+                    choices=["auto", "v1", "v2"],
+                    help="与基准比对：默认 auto（有 v2 比 v2）；v1/v2 显式指定")
     ap.add_argument("--self-test", action="store_true", help="证明比对会失败")
     a = ap.parse_args(argv)
     if a.self_test:
-        return self_test()
+        return self_test(default_golden())
     if a.freeze:
-        return freeze()
-    return check()
+        return freeze(GOLDEN)
+    if a.freeze_v2:
+        return freeze(GOLDEN_V2, tag="v2")
+    which = a.check or "auto"
+    return check(GOLDEN if which == "v1" else (GOLDEN_V2 if which == "v2" else default_golden()))
 
 
 if __name__ == "__main__":

@@ -23,7 +23,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 RUNS = ROOT / "runs"
-GOLDEN = ROOT / "tests" / "golden" / "kpi_baseline.json"
+GOLDEN = ROOT / "tests" / "golden" / "kpi_baseline.json"        # v1（永久保留）
+GOLDEN_V2 = ROOT / "tests" / "golden" / "kpi_baseline_v2.json"   # P6a 之后的默认基准
+
+
+def default_golden():
+    return GOLDEN_V2 if GOLDEN_V2.exists() else GOLDEN
 
 #: 冻结哪些指标。刻意不含 wall_clock_s（跟机器有关）、不含诊断计数之外的随机量。
 METRICS = [
@@ -72,7 +77,7 @@ def read_metrics(run_dir: Path) -> dict:
     return out
 
 
-def freeze(path: Path = GOLDEN) -> int:
+def freeze(path: Path = GOLDEN, tag: str = "v1") -> int:
     runs = latest_runs()
     if not runs:
         print("没有找到 runs/*/*/sim_kpi.json，先跑 `dc run --scope scenarios`", file=sys.stderr)
@@ -92,8 +97,8 @@ def freeze(path: Path = GOLDEN) -> int:
         }
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print("KPI_BASELINE_FROZEN %d 场景 -> %s" % (len(data["scenarios"]),
-                                                path.relative_to(ROOT).as_posix()))
+    print("KPI_BASELINE_FROZEN[%s] %d 场景 -> %s"
+          % (tag, len(data["scenarios"]), path.relative_to(ROOT).as_posix()))
     return 0
 
 
@@ -149,9 +154,10 @@ def check(path: Path = GOLDEN) -> int:
     return 0
 
 
-def self_test() -> int:
+def self_test(path: Path = None) -> int:
     """证明比对真的会失败：改一个计数、改一个小数，都必须被抓。"""
-    golden = json.loads(GOLDEN.read_text(encoding="utf-8"))
+    path = path or default_golden()
+    golden = json.loads(path.read_text(encoding="utf-8"))
     expected = {k: v["values"] for k, v in golden["scenarios"].items()}
     base = {k: dict(v) for k, v in expected.items()}
     if compare(expected, base):
@@ -174,15 +180,20 @@ def self_test() -> int:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="KPI 基准快照")
-    ap.add_argument("--freeze", action="store_true", help="重新冻结快照")
-    ap.add_argument("--check", action="store_true", help="与快照比对")
+    ap.add_argument("--freeze", action="store_true", help="冻结 v1（历史）")
+    ap.add_argument("--freeze-v2", action="store_true", help="冻结 v2（默认基准）")
+    ap.add_argument("--check", nargs="?", const="auto", default=None,
+                    choices=["auto", "v1", "v2"], help="与快照比对")
     ap.add_argument("--self-test", action="store_true", help="证明比对会失败")
     a = ap.parse_args(argv)
     if a.self_test:
-        return self_test()
+        return self_test(default_golden())
     if a.freeze:
-        return freeze()
-    return check()
+        return freeze(GOLDEN, tag="v1")
+    if a.freeze_v2:
+        return freeze(GOLDEN_V2, tag="v2")
+    which = a.check or "auto"
+    return check(GOLDEN if which == "v1" else (GOLDEN_V2 if which == "v2" else default_golden()))
 
 
 if __name__ == "__main__":

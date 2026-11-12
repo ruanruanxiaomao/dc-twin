@@ -53,7 +53,8 @@ def run_baseline(tmp_path, jump):
 
 
 def golden_baseline():
-    g = jload(ROOT / "tests" / "golden" / "step_baseline.json")
+    # 跟随默认基准（P6a 之后是 v2）：写死 v1 会让这道门永远红
+    g = jload(sb.default_golden())
     return g["scenarios"]["baseline"]
 
 

@@ -65,6 +65,7 @@ class Economy:
         self.revenue = 0.0
         self.variable = 0.0
         self.fixed = 0.0
+        self.holding = 0.0
         self.capex = 0.0
         self.salvage = 0.0
         self.postings = []                  # [(seq, account, amount, direction)]
@@ -75,6 +76,12 @@ class Economy:
         self.game_over = False
         self.over = {"fixed": {}, "counts": {}}
         self._in_hook = False
+        # 缺货罚金单价来自 inventory_spec（与库存层同一个配置源）
+        try:
+            self.inv_penalty_per_unit = float(
+                _jload(CONFIG / "inventory_spec.json")["stockout"]["penalty_per_unit"])
+        except Exception:                                  # noqa: BLE001
+            self.inv_penalty_per_unit = 0.0
 
     # ---- 事件 → 分录（与 ledger.build_entries 一一对应）
     def on_event(self, e):
@@ -87,6 +94,15 @@ class Economy:
             seq = e.get("seq")
             if typ == "TASK_COMPLETED":
                 self._on_task_completed(e, seq)
+            elif typ == "STOCKOUT":
+                # 缺货罚金：shortfall × penalty_per_unit（P6a §6）
+                self._post(seq, "Cost:Stockout_Penalty",
+                           float(e.get("shortfall") or 0.0) * float(
+                               self.inv_penalty_per_unit), "debit")
+            elif typ == "HOLDING_ACCRUED":
+                # 持有成本有源事件 seq，所以进 postings（可幂等、可审计）。
+                # 这与固定成本不同：固定成本按时段计提、没有 seq，只能单列在守恒式里。
+                self._post(seq, "Cost:Holding", float(e.get("amount") or 0.0), "debit")
             elif typ == "ORDER_LOST":
                 self._post(seq, "Cost:LostOrder",
                            self.cost["revenue"]["lost_order_penalty"], "debit")
@@ -109,6 +125,10 @@ class Economy:
             self._in_hook = False
 
     def _on_task_completed(self, e, seq):
+        if e.get("internal"):
+            # 内部移库（储备位→拣选面）不是销售：既不该有收入，也不该计耗材。
+            # 不跳过的话，每次补货都会凭空产生一笔营收，利润表会被自己补货灌水。
+            return
         rev = self.revenue_of(e)
         self._post(seq, "Revenue:" + str(e.get("order_type")), rev, "credit")
         self._post(seq, "Cost:Variable:Consumables",
@@ -161,6 +181,10 @@ class Economy:
                 self.capex += amount
             elif account.startswith("Cost:Variable:"):
                 self.variable += amount
+            elif account == "Cost:Holding":
+                # 持有成本单列：它是"按时间占用资金"的成本，不是某张单的变动成本。
+                # 混进 variable 会让"单均变动成本"随库存量漂移。
+                self.holding += amount
         self.postings.append((seq, account, amount, direction))
 
     def _check_bankrupt(self, t_s):
@@ -177,11 +201,11 @@ class Economy:
 
     # ---- 查询
     def profit(self):
-        return self.revenue + self.salvage - self.variable - self.fixed - self.capex
+        return self.revenue + self.salvage - self.variable - self.fixed - self.holding - self.capex
 
     def operating_profit(self):
         """经营利润：不含 capex（资本支出不进利润表，这是会计口径不是选择）。"""
-        return self.revenue + self.salvage - self.variable - self.fixed
+        return self.revenue + self.salvage - self.variable - self.fixed - self.holding
 
     def snapshot(self):
         return {
@@ -190,6 +214,7 @@ class Economy:
             "revenue": round(self.revenue, 2),
             "variable_cost": round(self.variable, 2),
             "fixed_cost": round(self.fixed, 2),
+            "holding_cost": round(self.holding, 2),
             "capex": round(self.capex, 2),
             "salvage": round(self.salvage, 2),
             "operating_profit": round(self.operating_profit(), 2),
@@ -213,6 +238,7 @@ class Economy:
             "revenue": self.revenue,
             "variable": self.variable,
             "fixed": self.fixed,
+            "holding": self.holding,
             "capex": self.capex,
             "salvage": self.salvage,
             "fixed_accrued_h": self._fixed_accrued_h,
@@ -231,6 +257,10 @@ class Economy:
 
         固定成本刻意不在 `postings` 里：它是按时间计提的，没有源事件 seq，
         无法套用 (seq, account) 幂等键。所以守恒式里单列一项，而不是硬塞一个假 seq。
+
+        **持有成本不同**：`HOLDING_ACCRUED` 是真实事件、有 seq，所以它走 postings
+        （可幂等、可审计），已在 Σ借 里。方案书 §6 把持有与固定都当"无 seq"处理，
+        那是因为方案书假设持有不出事件；既然出了事件，就按事件记账更严格。
         """
         credits = sum(a for _, acc, a, d in self.postings if d == "credit")
         debits = sum(a for _, acc, a, d in self.postings if d == "debit")
@@ -275,6 +305,7 @@ def restore_onto(sim, snap):
     econ.revenue = float(snap["revenue"])
     econ.variable = float(snap["variable"])
     econ.fixed = float(snap["fixed"])
+    econ.holding = float(snap.get("holding", 0.0))
     econ.capex = float(snap["capex"])
     econ.salvage = float(snap["salvage"])
     econ._fixed_accrued_h = float(snap["fixed_accrued_h"])

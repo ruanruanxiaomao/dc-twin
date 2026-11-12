@@ -6,449 +6,449 @@
   "note": "期初结存按 ABC 基准量；拣选面按 fill_ratio_of_reserve 取小批量",
   "summary": {
     "total_units": 10512,
-    "inventory_value": 94464.18,
+    "inventory_value": 92696.06,
     "skus": 240
   },
   "stock": {
     "SKU-0001": {
-      "SHELF-F10003": 48,
-      "SHELF-W0264": 24,
-      "SHELF-W0070": 14
+      "SHELF-F10003": 48
     },
     "SKU-0002": {
-      "SHELF-F20003": 48,
-      "SHELF-W0150": 24,
-      "SHELF-W0265": 24
+      "SHELF-F20003": 48
     },
     "SKU-0003": {
-      "SHELF-F30003": 48,
-      "SHELF-W0164": 24,
-      "SHELF-W0266": 24
+      "SHELF-F30003": 48
     },
     "SKU-0004": {
-      "SHELF-F10011": 48,
-      "SHELF-W0267": 24,
-      "SHELF-W0165": 14
+      "SHELF-F10011": 48
     },
     "SKU-0005": {
-      "SHELF-F20011": 48,
-      "SHELF-W0166": 24,
-      "SHELF-W0268": 24
+      "SHELF-F20011": 48
     },
     "SKU-0006": {
-      "SHELF-F30011": 48,
-      "SHELF-W0269": 24,
-      "SHELF-W0167": 14
+      "SHELF-F30011": 48
     },
     "SKU-0007": {
-      "SHELF-F10001": 48,
-      "SHELF-W0270": 24,
-      "SHELF-W0168": 14
+      "SHELF-F10001": 48
     },
     "SKU-0008": {
-      "SHELF-F10005": 48,
-      "SHELF-W0271": 24,
-      "SHELF-W0169": 14
+      "SHELF-F10005": 48
     },
     "SKU-0009": {
-      "SHELF-F10009": 48,
-      "SHELF-W0272": 24,
-      "SHELF-W0170": 14
+      "SHELF-F10009": 48
     },
     "SKU-0010": {
-      "SHELF-F20001": 48,
-      "SHELF-W0273": 24,
-      "SHELF-W0171": 14
+      "SHELF-F20001": 48
     },
     "SKU-0011": {
-      "SHELF-F20005": 48,
-      "SHELF-W0274": 24,
-      "SHELF-W0172": 14
+      "SHELF-F20005": 48
     },
     "SKU-0012": {
-      "SHELF-F20009": 48,
-      "SHELF-W0275": 24,
-      "SHELF-W0173": 14
+      "SHELF-F20009": 48
     },
     "SKU-0013": {
-      "SHELF-F30001": 48,
-      "SHELF-W0276": 24,
-      "SHELF-W0174": 14
+      "SHELF-F30001": 48
     },
     "SKU-0014": {
-      "SHELF-F30005": 48,
-      "SHELF-W0277": 24,
-      "SHELF-W0175": 14
+      "SHELF-F30005": 48
     },
     "SKU-0015": {
-      "SHELF-F30009": 48,
-      "SHELF-W0278": 24,
-      "SHELF-W0176": 14
+      "SHELF-F30009": 48
     },
     "SKU-0016": {
       "SHELF-W0003": 48,
-      "SHELF-W0280": 24,
-      "SHELF-W0177": 14
+      "SHELF-W0235": 24,
+      "SHELF-W0276": 24,
+      "SHELF-W0313": 24,
+      "SHELF-W0070": 14,
+      "SHELF-W0199": 14
     },
     "SKU-0017": {
       "SHELF-W0017": 48,
-      "SHELF-W0281": 24,
-      "SHELF-W0178": 14
+      "SHELF-W0150": 24,
+      "SHELF-W0200": 24,
+      "SHELF-W0236": 24,
+      "SHELF-W0277": 24,
+      "SHELF-W0314": 24
     },
     "SKU-0018": {
       "SHELF-W0083": 48,
-      "SHELF-W0282": 24,
-      "SHELF-W0179": 14
+      "SHELF-W0164": 24,
+      "SHELF-W0201": 24,
+      "SHELF-W0237": 24,
+      "SHELF-W0278": 24,
+      "SHELF-W0315": 24
     },
     "SKU-0019": {
       "SHELF-W0097": 48,
-      "SHELF-W0283": 24,
-      "SHELF-W0180": 14
+      "SHELF-W0202": 24,
+      "SHELF-W0238": 24,
+      "SHELF-W0280": 24,
+      "SHELF-W0316": 24,
+      "SHELF-W0165": 14
     },
     "SKU-0020": {
       "SHELF-W0005": 48,
-      "SHELF-W0182": 24,
-      "SHELF-W0284": 24
+      "SHELF-W0166": 24,
+      "SHELF-W0203": 24,
+      "SHELF-W0239": 24,
+      "SHELF-W0281": 24,
+      "SHELF-W0317": 24
     },
     "SKU-0021": {
       "SHELF-W0019": 48,
-      "SHELF-W0183": 24,
-      "SHELF-W0285": 24
+      "SHELF-W0204": 24,
+      "SHELF-W0240": 24,
+      "SHELF-W0282": 24,
+      "SHELF-W0318": 24,
+      "SHELF-W0167": 14
     },
     "SKU-0022": {
       "SHELF-W0085": 48,
-      "SHELF-W0184": 24,
-      "SHELF-W0286": 24
+      "SHELF-W0205": 24,
+      "SHELF-W0283": 24,
+      "SHELF-W0319": 24,
+      "SHELF-W0168": 14,
+      "SHELF-W0241": 14
     },
     "SKU-0023": {
       "SHELF-W0099": 48,
-      "SHELF-W0185": 24,
-      "SHELF-W0287": 24
+      "SHELF-W0206": 24,
+      "SHELF-W0242": 24,
+      "SHELF-W0284": 24,
+      "SHELF-W0320": 24,
+      "SHELF-W0169": 14
     },
     "SKU-0024": {
-      "SHELF-F10007": 48,
-      "SHELF-W0186": 24,
-      "SHELF-W0288": 24
+      "SHELF-F10007": 48
     },
     "SKU-0025": {
-      "SHELF-F20007": 48,
-      "SHELF-W0187": 24,
-      "SHELF-W0289": 24
+      "SHELF-F20007": 48
     },
     "SKU-0026": {
-      "SHELF-F30007": 48,
-      "SHELF-W0188": 24,
-      "SHELF-W0290": 24
+      "SHELF-F30007": 48
     },
     "SKU-0027": {
       "SHELF-W0001": 48,
-      "SHELF-W0291": 24,
-      "SHELF-W0189": 14
+      "SHELF-W0207": 24,
+      "SHELF-W0285": 24,
+      "SHELF-W0170": 14,
+      "SHELF-W0243": 14
     },
     "SKU-0028": {
       "SHELF-W0015": 48,
-      "SHELF-W0190": 24,
-      "SHELF-W0292": 24
+      "SHELF-W0208": 24,
+      "SHELF-W0244": 24,
+      "SHELF-W0286": 24,
+      "SHELF-W0171": 14
     },
     "SKU-0029": {
       "SHELF-W0081": 48,
-      "SHELF-W0293": 24,
-      "SHELF-W0191": 14
+      "SHELF-W0209": 24,
+      "SHELF-W0245": 24,
+      "SHELF-W0287": 24,
+      "SHELF-W0172": 14
     },
     "SKU-0030": {
       "SHELF-W0095": 48,
-      "SHELF-W0192": 24,
-      "SHELF-W0294": 24
+      "SHELF-W0210": 24,
+      "SHELF-W0246": 24,
+      "SHELF-W0288": 24,
+      "SHELF-W0173": 14
     },
     "SKU-0031": {
       "SHELF-W0007": 48,
-      "SHELF-W0295": 24,
-      "SHELF-W0193": 14
+      "SHELF-W0211": 24,
+      "SHELF-W0247": 24,
+      "SHELF-W0289": 24,
+      "SHELF-W0174": 14
     },
     "SKU-0032": {
       "SHELF-W0087": 48,
-      "SHELF-W0194": 24,
-      "SHELF-W0296": 24
+      "SHELF-W0212": 24,
+      "SHELF-W0248": 24,
+      "SHELF-W0290": 24,
+      "SHELF-W0175": 14
     },
     "SKU-0033": {
-      "SHELF-F10012": 48,
-      "SHELF-W0297": 24,
-      "SHELF-W0195": 14
+      "SHELF-F10012": 48
     },
     "SKU-0034": {
-      "SHELF-F10023": 48,
-      "SHELF-W0196": 24,
-      "SHELF-W0298": 24
+      "SHELF-F10023": 48
     },
     "SKU-0035": {
-      "SHELF-F20012": 48,
-      "SHELF-W0299": 24,
-      "SHELF-W0197": 14
+      "SHELF-F20012": 48
     },
     "SKU-0036": {
-      "SHELF-F20023": 48,
-      "SHELF-W0198": 24,
-      "SHELF-W0300": 24
+      "SHELF-F20023": 48
     },
     "SKU-0037": {
-      "SHELF-F30012": 48,
-      "SHELF-W0301": 24,
-      "SHELF-W0199": 14
+      "SHELF-F30012": 48
     },
     "SKU-0038": {
-      "SHELF-F30023": 48,
-      "SHELF-W0200": 24,
-      "SHELF-W0302": 24
+      "SHELF-F30023": 48
     },
     "SKU-0039": {
       "SHELF-W0013": 48,
-      "SHELF-W0201": 24,
-      "SHELF-W0303": 24
+      "SHELF-W0213": 24,
+      "SHELF-W0249": 24,
+      "SHELF-W0291": 24,
+      "SHELF-W0176": 14
     },
     "SKU-0040": {
       "SHELF-W0093": 48,
-      "SHELF-W0202": 24,
-      "SHELF-W0304": 24
+      "SHELF-W0214": 24,
+      "SHELF-W0250": 24,
+      "SHELF-W0292": 24,
+      "SHELF-W0177": 14
     },
     "SKU-0041": {
       "SHELF-W0009": 48,
-      "SHELF-W0203": 24,
-      "SHELF-W0305": 24
+      "SHELF-W0215": 24,
+      "SHELF-W0251": 24,
+      "SHELF-W0293": 24,
+      "SHELF-W0178": 14
     },
     "SKU-0042": {
       "SHELF-W0089": 48,
-      "SHELF-W0204": 24,
-      "SHELF-W0306": 24
+      "SHELF-W0216": 24,
+      "SHELF-W0252": 24,
+      "SHELF-W0294": 24,
+      "SHELF-W0179": 14
     },
     "SKU-0043": {
-      "SHELF-F10002": 48,
-      "SHELF-W0205": 24,
-      "SHELF-W0307": 24
+      "SHELF-F10002": 48
     },
     "SKU-0044": {
-      "SHELF-F10010": 48,
-      "SHELF-W0206": 24,
-      "SHELF-W0308": 24
+      "SHELF-F10010": 48
     },
     "SKU-0045": {
-      "SHELF-F10013": 48,
-      "SHELF-W0207": 24,
-      "SHELF-W0309": 24
+      "SHELF-F10013": 48
     },
     "SKU-0046": {
-      "SHELF-F10021": 48,
-      "SHELF-W0208": 24,
-      "SHELF-W0310": 24
+      "SHELF-F10021": 48
     },
     "SKU-0047": {
-      "SHELF-F20002": 48,
-      "SHELF-W0209": 24,
-      "SHELF-W0311": 24
+      "SHELF-F20002": 48
     },
     "SKU-0048": {
-      "SHELF-F20010": 48,
-      "SHELF-W0210": 24,
-      "SHELF-W0312": 24
+      "SHELF-F20010": 48
     },
     "SKU-0049": {
-      "SHELF-F20013": 48,
-      "SHELF-W0211": 24,
-      "SHELF-W0313": 24
+      "SHELF-F20013": 48
     },
     "SKU-0050": {
-      "SHELF-F20021": 48,
-      "SHELF-W0212": 24,
-      "SHELF-W0314": 24
+      "SHELF-F20021": 48
     },
     "SKU-0051": {
-      "SHELF-F30002": 48,
-      "SHELF-W0213": 24,
-      "SHELF-W0315": 24
+      "SHELF-F30002": 48
     },
     "SKU-0052": {
-      "SHELF-F30010": 48,
-      "SHELF-W0214": 24,
-      "SHELF-W0316": 24
+      "SHELF-F30010": 48
     },
     "SKU-0053": {
-      "SHELF-F30013": 48,
-      "SHELF-W0215": 24,
-      "SHELF-W0317": 24
+      "SHELF-F30013": 48
     },
     "SKU-0054": {
-      "SHELF-F30021": 48,
-      "SHELF-W0216": 24,
-      "SHELF-W0318": 24
+      "SHELF-F30021": 48
     },
     "SKU-0055": {
-      "SHELF-F10024": 48,
-      "SHELF-W0217": 24,
-      "SHELF-W0319": 24
+      "SHELF-F10024": 48
     },
     "SKU-0056": {
-      "SHELF-F20024": 48,
-      "SHELF-W0218": 24,
-      "SHELF-W0320": 24
+      "SHELF-F20024": 48
     },
     "SKU-0057": {
-      "SHELF-F30024": 48,
-      "SHELF-W0219": 24
+      "SHELF-F30024": 48
     },
     "SKU-0058": {
       "SHELF-W0011": 48,
-      "SHELF-W0220": 24
+      "SHELF-W0217": 24,
+      "SHELF-W0253": 24,
+      "SHELF-W0295": 24,
+      "SHELF-W0180": 14
     },
     "SKU-0059": {
       "SHELF-W0020": 48,
-      "SHELF-W0221": 24
+      "SHELF-W0182": 24,
+      "SHELF-W0218": 24,
+      "SHELF-W0254": 24,
+      "SHELF-W0296": 24
     },
     "SKU-0060": {
       "SHELF-W0091": 48,
-      "SHELF-W0222": 24
+      "SHELF-W0183": 24,
+      "SHELF-W0219": 24,
+      "SHELF-W0256": 24,
+      "SHELF-W0297": 24
     },
     "SKU-0061": {
       "SHELF-W0100": 48,
-      "SHELF-W0223": 24
+      "SHELF-W0184": 24,
+      "SHELF-W0220": 24,
+      "SHELF-W0261": 24,
+      "SHELF-W0298": 24
     },
     "SKU-0062": {
       "SHELF-W0039": 48,
-      "SHELF-W0224": 24
+      "SHELF-W0185": 24,
+      "SHELF-W0221": 24,
+      "SHELF-W0262": 24,
+      "SHELF-W0299": 24
     },
     "SKU-0063": {
       "SHELF-W0119": 48,
-      "SHELF-W0225": 24
+      "SHELF-W0186": 24,
+      "SHELF-W0222": 24,
+      "SHELF-W0263": 24,
+      "SHELF-W0300": 24
     },
     "SKU-0064": {
-      "SHELF-F10004": 48,
-      "SHELF-W0226": 24
+      "SHELF-F10004": 48
     },
     "SKU-0065": {
-      "SHELF-F10008": 48,
-      "SHELF-W0227": 24
+      "SHELF-F10008": 48
     },
     "SKU-0066": {
-      "SHELF-F10015": 48,
-      "SHELF-W0228": 24
+      "SHELF-F10015": 48
     },
     "SKU-0067": {
-      "SHELF-F10019": 48,
-      "SHELF-W0229": 24
+      "SHELF-F10019": 48
     },
     "SKU-0068": {
-      "SHELF-F20004": 48,
-      "SHELF-W0230": 24
+      "SHELF-F20004": 48
     },
     "SKU-0069": {
-      "SHELF-F20008": 48,
-      "SHELF-W0231": 24
+      "SHELF-F20008": 48
     },
     "SKU-0070": {
-      "SHELF-F20015": 48,
-      "SHELF-W0232": 24
+      "SHELF-F20015": 48
     },
     "SKU-0071": {
-      "SHELF-F20019": 48,
-      "SHELF-W0233": 24
+      "SHELF-F20019": 48
     },
     "SKU-0072": {
-      "SHELF-F30004": 48,
-      "SHELF-W0234": 24
+      "SHELF-F30004": 48
     },
     "SKU-0073": {
-      "SHELF-F30008": 48,
-      "SHELF-W0235": 24
+      "SHELF-F30008": 48
     },
     "SKU-0074": {
-      "SHELF-F30015": 48,
-      "SHELF-W0236": 24
+      "SHELF-F30015": 48
     },
     "SKU-0075": {
-      "SHELF-F30019": 48,
-      "SHELF-W0237": 24
+      "SHELF-F30019": 48
     },
     "SKU-0076": {
       "SHELF-W0002": 48,
-      "SHELF-W0238": 24
+      "SHELF-W0187": 24,
+      "SHELF-W0223": 24,
+      "SHELF-W0264": 24,
+      "SHELF-W0301": 24
     },
     "SKU-0077": {
       "SHELF-W0082": 48,
-      "SHELF-W0239": 24
+      "SHELF-W0188": 24,
+      "SHELF-W0224": 24,
+      "SHELF-W0265": 24,
+      "SHELF-W0302": 24
     },
     "SKU-0078": {
       "SHELF-W0018": 48,
-      "SHELF-W0240": 24
+      "SHELF-W0225": 24,
+      "SHELF-W0266": 24,
+      "SHELF-W0303": 24,
+      "SHELF-W0189": 14
     },
     "SKU-0079": {
       "SHELF-W0098": 48,
-      "SHELF-W0241": 14
+      "SHELF-W0190": 24,
+      "SHELF-W0226": 24,
+      "SHELF-W0267": 24,
+      "SHELF-W0304": 24
     },
     "SKU-0080": {
-      "SHELF-F10014": 48,
-      "SHELF-W0242": 24
+      "SHELF-F10014": 48
     },
     "SKU-0081": {
-      "SHELF-F10022": 48,
-      "SHELF-W0243": 14
+      "SHELF-F10022": 48
     },
     "SKU-0082": {
-      "SHELF-F20014": 48,
-      "SHELF-W0244": 24
+      "SHELF-F20014": 48
     },
     "SKU-0083": {
-      "SHELF-F20022": 48,
-      "SHELF-W0245": 24
+      "SHELF-F20022": 48
     },
     "SKU-0084": {
-      "SHELF-F30014": 48,
-      "SHELF-W0246": 24
+      "SHELF-F30014": 48
     },
     "SKU-0085": {
-      "SHELF-F30022": 48,
-      "SHELF-W0247": 24
+      "SHELF-F30022": 48
     },
     "SKU-0086": {
       "SHELF-W0021": 48,
-      "SHELF-W0248": 24
+      "SHELF-W0227": 24,
+      "SHELF-W0268": 24,
+      "SHELF-W0305": 24,
+      "SHELF-W0191": 14
     },
     "SKU-0087": {
       "SHELF-W0101": 48,
-      "SHELF-W0249": 24
+      "SHELF-W0192": 24,
+      "SHELF-W0228": 24,
+      "SHELF-W0269": 24,
+      "SHELF-W0306": 24
     },
     "SKU-0088": {
       "SHELF-W0037": 48,
-      "SHELF-W0250": 24
+      "SHELF-W0229": 24,
+      "SHELF-W0270": 24,
+      "SHELF-W0307": 24,
+      "SHELF-W0193": 14
     },
     "SKU-0089": {
       "SHELF-W0117": 48,
-      "SHELF-W0251": 24
+      "SHELF-W0194": 24,
+      "SHELF-W0230": 24,
+      "SHELF-W0271": 24,
+      "SHELF-W0308": 24
     },
     "SKU-0090": {
       "SHELF-W0040": 48,
-      "SHELF-W0252": 24
+      "SHELF-W0231": 24,
+      "SHELF-W0272": 24,
+      "SHELF-W0309": 24,
+      "SHELF-W0195": 14
     },
     "SKU-0091": {
       "SHELF-W0120": 48,
-      "SHELF-W0253": 24
+      "SHELF-W0196": 24,
+      "SHELF-W0232": 24,
+      "SHELF-W0273": 24,
+      "SHELF-W0310": 24
     },
     "SKU-0092": {
       "SHELF-W0059": 48,
-      "SHELF-W0254": 24
+      "SHELF-W0233": 24,
+      "SHELF-W0274": 24,
+      "SHELF-W0311": 24,
+      "SHELF-W0197": 14
     },
     "SKU-0093": {
       "SHELF-W0139": 48,
-      "SHELF-W0256": 24
+      "SHELF-W0198": 24,
+      "SHELF-W0234": 24,
+      "SHELF-W0275": 24,
+      "SHELF-W0312": 24
     },
     "SKU-0094": {
-      "SHELF-F10006": 48,
-      "SHELF-W0261": 24
+      "SHELF-F10006": 48
     },
     "SKU-0095": {
-      "SHELF-F10017": 48,
-      "SHELF-W0262": 24
+      "SHELF-F10017": 48
     },
     "SKU-0096": {
-      "SHELF-F20006": 48,
-      "SHELF-W0263": 24
+      "SHELF-F20006": 48
     },
     "SKU-0097": {
       "SHELF-F20017": 24

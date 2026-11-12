@@ -5,12 +5,12 @@
 
 | 指标 | 当前值 |
 |---|---|
-| 生成时间 | 2026-11-12 21:21:05 |
+| 生成时间 | 2026-11-12 22:35:15 |
 | Blender | 5.2.3 LTS |
 | 布局来源 | config/layout_spec.json → spec_layout.py（L1–L13 PASS，issues=0 warnings=148；38 扇门） |
 | AP 互斥 | 148 对（WARN，两 AP <2R 不能同时占用）；预约表复核同时占用 0 次；加宽变体互斥 29 对 |
 | 四层配置 | layout_spec / fleet_spec / demand_spec / 8 个 scenarios + 9 份 schema；4 个布局 spec（当前 / areas / f4 / wide）；本次审计 4 个变体，均 PASS |
-| 场景/KPI | 8 个冻结场景（config/scenarios）× 136 次运行；解析层 25 项 KPI + tick 层 50 项 KPI（去重 65 项），每项带 definition/formula/source |
+| 场景/KPI | 8 个冻结场景（config/scenarios）× 248 次运行；解析层 25 项 KPI + tick 层 56 项 KPI（去重 71 项），每项带 definition/formula/source |
 | 布局 | 4 仓 / 196 货架 / 441 库位（392 SHELF + 21 HOME）/ 10 月台 / 6 站 / 21 AGV |
 | 布局审计 | issues=0 warnings=0 verdict=PASS |
 | 功能区 | 21 个（物理 3 / 逻辑 18）；种类 BATTERY×1/EMPTY_CONTAINER×1/PACKING×2/PICK_FACE×4/QA×1/RECEIVING×1/REPLENISH×1/RETURNS×1/SORTING×1/STAGING_IN×4/STAGING_OUT×4；见 data/areas.json |
@@ -32,18 +32,19 @@
 | 车队/交通复核 | 状态迁移 147 次/非法 0；最低电量 53.986%；预约表顶点 0 / 边交换 0 |
 | 数据适配/复现 | CSV 24 行 schema=PASS；全新空目录复现 10/10 步、11 份 JSON 逐字节一致 |
 | 验收 | 40/40 PASS（A1–A40）；负测试 17/17（3 个测试文件） |
-| 开源交付层 | dc CLI 7 命令 / 46 步链（data 14 · scenarios 24 · full 46；game 3 步＝逐字节基准 + 游戏测试 + 浏览器点击流）；输出契约 sidecar 38 份 / manifest 79 个产物；静态 Demo 8 个场景 · 21 台车 |
-| 游戏层 | 关卡 4 个 / 目标 12 条 / 8 类玩家命令（已实现 6，占位 BUILD_STATION、MANUAL_ASSIGN）/ 存档槽 1 个 / ADR 8 篇；批跑产物逐字节不变见 `scripts/step_baseline.py` |
+| 开源交付层 | dc CLI 7 命令 / 46 步链（data 14 · scenarios 24 · full 46；game 3 步＝逐字节基准 + 游戏测试 + 浏览器点击流）；输出契约 sidecar 42 份 / manifest 83 个产物；静态 Demo 8 个场景 · 21 台车 |
+| 游戏层 | 关卡 5 个 / 目标 15 条 / 8 类玩家命令（已实现 7，占位 BUILD_STATION、MANUAL_ASSIGN）/ 存档槽 1 个 / ADR 9 篇；批跑产物逐字节不变见 `scripts/step_baseline.py` |
+| 库存层 | SKU 240 / 库位 392（拣选面 24）/ 期初 10512 件（占用 ¥92696.06）/ 最近一次 baseline 补货触发 0 次、缺货 0 次；守恒与补货门见 `python -m dc_twin run --scope inventory` |
 | 分档验收 | data tier 12/12 PASS；pytest -m "not blender" 与 CI 矩阵见 `.github/workflows/ci.yml` |
 
 ## 仍保留的边界（如实声明）
 
-- **两套 KPI 并存，引用时必须写清是哪一层**：解析层 `kpi.json`（`kpi.py`，M/M/c 近似）25 项；tick 层 `sim_kpi.json`（`sim_engine.py`，逐 tick 实测）50 项；去重 65 项。只报一个数字而不说层，就是口径错误。
+- **两套 KPI 并存，引用时必须写清是哪一层**：解析层 `kpi.json`（`kpi.py`，M/M/c 近似）25 项；tick 层 `sim_kpi.json`（`sim_engine.py`，逐 tick 实测）56 项；去重 71 项。只报一个数字而不说层，就是口径错误。
 - **交通层是"反应式门控 + 退让 + 绕行 + 清障"，不是预约表**：`advance()` 只在候选点与已更新位置距离 < MIN_SEP 时让行；被同一台车挡住超 8 s 由 id 较大的一方后退让路，超 20 s 尝试绕行，仍无解则在 300 s 触发人工清障（`JAM_CLEARED`）。实测清障 0–5 次/场景，说明这不是形式化无死锁，而是"有界可观测"的工程折中。0 冲突是 0.05 s 采样复核结果，不是形式化证明。
 - **过程层两层口径不同**：解析层用 Erlang-C 近似给出 `station_utilization` / `dock_utilization` / `max_dock_queue`，服务时间取 `fleet_spec.station_service`；tick 层则是**实测**——6 个 process_spec 工位 + 4 个拣选池按服务台运行，有 `STATION_ENTER/QUEUED/EXIT` 事件与会话级等待时长。仍缺的是：月台门没有占用/装卸工时（封门改派已实现），人员班次未建模。
 - **功能区三层已打通**：21 个功能区（物理 3 / 逻辑 18）见 `data/areas.json`；tick 层把 PICK_FACE 当拣选池、把 process_spec 工位当服务台（服务时长采样 + 并行位 + FIFO）；3D 层已按 `areas.json` 画地面色块与中文名称牌（物理区 3 块真实占位，逻辑区 18 个挂靠标牌）。仍未做：功能区不参与导航栅格（它不该改变可通行性），也没有按功能区做人员排班。
 - **瓶颈在巷道通行，不在工位**：实测工位利用率 约 18%，把并行位从 4 收到 1 会出现排队（等待 70.7 s）但吞吐反而从 40 升到 62/h —— 因为放开容量后同时上路的车更多、巷道更堵（累计受阻 36004 s → 26674 s）。见 `scripts/check_station.py`。
-- **库存层空缺**：`cargo_state.json` 是订单级货物状态，不是 SKU / 批次 / 货位库存；没有安全库存、补货点、效期、周转。
+- **库存层只做到 P6a**：已有 (SKU × 库位) 账、安全库存/补货点、缺货事件与持有成本；**仍缺批次 / 效期 / FEFO**（P6b），也没有多仓调拨与真实 WMS 对接。`cargo_state.json` 依旧是订单级货物状态，不是库存账，两者不可混用。
 - **订单仍是合成**：SKU 周转率为 Zipf 合成，`orders_per_hour=45` 仍是 placeholder，不是真实订单分布。
 - **多单已支持、多腿未支持**：tick 层一车可背多单（实测 `max_orders_per_robot=5`），但订单仍是单行单腿，没有订单头/行拆分与合单。
 - **货物为订单级箱体**：一件货 = 一张单，未模拟拆箱/托盘层级/批次/叉臂升降。

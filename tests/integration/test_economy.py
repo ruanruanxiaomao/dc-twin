@@ -65,9 +65,9 @@ def test_independent_recompute_from_event_stream(tmp_path):
     m = float(getattr(sim, "tariff_multiplier", 1.0))
     evs = events(sim)
     revenue = 0.0
-    consumables = sla = lost = energy = 0.0
+    consumables = sla = lost = energy = holding = 0.0
     for e in evs:
-        if e["type"] == "TASK_COMPLETED":
+        if e["type"] == "TASK_COMPLETED" and not e.get("internal"):
             revenue += ((cost["revenue"]["per_order"][e["order_type"]]
                          + cost["revenue"]["per_line_extra"]) * m)
             consumables += cost["variable_costs"]["consumables_per_order"]
@@ -78,10 +78,15 @@ def test_independent_recompute_from_event_stream(tmp_path):
         elif e["type"] == "ENERGY_TICK":
             energy += ((e["motion_kwh"] + e["idle_kwh"])
                        * cost["variable_costs"]["energy_tariff_per_kwh"])
+        elif e["type"] == "HOLDING_ACCRUED":
+            holding += float(e.get("amount") or 0.0)
 
     assert econ.revenue == pytest.approx(revenue, abs=1e-6)
+    # 持有成本单列（不是单均变动成本）：`econ.variable` 不含它
     assert econ.variable == pytest.approx(consumables + sla + lost + energy, abs=1e-6)
-    expected_cash = econ.initial_capital + revenue - (consumables + sla + lost + energy) - econ.fixed
+    assert econ.holding == pytest.approx(holding, abs=1e-6)
+    expected_cash = (econ.initial_capital + revenue
+                     - (consumables + sla + lost + energy + holding) - econ.fixed)
     assert econ.cash == pytest.approx(expected_cash, abs=1e-6)
 
 

@@ -47,6 +47,10 @@ EVENT_TYPES = (
     "DOCK_HANDOFF", "REPLAN", "WAIT_CONFLICT", "ENERGY_TICK",
     "STATION_ENTER", "STATION_QUEUED", "STATION_EXIT", "DEADLOCK_YIELD",
     "JAM_CLEARED",
+    # P6a 库存层（ADR-GAME-09）：库位级 SKU 账。这些事件必须真写进
+    # sim_events.jsonl，否则 refreeze 的 `--check=v1` 不会变红，归因就无从谈起。
+    "STOCK_DECREMENT", "STOCK_RECEIPT", "STOCK_REPLENISH_ARRIVED", "STOCKOUT",
+    "REORDER_TRIGGERED", "PICKFACE_REFILL", "HOLDING_ACCRUED",
     "RUN_SETTLED",
 )
 
@@ -265,7 +269,8 @@ ORDER_TYPES = ("INBOUND", "OUTBOUND", "PICK", "REPLENISH", "TRANSFER")
 #: `_cmd_<type小写>` 方法；`_handler_for` 按命名约定取处理器，不做第二份注册表
 #: （两份表必然分叉，最后会出现"登记了但没有人接"的命令）。
 COMMANDS = ("BUY_AGV", "SELL_AGV", "SET_PRICE", "SET_POLICY",
-            "SET_DEMAND", "INJECT_FAULT", "BUILD_STATION", "MANUAL_ASSIGN")
+            "SET_DEMAND", "INJECT_FAULT", "BUILD_STATION", "MANUAL_ASSIGN",
+            "SET_REORDER_POINT")
 #: 已登记但尚未实现：入队即抛，不静默空转（静默 = 玩家点了没反应还以为生效了）。
 NOT_IMPLEMENTED = ("BUILD_STATION", "MANUAL_ASSIGN")
 
@@ -636,6 +641,305 @@ class Simulation:
         # 游戏营收口径的市场价倍率：只影响"按什么价收钱"，不改进货/成本/会计科目。
         # 默认为 1，批跑（演示会计口径）完全不受影响。
         self.tariff_multiplier = float(es.get("tariff_multiplier", 1.0))
+        # 库存层（P6a / ADR-GAME-09）。数据与配置都由 gen_inventory.py 生成；
+        # 缺文件时不假装有库存（那会静默把每单都判成缺货），而是置 inv_enabled=False，
+        # 由 KPI 明确报 stockout_enabled=0。
+        self._init_inventory()
+
+    # ---------- 库存层（P6a）----------
+    def _init_inventory(self):
+        """装载库位级 SKU 账。**不消耗随机流、不读时钟**（ADR-GAME-09 决策四）。"""
+        self.inv_enabled = False
+        self.inv = {}            # sku -> {location: qty}
+        self.inv_loc = {}        # location -> {"sku","role","warehouse"}
+        self.inv_sku = {}        # sku -> {"reserve":[...], "pick_face":[...]}
+        self.inv_cost = {}       # sku -> unit_cost
+        self.inv_par = {}        # (sku, location) -> 期初水位（拣选面 par）
+        self.inv_reorder = {}    # sku -> 基础补货点（factor 前）
+        self.inv_pending = {}    # order_id -> {"sku","qty","location"}
+        self.inv_hold_t = 0.0
+        self.inv_stockout_n = 0
+        self.inv_reorder_n = 0
+        self.inv_refill_n = 0
+        self.inv_units_out = 0
+        self.inv_units_req = 0
+        self.inv_holding = 0.0
+        self.reorder_factor = 1.0
+        self.reorder_factor_by_sku = {}
+
+        sp = CONFIG / "inventory_spec.json"
+        slot_f = DATA / "inventory_slotting.json"
+        init_f = DATA / "inventory_initial.json"
+        master_f = DATA / "sku_master.json"
+        if not (sp.exists() and slot_f.exists() and init_f.exists() and master_f.exists()):
+            return False
+        spec = jload(sp)
+        slotting = jload(slot_f)
+        initial = jload(init_f)
+        master = jload(master_f)
+
+        self.inv_spec = spec
+        self.inv_hold_period_s = float(spec["holding"].get("period_s", 600))
+        for row in slotting["locations"]:
+            self.inv_loc[row["location_id"]] = {"sku": row["sku"], "role": row["role"],
+                                                "warehouse": row["warehouse_id"]}
+        self.inv_sku = {s: {"reserve": list(v["reserve"]),
+                            "pick_face": list(v["pick_face"])}
+                        for s, v in slotting["by_sku"].items()}
+        self.inv_cost = {s["id"]: float(s["unit_cost"]) for s in master["skus"]}
+        vel = {s["id"]: float(s.get("velocity") or 0.0) for s in master["skus"]}
+        for sku, rows in initial["stock"].items():
+            self.inv[sku] = {loc: float(q) for loc, q in rows.items()}
+            for loc, q in rows.items():
+                self.inv_par[(sku, loc)] = float(q)      # 期初水位 = 拣选面 par
+
+        # 补货点：按"本 SKU 的期望小时出库量"推，不用"周均"——这套引擎的 horizon
+        # 是 1 小时，周均在跑动中不可观测。写死成常量就等于没有补货逻辑。
+        mix = self.overrides.get("demand.orders.mix", self.demand["orders"]["mix"])
+        dec_share = sum(w for k, w in mix.items()
+                        if k in ("OUTBOUND", "PICK", "TRANSFER", "REPLENISH"))
+        total_w = sum(mix.values()) or 1.0
+        out_share = dec_share / total_w
+        safety_f = float(spec["reorder"]["safety_stock_factor"])
+        rp_f = float(spec["reorder"]["reorder_point_factor"])
+        for sku in sorted(self.inv):
+            exp_h = self.per_hour * out_share * vel.get(sku, 0.0)
+            self.inv_reorder[sku] = max(1.0, safety_f * exp_h + rp_f * exp_h)
+        self.inv_enabled = True
+        return True
+
+    def inv_on_hand(self, sku):
+        return sum(self.inv.get(sku, {}).values())
+
+    def inv_value(self):
+        return sum(q * self.inv_cost.get(sku, 0.0)
+                   for sku, rows in self.inv.items() for q in rows.values())
+
+    def inv_reorder_point(self, sku):
+        factor = float(self.reorder_factor_by_sku.get(sku, self.reorder_factor))
+        return self.inv_reorder.get(sku, 0.0) * factor
+
+    def _inv_dec(self, sku, loc, qty, order, cause):
+        cur = self.inv.setdefault(sku, {}).get(loc, 0.0)
+        if cur + 1e-9 < qty:
+            # 先扣减再发事件，扣不动就是逻辑错，不许"扣成负数"糊过去
+            raise ValueError("库存不足却要求扣减：%s@%s 现有 %s 需 %s"
+                             % (sku, loc, cur, qty))
+        self.inv[sku][loc] = cur - qty
+        self.inv_units_out += qty
+        self.log.emit(self.t, "STOCK_DECREMENT", sku=sku, location=loc, qty=qty,
+                      order_id=(order or {}).get("order_id"), cause=cause,
+                      on_hand_after=round(self.inv[sku][loc], 6))
+        return self.inv[sku][loc]
+
+    def _inv_inc(self, sku, loc, qty, order_id=None, cause="inbound"):
+        self.inv.setdefault(sku, {})
+        self.inv[sku][loc] = self.inv[sku].get(loc, 0.0) + qty
+        self.log.emit(self.t, "STOCK_RECEIPT", sku=sku, location=loc, qty=qty,
+                      order_id=order_id, cause=cause,
+                      on_hand_after=round(self.inv[sku][loc], 6))
+        return self.inv[sku][loc]
+
+    def _inv_settle(self, order):
+        """完成时结算库存；返回 (delivered, ok)。ok=False 表示缺货不得完成。
+
+        **先看清这套引擎里各类型到底怎么走**（读 `new_order` 的 rules 才知道，
+        方案书 §5.2 的抽象描述对不上具体实现）：
+          - OUTBOUND：货架 → 出库月台    → 只在取货位**扣**
+          - PICK：货架 → 打包            → 只在取货位**扣**
+          - INBOUND / REPLENISH：月台 → 货架 → 只在交货位**加**（补货是从月台补货架，
+            不是"储备位补拣选面"——后者由内部 TRANSFER 单承担）
+          - TRANSFER：货架 → 货架        → 源扣、目标加
+        订单**不带 sku 字段**：SKU 由库位反查（ADR-GAME-09 决策四），订单结构与
+        CSV 适配器都不用动，也不会多消耗一次 rng。
+        """
+        if not self.inv_enabled:
+            return 1.0, True
+        typ = order["type"]
+        need = float(order.get("qty") or 1.0)
+
+        # 内部移库（储备位 → 拣选面）：只发一条 PICKFACE_REFILL，不再发通用收/发事件。
+        # 这样"拣选面库存只能由显式转移改变"这条不变量在事件流里是**一眼可查**的。
+        if order.get("internal") and typ == "TRANSFER":
+            src, dst = order["pick_loc"], order["drop_loc"]
+            si, di = self.inv_loc.get(src), self.inv_loc.get(dst)
+            if si is None or di is None:
+                raise ValueError("内部补货单 %s 的库位没有映射：%r → %r"
+                                 % (order.get("order_id"), src, dst))
+            avail = self.inv.get(si["sku"], {}).get(src, 0.0)
+            qty = min(need, avail)
+            if qty <= 1e-9:
+                self.log.emit(self.t, "STOCKOUT", sku=si["sku"], location=src,
+                              order_id=order.get("order_id"), requested=need,
+                              available=avail, shortfall=need, policy="refill_empty")
+                self.inv_stockout_n += 1
+                self.inv_pending.pop(order.get("order_id"), None)
+                return 0.0, False
+            self.inv[si["sku"]][src] = avail - qty
+            self.inv.setdefault(di["sku"], {})
+            self.inv[di["sku"]][dst] = self.inv[di["sku"]].get(dst, 0.0) + qty
+            self.inv_refill_n += 1
+            self.log.emit(self.t, "PICKFACE_REFILL", sku=si["sku"],
+                          reserve_location=src, pickface_location=dst, qty=qty,
+                          order_id=order.get("order_id"))
+            self.inv_pending.pop(order.get("order_id"), None)
+            self._inv_reorder_check(si["sku"], src)
+            return qty, True
+
+        dec = typ in ("OUTBOUND", "PICK", "TRANSFER")
+        inc = typ in ("INBOUND", "REPLENISH", "TRANSFER")
+        sku_src = None
+        if dec:
+            src = order["pick_loc"]
+            info = self.inv_loc.get(src)
+            if info is None:
+                raise ValueError("订单 %s 的取货位 %r 没有库存映射（未知即抛错）"
+                                 % (order.get("order_id"), src))
+            sku_src = info["sku"]
+            self.inv_units_req += need
+            avail = self.inv.get(sku_src, {}).get(src, 0.0)
+            if avail + 1e-9 >= need:
+                self._inv_dec(sku_src, src, need, order, "pick")
+                delivered = need
+            elif avail > 1e-9 and self.inv_spec["stockout"].get("partial_fill"):
+                self._inv_dec(sku_src, src, avail, order, "pick_partial")
+                self.log.emit(self.t, "STOCKOUT", sku=sku_src, location=src,
+                              order_id=order.get("order_id"), requested=need,
+                              available=avail, shortfall=need - avail,
+                              policy="partial_fill")
+                self.inv_stockout_n += 1
+                delivered = avail
+            else:
+                self.log.emit(self.t, "STOCKOUT", sku=sku_src, location=src,
+                              order_id=order.get("order_id"), requested=need,
+                              available=avail, shortfall=need,
+                              policy=self.inv_spec["stockout"].get("policy", "fail_order"))
+                self.inv_stockout_n += 1
+                return 0.0, False
+        else:
+            delivered = need
+        if inc:
+            dst = order["drop_loc"]
+            info2 = self.inv_loc.get(dst)
+            if info2 is None:
+                raise ValueError("订单 %s 的交货位 %r 没有库存映射（未知即抛错）"
+                                 % (order.get("order_id"), dst))
+            sku_dst = info2["sku"]
+            self.inv.setdefault(sku_dst, {})
+            self.inv[sku_dst][dst] = self.inv[sku_dst].get(dst, 0.0) + delivered
+            etype = "STOCK_REPLENISH_ARRIVED" if typ == "REPLENISH" else "STOCK_RECEIPT"
+            self.log.emit(self.t, etype, sku=sku_dst, location=dst, qty=delivered,
+                          order_id=order.get("order_id"), cause=typ.lower(),
+                          on_hand_after=round(self.inv[sku_dst][dst], 6))
+        if dec and sku_src:
+            self._inv_reorder_check(sku_src, order["pick_loc"])
+        return delivered, True
+
+    def _inv_make_order(self, oid, src, dst, qty, typ="TRANSFER", internal=True):
+        """造一张内部补货单。**不碰 rng**：多抽一次随机数会打乱后续需求流。"""
+        # 一端可能是月台（REPLENISH 从月台补货架）：月台不在库存映射里，
+        # 所以"哪个端有映射就用哪个端的仓"，不能两端都要求有映射。
+        src_info, dst_info = self.inv_loc.get(src), self.inv_loc.get(dst)
+        if src_info is None and dst_info is None:
+            raise ValueError("内部补货单两端都没有库存映射：%r → %r" % (src, dst))
+        wid = (src_info or dst_info)["warehouse"]
+        if src_info and dst_info and dst_info["warehouse"] != src_info["warehouse"]:
+            # P6a 不做多仓调拨：跨仓补货单在引擎里没有合理路径语义，直接拒绝
+            raise ValueError("内部补货单跨仓（%s→%s），P6a 不支持多仓调拨" % (src, dst))
+        s_loc = self.world.locs[wid][src]
+        d_loc = self.world.locs[wid][dst]
+        return {"order_id": oid, "type": typ, "warehouse": wid,
+                "pick_loc": src, "drop_loc": dst,
+                "pick_xy": tuple(s_loc["access_point"]),
+                "drop_xy": tuple(d_loc["access_point"]),
+                # 内部补货是后台任务：必须让客户订单先派（P3 最低优先级）。
+                # 用 P2 时补货单会和客户单抢运力，出现"补货点越高、完成单越少"
+                # 的反常现象（实测 90→37），那是把内部作业当成了主营业务。
+                "t_arrive": self.t, "priority": "P3",
+                # 内部移库不该产生"迟到"：deadline 拉到无限远
+                "deadline": float("inf"), "reassignments": 0,
+                "qty": qty, "internal": True}
+
+    def _inv_reorder_check(self, sku, loc):
+        """补货判定。**只对本次被扣减的 SKU/库位做**（不遍历无序集合，§5.3）。
+
+        这里踩过一个设计坑，记下来：最初把"补货"实现成"储备位 → 拣选面"的内部移库，
+        结果 REORDER_OK 反着走——补货点越高、缺货越多。原因是订单从 `pick_loc`
+        取货，而 `pick_loc` 绝大多数是储备位：把库存搬去拣选面，等于把货搬离了
+        真正被取的地方。现在按引擎既有语义改成**从月台补货到被扣减的那个库位**
+        （`REPLENISH` 单本来就是 月台 → 货架），补货才真的降缺货。
+        拣选面只做"跌破水位时从同仓储备位补"的小批量前置，且不跨仓。
+        """
+        if not self.inv_enabled:
+            return
+        if self.inv_spec["reorder"].get("reorder_check") != "on_stock_change":
+            return
+        on_hand = self.inv.get(sku, {}).get(loc, 0.0)
+        info = self.inv_loc.get(loc) or {}
+        wid = info.get("warehouse")
+        role = info.get("role")
+
+        # 1) 拣选面：跌破最低水位 → 从同仓储备位补（内部移库，不发收入）
+        if role == "pick_face":
+            base = self.inv_par.get((sku, loc), 0.0)
+            ratio = float(self.inv_spec["pick_face"].get("min_fill_ratio", 0.3))
+            reserve = [l for l in self.inv_sku.get(sku, {}).get("reserve", [])
+                       if self.inv_loc.get(l, {}).get("warehouse") == wid]
+            if reserve and on_hand < max(1.0, base * ratio):
+                if not any(p.get("sku") == sku and p.get("kind") == "refill"
+                           for p in self.inv_pending.values()):
+                    src = reserve[0]
+                    if self.inv.get(sku, {}).get(src, 0.0) > 1.0:
+                        qty = max(1.0, base - on_hand)
+                        oid = "RPL-%05d" % (self.inv_reorder_n + 1)
+                        order = self._inv_make_order(oid, src, loc, qty)
+                        self.queue.append(order)
+                        self.inv_pending[oid] = {"sku": sku, "qty": qty, "location": loc,
+                                                 "kind": "refill"}
+                        self.inv_reorder_n += 1
+                        self.log.emit(self.t, "REORDER_TRIGGERED", sku=sku, location=loc,
+                                      on_hand=round(on_hand, 6),
+                                      reorder_point=round(base * ratio, 6),
+                                      replenish_qty=qty, replenish_order_id=oid,
+                                      kind="pickface")
+            return
+
+        # 2) 储备位：跌破补货点 → 从月台补货到本位（REPLENISH：月台 → 货架）
+        rp = self.inv_reorder_point(sku)
+        if on_hand > rp:
+            return
+        if any(p.get("sku") == sku and p.get("kind") == "dock"
+               for p in self.inv_pending.values()):
+            return
+        docks = [d["id"] for d in self.world.by_kind.get(wid, {}).get("INBOUND", [])]
+        if not docks:
+            return
+        qty = max(1.0, round(2.0 * rp - on_hand))
+        oid = "RPL-%05d" % (self.inv_reorder_n + 1)
+        order = self._inv_make_order(oid, sorted(docks)[0], loc, qty, typ="REPLENISH")
+        self.queue.append(order)
+        self.inv_pending[oid] = {"sku": sku, "qty": qty, "location": loc, "kind": "dock"}
+        self.inv_reorder_n += 1
+        self.log.emit(self.t, "REORDER_TRIGGERED", sku=sku, location=loc,
+                      on_hand=round(on_hand, 6), reorder_point=round(rp, 6),
+                      replenish_qty=qty, replenish_order_id=oid, kind="dock")
+
+    def _inv_accrue_holding(self, t_end):
+        """按仿真小时计提持有成本。用 tick 时间，不读墙钟（§5.6）。"""
+        if not self.inv_enabled:
+            return
+        dt_h = (t_end - self.inv_hold_t) / 3600.0
+        if dt_h <= 1e-12:
+            return
+        value = self.inv_value()
+        rate = float(self.inv_spec["holding"]["holding_rate_per_year"])
+        amount = value * rate * dt_h / 8760.0
+        self.inv_holding += amount
+        self.log.emit(t_end, "HOLDING_ACCRUED", t0=round(self.inv_hold_t, 3),
+                      t1=round(t_end, 3), hours=round(dt_h, 6),
+                      on_hand_value=round(value, 6), amount=round(amount, 6))
+        self.inv_hold_t = t_end
+
 
     # ---------- 工位层（M1-02）：process_spec 的服务时间真的进 tick ----------
     def _load_stations(self):
@@ -1276,6 +1580,15 @@ class Simulation:
             rid = p.get("agent")
             if not isinstance(rid, str) or rid not in self.robots:
                 raise ValueError("没有这台车：%r" % (rid,))
+        elif typ == "SET_REORDER_POINT":
+            sku = p.get("sku")
+            if not isinstance(sku, str) or not sku:
+                raise ValueError("SET_REORDER_POINT 需要 sku（'ALL' 或具体 id）")
+            if sku != "ALL" and sku not in self.inv_sku:
+                raise ValueError("没有这个 SKU：%r" % (sku,))
+            f = p.get("factor")
+            if isinstance(f, bool) or not isinstance(f, (int, float)) or not 0.1 <= f <= 10:
+                raise ValueError("factor 必须在 [0.1, 10]")
         elif typ == "SET_PRICE":
             typ_ = p.get("order_type")
             if typ_ not in ORDER_TYPES:
@@ -1347,6 +1660,18 @@ class Simulation:
         self.per_hour = max(0.0, self._base_per_hour * self.demand_multiplier
                             * self._price_factor())
         self.lam = self.per_hour / 3600.0
+
+    def _cmd_set_reorder_point(self, cmd):
+        p = cmd["payload"]
+        sku, f = p["sku"], float(p["factor"])
+        if not self.inv_enabled:
+            raise ValueError("本局没有装载库存层，无法设置补货点")
+        if sku == "ALL":
+            self.reorder_factor = f
+            self.reorder_factor_by_sku.clear()
+        else:
+            self.reorder_factor_by_sku[sku] = f
+        self.log.emit(self.t, "CMD_SET_REORDER_POINT", sku=sku, factor=f)
 
     def _cmd_set_price(self, cmd):
         p = cmd["payload"]
@@ -1557,6 +1882,9 @@ class Simulation:
                                  "mean_soc": round(sum(r.soc_pct for r in robots)
                                                    / len(robots), 3)})
         self.tick_i += 1
+        # 持有成本按仿真小时计提（tick 时间，不读墙钟）
+        if self.inv_enabled and t - self.inv_hold_t >= self.inv_hold_period_s - 1e-9:
+            self._inv_accrue_holding(t)
         return self.tick_i >= self.n_ticks
 
     def _finalize(self):
@@ -1569,6 +1897,10 @@ class Simulation:
             return self.metrics
         self.done = True
         every = self.spec["output"]["kpi_every_ticks"]
+        # 尾段持有成本要补到 horizon，否则"计提"会差最后一段（与 ENERGY_TICK 的
+        # 尾窗同理：不补就会略微小于实际占用时间，守恒对不上）
+        if self.inv_enabled:
+            self._inv_accrue_holding(self.horizon)
         # Flush the partial tail window so SUM(ENERGY_TICK) closes exactly with
         # sim_state energy_out/energy_in (S2 requires <1% error).
         self._emit_energy_window(self.horizon, (self.n_ticks % every or every) * self.tick,
@@ -1748,6 +2080,17 @@ class Simulation:
             self._enter_station(r, t, "DROPPING")
         elif r.state == "RETURNING":
             o = r.order
+            # 库存结算必须在发 TASK_COMPLETED **之前**：缺货就不许"完成"，
+            # 否则缺货被悄悄算成已交付（方案书 §5.2 / 门 3）。
+            delivered, ok = self._inv_settle(o)
+            if not ok:
+                self.log.emit(t, "ORDER_LOST", order_id=o["order_id"],
+                              order_type=o["type"], reason="stockout",
+                              pick_loc=o["pick_loc"],
+                              sku=self.inv_loc.get(o["pick_loc"], {}).get("sku"))
+                r.order = None
+                r.set_state("IDLE", self.log, t)
+                return
             self.log.emit(t, "TASK_COMPLETED", agent=r.id, order_id=o["order_id"],
                           order_type=o["type"], warehouse=o["warehouse"],
                           legs_m={"empty_out": round(r.leg_m[0], 3),
@@ -1756,6 +2099,8 @@ class Simulation:
                           energy_kwh=round(r.leg_m[0] * r.cons + r.leg_m[1] * r.cons
                                            + r.leg_m[2] * r.cons, 6),
                           tardiness_s=round(max(0.0, t - o["deadline"]), 3),
+                          delivered=delivered,
+                          internal=bool(o.get("internal")),
                           pick_loc=o["pick_loc"], drop_loc=o["drop_loc"],
                           reassignments=o["reassignments"])
             r.completed += 1
@@ -1965,6 +2310,25 @@ class Simulation:
                                       "因电量不足以跑完行程而就地充电的次数",
                                       "count(CHARGE_START.mode=energy_guard)")
         m["sim_duration_s"] = M(self.horizon, "s", "Simulation horizon", "sim_spec.horizon_s")
+        # ---- 库存层（P6a）：tick 层指标，每项带 definition/formula/source ----
+        m["stockout_count"] = M(self.inv_stockout_n, "times",
+                                "缺货次数（库存不足导致订单未完成）",
+                                "count(STOCKOUT)")
+        m["fill_rate"] = M(round(min(1.0, (self.inv_units_out / self.inv_units_req)
+                                     if self.inv_units_req else 1.0), 6),
+                           "ratio", "实发件数 / 请求件数（缺货与部分交付都会拉低）",
+                           "sum(STOCK_DECREMENT.qty)/sum(requested)")
+        m["holding_cost"] = M(round(self.inv_holding, 6), "CNY",
+                              "持有成本（按仿真小时计提，不含采购）",
+                              "Σ on_hand_value × holding_rate_per_year × dt/8760")
+        m["inventory_value"] = M(round(self.inv_value(), 2), "CNY",
+                                 "库存占用资金（资产侧展示，不进 P&L）",
+                                 "Σ qty × unit_cost")
+        m["reorder_triggers"] = M(self.inv_reorder_n, "times",
+                                  "补货触发次数", "count(REORDER_TRIGGERED)")
+        m["inventory_enabled"] = M(1 if self.inv_enabled else 0, "bool",
+                                   "本场景是否装载了库存层（缺数据时为 0）",
+                                   "inventory_slotting.json 存在且已装载")
         m["wall_clock_s"] = M(round(wall_s, 3), "s", "Wall clock", "time.time() delta")
         return {"schema_version": "1.0", "kind": "sim_kpi", "engine": "sim",
                 "scenario": self.sc["id"], "seed": self.seed,
@@ -1983,13 +2347,43 @@ class Simulation:
                                   "energy_in_kwh": round(r.energy_in, 6),
                                   "move_events": r.move_events}
                            for r in self.robots.values()},
-                "queue_depth": len(self.queue), "blocked_docks": sorted(self.blocked_docks)}
+                "queue_depth": len(self.queue), "blocked_docks": sorted(self.blocked_docks),
+                # 库存期末账：给 check_inventory 做"状态 vs 事件流"的独立对账
+                # （只有状态没有事件、或只有事件没有状态，都不足以证明守恒）
+                "inventory": ({"stock": {sku: {loc: q for loc, q in rows.items()}
+                                        for sku, rows in self.inv.items()},
+                               "summary": {"enabled": self.inv_enabled,
+                                           "units": round(self.inv_units_out, 6),
+                                           "value": round(self.inv_value(), 2),
+                                           "holding": round(self.inv_holding, 6),
+                                           "stockout": self.inv_stockout_n}}
+                              if self.inv_enabled else None)}
 
     # ---------- 快照（ADR-GAME-05 / 方案书 §2.4.2）----------
     # `_state()` 是给 KPI 对账用的**终态摘要**，故意保持原样不动（A 系列验收依赖它）。
     # 下面是另一个东西：可恢复的全量状态。字段必须穷举——少一块，续跑要几十个 tick
     # 之后才会"莫名偏了"，那时候已经查不出是哪块缺了。
-    SNAPSHOT_SCHEMA = "1.0"
+    SNAPSHOT_SCHEMA = "2.0"
+
+    def _inv_snapshot(self):
+        """库存状态入快照。schema 1.0 的旧档没有这一块，restore 会显式拒绝
+        （ADR-GAME-09 决策二）：补空账比报错危险得多。"""
+        return {
+            "schema": "1.0",
+            "enabled": bool(self.inv_enabled),
+            "stock": {sku: {loc: q for loc, q in rows.items()}
+                      for sku, rows in self.inv.items()},
+            "pending_replenish": {oid: dict(v) for oid, v in self.inv_pending.items()},
+            "holding_accrued": self.inv_holding,
+            "hold_t": self.inv_hold_t,
+            "counters": {"stockout": self.inv_stockout_n,
+                         "reorder": self.inv_reorder_n,
+                         "refill": self.inv_refill_n,
+                         "units_out": self.inv_units_out,
+                         "units_req": self.inv_units_req},
+            "reorder_factor": self.reorder_factor,
+            "reorder_factor_by_sku": dict(self.reorder_factor_by_sku),
+        }
 
     def snapshot(self):
         """全量可恢复状态（JSON-able）。
@@ -2050,6 +2444,7 @@ class Simulation:
                         else None),
             "counters": counters,
             "samples": conv(self.samples),
+            "inventory": self._inv_snapshot(),
             "run_dir": self._run_dir_rel(),
             "meta": {"level_id": (getattr(self, "level", {}) or {}).get("id", "")},
         }
@@ -2079,7 +2474,7 @@ class Simulation:
             raise ValueError("快照版本不符：%r（本引擎支持 %r）"
                              % (snap.get("schema_version"), cls.SNAPSHOT_SCHEMA))
         required = ("tick_i", "t_s", "rng_s", "svc_rng_s", "robots", "queue", "stations",
-                    "faults", "log", "counters", "policy", "demand")
+                    "faults", "log", "counters", "policy", "demand", "inventory")
         missing = [k for k in required if k not in snap]
         if missing:
             raise ValueError("快照缺字段：%s" % ", ".join(missing))
@@ -2151,7 +2546,63 @@ class Simulation:
         if snap.get("economy"):
             import game_economy
             game_economy.restore_onto(sim, snap["economy"])
+        sim._inv_restore(snap["inventory"])
         return sim
+
+    def _inv_restore(self, inv):
+        """库存账恢复 + **与事件流重放对账**（方案书 §5.4 的硬要求）。"""
+        if not isinstance(inv, dict) or "stock" not in inv:
+            raise ValueError("快照缺少 inventory.stock（有库存层的局面必须带账才能续跑）")
+        self.inv_enabled = bool(inv.get("enabled", True))
+        self.inv = {sku: {loc: float(q) for loc, q in rows.items()}
+                    for sku, rows in (inv.get("stock") or {}).items()}
+        self.inv_pending = {oid: dict(v)
+                            for oid, v in (inv.get("pending_replenish") or {}).items()}
+        self.inv_holding = float(inv.get("holding_accrued", 0.0))
+        self.inv_hold_t = float(inv.get("hold_t", 0.0))
+        c = inv.get("counters") or {}
+        self.inv_stockout_n = int(c.get("stockout", 0))
+        self.inv_reorder_n = int(c.get("reorder", 0))
+        self.inv_refill_n = int(c.get("refill", 0))
+        self.inv_units_out = float(c.get("units_out", 0.0))
+        self.inv_units_req = float(c.get("units_req", 0.0))
+        self.reorder_factor = float(inv.get("reorder_factor", 1.0))
+        self.reorder_factor_by_sku = dict(inv.get("reorder_factor_by_sku") or {})
+        if self.inv_enabled:
+            self._inv_reconcile()
+
+    def _inv_reconcile(self, tol=1e-6):
+        """内存库存账 vs 从事件流重放 —— 不一致就 raise。
+
+        为什么不只信快照：快照可能"看起来完整"但数值错位（漏 apply 一条增量、
+        恢复顺序不对）。事件流是事实来源，重放对不上的存档不能续玩。
+        """
+        path = self.out / "sim_events.jsonl"
+        if not path.exists():
+            raise ValueError("没有事件流可对账：%s" % path)
+        replay = {sku: {loc: float(q) for loc, q in rows.items()}
+                  for sku, rows in (jload(DATA / "inventory_initial.json")["stock"]).items()}
+        with path.open("r", encoding="utf-8") as f:
+            for line in f:
+                if not line.strip():
+                    continue
+                e = json.loads(line)
+                typ = e.get("type")
+                sku, loc, q = e.get("sku"), e.get("location"), float(e.get("qty") or 0)
+                if typ == "STOCK_DECREMENT":
+                    replay.setdefault(sku, {})[loc] = replay.get(sku, {}).get(loc, 0.0) - q
+                elif typ in ("STOCK_RECEIPT", "STOCK_REPLENISH_ARRIVED"):
+                    replay.setdefault(sku, {})[loc] = replay.get(sku, {}).get(loc, 0.0) + q
+        bad = []
+        for sku in set(replay) | set(self.inv):
+            for loc in set(replay.get(sku, {})) | set(self.inv.get(sku, {})):
+                a = replay.get(sku, {}).get(loc, 0.0)
+                b = self.inv.get(sku, {}).get(loc, 0.0)
+                if abs(a - b) > tol:
+                    bad.append((sku, loc, a, b))
+        if bad:
+            raise ValueError("快照库存与事件流重放不一致（%d 处），前 3 处：%s"
+                             % (len(bad), bad[:3]))
 
 
 def load_external_orders(path, layout=None):

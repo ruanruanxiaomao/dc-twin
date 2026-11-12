@@ -190,7 +190,19 @@ def judge(sim, level):
     primary_ok, _ = check(primaries, sim) if primaries else (False, [])
 
     bankrupt = bool(getattr(econ, "game_over", False)) if econ is not None else False
-    won = primary_ok and not bankrupt
+
+    # 失败条件优先级固定：先破产，再缺货（方案书 §7 / R7）。
+    # 两件事同时发生时报"破产"——现金流断裂是终局，缺货只是过程指标。
+    stockout_broken = None
+    for lc in level.get("lose_conditions", []):
+        if lc.get("type") == "stockouts":
+            try:
+                n = metric_value(sim, "stockout_count")
+            except LevelError:
+                continue
+            if n > float(lc.get("max", 0)):
+                stockout_broken = {"count": n, "max": float(lc.get("max", 0))}
+    won = primary_ok and not bankrupt and stockout_broken is None
 
     stars = 0
     if won:
@@ -209,6 +221,9 @@ def judge(sim, level):
         "won": won,
         "stars": stars,
         "bankrupt": bankrupt,
+        "stockout_broken": stockout_broken,
+        "lose_reason": ("bankrupt" if bankrupt
+                        else ("stockouts" if stockout_broken else None)),
         "objectives": rows,
         "unlocks": unlocks,
         "level_id": level.get("id"),

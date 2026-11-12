@@ -32,6 +32,34 @@ def chain_steps():
         return {}, "读取 dc_twin.runner 失败：%r" % (exc,)
 
 
+def inventory_facts():
+    """库存层可核查事实：SKU / 库位 / 拣选面 / 期初总量 / 补货触发（从产物现算）。"""
+    out = {"skus": 0, "locations": 0, "pick_face": 0, "units": 0, "value": 0.0,
+           "enabled": False}
+    slot = DATA and os.path.join(DATA, 'inventory_slotting.json')
+    init = DATA and os.path.join(DATA, 'inventory_initial.json')
+    if os.path.exists(slot):
+        d = json.load(open(slot, encoding='utf-8'))
+        c = d.get('counts', {})
+        out.update({"locations": c.get('locations', 0), "skus": c.get('skus', 0),
+                    "pick_face": c.get('pick_face', 0), "enabled": True})
+    if os.path.exists(init):
+        d = json.load(open(init, encoding='utf-8'))
+        out.update({"units": d.get('summary', {}).get('total_units', 0),
+                    "value": d.get('summary', {}).get('inventory_value', 0)})
+    # 补货触发数以最近一次 baseline 运行现算，不手抄
+    runs = sorted(glob.glob(os.path.join(ROOT, 'runs', 'baseline', '*', 'sim_kpi.json')),
+                  key=os.path.getmtime)
+    if runs:
+        try:
+            m = json.load(open(runs[-1], encoding='utf-8')).get('metrics', {})
+            out["triggers"] = m.get('reorder_triggers', {}).get('value', 0)
+            out["stockout"] = m.get('stockout_count', {}).get('value', 0)
+        except Exception:                       # noqa: BLE001
+            pass
+    return out
+
+
 def game_facts():
     """游戏层的可核查事实：关卡数、命令数、存档槽数、ADR 数。"""
     levels = sorted(glob.glob(os.path.join(CONFIG, 'levels', '*.json')))
@@ -71,6 +99,7 @@ def n(v, default='n/a'):
 def main():
     steps, steps_err = chain_steps()
     gfacts = game_facts()
+    inv = inventory_facts()
     br = j(OUT, 'build_report.json')
     ba = j(OUT, 'blend_audit.json')
     ar = j(OUT, 'artifact_report.json')
@@ -284,6 +313,11 @@ def main():
                    '存档槽 %s 个 / ADR %s 篇；批跑产物逐字节不变见 `scripts/step_baseline.py`'
          % (gfacts['levels'], gfacts['objectives'], gfacts['commands_done'],
             '、'.join(gfacts['placeholders']) or '无', gfacts['saves'], gfacts['adrs'])),
+        ('库存层', 'SKU %s / 库位 %s（拣选面 %s）/ 期初 %s 件（占用 ¥%s）/ '
+                   '最近一次 baseline 补货触发 %s 次、缺货 %s 次；'
+                   '守恒与补货门见 `python -m dc_twin run --scope inventory`'
+         % (inv['skus'], inv['locations'], inv['pick_face'], inv['units'],
+            inv['value'], inv.get('triggers', 'n/a'), inv.get('stockout', 'n/a'))),
         ('分档验收', 'data tier %s/%s PASS；pytest -m "not blender" 与 CI 矩阵见 '
                      '`.github/workflows/ci.yml`'
          % (vdata.get('passed'), vdata.get('total'))),
@@ -328,8 +362,9 @@ def main():
         '出现排队（等待 70.7 s）但吞吐反而从 40 升到 62/h —— 因为放开容量后同时上路的车更多、'
         '巷道更堵（累计受阻 36004 s → 26674 s）。见 `scripts/check_station.py`。'
         % ('约 18%' if not tick_keys else '约 18%'),
-        '- **库存层空缺**：`cargo_state.json` 是订单级货物状态，不是 SKU / 批次 / 货位库存；'
-        '没有安全库存、补货点、效期、周转。',
+        '- **库存层只做到 P6a**：已有 (SKU × 库位) 账、安全库存/补货点、缺货事件与持有成本；'
+        '**仍缺批次 / 效期 / FEFO**（P6b），也没有多仓调拨与真实 WMS 对接。'
+        '`cargo_state.json` 依旧是订单级货物状态，不是库存账，两者不可混用。',
         '- **订单仍是合成**：SKU 周转率为 Zipf 合成，`orders_per_hour=45` 仍是 placeholder，'
         '不是真实订单分布。',
         '- **多单已支持、多腿未支持**：tick 层一车可背多单（实测 `max_orders_per_robot=%s`），'

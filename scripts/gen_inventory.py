@@ -92,17 +92,29 @@ def build():
     empties.sort(key=lambda r: r["location_id"])
 
     rows = {}
+    sku_wh = {}                              # SKU → 已分配库位所在仓
     for r in assigned:
         rows[r["location_id"]] = {"sku": r["sku"], "role": "reserve", "source": "assigned"}
+        sku_wh[r["sku"]] = r["warehouse_id"]
 
-    # ---- 空库位 → A 类 SKU 的溢出储位（按速度降序轮转，保证确定性）
-    a_class = sorted((s for s in order_skus if sku_by_id[s].get("abc") == "A"),
-                     key=lambda s: (-float(sku_by_id[s].get("velocity") or 0), s))
-    if not a_class:                          # 兜底：没有 A 类就用全量
-        a_class = order_skus
-    for i, r in enumerate(empties):
-        rows[r["location_id"]] = {"sku": a_class[i % len(a_class)], "role": "reserve",
+    # ---- 空库位 → 同仓 A 类 SKU 的溢出储位（按速度降序轮转，保证确定性）
+    # **必须同仓**：空库位只在 W。若把 W 的空位派给一个"主储位在 F1"的 SKU，
+    # 就会出现"储备位 F1、拣选面 W"的跨仓配对，内部补货单要跨仓搬运 —— P6a 明确
+    # 不做多仓调拨，这种配对在引擎里会直接抛错（第一版就是这么被抓到的）。
+    a_class_all = sorted((s for s in order_skus if sku_by_id[s].get("abc") == "A"),
+                         key=lambda s: (-float(sku_by_id[s].get("velocity") or 0), s))
+    if not a_class_all:                      # 兜底：没有 A 类就用全量
+        a_class_all = list(order_skus)
+    cursor = {}
+    for r in empties:
+        wid = r["warehouse_id"]
+        pool = [s for s in a_class_all if sku_wh.get(s) == wid]
+        if not pool:
+            pool = [s for s in order_skus if sku_wh.get(s) == wid] or a_class_all
+        k = cursor.get(wid, 0)
+        rows[r["location_id"]] = {"sku": pool[k % len(pool)], "role": "reserve",
                                   "source": "overflow"}
+        cursor[wid] = k + 1
 
     # ---- 拣选面：每仓取"离该仓 OUTBOUND 月台最近"的溢出位，数量受 max_per_warehouse 限制
     outbound_anchor = {}

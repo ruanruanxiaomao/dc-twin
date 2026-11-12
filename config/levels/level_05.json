@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "id": "level_05",
+  "name": "库存：别断货，也别囤货",
+  "brief": "补货点是一个真实杠杆：调高少断货但占资金，调低省钱但可能断货。这一关同时考核两件事。",
+  "scenario": "../scenarios/baseline.json",
+  "initial_capital": 500000,
+  "objectives": [
+    {"metric": "operating_profit", "op": ">=", "value": 100, "primary": true,
+     "label": "经营利润 ≥ 100 元"},
+    {"metric": "fill_rate", "op": ">=", "value": 0.99, "primary": true,
+     "label": "满足率 ≥ 99%（发出的货不能缺）"},
+    {"metric": "holding_cost", "op": "<=", "value": 1.0, "primary": false,
+     "label": "持有成本 ≤ 1.0 元（别囤货）"}
+  ],
+  "stars": [
+    {"stars": 1, "require": [{"metric": "fill_rate", "op": ">=", "value": 0.99}]},
+    {"stars": 2, "require": [{"metric": "operating_profit", "op": ">=", "value": 200}]},
+    {"stars": 3, "require": [{"metric": "operating_profit", "op": ">=", "value": 200},
+                             {"metric": "holding_cost", "op": "<=", "value": 0.5}]}
+  ],
+  "lose_conditions": [
+    {"type": "bankrupt", "grace_s": 300},
+    {"type": "stockouts", "max": 0}
+  ],
+  "unlocks_on_win": [],
+  "carry_over": {"cash": true, "reputation": true, "unlocks": true},
+  "calibration": "2026-11-12 实测：baseline 正常库存下 stockout=0 / fill_rate=1.0 / holding≈2.59；默认补货点 factor=1 时持有成本已高于 1.0，玩家需用 SET_REORDER_POINT 下调因子才能达标——这正是本关的决策点"
+}

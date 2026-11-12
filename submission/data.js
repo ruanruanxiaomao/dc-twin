@@ -1,5 +1,5 @@
 window.DC_SUBMISSION = {
-  "generated_at": "2026-11-12T05:20:46+00:00",
+  "generated_at": "2026-11-12T14:11:29+00:00",
   "project": {
     "name": "配送中心数字孪生 · DC Twin Studio",
     "tagline": "从一张布局图纸，到可仿真、可算账、可定制的运营孪生",
@@ -26076,18 +26076,18 @@ window.DC_SUBMISSION = {
       "name": "大促：135 单每小时 / 4 小时 / 35 台 AGV",
       "metrics": {
         "orders_generated": 122,
-        "orders_completed": 65,
-        "orders_lost": 27,
-        "throughput_orders_per_h": 65.0,
-        "charge_events": 5,
-        "task_reassignments": 1,
-        "replans": 636,
+        "orders_completed": 63,
+        "orders_lost": 21,
+        "throughput_orders_per_h": 63.0,
+        "charge_events": 6,
+        "task_reassignments": 2,
+        "replans": 992,
         "fault_downtime_s": 0,
-        "idle_rate": 0.6405,
+        "idle_rate": 0.542,
         "max_queue_depth": 12,
         "agents": 35,
         "strict_collisions": 0,
-        "min_pair_distance_m": 1.4642,
+        "min_pair_distance_m": 1.4596,
         "multi_order_robots": 9,
         "availability": 1.0
       }
@@ -26200,7 +26200,7 @@ window.DC_SUBMISSION = {
   ],
   "pnl": [
     {
-      "run_id": "baseline/20261111T154242Z",
+      "run_id": "baseline/20261112T140654Z",
       "engine": "sim",
       "prices_source": "demo",
       "revenue": 192.9,
@@ -26232,7 +26232,7 @@ window.DC_SUBMISSION = {
       }
     },
     {
-      "run_id": "dock_blocked/20261111T154244Z",
+      "run_id": "dock_blocked/20261112T140656Z",
       "engine": "sim",
       "prices_source": "demo",
       "revenue": 165.6,
@@ -26264,39 +26264,39 @@ window.DC_SUBMISSION = {
       }
     },
     {
-      "run_id": "holiday/20261111T154246Z",
+      "run_id": "holiday/20261112T140659Z",
       "engine": "sim",
       "prices_source": "demo",
-      "revenue": 381.5,
-      "variable": 152.496308,
+      "revenue": 361.9,
+      "variable": 121.992299,
       "fixed": 902.239345,
-      "profit": -673.235653,
-      "orders": 65,
-      "breakeven": 257,
-      "per_order_profit": -10.357472,
+      "profit": -662.331644,
+      "orders": 63,
+      "breakeven": 237,
+      "per_order_profit": -10.513201,
       "sensitivity": {
         "energy_tariff_pm20": {
-          "low": -671.686391,
-          "base": -673.235653,
-          "high": -674.784915,
+          "low": -660.823184,
+          "base": -662.331644,
+          "high": -663.840104,
           "note": "电价 -20% / +20%"
         },
         "order_volume_pm20": {
-          "low": -720.585653,
-          "base": -673.235653,
-          "high": -625.885653,
+          "low": -711.821644,
+          "base": -662.331644,
+          "high": -612.841644,
           "note": "单量 -20% / +20%，固定成本不变"
         },
         "fleet_pm2": {
-          "low": -651.591817,
-          "base": -673.235653,
-          "high": -694.879489,
+          "low": -640.687808,
+          "base": -662.331644,
+          "high": -683.97548,
           "note": "车数 -2 / +2，只影响折旧与维护"
         }
       }
     },
     {
-      "run_id": "layout_variant_f4/20261111T154256Z",
+      "run_id": "layout_variant_f4/20261112T140724Z",
       "engine": "sim",
       "prices_source": "demo",
       "revenue": 184.8,
@@ -26328,7 +26328,7 @@ window.DC_SUBMISSION = {
       }
     },
     {
-      "run_id": "night/20261111T154259Z",
+      "run_id": "night/20261112T140727Z",
       "engine": "sim",
       "prices_source": "demo",
       "revenue": 20.4,
@@ -26360,7 +26360,7 @@ window.DC_SUBMISSION = {
       }
     },
     {
-      "run_id": "peak/20261111T154300Z",
+      "run_id": "peak/20261112T140728Z",
       "engine": "sim",
       "prices_source": "demo",
       "revenue": 320.5,
@@ -26392,7 +26392,7 @@ window.DC_SUBMISSION = {
       }
     },
     {
-      "run_id": "robot_failure/20261111T154304Z",
+      "run_id": "robot_failure/20261112T140734Z",
       "engine": "sim",
       "prices_source": "demo",
       "revenue": 189.1,
@@ -26424,7 +26424,7 @@ window.DC_SUBMISSION = {
       }
     },
     {
-      "run_id": "scale_50/20261111T154311Z",
+      "run_id": "scale_50/20261112T140741Z",
       "engine": "sim",
       "prices_source": "demo",
       "revenue": 220.8,
@@ -26578,7 +26578,7 @@ window.DC_SUBMISSION = {
       "icon": "SIM",
       "in": "sim_spec.json · 8 个场景配置",
       "out": "sim_events.jsonl · sim_kpi.json · sim_state.json",
-      "body": "离散事件引擎：泊松到达、在线派单、9 态 FSM、电量/充电、故障重派、反应式门控（到达互斥 + 车间距）；50 项 measured KPI。"
+      "body": "离散事件引擎：泊松到达、在线派单、9 态 FSM、电量/充电、故障重派、反应式门控（到达互斥 + 车间距）；56 项 measured KPI。"
     },
     {
       "n": "05",
@@ -26721,8 +26721,8 @@ window.DC_SUBMISSION = {
       {
         "group": "核心脚本",
         "path": "scripts/sim_engine.py",
-        "bytes": 84426,
-        "size": "82.4 KB",
+        "bytes": 142329,
+        "size": "139.0 KB",
         "note": "tick 级离散事件仿真引擎"
       },
       {
@@ -26770,15 +26770,15 @@ window.DC_SUBMISSION = {
       {
         "group": "核心脚本",
         "path": "scripts/animate.py",
-        "bytes": 6952,
+        "bytes": 6955,
         "size": "6.8 KB",
         "note": "Blender 关键帧动画"
       },
       {
         "group": "核心脚本",
         "path": "scripts/scenario_tools.py",
-        "bytes": 15976,
-        "size": "15.6 KB",
+        "bytes": 17631,
+        "size": "17.2 KB",
         "note": "自定义场景 校验/试算/保存/运行"
       },
       {
@@ -26847,8 +26847,8 @@ window.DC_SUBMISSION = {
       {
         "group": "报告 / 验收",
         "path": "out/manifest.json",
-        "bytes": 13600,
-        "size": "13.3 KB",
+        "bytes": 14739,
+        "size": "14.4 KB",
         "note": "58 个产物 + sidecar 哈希清单"
       },
       {
@@ -26868,7 +26868,7 @@ window.DC_SUBMISSION = {
       {
         "group": "报告 / 验收",
         "path": "out/validate_report.json",
-        "bytes": 7292,
+        "bytes": 7296,
         "size": "7.1 KB",
         "note": "A1–A40 逐条结果"
       },
@@ -26931,8 +26931,8 @@ window.DC_SUBMISSION = {
       {
         "group": "开源交付 / 文档",
         "path": "docs/GITHUB_REFERENCE_AUDIT.md",
-        "bytes": 13013,
-        "size": "12.7 KB",
+        "bytes": 14845,
+        "size": "14.5 KB",
         "note": "16 个仓库许可证对照审计"
       },
       {
@@ -26959,8 +26959,8 @@ window.DC_SUBMISSION = {
       {
         "group": "开源交付 / 文档",
         "path": "CHANGELOG.md",
-        "bytes": 26929,
-        "size": "26.3 KB",
+        "bytes": 35241,
+        "size": "34.4 KB",
         "note": "版本记录"
       },
       {
@@ -26987,8 +26987,8 @@ window.DC_SUBMISSION = {
       {
         "group": "开源交付 / 文档",
         "path": "console/server.py",
-        "bytes": 49207,
-        "size": "48.1 KB",
+        "bytes": 54086,
+        "size": "52.8 KB",
         "note": "本地控制台服务"
       },
       {
@@ -27485,8 +27485,56 @@ window.DC_SUBMISSION = {
       "source": "sim_engine measured"
     },
     {
+      "key": "stockout_count",
+      "value": 0,
+      "unit": "times",
+      "definition": "缺货次数（库存不足导致订单未完成）",
+      "formula": "count(STOCKOUT)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "fill_rate",
+      "value": 1.0,
+      "unit": "ratio",
+      "definition": "实发件数 / 请求件数（缺货与部分交付都会拉低）",
+      "formula": "sum(STOCK_DECREMENT.qty)/sum(requested)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "holding_cost",
+      "value": 2.538168,
+      "unit": "CNY",
+      "definition": "持有成本（按仿真小时计提，不含采购）",
+      "formula": "Σ on_hand_value × holding_rate_per_year × dt/8760",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "inventory_value",
+      "value": 92619.53,
+      "unit": "CNY",
+      "definition": "库存占用资金（资产侧展示，不进 P&L）",
+      "formula": "Σ qty × unit_cost",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "reorder_triggers",
+      "value": 0,
+      "unit": "times",
+      "definition": "补货触发次数",
+      "formula": "count(REORDER_TRIGGERED)",
+      "source": "sim_engine measured"
+    },
+    {
+      "key": "inventory_enabled",
+      "value": 1,
+      "unit": "bool",
+      "definition": "本场景是否装载了库存层（缺数据时为 0）",
+      "formula": "inventory_slotting.json 存在且已装载",
+      "source": "sim_engine measured"
+    },
+    {
       "key": "wall_clock_s",
-      "value": 2.283,
+      "value": 2.674,
       "unit": "s",
       "definition": "Wall clock",
       "formula": "time.time() delta",
@@ -27630,7 +27678,7 @@ window.DC_SUBMISSION = {
         "queue": 0
       }
     ],
-    "total": 933,
+    "total": 983,
     "types": [
       {
         "type": "ENERGY_TICK",
@@ -27677,12 +27725,24 @@ window.DC_SUBMISSION = {
         "count": 28
       },
       {
+        "type": "STOCK_DECREMENT",
+        "count": 27
+      },
+      {
         "type": "DOCK_RESERVED",
         "count": 23
       },
       {
         "type": "DOCK_HANDOFF",
         "count": 23
+      },
+      {
+        "type": "STOCK_RECEIPT",
+        "count": 15
+      },
+      {
+        "type": "HOLDING_ACCRUED",
+        "count": 6
       },
       {
         "type": "CHARGE_START",
@@ -27694,6 +27754,10 @@ window.DC_SUBMISSION = {
       },
       {
         "type": "STATION_QUEUED",
+        "count": 2
+      },
+      {
+        "type": "STOCK_REPLENISH_ARRIVED",
         "count": 2
       },
       {
@@ -27710,7 +27774,7 @@ window.DC_SUBMISSION = {
     "sample": [
       {
         "source_event_seq": 5,
-        "run_id": "baseline/20261111T154242Z",
+        "run_id": "baseline/20261112T140654Z",
         "t_s": 110.0,
         "account": "Cost:Variable:Energy",
         "amount": 0.011204,
@@ -27722,7 +27786,7 @@ window.DC_SUBMISSION = {
       },
       {
         "source_event_seq": 12,
-        "run_id": "baseline/20261111T154242Z",
+        "run_id": "baseline/20261112T140654Z",
         "t_s": 120.0,
         "account": "Cost:Variable:Energy",
         "amount": 0.005995,
@@ -27734,7 +27798,7 @@ window.DC_SUBMISSION = {
       },
       {
         "source_event_seq": 15,
-        "run_id": "baseline/20261111T154242Z",
+        "run_id": "baseline/20261112T140654Z",
         "t_s": 130.0,
         "account": "Cost:Variable:Energy",
         "amount": 0.00524,
@@ -27746,7 +27810,7 @@ window.DC_SUBMISSION = {
       },
       {
         "source_event_seq": 16,
-        "run_id": "baseline/20261111T154242Z",
+        "run_id": "baseline/20261112T140654Z",
         "t_s": 140.0,
         "account": "Cost:Variable:Energy",
         "amount": 0.002243,
@@ -27758,7 +27822,7 @@ window.DC_SUBMISSION = {
       },
       {
         "source_event_seq": 17,
-        "run_id": "baseline/20261111T154242Z",
+        "run_id": "baseline/20261112T140654Z",
         "t_s": 150.0,
         "account": "Cost:Variable:Energy",
         "amount": 0.002243,
@@ -27770,7 +27834,7 @@ window.DC_SUBMISSION = {
       },
       {
         "source_event_seq": 21,
-        "run_id": "baseline/20261111T154242Z",
+        "run_id": "baseline/20261112T140654Z",
         "t_s": 160.0,
         "account": "Cost:Variable:Energy",
         "amount": 0.011015,
@@ -27782,7 +27846,7 @@ window.DC_SUBMISSION = {
       },
       {
         "source_event_seq": 25,
-        "run_id": "baseline/20261111T154242Z",
+        "run_id": "baseline/20261112T140654Z",
         "t_s": 170.0,
         "account": "Cost:Variable:Energy",
         "amount": 0.022541,
@@ -27794,7 +27858,7 @@ window.DC_SUBMISSION = {
       },
       {
         "source_event_seq": 26,
-        "run_id": "baseline/20261111T154242Z",
+        "run_id": "baseline/20261112T140654Z",
         "t_s": 180.0,
         "account": "Cost:Variable:Energy",
         "amount": 0.022643,
@@ -27806,7 +27870,7 @@ window.DC_SUBMISSION = {
       },
       {
         "source_event_seq": 27,
-        "run_id": "baseline/20261111T154242Z",
+        "run_id": "baseline/20261112T140654Z",
         "t_s": 190.0,
         "account": "Cost:Variable:Energy",
         "amount": 0.022643,
@@ -27818,7 +27882,7 @@ window.DC_SUBMISSION = {
       },
       {
         "source_event_seq": 32,
-        "run_id": "baseline/20261111T154242Z",
+        "run_id": "baseline/20261112T140654Z",
         "t_s": 200.0,
         "account": "Cost:Variable:Energy",
         "amount": 0.028289,
@@ -28241,7 +28305,7 @@ window.DC_SUBMISSION = {
       {
         "id": "A22 四层配置与 schema 合法",
         "status": "PASS",
-        "detail": "config_files=20 解析失败=[]；L1 issues=0；spec verdict=PASS"
+        "detail": "config_files=22 解析失败=[]；L1 issues=0；spec verdict=PASS"
       },
       {
         "id": "A23 spec 展开确定性（两次 + 落盘一致）",
@@ -28306,7 +28370,7 @@ window.DC_SUBMISSION = {
       {
         "id": "A35 50 车场景 plan_wall_clock <300 s",
         "status": "PASS",
-        "detail": "fleet=50 wall_clock=0.043s"
+        "detail": "fleet=50 wall_clock=0.044s"
       },
       {
         "id": "A36 改 seed 后展开结果改变",
@@ -28331,14 +28395,14 @@ window.DC_SUBMISSION = {
       {
         "id": "A40 全新空目录复现数据层（无 .venv）",
         "status": "PASS",
-        "detail": "steps=9/9 identical=8/8"
+        "detail": "steps=10/10 identical=11/11"
       }
     ],
     "S": [
       {
         "id": "S1",
         "status": "PASS",
-        "detail": "determinism: two independent 900 s runs, 309 events each, byte-identical=True"
+        "detail": "determinism: two independent 900 s runs, 326 events each, byte-identical=True"
       },
       {
         "id": "S2",
@@ -28353,7 +28417,7 @@ window.DC_SUBMISSION = {
       {
         "id": "S2",
         "status": "PASS",
-        "detail": "energy conservation: window sum vs terminal state: err_out=0.0000% err_in=0.0000% max soc residual=0.000127 kWh"
+        "detail": "energy conservation: window sum vs terminal state: err_out=0.0000% err_in=0.0000% max soc residual=0.000001 kWh"
       },
       {
         "id": "S2",
@@ -28408,7 +28472,7 @@ window.DC_SUBMISSION = {
       {
         "id": "S8",
         "status": "PASS",
-        "detail": "KPI provenance: 50 metrics, 0 missing triplets, 0 recomputation mismatches"
+        "detail": "KPI provenance: 56 metrics, 0 missing triplets, 0 recomputation mismatches"
       },
       {
         "id": "X1",
@@ -28515,17 +28579,17 @@ window.DC_SUBMISSION = {
       {
         "id": "holiday/F2",
         "status": "PASS",
-        "detail": "posting traceability: 519 postings, 10 sampled revenue rows, 0 issues"
+        "detail": "posting traceability: 509 postings, 10 sampled revenue rows, 0 issues"
       },
       {
         "id": "holiday/F4",
         "status": "PASS",
-        "detail": "energy: events=9.113313 kWh ledger=9.113304 kWh state=9.113315 kWh, err=0.0001%/0.0000%"
+        "detail": "energy: events=8.873325 kWh ledger=8.873293 kWh state=8.873326 kWh, err=0.0004%/0.0000%"
       },
       {
         "id": "holiday/F5",
         "status": "PASS",
-        "detail": "breakeven=257 orders x 3.5231 contribution vs 902.24 fixed"
+        "detail": "breakeven=237 orders x 3.8081 contribution vs 902.24 fixed"
       },
       {
         "id": "holiday/F6",
@@ -28745,7 +28809,7 @@ window.DC_SUBMISSION = {
         "target_check": "S8",
         "tampered_run_status": "FAIL",
         "status": "PASS",
-        "detail": "KPI provenance: 50 metrics, 0 missing triplets, 1 recomputation mismatches"
+        "detail": "KPI provenance: 56 metrics, 0 missing triplets, 1 recomputation mismatches"
       }
     ],
     "negative_pnl": [
