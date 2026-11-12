@@ -32,6 +32,30 @@ def chain_steps():
         return {}, "读取 dc_twin.runner 失败：%r" % (exc,)
 
 
+from pathlib import Path  # noqa: E402  (art_count 需要 Path)
+
+
+def art_count():
+    """现算 manifest 会收录的产物数，**不读 manifest.json**。
+
+    读 manifest 会制造循环依赖：manifest 要哈希 CURRENT_STATUS.md，而状态表又要
+    引用 manifest 的计数 → "先跑谁"都有一边过期，文件每轮都变脏（实测就是
+    "83 → 91" 这种差一个周期的数字）。自己按同一套规则数，断掉这个环。
+    """
+    root = Path(OUT)          # 本文件里 OUT 是字符串（历史原因），这里显式转
+    n = 0
+    for p in sorted(root.rglob('*')):
+        if not p.is_file() or p.name == 'manifest.json' or p.name.endswith('.meta.json'):
+            continue
+        parts = p.relative_to(root).parts
+        if ('frames' in parts or p.suffix in ('.blend1', '.blend2')
+                or p.name in ('manifest_check.json', 'junit.xml',
+                              'validate_data_check_report.json')):
+            continue
+        n += 1
+    return n
+
+
 def inventory_facts():
     """库存层可核查事实：SKU / 库位 / 拣选面 / 期初总量 / 补货触发（从产物现算）。"""
     out = {"skus": 0, "locations": 0, "pick_face": 0, "units": 0, "value": 0.0,
@@ -307,7 +331,7 @@ def main():
             steps.get('data', 'n/a'), steps.get('scenarios', 'n/a'),
             steps.get('full', 'n/a'), steps.get('game', 'n/a'),
             man.get('counts', {}).get('report_sidecars'),
-            man.get('counts', {}).get('artifacts'),
+            art_count(),
             demo_man.get('scenarios'), demo_man.get('agents'))),
         ('游戏层', '关卡 %s 个 / 目标 %s 条 / 8 类玩家命令（已实现 %s，占位 %s）/ '
                    '存档槽 %s 个 / ADR %s 篇；批跑产物逐字节不变见 `scripts/step_baseline.py`'
