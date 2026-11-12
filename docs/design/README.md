@@ -16,3 +16,20 @@ work, not deliverables, and their conclusions are already incorporated in
 
 Historical numbers in the project report are **snapshots**. Current measured
 values are generated from JSON into [`out/CURRENT_STATUS.md`](../../out/CURRENT_STATUS.md).
+
+## Game-layer ADRs (2026-11-12)
+
+`模拟运营游戏改造计划报告.md` §6 produced seven decisions; section §2.3 of the
+execution plan added an eighth once the override whitelist turned out to
+contradict the engine. They are recorded here because the *reasons* outlive the code:
+
+| ADR | Decision | Still constrains |
+|---|---|---|
+| [GAME-01](ADR-GAME-01.md) | Wrap, do not rewrite | every future change: A1–A40 + byte-identical batch output |
+| [GAME-02](ADR-GAME-02.md) | Server-authoritative clock, front end renders | no local time logic, no local money in `app.js` / `game.js` |
+| [GAME-03](ADR-GAME-03.md) | Commands applied at tick boundaries | unknown command / bad payload must raise |
+| [GAME-04](ADR-GAME-04.md) | One source of truth for the books | fixed cost accrued hourly, never also at `RUN_SETTLED` |
+| [GAME-05](ADR-GAME-05.md) | Snapshot to resume, event log to audit | snapshots must be complete; `restore` refuses mismatches |
+| [GAME-06](ADR-GAME-06.md) | GPL reference isolation | reference projects inform design only |
+| [GAME-07](ADR-GAME-07.md) | Level = scenario + business objectives | objectives stay separate from `assertions` |
+| [GAME-08](ADR-GAME-08.md) | Override whitelist derives from the engine | never keep a second copy of policy names |

@@ -89,6 +89,7 @@
         <button data-tab="orders">订单</button>
         <button data-tab="kpi">指标</button>
         <button data-tab="ops">运营</button>
+        <button data-tab="game">游戏</button>
         <button data-tab="scenarios">场景</button>
       </div>
       <div class="tab-row">
@@ -256,6 +257,10 @@
         <iframe id="planFrame" title="计划书"></iframe>
       </div>
 
+      <div class="pane" id="pane-game">
+        <div class="pane-sub">加载中…</div>
+      </div>
+
       <div class="pane" id="pane-scenarios">
         <div class="pane-sub">场景列表（内置 8 个冻结，自定义存于 config/scenarios/custom/）</div>
         <div class="list" id="scenList"></div>
@@ -294,6 +299,7 @@
 
 <script src="/static/areas.js"></script>
 <script src="/static/app.js"></script>
+<script src="/static/game.js"></script>
 <script src="/static/ops.js"></script>
 </body>
 </html>

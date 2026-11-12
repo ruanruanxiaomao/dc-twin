@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dc-twin.local/schemas/level.schema.json",
+  "title": "Level spec（关卡 = 场景 + 经营目标 + 胜负 + 星级 + 元进度）",
+  "type": "object",
+  "required": ["schema_version", "id", "name", "scenario", "initial_capital", "objectives", "stars"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,39}$"},
+    "name": {"type": "string", "minLength": 1},
+    "brief": {"type": "string"},
+    "scenario": {"type": "string", "pattern": "^\\.\\./scenarios/[A-Za-z0-9_-]+\\.json$"},
+    "initial_capital": {"type": "number", "exclusiveMinimum": 0},
+    "objectives": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["metric", "op", "value"],
+        "properties": {
+          "metric": {"type": "string"},
+          "op": {"enum": ["==", "!=", ">=", "<=", ">", "<"]},
+          "value": {"type": "number"},
+          "primary": {"type": "boolean"},
+          "label": {"type": "string"}
+        }
+      }
+    },
+    "stars": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["stars", "require"],
+        "properties": {
+          "stars": {"type": "integer", "minimum": 1, "maximum": 3},
+          "require": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["metric", "op", "value"],
+              "properties": {
+                "metric": {"type": "string"},
+                "op": {"enum": ["==", "!=", ">=", "<=", ">", "<"]},
+                "value": {"type": "number"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "lose_conditions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type"],
+        "properties": {
+          "type": {"enum": ["bankrupt"]},
+          "grace_s": {"type": "number", "minimum": 0}
+        }
+      }
+    },
+    "unlocks_on_win": {"type": "array", "items": {"type": "string"}},
+    "carry_over": {
+      "type": "object",
+      "properties": {
+        "cash": {"type": "boolean"},
+        "reputation": {"type": "boolean"},
+        "unlocks": {"type": "boolean"}
+      }
+    },
+    "calibration": {"type": "string"}
+  }
+}

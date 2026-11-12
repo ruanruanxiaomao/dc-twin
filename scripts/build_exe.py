@@ -33,6 +33,7 @@ import shutil
 import subprocess
 import sys
 import time
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -201,6 +202,25 @@ def stage_payload(app_dir: Path) -> dict:
     return {"files": files, "scenarios": scen, "run_files": run_files}
 
 
+def make_release_zip(app_dir: Path) -> dict:
+    """把 `dist/DC Twin` 打成发布 zip —— **脚本化，不手搓**。
+
+    这条是补漏：之前 `dist/DC-Twin-win64.zip` 是人工打的，游戏层落地后没人重打，
+    结果压缩包里 506 个条目里一条 `game*` 都没有（时间戳停在 13:23，代码是 19:35）。
+    发布件与源码不匹配，比没发布更糟：用户下到的是旧功能，而 CHANGELOG 说已实现。
+    """
+    zpath = DIST_ROOT / ("%s-win64.zip" % APP_NAME.replace(" ", "-"))
+    if zpath.exists():
+        zpath.unlink()
+    n = 0
+    with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as z:
+        for f in sorted(app_dir.rglob("*")):
+            if f.is_file():
+                z.write(f, f.relative_to(app_dir.parent).as_posix())
+                n += 1
+    return {"path": zpath, "files": n, "bytes": zpath.stat().st_size}
+
+
 def dir_size(p: Path) -> int:
     return sum(f.stat().st_size for f in p.rglob("*") if f.is_file())
 
@@ -268,6 +288,10 @@ def main(argv=None) -> int:
         if rc != 0:
             print("自检未通过，先别发出去", file=sys.stderr)
             return rc
+
+    z = make_release_zip(APP_DIR)
+    print("发布包：%s（%d 个文件 / %.0f MB）"
+          % (z["path"].name, z["files"], z["bytes"] / 1048576))
     return 0
 
 

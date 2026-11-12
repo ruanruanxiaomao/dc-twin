@@ -5,12 +5,12 @@
 
 | 指标 | 当前值 |
 |---|---|
-| 生成时间 | 2026-11-12 13:20:47 |
+| 生成时间 | 2026-11-12 20:20:40 |
 | Blender | 5.2.3 LTS |
 | 布局来源 | config/layout_spec.json → spec_layout.py（L1–L13 PASS，issues=0 warnings=148；38 扇门） |
 | AP 互斥 | 148 对（WARN，两 AP <2R 不能同时占用）；预约表复核同时占用 0 次；加宽变体互斥 29 对 |
-| 四层配置 | layout_spec / fleet_spec / demand_spec / 8 个 scenarios + 7 份 schema；4 个布局 spec（当前 / areas / f4 / wide）；本次审计 4 个变体，均 PASS |
-| 场景/KPI | 8 个冻结场景（config/scenarios）× 18 次运行；解析层 25 项 KPI + tick 层 50 项 KPI（去重 65 项），每项带 definition/formula/source |
+| 四层配置 | layout_spec / fleet_spec / demand_spec / 8 个 scenarios + 8 份 schema；4 个布局 spec（当前 / areas / f4 / wide）；本次审计 4 个变体，均 PASS |
+| 场景/KPI | 8 个冻结场景（config/scenarios）× 119 次运行；解析层 25 项 KPI + tick 层 50 项 KPI（去重 65 项），每项带 definition/formula/source |
 | 布局 | 4 仓 / 196 货架 / 441 库位（392 SHELF + 21 HOME）/ 10 月台 / 6 站 / 21 AGV |
 | 布局审计 | issues=0 warnings=0 verdict=PASS |
 | 功能区 | 21 个（物理 3 / 逻辑 18）；种类 BATTERY×1/EMPTY_CONTAINER×1/PACKING×2/PICK_FACE×4/QA×1/RECEIVING×1/REPLENISH×1/RETURNS×1/SORTING×1/STAGING_IN×4/STAGING_OUT×4；见 data/areas.json |
@@ -32,7 +32,8 @@
 | 车队/交通复核 | 状态迁移 147 次/非法 0；最低电量 53.986%；预约表顶点 0 / 边交换 0 |
 | 数据适配/复现 | CSV 24 行 schema=PASS；全新空目录复现 9/9 步、8 份 JSON 逐字节一致 |
 | 验收 | 40/40 PASS（A1–A40）；负测试 17/17（3 个测试文件） |
-| 开源交付层 | dc CLI 7 命令 / 31 步链（data 11 · scenarios 16 · full 31）；输出契约 sidecar 37 份 / manifest 75 个产物；静态 Demo 8 个场景 · 21 台车 |
+| 开源交付层 | dc CLI 7 命令 / 45 步链（data 13 · scenarios 23 · full 45；game 3 步＝逐字节基准 + 游戏测试 + 浏览器点击流）；输出契约 sidecar 38 份 / manifest 79 个产物；静态 Demo 8 个场景 · 21 台车 |
+| 游戏层 | 关卡 4 个 / 目标 12 条 / 8 类玩家命令（已实现 6，占位 BUILD_STATION、MANUAL_ASSIGN）/ 存档槽 1 个 / ADR 8 篇；批跑产物逐字节不变见 `scripts/step_baseline.py` |
 | 分档验收 | data tier 12/12 PASS；pytest -m "not blender" 与 CI 矩阵见 `.github/workflows/ci.yml` |
 
 ## 仍保留的边界（如实声明）

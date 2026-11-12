@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "id": "level_03",
+  "name": "坏车：策略比车更重要",
+  "brief": "车会坏。派单规则和电量保留留得太紧，坏一台车就能把准时率拖下去。",
+  "scenario": "../scenarios/robot_failure.json",
+  "initial_capital": 550000,
+  "objectives": [
+    {"metric": "operating_profit", "op": ">=", "value": 100, "primary": true,
+     "label": "经营利润 ≥ 100 元"},
+    {"metric": "on_time_rate", "op": ">=", "value": 0.90, "primary": true,
+     "label": "准时率 ≥ 90%（坏车仍要守住）"},
+    {"metric": "deadlock_yields", "op": ">=", "value": 0, "primary": false,
+     "label": "记录一次退让（可观测）"}
+  ],
+  "stars": [
+    {"stars": 1, "require": [{"metric": "operating_profit", "op": ">=", "value": 100}]},
+    {"stars": 2, "require": [{"metric": "operating_profit", "op": ">=", "value": 180}]},
+    {"stars": 3, "require": [{"metric": "operating_profit", "op": ">=", "value": 180},
+                             {"metric": "on_time_rate", "op": ">=", "value": 0.97}]}
+  ],
+  "lose_conditions": [{"type": "bankrupt", "grace_s": 300}],
+  "unlocks_on_win": ["level_04"],
+  "carry_over": {"cash": true, "reputation": true, "unlocks": true},
+  "calibration": "2026-11-12 实测：robot_failure 完成 37 单 / 准时率 0.973 / 经营利润 185.9 元"
+}

@@ -4,6 +4,122 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] — 模拟运营游戏层（P0–P5 第一轮）
+
+The twin could only be watched: `run()` was a single `while` loop from t=0 to
+`horizon`, money was settled after the fact, and the front end scrubbed a
+pre-computed keyframe track. This round wraps the *same* deterministic engine
+in a game layer without touching its arithmetic.
+
+**Every existing gate still passes: A1–A40 40/40, 17 negative tests, KPI golden,
+and the batch event stream is byte-identical (`step_baseline --check`).**
+
+### Added
+
+- **`scripts/step_baseline.py` + `tests/golden/step_baseline.json`.** Freezes
+  `sim_events/sim_kpi/sim_state` per scenario and compares **byte for byte**
+  (only `run_id` and `wall_clock_s` normalised, since those must change). This is
+  the gate that proves `run()` → `step()` changed nothing; `--self-test` proves
+  the gate can fail.
+- **`Simulation.step()` / `_init_run()` / `_finalize()`.** The old `while`
+  body moved verbatim, including the idle tick-jump. `run()` is now
+  `init → while not step() → finalize`, and refuses to re-init a resumed sim.
+- **Player command queue** (`enqueue_command` / `_apply_commands`, tick-boundary
+  application). `SET_POLICY`, `SET_DEMAND`, `BUY_AGV`, `SELL_AGV`, `SET_PRICE`,
+  `INJECT_FAULT` work; unknown types and bad payloads raise.
+- **Snapshot primitives**: `Mulberry32.state()/from_state()`,
+  `Robot.serialize()/deserialize()` (33 fields), `EventLog.snapshot()/restore()`
+  which reopens **append** and refuses a log whose last seq disagrees.
+- **`Simulation.snapshot()` / `restore()`** — full resumable state; restoring and
+  continuing produces the same event bytes as running straight through.
+- **`console/game.py`** — game session + Fix-Your-Timestep wall-clock loop
+  (`speed ∈ {1,2,4,8}`, pause zeroes the accumulator), command/save/load APIs.
+- **`/api/game/*`** — start / pause / speed / command / state / save / load /
+  fast-forward / levels / stop. HUD state is ~kilobytes, not the whole event log.
+- **`scripts/game_economy.py`** — live cash, postings shared with `ledger.py`
+  (`(source_event_seq, account)` idempotency), fixed cost accrued **per sim hour**
+  (so it is *not* double-posted at `RUN_SETTLED`), bankruptcy after a grace period.
+- **`scripts/game_levels.py` + `config/levels/*.json` + level schema** — 4 levels
+  calibrated against measured runs, objectives (not assertions), 1–3 stars by
+  rule, unlocks + `saves/meta.json` meta-progress.
+- **`scripts/game_save.py`** — atomic save slots, rejects corrupt/version-mismatched
+  saves, restores by continuing the *same* event log.
+- **Front end**: `console/static/game.js` + a 游戏 tab. Play/pause/speed now talk
+  to the server; the 3D sampler reads live positions; replay stays intact.
+- `scripts/dc_root.py` — one root resolver; frozen builds resolve to the exe dir.
+- **`scripts/check_live.py` + `scripts/live_probe.mjs`** — a real browser click-path
+  (Edge/Chrome over CDP, Node 22's built-in `WebSocket`, zero extra deps):
+  start → HUD numbers → clock runs → pause holds → resume → 2× → save → load →
+  buy until cash goes negative. This is `LIVE_OK`; wiring tests alone could not
+  prove "the button actually does something".
+- **`dc run --scope game`** — new chain: byte-level step baseline + game tests +
+  browser click-path. Kept out of `full` so CI without a browser still passes.
+- `tests/run_game_tests.py` — one entry point listing the game test files, so the
+  chain does not drift when tests are added.
+
+### Changed
+
+- **`scenario_tools.validate_scenario`** now accepts `dispatch.policy`,
+  `battery.charge_policy`, `dispatch.battery_reserve_pct` with value checks
+  derived from the engine's own tables. Before this, the engine read those keys
+  but the validator rejected them, so "policy = scenario" was not actually true.
+- `config/economy_spec.json` introduces `tariff_multiplier = 5.0`: demo prices
+  make every scenario loss-making at 45 orders/h (revenue ¥193 vs ¥751 of fixed
+  cost), so levels would be unwinnable. The multiplier is labelled
+  `prices_source=game_balance` in the HUD and the post-hoc ledger still uses the
+  demo prices — the two numbers must never be mixed.
+- `check_exe.py` now walks the game chain (start → tick → pause → command → save →
+  load) inside the packaged exe, because `game_*` modules are imported lazily and
+  PyInstaller can silently drop them.
+- **`report_status.py` no longer hardcodes the pipeline length.** It printed
+  "31 步链（data 11 · scenarios 16 · full 31）" while the runner was 45 — now both the
+  step counts and the new game-layer row (levels / objectives / commands / slots /
+  ADRs) are computed from `dc_twin.runner` and the files on disk.
+- **`check_claims.py` now scans `out/CURRENT_STATUS.md`** — the "single source of
+  truth" was not in the guard's target list, which is exactly how a wrong step
+  count survived. Adds a "N 步链" rule and a data/scenarios/full triple check;
+  verified by re-injecting the old text (guard reports 2 problems).
+- **`build_exe.py` now produces the release zip itself** (`dist/DC-Twin-win64.zip`).
+  It used to be packed by hand, so after the game layer landed the zip still had
+  506 entries and **zero game files** — a release that quietly shipped the old
+  feature set while the CHANGELOG said otherwise.
+
+### Fixed
+
+- **Snapshot taken with unflushed event log** (surfaced only in the packaged exe:
+  few events, buffer not full → `load` reported "log seq=0 vs snapshot seq=4").
+  `EventLog.snapshot()` now flushes first.
+- **`run()` after `step()` silently restarted the sim** (t reset to 0, seq doubled).
+  `run()` initialises only when the sim has not started; `restore()` marks it started.
+- **Robot snapshots were missing `charger_id`** (the plan's field list omitted it):
+  every restored robot would have queued for the same charger.
+- **Frozen builds resolved `config/` inside the unpack temp dir**, so the exe said
+  "no such scenario: baseline". All modules now share `dc_root.project_root()`.
+- **Loading a save left the game frozen.** `/api/game/load` only started the tick
+  thread when `paused=false`, so pressing "继续" after a load did nothing — the flag
+  was cleared but nobody was reading it. The thread now always starts; `paused`
+  is just a gate. (Found by the browser click-path, not by unit tests.)
+- **`GameSession.start()` reset a loaded save to `t=0`** — it called `_init_run()`
+  unconditionally. Same bug class as `run()`, fixed the same way: only initialise
+  when the sim has not started. A regression test waits on the real thread.
+- `game_save.save_session` crashed when the slot dir was outside the project root
+  (`relative_to` ValueError); it now falls back to an absolute path.
+
+### Verified
+
+| Gate | Evidence |
+|---|---|
+| `ENV_OK` | `dc doctor` PASS (17 checks); `.venv` on Python 3.14.6 |
+| `BASELINE_OK` | 65 pytest, A1–A40 40/40, 17 negatives, KPI golden |
+| `STEP_OK` | 8 scenarios × 3 artefacts byte-identical; gate proven fallible |
+| `CMD_OK` | same seed + same command stream → identical event bytes |
+| `GAME_OK` | live ticking, pause holds `t_s`, 120 concurrent commands all applied |
+| `ECON_OK` | Δcash == Σcredit − Σdebit − fixed accrual (1e-6); bankruptcy fires |
+| `LEVEL_OK` | win/lose/stars/unlock, plus failure cases |
+| `SAVE_OK` | restore-and-continue == uninterrupted run (byte-identical) |
+| `LIVE_OK` | browser click-path (14 steps): HUD, clock, pause, resume, 2×, save, load, bankruptcy |
+| `EXE_OK` | packaged exe: all read APIs + `game/*` chain pass; release zip rebuilt from it |
+
 ## [0.13.0] - 2026-11-12
 
 Trucks were scenery: two box shapes parked on the yard lane, never at a dock,

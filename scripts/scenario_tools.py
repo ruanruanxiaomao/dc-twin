@@ -46,7 +46,21 @@ RANGES = {
     "demand.orders.per_hour": (1, 1000),
     "fleet.size": (1, 200),
     "sim.horizon_s": (60, 7200),
+    "dispatch.battery_reserve_pct": (0, 95),
 }
+
+# 策略层的取值来源必须与引擎同源，否则"校验放行的策略"和"引擎认识的策略"会分叉。
+# 这正是 R10 的成因：引擎读 overrides["dispatch.policy"]，校验却把该键判成非法，
+# 于是玩家把策略存进场景就存不下——"存策略 = 存场景"这句话在代码里是假的。
+try:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from sim_engine import CHARGE_POLICIES, DISPATCH_RULES  # noqa: E402
+    DISPATCH_POLICIES = tuple(sorted(DISPATCH_RULES))
+    CHARGE_POLICY_NAMES = tuple(CHARGE_POLICIES)
+except Exception:                                   # pragma: no cover - 兜底不该发生
+    DISPATCH_POLICIES = ("nearest_first", "farthest_first", "highest_soc",
+                         "lowest_soc", "least_completed")
+    CHARGE_POLICY_NAMES = ("opportunistic", "threshold")
 
 
 def jload(p):
@@ -162,7 +176,11 @@ def validate_scenario(obj):
         issues.append("overrides must be an object")
     else:
         allowed = {"demand.orders.per_hour", "fleet.size", "fleet.deployment",
-                   "demand.orders.mix", "fleet.deployment.count"}
+                   "demand.orders.mix", "fleet.deployment.count",
+                   # 策略层（R10）：引擎 __init__ 已经在读这三个键，校验必须放行，
+                   # 否则"把策略存进场景"会被自己的校验拒掉。
+                   "dispatch.policy", "battery.charge_policy",
+                   "dispatch.battery_reserve_pct"}
         for k, v in ov.items():
             if k not in allowed:
                 issues.append("override '%s' is not whitelisted" % k)
@@ -170,6 +188,12 @@ def validate_scenario(obj):
                                   or isinstance(v, bool)
                                   or not RANGES[k][0] <= v <= RANGES[k][1]):
                 issues.append("override '%s' outside %s" % (k, RANGES[k]))
+            elif k == "dispatch.policy" and v not in DISPATCH_POLICIES:
+                issues.append("override 'dispatch.policy' must be one of %s"
+                              % list(DISPATCH_POLICIES))
+            elif k == "battery.charge_policy" and v not in CHARGE_POLICY_NAMES:
+                issues.append("override 'battery.charge_policy' must be one of %s"
+                              % list(CHARGE_POLICY_NAMES))
             if k == "demand.orders.mix":
                 if not isinstance(v, dict) or set(v) != set(MIX_KEYS):
                     issues.append("mix must contain exactly %s" % list(MIX_KEYS))

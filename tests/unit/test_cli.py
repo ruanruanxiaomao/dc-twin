@@ -23,10 +23,13 @@ def test_doctor_collect_is_pass_and_has_checks():
 
 
 def test_scopes_have_expected_step_counts_and_are_ordered():
-    assert set(runner.SCOPES) == {"data", "scenarios", "full"}
+    assert set(runner.SCOPES) == {"data", "scenarios", "game", "full"}
     assert len(runner.SCOPES["data"]) == 13   # + spec_areas / check_process
     assert len(runner.SCOPES["scenarios"]) > len(runner.SCOPES["data"])
     assert len(runner.SCOPES["full"]) > len(runner.SCOPES["scenarios"])
+    # 游戏门是独立一条链：不进 full（CI 可能没有浏览器），但必须有
+    assert len(runner.SCOPES["game"]) >= 3
+    assert runner.SCOPES["game"] != runner.SCOPES["full"]
     full = runner.build_steps("full", None)
     assert full[0][0] == "scripts/spec_layout.py"
     assert full[-1][0] == "scripts/manifest.py"

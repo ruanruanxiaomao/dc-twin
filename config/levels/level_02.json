@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "id": "level_02",
+  "name": "高峰：单价与单量的取舍",
+  "brief": "单量翻三倍，车队从 21 台加到 28 台。能不能吃下峰值，取决于你敢不敢加车。",
+  "scenario": "../scenarios/peak.json",
+  "initial_capital": 600000,
+  "objectives": [
+    {"metric": "operating_profit", "op": ">=", "value": 500, "primary": true,
+     "label": "经营利润 ≥ 500 元"},
+    {"metric": "on_time_rate", "op": ">=", "value": 0.95, "primary": true,
+     "label": "准时率 ≥ 95%"},
+    {"metric": "orders_completed", "op": ">=", "value": 60, "primary": false,
+     "label": "完成 ≥ 60 单"}
+  ],
+  "stars": [
+    {"stars": 1, "require": [{"metric": "operating_profit", "op": ">=", "value": 500}]},
+    {"stars": 2, "require": [{"metric": "operating_profit", "op": ">=", "value": 700}]},
+    {"stars": 3, "require": [{"metric": "operating_profit", "op": ">=", "value": 700},
+                             {"metric": "orders_completed", "op": ">=", "value": 65}]}
+  ],
+  "lose_conditions": [{"type": "bankrupt", "grace_s": 300}],
+  "unlocks_on_win": ["level_03"],
+  "carry_over": {"cash": true, "reputation": true, "unlocks": true},
+  "calibration": "2026-11-12 实测：peak 完成 65 单 / 准时率 1.000 / 经营利润 760.1 元"
+}

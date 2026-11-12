@@ -7,6 +7,8 @@ out/renders/*
 
 # Scenario runs and local state
 runs/
+# 玩家存档（含快照与事件流路径，机器相关；saves/meta.json 也是本机进度）
+saves/
 tests/_tmp_spec/
 *.bak
 data/config.bak.json

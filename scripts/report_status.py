@@ -9,10 +9,51 @@ import datetime
 import glob
 import json
 import os
+import sys
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 OUT, DATA, CONFIG = (os.path.join(ROOT, 'out'), os.path.join(ROOT, 'data'),
                      os.path.join(ROOT, 'config'))
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)
+
+
+def chain_steps():
+    """现算三条链的步数（**禁止硬编码**）。
+
+    这里曾经写死成「31 步链（data 11 · scenarios 16 · full 31）」，而 runner 实际是
+    13/23/45 —— 差了 14 步，且 `check_doc_drift` 抓不到（它比的是文档与产物，不是
+    文档与代码）。凡"数字"，一律从代码算，算不出来就明说算不出来。
+    """
+    try:
+        from dc_twin.runner import SCOPES
+        return {k: len(v) for k, v in SCOPES.items()}, None
+    except Exception as exc:                       # noqa: BLE001
+        return {}, "读取 dc_twin.runner 失败：%r" % (exc,)
+
+
+def game_facts():
+    """游戏层的可核查事实：关卡数、命令数、存档槽数、ADR 数。"""
+    levels = sorted(glob.glob(os.path.join(CONFIG, 'levels', '*.json')))
+    caps = 0
+    for p in levels:
+        try:
+            caps += len(json.load(open(p, encoding='utf-8')).get('objectives') or [])
+        except Exception:                          # noqa: BLE001
+            pass
+    cmds, not_impl = (), ()
+    try:
+        if os.path.join(ROOT, 'scripts') not in sys.path:
+            sys.path.insert(0, os.path.join(ROOT, 'scripts'))
+        import sim_engine as se
+        cmds, not_impl = se.COMMANDS, se.NOT_IMPLEMENTED
+    except Exception:                              # noqa: BLE001
+        pass
+    saves = sorted(glob.glob(os.path.join(ROOT, 'saves', 'slots', '*.json')))
+    adrs = sorted(glob.glob(os.path.join(ROOT, 'docs', 'design', 'ADR-GAME-*.md')))
+    return {"levels": len(levels), "objectives": caps, "commands": len(cmds),
+            "commands_done": len(cmds) - len(not_impl), "placeholders": list(not_impl),
+            "saves": len(saves), "adrs": len(adrs)}
 
 
 def j(*parts, default=None):
@@ -28,6 +69,8 @@ def n(v, default='n/a'):
 
 
 def main():
+    steps, steps_err = chain_steps()
+    gfacts = game_facts()
     br = j(OUT, 'build_report.json')
     ba = j(OUT, 'blend_audit.json')
     ar = j(OUT, 'artifact_report.json')
@@ -227,12 +270,20 @@ def main():
                   % (passed, len(vr), len(vr), neg_pass, neg_total,
                      sum(1 for x in (neg, neg_spec, neg_scen) if x)))
          if has_val else '未运行（本次只跑数据链，见 data tier）'),
-        ('开源交付层', 'dc CLI 7 命令 / 31 步链（data 11 · scenarios 16 · full 31）；'
+        ('开源交付层', 'dc CLI 7 命令 / %s 步链（data %s · scenarios %s · full %s；'
+                       'game %s 步＝逐字节基准 + 游戏测试 + 浏览器点击流）；'
                        '输出契约 sidecar %s 份 / manifest %s 个产物；'
                        '静态 Demo %s 个场景 · %s 台车'
-         % (man.get('counts', {}).get('report_sidecars'),
+         % (steps_err or (steps.get('full')),
+            steps.get('data', 'n/a'), steps.get('scenarios', 'n/a'),
+            steps.get('full', 'n/a'), steps.get('game', 'n/a'),
+            man.get('counts', {}).get('report_sidecars'),
             man.get('counts', {}).get('artifacts'),
             demo_man.get('scenarios'), demo_man.get('agents'))),
+        ('游戏层', '关卡 %s 个 / 目标 %s 条 / 8 类玩家命令（已实现 %s，占位 %s）/ '
+                   '存档槽 %s 个 / ADR %s 篇；批跑产物逐字节不变见 `scripts/step_baseline.py`'
+         % (gfacts['levels'], gfacts['objectives'], gfacts['commands_done'],
+            '、'.join(gfacts['placeholders']) or '无', gfacts['saves'], gfacts['adrs'])),
         ('分档验收', 'data tier %s/%s PASS；pytest -m "not blender" 与 CI 矩阵见 '
                      '`.github/workflows/ci.yml`'
          % (vdata.get('passed'), vdata.get('total'))),

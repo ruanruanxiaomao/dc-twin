@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "id": "level_01",
+  "name": "第一班：跑起来，别亏",
+  "brief": "一条基线班次。目标不是赚钱赚得多，而是先把「一小时的固定成本」跑回来。",
+  "scenario": "../scenarios/baseline.json",
+  "initial_capital": 500000,
+  "objectives": [
+    {"metric": "operating_profit", "op": ">=", "value": 100, "primary": true,
+     "label": "经营利润 ≥ 100 元"},
+    {"metric": "on_time_rate", "op": ">=", "value": 0.95, "primary": true,
+     "label": "准时率 ≥ 95%"},
+    {"metric": "orders_completed", "op": ">=", "value": 30, "primary": false,
+     "label": "完成 ≥ 30 单"}
+  ],
+  "stars": [
+    {"stars": 1, "require": [{"metric": "operating_profit", "op": ">=", "value": 100}]},
+    {"stars": 2, "require": [{"metric": "operating_profit", "op": ">=", "value": 200}]},
+    {"stars": 3, "require": [{"metric": "operating_profit", "op": ">=", "value": 200},
+                             {"metric": "on_time_rate", "op": ">=", "value": 0.99},
+                             {"metric": "orders_completed", "op": ">=", "value": 38}]}
+  ],
+  "lose_conditions": [{"type": "bankrupt", "grace_s": 300}],
+  "unlocks_on_win": ["level_02"],
+  "carry_over": {"cash": true, "reputation": true, "unlocks": true},
+  "calibration": "2026-11-12 实测：baseline 完成 38 单 / 准时率 1.000 / 经营利润 205.0 元"
+}

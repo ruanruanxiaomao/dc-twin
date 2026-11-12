@@ -54,7 +54,7 @@ def latest_runs() -> dict[str, Path]:
     best: dict[str, tuple[float, Path]] = {}
     for f in RUNS.glob("*/*/sim_kpi.json"):
         scen = f.parts[-3]
-        if scen in ("custom", "logs", "pilot_csv"):   # pilot 有自己的基准
+        if scen in ("custom", "logs", "pilot_csv", "game"):   # pilot 有自己的基准
             continue
         m = f.stat().st_mtime
         if scen not in best or m > best[scen][0]:

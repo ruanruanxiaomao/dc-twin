@@ -66,6 +66,8 @@ GETS = [
     ("/api/pnl", "损益表", None),
     ("/api/ledger", "账本", None),
     ("/api/cost-spec", "成本口径", None),
+    ("/api/game/levels", "关卡清单（P4）", "levels"),
+    ("/api/game/state", "游戏状态（未开局应为 no_session）", None),
     ("/out/dc_preview.glb", "3D 模型（three.js 加载）", "glb"),
     ("/data/layout.json", "布局（2D 沙盘）", "json"),
 ]
@@ -106,6 +108,10 @@ def describe(key: str | None, body: bytes) -> tuple[bool, str]:
     if key == "areas":
         n = len(d.get("areas") or [])
         return (n >= 20, "%d 个功能区" % n)
+    if key == "levels":
+        n = len(d.get("levels") or [])
+        return (n >= 4, "%d 个关卡 / 解锁 %s"
+                % (n, sum(1 for v in (d.get("unlocked") or {}).values() if v)))
     if key == "env":
         env = d.get("env") or {}
         return (bool(env.get("root")), "root=%s" % env.get("root"))
@@ -200,6 +206,60 @@ def ops_tests(base: str, app: Path) -> list[str]:
     return bad
 
 
+def game_tests(base: str) -> list[str]:
+    """打包后的游戏链路：开局 → 暂停 → 命令 → 存档 → 读档。
+
+    为什么必须在 exe 里单独跑一遍：`game_economy / game_levels / game_save` 是
+    **函数内延迟导入**的，开发环境里一定有，打包后却可能被 PyInstaller 漏掉。
+    这类缺失的表现是"页面能开、点开局报 500"，只有真跑一次才看得见。
+    """
+    bad = []
+    steps = []
+
+    def record(name, ok, detail=""):
+        steps.append((name, ok, detail))
+        print("  %-26s %-28s %s %s" % ("POST", name, "OK  " if ok else "FAIL", detail))
+        if not ok:
+            bad.append(name)
+
+    def post_json(path, payload):
+        return json.loads(post(base + path, payload, timeout=40)[1])
+
+    try:
+        d = post_json("/api/game/start", {"scenario_id": "baseline", "mode": "live"})
+        record("game/start", bool(d.get("ok")), "session=%s" % d.get("session_id"))
+        record("game/economy", "economy" in d,
+               "cash=%s" % (d.get("economy") or {}).get("cash"))
+
+        time.sleep(1.2)
+        st = json.loads(get(base + "/api/game/state")[1])
+        gt = float(st.get("t_s") or 0)
+        record("game/live-tick", gt > 0, "t=%.1fs tick=%s" % (gt, st.get("tick_i")))
+
+        post_json("/api/game/pause", {"paused": True})
+        time.sleep(0.4)
+        a = float(json.loads(get(base + "/api/game/state")[1]).get("t_s") or 0)
+        time.sleep(0.5)
+        b = float(json.loads(get(base + "/api/game/state")[1]).get("t_s") or 0)
+        record("game/pause", abs(a - b) < 1e-9, "暂停后 t 不变（%.1f→%.1f）" % (a, b))
+
+        r = post_json("/api/game/command", {"type": "SET_POLICY",
+                                            "payload": {"dispatch.policy": "highest_soc"}})
+        record("game/command", bool(r.get("ok")), "queued=%s" % r.get("queued"))
+
+        r = post_json("/api/game/save", {"slot": "exe_selftest"})
+        record("game/save", bool(r.get("ok")), "t=%ss %sB" % (r.get("t_s"), r.get("bytes")))
+
+        r = post_json("/api/game/load", {"slot": "exe_selftest"})
+        record("game/load", bool(r.get("ok")), "t=%ss" % r.get("t_s"))
+
+        post_json("/api/game/save/delete", {"slot": "exe_selftest"})
+        post_json("/api/game/stop", {})
+    except Exception as e:                            # noqa: BLE001
+        record("game chain", False, repr(e))
+    return bad
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="打包产物自检")
     ap.add_argument("--app", default=str(ROOT / "dist" / "DC Twin"), help="打包目录")
@@ -285,6 +345,9 @@ def main(argv=None) -> int:
 
         if a.ops:
             fails.extend(ops_tests(base, app))
+
+        # 游戏链路（P2–P5）：延迟导入的模块在打包后最容易缺，必须真跑一遍
+        fails.extend(game_tests(base))
 
         if a.shot:
             note = shot(base + "/?view=3d", Path(a.shot))

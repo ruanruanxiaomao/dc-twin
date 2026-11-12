@@ -54,6 +54,11 @@ try:                                    # `-m console.server` 与 `python consol
 except ImportError:                     # 直接执行脚本时 ROOT/console 在 sys.path 上
     import security as _security  # type: ignore
 
+try:                                    # 游戏服务层（ADR-GAME-01 的三层边界之一）
+    from console import game as _game
+except ImportError:                     # 直接执行脚本时
+    import game as _game  # type: ignore
+
 HOST = os.environ.get("DC_CONSOLE_HOST", "127.0.0.1")
 TOKEN = _security.token_from_env()
 PORT = int(os.environ.get("DC_CONSOLE_PORT", "8765"))
@@ -972,6 +977,22 @@ class Handler(BaseHTTPRequestHandler):
             if path == "/api/cost-spec":
                 return self.send_json({"ok": True, "spec": _load(ROOT / "config" / "cost_spec.json"),
                                        "editable": [f[0] for f in COST_FIELDS] + ["prices_source"]})
+            if path == "/api/game/state":
+                sess = _game.MANAGER.current()
+                if sess is None:
+                    return self.send_json({"ok": False, "error": "no_session"})
+                return self.send_json(sess.state())
+            if path == "/api/game/levels":
+                import game_levels
+                lvs = game_levels.list_levels()
+                return self.send_json({
+                    "ok": True, "levels": lvs, "meta": game_levels.load_meta(),
+                    "unlocked": {lv["id"]: game_levels.is_unlocked(lv["id"])
+                                 for lv in lvs if lv.get("id")},
+                })
+            if path == "/api/game/saves":
+                import game_save
+                return self.send_json({"ok": True, "slots": game_save.list_slots()})
             if path.startswith("/static/"):
                 target = self.static_path(path[len("/static/"):])
                 if target is None:
@@ -1046,9 +1067,77 @@ class Handler(BaseHTTPRequestHandler):
                     job.log("用户取消。", level="error")
                     return self.send_json({"ok": True})
                 return self.send_error_json("当前没有运行中的作业", 400)
+            if path.startswith("/api/game/"):
+                return self.handle_game(path, payload)
             return self.send_error_json("unknown route: " + path, 404)
         except Exception as exc:  # noqa: BLE001
             return self.send_error_json("server error: %r" % (exc,), 500)
+
+    # ---- 游戏（P2–P5）
+    def handle_game(self, path, payload):
+        """游戏 API。所有异常都翻成前端能读的 4xx/5xx，不把栈糊到响应里。"""
+        import game_levels
+        import game_save
+
+        try:
+            if path == "/api/game/start":
+                sess = _game.MANAGER.start(payload.get("scenario_id") or "baseline",
+                                           payload.get("mode") or "live",
+                                           payload.get("level_id"),
+                                           payload.get("initial_capital"))
+                return self.send_json(dict(sess.state(), started=True))
+            if path == "/api/game/stop":
+                _game.MANAGER.stop()
+                return self.send_json({"ok": True, "stopped": True})
+
+            sess = _game.MANAGER.current()
+            if sess is None:
+                return self.send_error_json("还没有开局：先 POST /api/game/start", 409)
+
+            if path == "/api/game/pause":
+                sess.pause(bool(payload.get("paused", True)))
+                return self.send_json({"ok": True, "paused": sess.paused})
+            if path == "/api/game/speed":
+                sess.set_speed(payload.get("speed", 1))
+                return self.send_json({"ok": True, "speed": sess.speed})
+            if path == "/api/game/command":
+                cmd = payload.get("command") or payload
+                return self.send_json(sess.command(cmd))
+            if path == "/api/game/fast-forward":
+                return self.send_json(sess.fast_forward(payload.get("to") or "settle"))
+            if path == "/api/game/save":
+                return self.send_json(sess.save(payload.get("slot") or "slot1"))
+            if path == "/api/game/load":
+                slot = payload.get("slot") or "slot1"
+                loaded = _game.GameSession.load(slot)
+                with _game.MANAGER.lock:
+                    old = _game.MANAGER.session
+                    if old is not None:
+                        old.stop()
+                    _game.MANAGER.session = loaded
+                # 线程必须起来：`paused` 只是闸门，不是"关掉时钟"。
+                # 以前这里只在 paused=false 时才 start，于是读档后点"继续"毫无反应——
+                # 单测测的是"读档后 t 对不对"，测不出"时钟还转不转"，是浏览器点击流抓到的。
+                loaded.start()
+                if payload.get("paused", True):
+                    loaded.pause(True)
+                return self.send_json(dict(loaded.state(), loaded=True))
+            if path == "/api/game/save/delete":
+                return self.send_json(game_save.delete_slot(payload.get("slot") or ""))
+            if path == "/api/game/level/unlock":
+                lid = payload.get("level_id") or ""
+                if not game_levels.is_unlocked(lid):
+                    return self.send_error_json("关卡 %s 尚未解锁（先通关上一关）" % lid, 403)
+                return self.send_json({"ok": True, "level_id": lid, "unlocked": True})
+            return self.send_error_json("unknown game route: " + path, 404)
+        except _game.GameError as exc:
+            return self.send_error_json(str(exc), exc.code)
+        except (ValueError, NotImplementedError, game_save.SaveError,
+                game_levels.LevelError) as exc:
+            return self.send_error_json(str(exc), 400)
+        except Exception as exc:                       # noqa: BLE001
+            traceback.print_exc()
+            return self.send_error_json("game error: %r" % (exc,), 500)
 
     # ---- 业务
     def handle_config(self, payload):

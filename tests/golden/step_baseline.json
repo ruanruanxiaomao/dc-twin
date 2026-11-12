@@ -1,0 +1,152 @@
+{
+  "schema_version": "1.0",
+  "kind": "step_baseline",
+  "note": "批跑产物逐字节快照。step 化重构的回归门；仅 run_id / wall_clock_s 归一化。",
+  "normalised": [
+    "run_id",
+    "metrics.wall_clock_s.value"
+  ],
+  "artifacts": [
+    "sim_events.jsonl",
+    "sim_kpi.json",
+    "sim_state.json"
+  ],
+  "scenarios": {
+    "baseline": {
+      "sim_events.jsonl": {
+        "sha256": "ceec0c0260e9efc54e71c03cbf8e0d26aa60ca4995bb3b44e147dde84c96c7b7",
+        "bytes": 145005,
+        "lines": 933
+      },
+      "sim_kpi.json": {
+        "sha256": "164a886f7db3eafc554c584c65a91bfc8ea11787097606023f7a8f6c6dc88e25",
+        "bytes": 39214,
+        "lines": 1964
+      },
+      "sim_state.json": {
+        "sha256": "3f8103b2e45fd800eb785df86aef32592d7b89281a6cbe9b5879eac81caaa7de",
+        "bytes": 6969,
+        "lines": 324
+      }
+    },
+    "dock_blocked": {
+      "sim_events.jsonl": {
+        "sha256": "8d64caf043db1fe7566e3201d33af0ea4716a2fd87a9393316514af4ec942afe",
+        "bytes": 178970,
+        "lines": 1179
+      },
+      "sim_kpi.json": {
+        "sha256": "ba13587d29ceebeec7254061fff021b704f1ddb0e1d264de0c8f6dc232a8d048",
+        "bytes": 39222,
+        "lines": 1964
+      },
+      "sim_state.json": {
+        "sha256": "2ad0ba5a0be83c5fb48a3c047545cf863f673a0c0d24ce07ed4a94826e49d959",
+        "bytes": 6989,
+        "lines": 324
+      }
+    },
+    "holiday": {
+      "sim_events.jsonl": {
+        "sha256": "ccfac42ccf987930a15dbec533755c54132f18f83f964ba6e241db16ae73204c",
+        "bytes": 656060,
+        "lines": 5013
+      },
+      "sim_kpi.json": {
+        "sha256": "baf201fafdb725773043f86e0ff890efb3d31cf0c5f7cef911593ad284902a63",
+        "bytes": 39594,
+        "lines": 1964
+      },
+      "sim_state.json": {
+        "sha256": "bb8acf1770083e6c4030ec2500e6eba32546146b879c2eab1462f86681404f8d",
+        "bytes": 11666,
+        "lines": 534
+      }
+    },
+    "layout_variant_f4": {
+      "sim_events.jsonl": {
+        "sha256": "c80749dbc740d7484867f45a3796861c0b0903c5509717ab2ee263ddae9a89bc",
+        "bytes": 198579,
+        "lines": 1368
+      },
+      "sim_kpi.json": {
+        "sha256": "700f3cf896510a5ffa783c1cb0fd7c2333b0d7a619c1c16ab736203bc857b22a",
+        "bytes": 39223,
+        "lines": 1964
+      },
+      "sim_state.json": {
+        "sha256": "75038a64783a3925921a457cd13c17a685826668bddd8ebb1066756e558dee0a",
+        "bytes": 7948,
+        "lines": 369
+      }
+    },
+    "night": {
+      "sim_events.jsonl": {
+        "sha256": "b1dc3eb6b10ae2809cf9aa10d2a29df685f2a65d562860d15d7a9fea4cdf162e",
+        "bytes": 73392,
+        "lines": 404
+      },
+      "sim_kpi.json": {
+        "sha256": "00cbcb4b903c569e961271445e0ed3bd1269085984ea4595a37b44cd0aa992fa",
+        "bytes": 39199,
+        "lines": 1964
+      },
+      "sim_state.json": {
+        "sha256": "e00a234f20f49317a976c00b2c71a99c73cdb3546cd2100b9bb17b424577d343",
+        "bytes": 3992,
+        "lines": 189
+      }
+    },
+    "peak": {
+      "sim_events.jsonl": {
+        "sha256": "fb39e65330179016a533daf65ea7655f2045633d996e4a3468180559c5e9d0cf",
+        "bytes": 413480,
+        "lines": 3057
+      },
+      "sim_kpi.json": {
+        "sha256": "8d7dc844c3e922e51c49d3065e7491b9fc2c907eb4568a4cdeda5fa510fbcc9d",
+        "bytes": 39259,
+        "lines": 1964
+      },
+      "sim_state.json": {
+        "sha256": "53eac8c69bb54ec7ce3eaa402ca09a9e44642f336000f3406204777586c189e0",
+        "bytes": 9331,
+        "lines": 429
+      }
+    },
+    "robot_failure": {
+      "sim_events.jsonl": {
+        "sha256": "7e80549e4aa5ed95f50893337f83e3800f3a76ba778e7828884f47d639156c69",
+        "bytes": 168452,
+        "lines": 1095
+      },
+      "sim_kpi.json": {
+        "sha256": "0c0bcacc0193b0a961216c7880233af23571dc76e21b60784ee13c718d1ed45e",
+        "bytes": 39240,
+        "lines": 1964
+      },
+      "sim_state.json": {
+        "sha256": "d496ad7305d98e398c178c4e0ddc0cc553358ffe84f31915a0de0820dedbb5fd",
+        "bytes": 6979,
+        "lines": 324
+      }
+    },
+    "scale_50": {
+      "sim_events.jsonl": {
+        "sha256": "344fbfc46de1cd6e42655dc9aa4287e75fd0c64b181d32ed746f42667fbbec24",
+        "bytes": 702745,
+        "lines": 5440
+      },
+      "sim_kpi.json": {
+        "sha256": "b1ac8a0bb9370a16f262bcd4c1fb9e4d6c7444e313311d0126048a89b169f7d6",
+        "bytes": 39466,
+        "lines": 1964
+      },
+      "sim_state.json": {
+        "sha256": "ee5deac3ea16cbd394b8ea32f9b9eebe6264b7c3577f855e7c66728b71f3568e",
+        "bytes": 16566,
+        "lines": 759
+      }
+    }
+  }
+}

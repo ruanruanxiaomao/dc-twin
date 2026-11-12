@@ -23,7 +23,8 @@ import sys
 import time
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+from dc_root import project_root  # noqa: E402
+ROOT = project_root(__file__)
 CONFIG, DATA, OUT, RUNS = ROOT / "config", ROOT / "data", ROOT / "out", ROOT / "runs"
 
 # 死锁退让参数：被同一台车挡住这么久，且我方 id 更大，就后退让路。
@@ -77,6 +78,18 @@ class Mulberry32:
 
     def choice(self, seq):
         return seq[int(self.next() * len(seq))]
+
+    # ---- 快照原语（ADR-GAME-05）----
+    # 内部状态只有一个 32 位整数，所以"存档"就是存这个数。为它单开读写口子，
+    # 是为了让存档代码不必碰私有字段，也让单元测试能直接断言"同一状态 → 同一序列"。
+    def state(self):
+        return self.s
+
+    @classmethod
+    def from_state(cls, s):
+        obj = cls(0)
+        obj.s = int(s) & 0xFFFFFFFF
+        return obj
 
 
 class World:
@@ -168,10 +181,11 @@ class World:
 
 
 class EventLog:
-    def __init__(self, path, ring=5000):
+    def __init__(self, path, ring=5000, append=False):
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.f = open(self.path, "w", encoding="utf-8")
+        # append=True 只给 restore 用：快照续玩要接着写，不能把已落盘的事件清空。
+        self.f = open(self.path, "a" if append else "w", encoding="utf-8")
         self.seq = 0
         self.ring = ring
         self.recent = []
@@ -193,6 +207,45 @@ class EventLog:
     def close(self):
         self.f.close()
 
+    # ---- 快照原语（ADR-GAME-05 / 方案书 §4.3）----
+    def snapshot(self):
+        # 必须先 flush：Python 的文件对象有缓冲，存档瞬间最后几条事件可能还在内存里。
+        # 不 flush 的后果是 restore 校验读到"磁盘最后 seq=0、快照 seq=4"，看起来像
+        # 日志被截断——实际只是没落盘。（打包后的 exe 里更容易命中：事件少、缓冲没满。）
+        try:
+            self.f.flush()
+        except Exception:                      # noqa: BLE001  已关闭的文件不用管
+            pass
+        return {"seq": self.seq, "counts": dict(self.counts), "recent": list(self.recent)}
+
+    @classmethod
+    def restore(cls, path, ring, snap):
+        """以 append 重开日志并恢复 seq/counts/recent。
+
+        硬校验：**磁盘上最后一条事件的 seq 必须等于快照里的 seq**。
+        这条检查是给"截断重开"这一类事故上的锁——一旦有人图省事用 `open(...,"w")`
+        重开，已写事件被清空，后续 seq 从 1 重号，ledger 的幂等键（seq, account）
+        会把新事件当成旧事件去重，最后算出来的利润是错的且查不出来。
+        """
+        path = Path(path)
+        want = int(snap["seq"])
+        last = 0
+        if path.exists():
+            with path.open("r", encoding="utf-8") as f:
+                for line in f:
+                    if line.strip():
+                        last = json.loads(line)["seq"]
+        elif want > 0:
+            raise ValueError("事件日志缺失但快照 seq=%d：不能凭空续写" % want)
+        if path.exists() and last != want:
+            raise ValueError("事件日志与快照不一致：磁盘最后 seq=%d，快照 seq=%d"
+                             "（历史被截断或快照过期）" % (last, want))
+        obj = cls(path, ring, append=True)
+        obj.seq = want
+        obj.counts = dict(snap.get("counts") or {})
+        obj.recent = list(snap.get("recent") or [])[-ring:]
+        return obj
+
 
 #: 派单规则表。键就是 config/scenarios/*.json 里 overrides["dispatch.policy"] 的取值。
 #: 加一个键 = 多一种可保存、可对比的策略；引擎里不再写死"最近的车"。
@@ -204,6 +257,17 @@ DISPATCH_RULES = {
     "least_completed": lambda r, o, sim: r.completed,
 }
 CHARGE_POLICIES = ("opportunistic", "threshold")
+
+#: 订单类型（与 demand_spec.orders.mix 的键一致）。定价只能定这五种。
+ORDER_TYPES = ("INBOUND", "OUTBOUND", "PICK", "REPLENISH", "TRANSFER")
+
+#: 玩家命令登记表（方案书 §2.4.1 / ADR-GAME-03）。加一个动作 = 在这里登记 + 写一个
+#: `_cmd_<type小写>` 方法；`_handler_for` 按命名约定取处理器，不做第二份注册表
+#: （两份表必然分叉，最后会出现"登记了但没有人接"的命令）。
+COMMANDS = ("BUY_AGV", "SELL_AGV", "SET_PRICE", "SET_POLICY",
+            "SET_DEMAND", "INJECT_FAULT", "BUILD_STATION", "MANUAL_ASSIGN")
+#: 已登记但尚未实现：入队即抛，不静默空转（静默 = 玩家点了没反应还以为生效了）。
+NOT_IMPLEMENTED = ("BUILD_STATION", "MANUAL_ASSIGN")
 
 
 class Robot:
@@ -252,6 +316,91 @@ class Robot:
     @property
     def soc_pct(self):
         return 100.0 * self.soc / self.cap
+
+    # ---- 快照原语（ADR-GAME-05 / 方案书 §4.2）----
+    #: 跨 tick 会变的全部字段。模型常量（cap/speed/cons/idle_kw/charge_kw）**不入快照**：
+    #: 它们由 model 重建，存两份必然漂移；模型改版后旧快照也不该带着旧参数复活。
+    SNAPSHOT_FIELDS = (
+        "id", "wid", "home", "pos", "soc", "soc_initial", "state", "order", "legs", "leg",
+        "route", "arc", "route_len", "dwell_until", "wait_s", "fault_until", "charging_since",
+        "station", "next_station_state", "queued_since", "blocked_by", "blocked_s",
+        "yields", "detours", "blocked_total", "detour_try_t", "completed",
+        "distance_m", "energy_out", "energy_in", "move_events", "leg_m",
+        # 附录 A.3 漏了这一个：_make_robots 里给每台车配了充电桩，充电去哪台
+        # 靠它决定。漏存的后果是续玩后全车队挤同一台桩。
+        "charger_id",
+    )
+
+    def serialize(self):
+        """JSON-able 全量状态。坐标元组统一降为列表（JSON 没有元组）。"""
+        def conv(v):
+            if isinstance(v, (list, tuple)):
+                return [conv(x) for x in v]
+            if isinstance(v, dict):
+                return {k: conv(x) for k, x in v.items()}
+            return v
+        return {k: conv(getattr(self, k)) for k in self.SNAPSHOT_FIELDS}
+
+    @classmethod
+    def deserialize(cls, d, model):
+        """逐字段恢复。缺字段直接报错——不许"尽力而为"地补默认值。
+
+        补默认值看起来友好，实际会让缺状态的快照静默续跑，然后在几十个 tick 之后
+        以"轨迹莫名偏了"的形式暴露，极难定位。
+        """
+        missing = [k for k in cls.SNAPSHOT_FIELDS if k not in d]
+        if missing:
+            raise ValueError("robot 快照缺字段：%s" % ", ".join(missing))
+        r = cls.__new__(cls)
+        r.cap = model["battery_kwh"]
+        r.speed = model["speed_mps"]
+        r.cons = model["consumption_kwh_per_m"]
+        r.idle_kw = model["idle_kw"]
+        r.charge_kw = model["charge_kw"]
+        r.id = d["id"]
+        r.wid = d["wid"]
+        r.home = tuple(d["home"])
+        r.pos = tuple(d["pos"])
+        r.soc = d["soc"]
+        r.soc_initial = d["soc_initial"]
+        r.state = d["state"]
+        if r.state not in cls.STATES:
+            raise ValueError("robot %s 快照状态非法：%r" % (r.id, r.state))
+        # 订单里的 pick_xy/drop_xy 必须还原成元组：下游 math.dist 与
+        # "同一坐标"的判断都按元组语义走的，列表会让相等判断悄悄失真。
+        od = d["order"]
+        r.order = None
+        if od is not None:
+            r.order = dict(od)
+            for k in ("pick_xy", "drop_xy"):
+                if k in r.order and r.order[k] is not None:
+                    r.order[k] = tuple(r.order[k])
+        r.legs = [[tuple(p) for p in leg] for leg in d["legs"]]
+        r.leg = d["leg"]
+        r.route = [tuple(p) for p in d["route"]]
+        r.arc = d["arc"]
+        r.route_len = d["route_len"]
+        r.dwell_until = d["dwell_until"]
+        r.wait_s = d["wait_s"]
+        r.fault_until = d["fault_until"]
+        r.charging_since = d["charging_since"]
+        r.station = d["station"]
+        r.next_station_state = d["next_station_state"]
+        r.queued_since = d["queued_since"]
+        r.blocked_by = d["blocked_by"]
+        r.blocked_s = d["blocked_s"]
+        r.yields = d["yields"]
+        r.detours = d["detours"]
+        r.blocked_total = d["blocked_total"]
+        r.detour_try_t = d["detour_try_t"]
+        r.completed = d["completed"]
+        r.distance_m = d["distance_m"]
+        r.energy_out = d["energy_out"]
+        r.energy_in = d["energy_in"]
+        r.move_events = d["move_events"]
+        r.leg_m = list(d["leg_m"])
+        r.charger_id = d["charger_id"]
+        return r
 
     def set_state(self, new, log, t):
         old = self.state
@@ -353,9 +502,13 @@ class Robot:
 class Simulation:
     station_slots_override = None       # 验证排队用：把所有工位并行位强制为 N
     dock_slots_override = None          # 同上，但只改月台门（工位不动）
+    # 验证"跳 tick 分支真的在起作用"用：置 False 时关闭空闲跳 tick。
+    # 这不是给人用的开关，是给 tests/test_step_gate.py 证明 STEP_OK 门会失败用的
+    # ——沿用 station_slots_override / dock_slots_override 的可证伪套路。
+    jump_ticks_override = None
 
     def __init__(self, scenario_path, sim_spec, fleet, demand, layout, grid, cfg,
-                 out_dir=None, external_orders=None):
+                 out_dir=None, external_orders=None, append_log=False):
         self.sc = jload(scenario_path)
         self.spec = copy.deepcopy(sim_spec)
         self.fleet, self.demand, self.layout, self.grid = fleet, demand, layout, grid
@@ -397,7 +550,8 @@ class Simulation:
                                  .strftime("%Y%m%dT%H%M%SZ"))
         self.out = Path(out_dir) if out_dir else RUNS / self.sc["id"] / Path(self.run_id).name
         self.out.mkdir(parents=True, exist_ok=True)
-        self.log = EventLog(self.out / "sim_events.jsonl", self.spec["output"]["event_ring"])
+        self.log = EventLog(self.out / "sim_events.jsonl", self.spec["output"]["event_ring"],
+                            append=append_log)
         self.robots = self._make_robots()
         self.queue = []
         self.reserved = {}
@@ -446,6 +600,42 @@ class Simulation:
         self._max_blocked_agent = None
         self.energy_guard_n = 0
         self.wall0 = time.time()
+        # step 化（ADR-GAME-01）：以下状态原是 run() 的局部变量，升为实例字段，
+        # 才能让实时会话逐帧推进、让快照读到"现在是第几 tick"。初值仍由
+        # _init_run() 统一重置，避免"__init__ 与 run 两处初始化"再次分叉。
+        self.tick_i = 0
+        self.t = 0.0
+        self.n_ticks = int(self.horizon / self.tick)
+        self.lam = self.per_hour / 3600.0
+        self._order_n = 0
+        self.done = False
+        # step() 是否已经初始化过。没有这个标记时，"先 step 再 run"会把下一次
+        # 到达时间用成 __init__ 的 0.0（不是随机抽样），首单凭空插在 t=0。
+        self._started = False
+        # 玩家命令队列（ADR-GAME-03）：批跑模式下恒为空，等价于空操作。
+        self._cmd_queue = []
+        # 定价与需求弹性（P3）：订单需求原本是外生的，改单价不影响单量，
+        # "经营反馈环"就断了。这里把 per_hour 拆成 基准 × 需求倍数 × 价格因子，
+        # 让 SET_DEMAND 与 SET_PRICE 各自可叠加、且都可复现。
+        self._base_per_hour = float(self.demand["orders"]["per_hour"])
+        self.demand_multiplier = (self.per_hour / self._base_per_hour
+                                  if self._base_per_hour > 0 else 1.0)
+        self.price_overrides = {}
+        self.price_elasticity_k = 1.2
+        self.min_demand_factor = 0.1
+        self.sell_refund_pct = 0.5
+        self.cost_spec = {}
+        for name, attr in (("cost_spec.json", "cost_spec"), ("economy_spec.json", "econ_spec")):
+            p = CONFIG / name
+            if p.exists():
+                setattr(self, attr, jload(p))
+        es = getattr(self, "econ_spec", {}) or {}
+        self.price_elasticity_k = float(es.get("price_elasticity_k", self.price_elasticity_k))
+        self.min_demand_factor = float(es.get("min_demand_factor", self.min_demand_factor))
+        self.sell_refund_pct = float(es.get("sell_refund_pct", self.sell_refund_pct))
+        # 游戏营收口径的市场价倍率：只影响"按什么价收钱"，不改进货/成本/会计科目。
+        # 默认为 1，批跑（演示会计口径）完全不受影响。
+        self.tariff_multiplier = float(es.get("tariff_multiplier", 1.0))
 
     # ---------- 工位层（M1-02）：process_spec 的服务时间真的进 tick ----------
     def _load_stations(self):
@@ -1002,127 +1192,386 @@ class Simulation:
                       **({"final": True} if final else {}))
 
     # ---------- main loop ----------
-    def run(self):
+    def _handler_for(self, typ):
+        fn = getattr(self, "_cmd_" + typ.lower(), None)
+        if fn is None:
+            raise ValueError("unknown command: %r (known: %s)" % (typ, ", ".join(COMMANDS)))
+        return fn
+
+    def enqueue_command(self, cmd):
+        """校验并入队。校验前置是**故意的**：入队通过、应用时炸掉，异常会落在
+        实时 tick 线程里，直接把会话打死；前置校验能把 400 报给前端。"""
+        if not isinstance(cmd, dict):
+            raise ValueError("command must be an object")
+        typ = cmd.get("type")
+        if typ not in COMMANDS:
+            raise ValueError("unknown command: %r (known: %s)" % (typ, ", ".join(COMMANDS)))
+        self._handler_for(typ)                              # 命名约定必须对得上
+        if typ in NOT_IMPLEMENTED:
+            raise NotImplementedError("%s 已登记但尚未实现（不静默空转）" % typ)
+        payload = cmd.get("payload") or {}
+        self._validate_payload(typ, payload)
+        self._cmd_queue.append({"type": typ,
+                                "t_request_s": float(cmd.get("t_request_s", self.t)),
+                                "payload": dict(payload)})
+        return len(self._cmd_queue)
+
+    def _validate_payload(self, typ, p):
+        if not isinstance(p, dict):
+            raise ValueError("%s payload must be an object" % typ)
+        if typ == "SET_POLICY":
+            known = {"dispatch.policy", "battery.charge_policy", "dispatch.battery_reserve_pct"}
+            unknown = sorted(set(p) - known)
+            if unknown:
+                raise ValueError("SET_POLICY 不认识的键：%s" % unknown)
+            if not p:
+                raise ValueError("SET_POLICY 需要至少一个策略键")
+            if "dispatch.policy" in p and p["dispatch.policy"] not in DISPATCH_RULES:
+                raise ValueError("unknown dispatch.policy: %r (known: %s)"
+                                 % (p["dispatch.policy"], ", ".join(sorted(DISPATCH_RULES))))
+            if "battery.charge_policy" in p and p["battery.charge_policy"] not in CHARGE_POLICIES:
+                raise ValueError("unknown battery.charge_policy: %r (known: %s)"
+                                 % (p["battery.charge_policy"], ", ".join(CHARGE_POLICIES)))
+            if "dispatch.battery_reserve_pct" in p:
+                v = p["dispatch.battery_reserve_pct"]
+                if isinstance(v, bool) or not isinstance(v, (int, float)) or not 0 <= v <= 95:
+                    raise ValueError("dispatch.battery_reserve_pct 必须在 [0,95]")
+        elif typ == "SET_DEMAND":
+            v = p.get("orders.per_hour")
+            if isinstance(v, bool) or not isinstance(v, (int, float)) or not 1 <= v <= 1000:
+                raise ValueError("SET_DEMAND 需要 orders.per_hour ∈ [1,1000]")
+            extra = sorted(set(p) - {"orders.per_hour"})
+            if extra:
+                raise ValueError("SET_DEMAND 不认识的键：%s" % extra)
+        elif typ == "INJECT_FAULT":
+            kind = p.get("type")
+            if kind not in ("robot_down", "dock_blocked"):
+                raise ValueError("INJECT_FAULT.type 只能是 robot_down / dock_blocked")
+            dur = p.get("duration_s")
+            if isinstance(dur, bool) or not isinstance(dur, (int, float)) or not 1 <= dur <= 7200:
+                raise ValueError("INJECT_FAULT.duration_s 必须在 [1,7200]")
+            if kind == "robot_down":
+                ag = p.get("agent")
+                if not isinstance(ag, str) or not ag:
+                    raise ValueError("robot_down 需要 agent")
+                if ag != "ANY_BUSY" and ag not in self.robots:
+                    raise ValueError("没有这台车：%r" % ag)
+            else:
+                dock = p.get("dock")
+                if not isinstance(dock, str) or dock not in self.stations:
+                    raise ValueError("没有这个月台：%r" % (dock,))
+        elif typ == "BUY_AGV":
+            wid = p.get("wid")
+            if wid not in self.world.warehouses:
+                raise ValueError("没有这个仓：%r" % (wid,))
+            model = p.get("model")
+            if model is not None and model != self.model.get("id", "AMR-250"):
+                raise ValueError("本布局只支持车型 %r" % self.model.get("id", "AMR-250"))
+            home = p.get("home")
+            if home is not None:
+                if (not isinstance(home, (list, tuple)) or len(home) != 2
+                        or any(isinstance(x, bool) or not isinstance(x, (int, float)) for x in home)):
+                    raise ValueError("home 必须是 [x, y] 两个数字")
+        elif typ == "SELL_AGV":
+            rid = p.get("agent")
+            if not isinstance(rid, str) or rid not in self.robots:
+                raise ValueError("没有这台车：%r" % (rid,))
+        elif typ == "SET_PRICE":
+            typ_ = p.get("order_type")
+            if typ_ not in ORDER_TYPES:
+                raise ValueError("order_type 只能是 %s" % list(ORDER_TYPES))
+            price = p.get("price")
+            if isinstance(price, bool) or not isinstance(price, (int, float)) or not 0 < price <= 1000:
+                raise ValueError("price 必须在 (0, 1000]")
+
+    def _apply_commands(self):
+        """在 tick 边界应用玩家命令。批跑模式下队列恒为空，是空操作。
+
+        这里**不做 try/except**：handler 的异常要冒出去让人看见。吞掉异常等于
+        "玩家的操作悄悄没生效"，比崩掉更难查。
+        """
+        if not self._cmd_queue:
+            return
+        while self._cmd_queue:
+            cmd = self._cmd_queue.pop(0)
+            self._handler_for(cmd["type"])(cmd)
+
+    def _cmd_set_policy(self, cmd):
+        p = cmd["payload"]
+        changed = {}
+        if "dispatch.policy" in p:
+            self.dispatch_rule = p["dispatch.policy"]
+            changed["dispatch.policy"] = p["dispatch.policy"]
+        if "battery.charge_policy" in p:
+            self.charge_policy = p["battery.charge_policy"]
+            changed["battery.charge_policy"] = p["battery.charge_policy"]
+        if "dispatch.battery_reserve_pct" in p:
+            self.reserve_pct = float(p["dispatch.battery_reserve_pct"])
+            changed["dispatch.battery_reserve_pct"] = self.reserve_pct
+        # 策略同时写回 overrides：存档时"策略就是场景的一部分"这条不变量继续成立。
+        self.overrides.update(changed)
+        self.log.emit(self.t, "CMD_SET_POLICY", **changed)
+
+    def _cmd_set_demand(self, cmd):
+        per_hour = float(cmd["payload"]["orders.per_hour"])
+        self.demand_multiplier = (per_hour / self._base_per_hour
+                                  if self._base_per_hour > 0 else 1.0)
+        self._refresh_demand()
+        self.overrides["demand.orders.per_hour"] = per_hour
+        self.log.emit(self.t, "CMD_SET_DEMAND", orders_per_hour=per_hour)
+
+    # ---- 定价与需求弹性（P3）----
+    # 需求在引擎里（确定性、可单测），钱在经济层（game_economy）。这样"改价真的
+    # 改变单量"不必依赖经济层是否挂载，也不会让账本逻辑污染仿真核心。
+    def _price_factor(self):
+        """按订单结构加权：只给 OUTBOUND 涨价，不该让 PICK 的量也一起掉。
+
+        factor_i = clamp(1 − k × (price_i − base_i) / base_i, min_factor, ∞)
+        线性弹性是最粗的一版，但可解释、可调参、能让"薄利多销 vs 高价少单"成立。
+        """
+        mix = self.overrides.get("demand.orders.mix", self.demand["orders"]["mix"])
+        total_w = sum(mix.values()) or 1.0
+        base_prices = (self.cost_spec.get("revenue", {}).get("per_order") or {})
+        acc = 0.0
+        for typ, w in mix.items():
+            base = float(base_prices.get(typ, 0.0)) * self.tariff_multiplier
+            if base <= 0:
+                acc += w
+                continue
+            price = float(self.price_overrides.get(typ, base))
+            f = 1.0 - self.price_elasticity_k * (price - base) / base
+            acc += w * max(self.min_demand_factor, f)
+        return acc / total_w
+
+    def _refresh_demand(self):
+        self.per_hour = max(0.0, self._base_per_hour * self.demand_multiplier
+                            * self._price_factor())
+        self.lam = self.per_hour / 3600.0
+
+    def _cmd_set_price(self, cmd):
+        p = cmd["payload"]
+        typ = p["order_type"]
+        price = float(p["price"])
+        self.price_overrides[typ] = price
+        self._refresh_demand()
+        self.log.emit(self.t, "CMD_SET_PRICE", order_type=typ, price=price,
+                      orders_per_hour=round(self.per_hour, 6))
+
+    def _cmd_sell_agv(self, cmd):
+        p = cmd["payload"]
+        rid = p["agent"]
+        r = self.robots.get(rid)
+        if r is None:
+            raise ValueError("没有这台车：%r" % (rid,))
+        if r.order is not None:
+            raise ValueError("车 %s 正在执行任务，不能卖（会丢单）" % rid)
+        del self.robots[rid]
+        self.n_robots = len(self.robots)
+        self.log.emit(self.t, "CMD_SELL_AGV", agent=rid, wid=r.wid,
+                      refund_pct=self.sell_refund_pct)
+
+    def _cmd_inject_fault(self, cmd):
+        p = cmd["payload"]
+        end = self.t + float(p["duration_s"])
+        f = {"type": p["type"], "start": self.t, "end": end}
+        if p["type"] == "robot_down":
+            f["agent"] = p["agent"]
+        else:
+            f["dock"] = p["dock"]
+        self.faults.append(f)
+        extra = {"agent": f["agent"]} if "agent" in f else {"dock": f["dock"]}
+        self.log.emit(self.t, "CMD_INJECT_FAULT", fault_type=p["type"], until_s=end, **extra)
+
+    def _next_robot_id(self, wid):
+        n = 1
+        while True:
+            rid = "%s-BUY%02d" % (wid, n)
+            if rid not in self.robots:
+                return rid
+            n += 1
+
+    def _cmd_buy_agv(self, cmd):
+        p = cmd["payload"]
+        wid = p["wid"]
+        home = p.get("home")
+        if home is None:
+            spawns = [(s["position"][0], s["position"][2])
+                      for s in self.world.warehouses[wid]["spawn"]["robots"]]
+            base = spawns[0] if spawns else (10.0, 10.0)
+            k = sum(1 for r in self.robots.values() if r.wid == wid)
+            home = (base[0] + 2.0 * k, base[1] + 1.6 * k)
+        # 吸附到最近可走格中心：玩家给的坐标可能落在货架里，车不能生成在墙上。
+        cell = self.world.nearest_walkable((float(home[0]), float(home[1])))
+        pos = self.world.center(cell)
+        b = self.spec["battery"]
+        soc = b["initial_soc_pct"] / 100.0 * self.model["battery_kwh"]
+        rid = self._next_robot_id(wid)
+        r = Robot(rid, wid, pos, soc, self.model)
+        r.charger_id = "%s-CHG-01" % wid
+        self.robots[rid] = r
+        self.n_robots = len(self.robots)
+        self.log.emit(self.t, "CMD_BUY_AGV", agent=rid, wid=wid,
+                      model=self.model.get("id", "AMR-250"), home=list(pos))
+
+    def _cmd_build_station(self, cmd):
+        raise NotImplementedError("BUILD_STATION 尚未实现（P4 落地）")
+
+    def _cmd_manual_assign(self, cmd):
+        raise NotImplementedError("MANUAL_ASSIGN 尚未实现（P4 落地）")
+
+    def _init_run(self):
+        """把批跑的一次性初值收敛到一处。
+
+        原来这些初值写在 run() 开头，实时会话（每帧只推进一步）没有地方可放，
+        只能复制一遍——复制就会漂移。所以升为方法，run() 与实时循环共用同一套起点。
+        """
         self._order_n = 0
-        t = 0.0
-        tick = 0
-        n_ticks = int(self.horizon / self.tick)
-        lam = self.per_hour / 3600.0
+        self.tick_i = 0
+        self.t = 0.0
+        self.n_ticks = int(self.horizon / self.tick)
+        self.lam = self.per_hour / 3600.0
+        self.done = False
+        self._started = True
         if self.ext:
             self.next_arrival = self.ext[0]["t_arrive"]
         else:
-            self.next_arrival = self.rng.expovariate(lam) if lam > 0 else float("inf")
-        while tick < n_ticks:
-            t = tick * self.tick
-            # Event-driven tick jump. Fault start/end times are scheduled events
-            # too: without them a t=0 fault was silently skipped to the first
-            # order arrival and the recovery never fired on an idle fleet.
-            busy = any(r.state not in ("IDLE", "FAULT", "CHARGING") for r in self.robots.values())
-            # An arrival / fault edge that is already due but not yet consumed
-            # must be processed in THIS tick; never jump over it.
-            due = self.next_arrival <= t + 1e-9
-            scheduled = [self.next_arrival]
-            for f in self.faults:
-                was = f.get("was_active", False)
-                if not was and f["start"] <= t + 1e-9:
-                    due = True
-                elif not was:
-                    scheduled.append(f["start"])
-                elif was and f["end"] <= t + 1e-9:
-                    due = True
-                else:
-                    scheduled.append(f["end"])
-            future = [x for x in scheduled if x > t + 1e-9]
-            next_t = min(future) if future else float("inf")
-            if not busy and not self.queue and not due:
-                if next_t == float("inf"):
-                    tick = n_ticks          # no future event: jump to horizon end
-                    continue
-                if next_t > t + self.tick:
-                    jump = int((next_t - t) / self.tick)
-                    tick = min(n_ticks, tick + jump)
-                    continue
+            self.next_arrival = self.rng.expovariate(self.lam) if self.lam > 0 else float("inf")
 
-            # 1) demand
-            if self.ext:
-                # 外部订单：到达时间由数据决定，不消耗随机流——同一个 CSV 跑两遍
-                # 结果必须一致，否则"真实数据接入"就没法当基准。
-                while (self.ext_i < len(self.ext)
-                       and self.ext[self.ext_i]["t_arrive"] <= t + 1e-9):
-                    o = self.ext[self.ext_i]
-                    self.ext_i += 1
-                    self._order_n += 1
-                    self.queue.append(o)
-                    self.log.emit(o["t_arrive"], "ORDER_ARRIVED",
-                                  order_id=o["order_id"], order_type=o["type"],
-                                  warehouse=o["warehouse"], priority=o["priority"],
-                                  source="csv")
-                self.next_arrival = (self.ext[self.ext_i]["t_arrive"]
-                                     if self.ext_i < len(self.ext) else float("inf"))
+    def step(self):
+        """推进一个循环迭代（空闲时可能跳 tick），返回是否到达 horizon。
+
+        这是 run() 循环体的**逐行搬运**，语义一字不改：仍保留"空闲事件驱动跳 tick"，
+        否则批跑事件流会变、STEP_OK 会红。变量升格：局部 `tick` → `self.tick_i`，
+        `t` → `self.t`，供实时模式与快照读取。
+        """
+        self._apply_commands()
+        if not self._started:
+            # 防误用：直接 step() 也要有正确的首次到达时间（不是 __init__ 的 0.0）
+            self._init_run()
+        if self.tick_i >= self.n_ticks:
+            return True
+        t = self.tick_i * self.tick
+        self.t = t
+        # Event-driven tick jump. Fault start/end times are scheduled events
+        # too: without them a t=0 fault was silently skipped to the first
+        # order arrival and the recovery never fired on an idle fleet.
+        busy = any(r.state not in ("IDLE", "FAULT", "CHARGING") for r in self.robots.values())
+        # An arrival / fault edge that is already due but not yet consumed
+        # must be processed in THIS tick; never jump over it.
+        due = self.next_arrival <= t + 1e-9
+        scheduled = [self.next_arrival]
+        for f in self.faults:
+            was = f.get("was_active", False)
+            if not was and f["start"] <= t + 1e-9:
+                due = True
+            elif not was:
+                scheduled.append(f["start"])
+            elif was and f["end"] <= t + 1e-9:
+                due = True
             else:
-                while self.next_arrival <= t:
-                    self._order_n += 1
-                    o = self.new_order(self.next_arrival)
-                    if o:
-                        self.queue.append(o)
-                        self.log.emit(self.next_arrival, "ORDER_ARRIVED",
-                                      order_id=o["order_id"], order_type=o["type"],
-                                      warehouse=o["warehouse"], priority=o["priority"])
-                    self.next_arrival += self.rng.expovariate(lam) if lam > 0 else float("inf")
+                scheduled.append(f["end"])
+        future = [x for x in scheduled if x > t + 1e-9]
+        next_t = min(future) if future else float("inf")
+        if Simulation.jump_ticks_override is not False \
+                and not busy and not self.queue and not due:
+            if next_t == float("inf"):
+                self.tick_i = self.n_ticks      # no future event: jump to horizon end
+                return True
+            if next_t > t + self.tick:
+                jump = int((next_t - t) / self.tick)
+                self.tick_i = min(self.n_ticks, self.tick_i + jump)
+                return self.tick_i >= self.n_ticks
 
-            # 2) faults
-            self._apply_faults(t)
+        # 1) demand
+        if self.ext:
+            # 外部订单：到达时间由数据决定，不消耗随机流——同一个 CSV 跑两遍
+            # 结果必须一致，否则"真实数据接入"就没法当基准。
+            while (self.ext_i < len(self.ext)
+                   and self.ext[self.ext_i]["t_arrive"] <= t + 1e-9):
+                o = self.ext[self.ext_i]
+                self.ext_i += 1
+                self._order_n += 1
+                self.queue.append(o)
+                self.log.emit(o["t_arrive"], "ORDER_ARRIVED",
+                              order_id=o["order_id"], order_type=o["type"],
+                              warehouse=o["warehouse"], priority=o["priority"],
+                              source="csv")
+            self.next_arrival = (self.ext[self.ext_i]["t_arrive"]
+                                 if self.ext_i < len(self.ext) else float("inf"))
+        else:
+            while self.next_arrival <= t:
+                self._order_n += 1
+                o = self.new_order(self.next_arrival)
+                if o:
+                    self.queue.append(o)
+                    self.log.emit(self.next_arrival, "ORDER_ARRIVED",
+                                  order_id=o["order_id"], order_type=o["type"],
+                                  warehouse=o["warehouse"], priority=o["priority"])
+                self.next_arrival += self.rng.expovariate(self.lam) if self.lam > 0 else float("inf")
 
-            # 3) dispatch
-            self._assign(t)
+        # 2) faults
+        self._apply_faults(t)
 
-            # 4) robots: sequential updates with an immediately-updated
-            #    position map keep the 2*AGV_RADIUS reservation consistent.
-            positions = {r0.id: r0.pos for r0 in self.robots.values()}
-            for r in self.robots.values():
-                self._robot_step(r, t, positions)
-                positions[r.id] = r.pos
-            cell_owner = {}
-            for r0 in self.robots.values():
-                cr0 = self.world.to_cell(r0.pos)
-                if cr0 in cell_owner and cell_owner[cr0] != r0.id:
-                    self.reservation_double += 1
-                cell_owner[cr0] = r0.id
+        # 3) dispatch
+        self._assign(t)
 
-            # 4b) independent separation sampling (1 s) for S6
-            if tick % 10 == 0:
-                pos = [(r.id, r.pos) for r in self.robots.values()]
-                for i in range(len(pos)):
-                    for j in range(i + 1, len(pos)):
-                        d = math.dist(pos[i][1], pos[j][1])
-                        if d < self.min_pair_m:
-                            self.min_pair_m = d
-                        if d < self.min_sep - 1e-6:
-                            self.sep_violations += 1
+        # 4) robots: sequential updates with an immediately-updated
+        #    position map keep the 2*AGV_RADIUS reservation consistent.
+        positions = {r0.id: r0.pos for r0 in self.robots.values()}
+        for r in self.robots.values():
+            self._robot_step(r, t, positions)
+            positions[r.id] = r.pos
+        cell_owner = {}
+        for r0 in self.robots.values():
+            cr0 = self.world.to_cell(r0.pos)
+            if cr0 in cell_owner and cell_owner[cr0] != r0.id:
+                self.reservation_double += 1
+            cell_owner[cr0] = r0.id
 
-            # 5) energy accounting + KPI sampling (window deltas, one aggregate
-            #    event per KPI window; S2 recomputes from these + sim_state)
-            if tick % self.spec["output"]["kpi_every_ticks"] == 0:
-                self._emit_energy_window(t, self.spec["output"]["kpi_every_ticks"] * self.tick)
-                self.max_queue_depth = max(self.max_queue_depth, len(self.queue))
-                robots = list(self.robots.values())
-                self.position_samples.append({"t_s": round(t, 2), "agents": {
-                    rid: [round(v, 3) for v in r.pos] for rid, r in self.robots.items()}})
-                busy = sum(1 for r in robots
-                           if r.state not in ("IDLE", "FAULT", "CHARGING"))
-                self.samples.append({"t_s": round(t, 2),
-                                     "queue": len(self.queue),
-                                     "active": busy,
-                                     "fleet": len(robots),
-                                     "idle_robots": len(robots) - busy,
-                                     "mean_soc": round(sum(r.soc_pct for r in robots)
-                                                       / len(robots), 3)})
-            tick += 1
+        # 4b) independent separation sampling (1 s) for S6
+        if self.tick_i % 10 == 0:
+            pos = [(r.id, r.pos) for r in self.robots.values()]
+            for i in range(len(pos)):
+                for j in range(i + 1, len(pos)):
+                    d = math.dist(pos[i][1], pos[j][1])
+                    if d < self.min_pair_m:
+                        self.min_pair_m = d
+                    if d < self.min_sep - 1e-6:
+                        self.sep_violations += 1
 
+        # 5) energy accounting + KPI sampling (window deltas, one aggregate
+        #    event per KPI window; S2 recomputes from these + sim_state)
+        if self.tick_i % self.spec["output"]["kpi_every_ticks"] == 0:
+            self._emit_energy_window(t, self.spec["output"]["kpi_every_ticks"] * self.tick)
+            self.max_queue_depth = max(self.max_queue_depth, len(self.queue))
+            robots = list(self.robots.values())
+            self.position_samples.append({"t_s": round(t, 2), "agents": {
+                rid: [round(v, 3) for v in r.pos] for rid, r in self.robots.items()}})
+            busy = sum(1 for r in robots
+                       if r.state not in ("IDLE", "FAULT", "CHARGING"))
+            self.samples.append({"t_s": round(t, 2),
+                                 "queue": len(self.queue),
+                                 "active": busy,
+                                 "fleet": len(robots),
+                                 "idle_robots": len(robots) - busy,
+                                 "mean_soc": round(sum(r.soc_pct for r in robots)
+                                                   / len(robots), 3)})
+        self.tick_i += 1
+        return self.tick_i >= self.n_ticks
+
+    def _finalize(self):
+        """收尾：尾窗能量 + RUN_SETTLED + 关日志 + KPI/状态落盘。
+
+        幂等：实时模式可能在多个窗口里碰到 done，重复收尾会写出两份 RUN_SETTLED
+        并让 ledger 重复结算固定成本。
+        """
+        if self.done:
+            return self.metrics
+        self.done = True
+        every = self.spec["output"]["kpi_every_ticks"]
         # Flush the partial tail window so SUM(ENERGY_TICK) closes exactly with
         # sim_state energy_out/energy_in (S2 requires <1% error).
-        every = self.spec["output"]["kpi_every_ticks"]
-        self._emit_energy_window(self.horizon, (n_ticks % every or every) * self.tick,
+        self._emit_energy_window(self.horizon, (self.n_ticks % every or every) * self.tick,
                                  final=True)
         # Settlement event: fixed-cost allocation in ledger.py needs a real
         # source event (F2 traceability), not a synthetic entry.
@@ -1139,6 +1588,19 @@ class Simulation:
               "kind": "sim_positions", "min_sep_threshold_m": self.min_sep,
               "samples": self.position_samples})
         return self.metrics
+
+    def run(self):
+        """批跑模式：行为与 step 化之前逐字节一致（STEP_OK 门守着）。
+
+        只在**没跑过**的时候初始化。这样"读档后 run() 续跑到尾"才成立——
+        如果无条件 `_init_run()`，读档续跑会被悄悄重置成 t=0（存档看起来"成功了"，
+        实际从头再跑一遍，事件流 seq 还会翻倍）。
+        """
+        if not self._started:
+            self._init_run()
+        while not self.step():
+            pass
+        return self._finalize()
 
     def _read_events(self):
         return [json.loads(line) for line in (self.out / "sim_events.jsonl")
@@ -1522,6 +1984,174 @@ class Simulation:
                                   "move_events": r.move_events}
                            for r in self.robots.values()},
                 "queue_depth": len(self.queue), "blocked_docks": sorted(self.blocked_docks)}
+
+    # ---------- 快照（ADR-GAME-05 / 方案书 §2.4.2）----------
+    # `_state()` 是给 KPI 对账用的**终态摘要**，故意保持原样不动（A 系列验收依赖它）。
+    # 下面是另一个东西：可恢复的全量状态。字段必须穷举——少一块，续跑要几十个 tick
+    # 之后才会"莫名偏了"，那时候已经查不出是哪块缺了。
+    SNAPSHOT_SCHEMA = "1.0"
+
+    def snapshot(self):
+        """全量可恢复状态（JSON-able）。
+
+        `position_samples` 不入快照：它只喂 sim_positions.json（3D 位置抽样），
+        不入任何 KPI，体积却有几百 KB。`samples` 必须入——`_kpi` 用它算
+        idle_rate 与吞吐曲线，丢了续跑的 KPI 就和全程跑不一致了。
+        """
+        def conv(v):
+            if isinstance(v, (list, tuple)):
+                return [conv(x) for x in v]
+            if isinstance(v, dict):
+                return {k: conv(x) for k, x in v.items()}
+            return v
+
+        counters = {k: getattr(self, k) for k in (
+            "yield_n", "detour_n", "jam_clear_n", "max_queue_depth",
+            "sep_violations", "reservation_double", "min_pair_m", "max_blocked_s",
+            "energy_guard_n", "reservation_double")}
+        counters["min_pair_m"] = (None if self.min_pair_m == float("inf")
+                                  else self.min_pair_m)
+        return {
+            "schema_version": self.SNAPSHOT_SCHEMA,
+            "kind": "game_snapshot",
+            "scenario": self.sc["id"],
+            "seed": self.seed,
+            "tick_i": self.tick_i,
+            "t_s": self.t,
+            "n_ticks": self.n_ticks,
+            "rng_s": self.rng.state(),
+            "svc_rng_s": self.svc_rng.state(),
+            "robots": {rid: r.serialize() for rid, r in self.robots.items()},
+            "queue": conv(self.queue),
+            "reserved": conv(self.reserved),
+            "stations": conv(self.stations),
+            "faults": conv(self.faults),
+            "blocked_docks": sorted(self.blocked_docks),
+            "next_arrival": (None if self.next_arrival == float("inf")
+                             else self.next_arrival),
+            "ext_i": self.ext_i,
+            "order_n": self._order_n,
+            "done": self.done,
+            "demand": {"base_per_hour": self._base_per_hour,
+                       "multiplier": self.demand_multiplier,
+                       "per_hour": self.per_hour,
+                       "lam": self.lam,
+                       "price_overrides": dict(self.price_overrides),
+                       "tariff_multiplier": self.tariff_multiplier},
+            "policy": {"dispatch": self.dispatch_rule,
+                       "charge": self.charge_policy,
+                       "reserve_pct": self.reserve_pct,
+                       "overrides": conv(self.overrides)},
+            "energy": {"last_out": self._last_energy_out,
+                       "last_motion": self._last_motion,
+                       "last_in": self._last_energy_in},
+            "log": self.log.snapshot(),
+            "economy": (self.economy.snapshot_full() if getattr(self, "economy", None)
+                        else None),
+            "counters": counters,
+            "samples": conv(self.samples),
+            "run_dir": self._run_dir_rel(),
+            "meta": {"level_id": (getattr(self, "level", {}) or {}).get("id", "")},
+        }
+
+    def _run_dir_rel(self):
+        """快照要记住"我这一局的事件流在哪个目录"。
+
+        续玩的语义是**接着同一份事件流写**（append），不是另开一局：
+        另开一局就得把历史事件一起搬过去，否则 ledger 的幂等键会从 1 重号。
+        """
+        try:
+            return self.out.resolve().relative_to(ROOT).as_posix()
+        except ValueError:
+            return self.out.resolve().as_posix()
+
+    @classmethod
+    def restore(cls, snap, scenario_path, sim_spec, fleet, demand, layout, grid, cfg,
+                out_dir=None, external_orders=None):
+        """从快照续跑。缺字段 / 版本不符 / 事件日志对不上 → 一律 raise。
+
+        `append_log=True` 是关键：默认构造会用 `open(...,"w")` 把历史事件清空，
+        那正是 R11。这里先以 append 重开，再由 `EventLog.restore` 校验磁盘 seq。
+        """
+        if not isinstance(snap, dict) or snap.get("kind") != "game_snapshot":
+            raise ValueError("不是 game_snapshot：%r" % (snap or {}).get("kind"))
+        if snap.get("schema_version") != cls.SNAPSHOT_SCHEMA:
+            raise ValueError("快照版本不符：%r（本引擎支持 %r）"
+                             % (snap.get("schema_version"), cls.SNAPSHOT_SCHEMA))
+        required = ("tick_i", "t_s", "rng_s", "svc_rng_s", "robots", "queue", "stations",
+                    "faults", "log", "counters", "policy", "demand")
+        missing = [k for k in required if k not in snap]
+        if missing:
+            raise ValueError("快照缺字段：%s" % ", ".join(missing))
+
+        sim = cls(scenario_path, sim_spec, fleet, demand, layout, grid, cfg,
+                  out_dir=out_dir, external_orders=external_orders, append_log=True)
+        old_log = sim.log
+        try:
+            sim.log = EventLog.restore(sim.out / "sim_events.jsonl",
+                                       sim.spec["output"]["event_ring"], snap["log"])
+        finally:
+            try:
+                old_log.close()
+            except Exception:                      # noqa: BLE001
+                pass
+
+        sim.tick_i = int(snap["tick_i"])
+        sim.t = float(snap["t_s"])
+        sim.n_ticks = int(snap.get("n_ticks", sim.n_ticks))
+        sim.done = bool(snap.get("done", False))
+        sim._started = True          # 已经在中途：别再 init 一次（会把 t 归零）
+        sim.rng = Mulberry32.from_state(snap["rng_s"])
+        sim.svc_rng = Mulberry32.from_state(snap["svc_rng_s"])
+        sim.robots = {rid: Robot.deserialize(d, sim.model)
+                      for rid, d in snap["robots"].items()}
+        sim.n_robots = len(sim.robots)
+        sim.queue = list(snap["queue"])
+        sim.reserved = dict(snap["reserved"])
+        sim.stations = dict(snap["stations"])
+        sim.faults = list(snap["faults"])
+        sim.blocked_docks = set(snap["blocked_docks"])
+        sim.next_arrival = (float("inf") if snap.get("next_arrival") is None
+                            else float(snap["next_arrival"]))
+        sim.ext_i = int(snap.get("ext_i", 0))
+        sim._order_n = int(snap.get("order_n", 0))
+
+        d = snap["demand"]
+        sim._base_per_hour = float(d["base_per_hour"])
+        sim.demand_multiplier = float(d["multiplier"])
+        sim.per_hour = float(d["per_hour"])
+        sim.lam = float(d["lam"])
+        sim.price_overrides = dict(d.get("price_overrides") or {})
+        sim.tariff_multiplier = float(d.get("tariff_multiplier", 1.0))
+
+        pol = snap["policy"]
+        if pol["dispatch"] not in DISPATCH_RULES:
+            raise ValueError("快照里的 dispatch.policy 非法：%r" % (pol["dispatch"],))
+        if pol["charge"] not in CHARGE_POLICIES:
+            raise ValueError("快照里的 battery.charge_policy 非法：%r" % (pol["charge"],))
+        sim.dispatch_rule = pol["dispatch"]
+        sim.charge_policy = pol["charge"]
+        sim.reserve_pct = float(pol["reserve_pct"])
+        sim.overrides = dict(pol.get("overrides") or {})
+
+        e = snap["energy"]
+        sim._last_energy_out = float(e["last_out"])
+        sim._last_motion = float(e["last_motion"])
+        sim._last_energy_in = float(e["last_in"])
+
+        c = snap["counters"]
+        for k in ("yield_n", "detour_n", "jam_clear_n", "max_queue_depth",
+                  "sep_violations", "reservation_double", "energy_guard_n"):
+            setattr(sim, k, int(c.get(k, 0)))
+        sim.min_pair_m = (float("inf") if c.get("min_pair_m") is None
+                          else float(c["min_pair_m"]))
+        sim.max_blocked_s = float(c.get("max_blocked_s", 0.0))
+        sim.samples = list(snap.get("samples") or [])
+
+        if snap.get("economy"):
+            import game_economy
+            game_economy.restore_onto(sim, snap["economy"])
+        return sim
 
 
 def load_external_orders(path, layout=None):

@@ -79,9 +79,19 @@ ACCEPT_CHAIN = [
     ("scripts/manifest.py", (), "python"),   # last: hashes must cover every report above
 ]
 
+#: 游戏层的门（方案书 §8.2）。单独一条链，因为它多两样东西：
+#: 逐字节批跑基准（`step_baseline`）与真浏览器点击流（`check_live`）。
+#: **不并入 full**：full 要在没有浏览器的 CI 上也能跑；游戏门是发布前必跑的另一条。
+GAME_CHAIN = [
+    ("scripts/step_baseline.py", ("--check",), "python"),   # STEP_OK：批跑产物逐字节不变
+    ("tests/run_game_tests.py", (), "python"),              # 游戏层单测 + 集成
+    ("scripts/check_live.py", (), "python"),                # LIVE_OK：真浏览器点击流
+]
+
 SCOPES = {
     "data": DATA_CHAIN,
     "scenarios": DATA_CHAIN + SCENARIO_CHAIN,
+    "game": GAME_CHAIN,
     "full": DATA_CHAIN + SCENARIO_CHAIN + BLENDER_CHAIN + POST_CHAIN + ACCEPT_CHAIN,
 }
 

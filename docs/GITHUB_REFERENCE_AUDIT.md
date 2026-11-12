@@ -161,3 +161,29 @@ sed -n '1,60p' _research/repos/layout-editor/server/layout_schema.py
 - API 的 star / push 数据是 2026-11-09 快照，会随时间变化；许可证以仓库 LICENSE 文件为准，GitHub `license` 字段为 `null` 时一律按「未核实」处理。
 - 「参考」分三档，本文严格区分：**代码衍生**（仅 WareTwin，MIT 已声明）、**概念/架构参照**（RHCR、openTCS、ERPNext、beancount、layout-editor 等）、**仅核查未采用**（MAPF-CBS、salabim、warehouse_simulation_toolkit 等）。
 - 本项目未向任何第三方生产系统写入数据；`_research/repos/` 下仓库不参与运行。
+
+---
+
+## 8. 游戏化改造阶段（ADR-GAME-06）· GPL 隔离声明
+
+> 日期：2026-11-12 · 触发：把数字孪生改造为模拟运营游戏，参考项目池里 GPLv3 占比高
+
+游戏改造阶段新引入的对照项目，按 `docs/design/ADR-GAME-06.md` 的隔离规则登记：
+
+| 仓库 | 许可 | 借鉴点 | 采用方式 | 是否产生代码衍生 |
+|---|---|---|---|---|
+| tobspr/shapez.io | **GPL-3.0** | 实时 tick 循环、存档系统、实体/组件组织 | **仅架构阅读** | 否 |
+| Anuken/Mindustry | **GPL-3.0** | 暂停/倍速节奏、战役解锁、传送带物流玩法 | **仅玩法设计阅读** | 否 |
+| OpenTTD/OpenTTD | **GPL-2.0** | 车辆调度、订单路线、送达结算 | **仅设计阅读** | 否 |
+| simutrans/simutrans | **GPL-2.0** | 同 OpenTTD | **仅设计阅读** | 否 |
+| OpenRCT2/OpenRCT2 | **GPL-3.0** | 经营评分、失败态、结算画面 | **仅设计阅读** | 否 |
+| kittensgame/KittensGame | **MIT** | 资源/购买/解锁/存档导入导出范式 | 可借鉴代码（须署名） | 本期未复制 |
+| pmotschmann/Evolve | 宽松 | 生产链驱动解锁 | 参考设计 | 否 |
+| SimPy / Salabim | 宽松（逐个核对） | DES 事件调度结构、仿真与可视化共用状态 | 参考架构 | 本期未引入 |
+
+**结论**：游戏层的 `step()` 拆分、命令队列、快照、实时经济、关卡判定**全部自研**。
+GPLv3 项目只贡献"可以这么做"的判断，不贡献任何表达式（函数体、常量表、注释、命名）。
+若后续确需借鉴 MIT 代码，必须先在 `THIRD_PARTY_NOTICES.md` 增加条目，再在本表第 5 列改为「是」。
+
+复核方式：`scripts/validate.py` 的 A39（许可登记）与 `scripts/check_doc_drift.py`（口径守卫）会兜底；
+新增 `requirements.txt` 条目须先在本节登记。
