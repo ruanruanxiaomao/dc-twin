@@ -5,12 +5,12 @@
 
 | 指标 | 当前值 |
 |---|---|
-| 生成时间 | 2026-11-12 20:20:40 |
+| 生成时间 | 2026-11-12 20:35:49 |
 | Blender | 5.2.3 LTS |
 | 布局来源 | config/layout_spec.json → spec_layout.py（L1–L13 PASS，issues=0 warnings=148；38 扇门） |
 | AP 互斥 | 148 对（WARN，两 AP <2R 不能同时占用）；预约表复核同时占用 0 次；加宽变体互斥 29 对 |
 | 四层配置 | layout_spec / fleet_spec / demand_spec / 8 个 scenarios + 8 份 schema；4 个布局 spec（当前 / areas / f4 / wide）；本次审计 4 个变体，均 PASS |
-| 场景/KPI | 8 个冻结场景（config/scenarios）× 119 次运行；解析层 25 项 KPI + tick 层 50 项 KPI（去重 65 项），每项带 definition/formula/source |
+| 场景/KPI | 8 个冻结场景（config/scenarios）× 120 次运行；解析层 25 项 KPI + tick 层 50 项 KPI（去重 65 项），每项带 definition/formula/source |
 | 布局 | 4 仓 / 196 货架 / 441 库位（392 SHELF + 21 HOME）/ 10 月台 / 6 站 / 21 AGV |
 | 布局审计 | issues=0 warnings=0 verdict=PASS |
 | 功能区 | 21 个（物理 3 / 逻辑 18）；种类 BATTERY×1/EMPTY_CONTAINER×1/PACKING×2/PICK_FACE×4/QA×1/RECEIVING×1/REPLENISH×1/RETURNS×1/SORTING×1/STAGING_IN×4/STAGING_OUT×4；见 data/areas.json |

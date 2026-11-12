@@ -354,9 +354,47 @@ def main():
         '',
     ]
     path = os.path.join(OUT, 'CURRENT_STATUS.md')
+    changed = write_if_changed(path, lines)
+    print('STATUS_OK', path, 'rows', len(rows),
+          '（内容变化，已重写）' if changed else '（内容未变，时间戳原样保留）')
+
+
+#: 生成时间那一行的前缀。它**不参与**"内容是否变化"的比较。
+TS_PREFIX = '| 生成时间 |'
+
+
+def _body_lines(text: str) -> list:
+    """去掉时间戳行与末尾空行，得到"可比内容"。
+
+    末尾空行必须一起去掉：写文件时 `'\\n'.join(lines)` 因为 lines 末尾有个空串而
+    以换行收尾，读回来 `splitlines()` 又把那个空行吃掉——两边永远差一个空元素，
+    比较恒不等，幂等逻辑等于没写（第一版就是这么错的）。
+    """
+    ls = [ln for ln in text.splitlines() if not ln.startswith(TS_PREFIX)]
+    while ls and ls[-1] == '':
+        ls.pop()
+    return ls
+
+
+def write_if_changed(path, lines) -> bool:
+    """只在内容真的变了才落盘；只差时间戳就不写。
+
+    为什么要有这个函数：这份文件带时间戳，又被提交进版本库，于是**任何一次重生成
+    都会把工作区弄脏**，而 diff 永远只有一行时间。后果不是"不干净"这么轻——
+    提交历史里全是这种噪音，真正的口径变化（比如"31 步"改成"45 步"）反而被淹没，
+    审查的人扫一眼 diff 全是时间戳就跳过了。
+
+    做法：把 `| 生成时间 |` 那一行剥掉再比；内容一致就完全不动文件（连 mtime 都不碰）。
+    这样"重生成"变成幂等操作，可以随便跑。
+    """
+    body = _body_lines('\n'.join(lines))
+    if os.path.exists(path):
+        with open(path, encoding='utf-8') as f:
+            if _body_lines(f.read()) == body:
+                return False
     with open(path, 'w', encoding='utf-8') as f:
         f.write('\n'.join(lines))
-    print('STATUS_OK', path, 'rows', len(rows))
+    return True
 
 
 if __name__ == '__main__':

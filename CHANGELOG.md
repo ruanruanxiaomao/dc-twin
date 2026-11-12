@@ -104,6 +104,13 @@ and the batch event stream is byte-identical (`step_baseline --check`).**
   when the sim has not started. A regression test waits on the real thread.
 - `game_save.save_session` crashed when the slot dir was outside the project root
   (`relative_to` ValueError); it now falls back to an absolute path.
+- **`out/CURRENT_STATUS.md` went dirty after every regeneration** — the file carries a
+  `生成时间` line but is committed, so any rerun produced a one-line diff. Noise, and
+  worse: real calibre changes hid inside it. `report_status.write_if_changed()` now
+  compares everything except that line and leaves the file untouched (not even mtime)
+  when nothing else changed; regeneration is idempotent. Covered by
+  `tests/unit/test_report_status.py`, which also pins the two mistakes my first
+  attempt made (list-vs-splitlines trailing element; forgetting the trailing blank).
 
 ### Verified
 
