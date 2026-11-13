@@ -495,6 +495,10 @@ def expand(spec, fleet_counts=None):
                 'id': sid, 'kind': st['kind'], 'zone': zone_id,
                 'rect': [r2(ox + x0), r2(oz + z0), r2(ox + x1), r2(oz + z1)],
                 'access_point': ap,
+                # R8.10/D11：分型来自数据。没声明就不写键 → layout 与历史逐字节一致
+                # （3D 层 zone_detail 的缺省仍是 chute / belt）。
+                **({'sorter': st['sorter']} if st.get('sorter') else {}),
+                **({'conveyor_style': st['conveyor_style']} if st.get('conveyor_style') else {}),
             })
             face = round(math.degrees(math.atan2((z0 + z1) / 2 - apz,
                                                  (x0 + x1) / 2 - apx)), 1)
@@ -587,6 +591,7 @@ def expand(spec, fleet_counts=None):
                 'speed_mps': cv.get('speed_mps', 0.6),
                 'direction': cv.get('direction', 'FORWARD'),
                 'blocks_grid': True,
+                **({'style': cv['style']} if cv.get('style') else {}),
             })
         warehouses.append(w)
 

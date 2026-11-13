@@ -26,11 +26,14 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 DATA = os.path.join(ROOT, 'data')
-OUT = os.path.join(ROOT, 'out')
+# D11-A：关卡/编辑器预览要能构建"带分型"的变体，所以三个输出路径可被环境变量接管。
+# 默认值与原路径逐字相同——不设变量时构建产物一字节不变（金标准仍归 out/）。
+OUT = os.environ.get('DC_OUT') or os.path.join(ROOT, 'out')
 ASSET_GLB = os.path.join(ROOT, 'assets', 'cargotwin_assets.glb')
-BLEND = os.path.join(OUT, 'distribution_center.blend')
+BLEND = os.environ.get('DC_BLEND') or os.path.join(OUT, 'distribution_center.blend')
 
-LAYOUT = json.load(open(os.path.join(DATA, 'layout.json'), encoding='utf-8'))
+LAYOUT = json.load(open(os.environ.get('DC_LAYOUT')
+                        or os.path.join(DATA, 'layout.json'), encoding='utf-8'))
 import scene_config  # noqa: E402  (要在 LAYOUT 之后才能定位 data/)
 import rack_assets  # noqa: E402  (R8 程序化货架几何：纯数据，不碰 bpy)
 import equipment_assets  # noqa: E402  (R8.5 穿梭车/CTU/机械臂：无 GLB 母版，程序化)

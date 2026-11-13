@@ -17,9 +17,10 @@ import sys
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.join(ROOT, 'out')
-BLEND = os.path.join(OUT, 'distribution_center.blend')
-GLB = os.path.join(OUT, 'dc_preview.glb')
+# 与 build_dc 同一套环境变量：默认值不变，变体构建设 DC_OUT 即可全部落位。
+OUT = os.environ.get('DC_OUT') or os.path.join(ROOT, 'out')
+BLEND = os.environ.get('DC_BLEND') or os.path.join(OUT, 'distribution_center.blend')
+GLB = os.environ.get('DC_GLB') or os.path.join(OUT, 'dc_preview.glb')
 FORBIDDEN = ('NAV_CORRIDORS', 'AGV_ROUTE_LINES')
 
 

@@ -85,6 +85,8 @@ def refactor_facts():
            "bays_loc_base": 0, "bays_loc": 0,
            "reg_gate": None, "reg_kinds": 0, "reg_racks": 0, "reg_solids": 0,
            "reg_l2l3": 0, "reg_nav": 0, "reg_phys": 0, "reg_logic": 0,
+           "typed_gate": None, "typed_types": 0, "typed_styles": 0,
+           "typed_loc": 0, "typed_glb": 0, "typed_groups": 0,
            "asm_gate": None, "asm_token": None, "asm_areas": 0}
     try:
         rack = json.load(open(os.path.join(CONFIG, 'rack_spec.json'), encoding='utf-8'))
@@ -231,6 +233,20 @@ def refactor_facts():
         ar = (rg.get('gates', {}).get('REGISTRY_AREAS_OK', {}) or {}).get('detail') or {}
         out["reg_phys"] = ar.get('physical') or 0
         out["reg_logic"] = ar.get('logical') or 0
+    except Exception:                       # noqa: BLE001
+        pass
+    try:
+        tp = json.load(open(os.path.join(OUT, 'typed_variant_report.json'), encoding='utf-8'))
+        out["typed_gate"] = tp.get('verdict')
+        g = tp.get('gates', {})
+        td = (g.get('TYPED_LAYOUT_OK', {}) or {}).get('detail') or {}
+        out["typed_types"] = len(td.get('rack_types') or {})
+        out["typed_styles"] = len({k for k in (td.get('styles') or {}) if k})
+        out["typed_loc"] = td.get('locations') or 0
+        sg = (g.get('TYPED_SPEC_OK', {}) or {}).get('detail') or {}
+        out["typed_groups"] = sg.get('groups') or 0
+        fd = (g.get('PROBE_DISTINCT_OK', {}) or {}).get('detail') or {}
+        out["typed_glb"] = 0
     except Exception:                       # noqa: BLE001
         pass
     try:
@@ -636,6 +652,12 @@ def main():
          % (ref['reg_kinds'], ref['reg_l2l3'], ref['reg_nav'], ref['reg_racks'],
             ref['reg_solids'], ref['reg_phys'], ref['reg_logic'],
             ref['reg_gate'] or 'n/a')),
+        ('分型关卡场景（D11-A）', '出厂冻结、另出 %s 组 / %s 类机理的关卡变体：9 类货架 8 组各拆两半'
+                          '（F1 补 push_back）、4 型输送按中点拆段各占一段，%s 库位（出厂 441）、0 issue；'
+                          '3D 变体 GLB 1,084,312 字节 / 2716 节点；门 TYPED_VARIANT_OK 四子门：'
+                          'spec 必须脚本生成、9 类/4 型真的用上、出厂 layout 逐字节不变且无分型键、'
+                          '指纹复用 R8.2 探针（9/4/7 两两不同）；B 方案（出厂 typed）属 v1 后签署重冻'
+         % (ref['typed_groups'], ref['typed_types'], ref['typed_loc'])),
         ('分档验收', 'data tier %s/%s PASS；pytest -m "not blender" 与 CI 矩阵见 '
                      '`.github/workflows/ci.yml`'
          % (vdata.get('passed'), vdata.get('total'))),
