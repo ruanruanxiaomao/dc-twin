@@ -1,0 +1,222 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "asset_spec (G8/R8)",
+  "type": "object",
+  "required": ["schema_version", "kind", "note", "default_off", "meta", "render_paths",
+               "rack_module", "rack_assets", "equipment_assets", "conveyor_assets", "sorter_assets"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "kind": {"const": "asset_spec"},
+    "note": {"type": "string"},
+    "default_off": {"const": true, "description": "P3：未启用时 build_dc 走现状，字节不变"},
+    "meta": {
+      "type": "object",
+      "required": ["provenance", "authority", "mechanism_rule", "status_enum", "footprint_rule"],
+      "properties": {
+        "provenance": {
+          "type": "object",
+          "required": ["glb", "license", "measured"],
+          "properties": {
+            "glb": {"type": "string", "pattern": "^assets/.+\\.glb$"},
+            "license": {"type": "string"},
+            "measured": {
+              "type": "object",
+              "required": ["bytes", "nodes", "meshes", "asset_roots"],
+              "properties": {
+                "magic": {"type": "string"},
+                "version": {"type": "integer"},
+                "bytes": {"type": "integer", "minimum": 1},
+                "nodes": {"type": "integer", "minimum": 1},
+                "meshes": {"type": "integer", "minimum": 1},
+                "asset_roots": {"type": "integer", "minimum": 1}
+              }
+            },
+            "method": {"type": "string"},
+            "wired_at_r81": {"type": "integer", "minimum": 0},
+            "idle_masters": {"type": "integer", "minimum": 0}
+          }
+        },
+        "authority": {"type": "object", "additionalProperties": {"type": "string"}},
+        "mechanism_rule": {"type": "string"},
+        "status_enum": {
+          "type": "array", "minItems": 1,
+          "items": {"enum": ["existing", "idle_master", "variant", "new", "gap", "deferred"]}
+        },
+        "status_meaning": {"type": "object", "additionalProperties": {"type": "string"}},
+        "footprint_rule": {"type": "string"}
+      }
+    },
+    "render_paths": {
+      "type": "object",
+      "required": ["blender", "canvas2d"],
+      "properties": {
+        "blender": {
+          "type": "object", "required": ["generator", "asset_glb", "export"],
+          "properties": {
+            "generator": {"type": "string"},
+            "asset_glb": {"type": "string"},
+            "export": {"type": "string"}
+          }
+        },
+        "canvas2d": {
+          "type": "object", "required": ["editor", "preview"],
+          "properties": {
+            "editor": {"type": "string"},
+            "preview": {"type": "string"},
+            "demo": {"type": "string"}
+          }
+        }
+      }
+    },
+    "rack_module": {
+      "type": "object",
+      "required": ["bays", "axis_note"],
+      "properties": {
+        "bays": {"type": "integer", "minimum": 1, "maximum": 20},
+        "axis_note": {"type": "string"}
+      }
+    },
+    "rack_assets": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"$ref": "#/definitions/rackAsset"}
+    },
+    "equipment_assets": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"$ref": "#/definitions/equipmentAsset"}
+    },
+    "scene_assets": {
+      "type": "object",
+      "properties": {
+        "_note": {"type": "string"}
+      },
+      "additionalProperties": {
+        "type": "object",
+        "required": ["source", "status", "use"],
+        "properties": {
+          "source": {"$ref": "#/definitions/source"},
+          "status": {"$ref": "#/definitions/status"},
+          "use": {"type": "string"},
+          "params": {"type": "object"},
+          "module": {"type": "string"},
+          "glb_gap": {"type": "string"},
+          "implemented_in": {"type": "string"}
+        }
+      }
+    },
+    "conveyor_assets": {
+      "type": "object",
+      "additionalProperties": {"$ref": "#/definitions/propAsset"}
+    },
+    "sorter_assets": {
+      "type": "object",
+      "additionalProperties": {"$ref": "#/definitions/propAsset"}
+    },
+    "deferred_rack_types": {
+      "type": "object",
+      "patternProperties": {
+        "^_note$": {"type": "string"}
+      },
+      "additionalProperties": {
+        "type": "object",
+        "required": ["name_cn", "reason"],
+        "properties": {
+          "name_cn": {"type": "string"},
+          "reason": {"type": "string"}
+        }
+      }
+    }
+  },
+  "definitions": {
+    "source": {
+      "type": "string",
+      "pattern": "^(glb:asset_[a-z0-9_]+|procedural:[a-z0-9_.]+)$",
+      "description": "glb:<节点名> 必须在 GLB 实测清单内；procedural:<函数名> 必须在 module 里真实存在"
+    },
+    "status": {
+      "enum": ["existing", "idle_master", "variant", "new", "gap", "deferred"]
+    },
+    "rackAsset": {
+      "type": "object",
+      "required": ["name_cn", "status", "source", "depth_positions", "footprint_m", "visual_cue"],
+      "properties": {
+        "name_cn": {"type": "string"},
+        "status": {"$ref": "#/definitions/status"},
+        "source": {"$ref": "#/definitions/source"},
+        "module": {"type": "string"},
+        "depth_positions": {
+          "oneOf": [
+            {"type": "integer", "minimum": 1, "maximum": 60},
+            {"enum": ["from_rack"]}
+          ]
+        },
+        "footprint_m": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "array", "minItems": 2, "maxItems": 2,
+             "items": {"type": "number", "exclusiveMinimum": 0}}
+          ],
+          "description": "from_rack 深位时填 null（进深由 rack_spec 的 aisle_depth_positions 定）"
+        },
+        "visual_cue": {"type": "string"},
+        "behavior_ref": {"type": "string"},
+        "glb_fallback": {"$ref": "#/definitions/source"},
+        "glb_gap": {"type": "string"},
+        "params": {"type": "object"},
+        "implemented_in": {"type": "string", "pattern": "^[a-z_/]+\\.py:\\d+$"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"status": {"const": "existing"}}},
+          "then": {"required": ["implemented_in"]}
+        },
+        {
+          "if": {"properties": {"depth_positions": {"const": "from_rack"}}},
+          "then": {"properties": {"footprint_m": {"type": "null"}}},
+          "else": {"properties": {"footprint_m": {"type": "array"}}}
+        }
+      ]
+    },
+    "equipmentAsset": {
+      "type": "object",
+      "required": ["name_cn", "status", "source", "footprint_m", "footprint_source"],
+      "properties": {
+        "name_cn": {"type": "string"},
+        "status": {"$ref": "#/definitions/status"},
+        "source": {"$ref": "#/definitions/source"},
+        "module": {"type": "string"},
+        "footprint_m": {"type": "array", "minItems": 2, "maxItems": 2,
+                        "items": {"type": "number", "exclusiveMinimum": 0}},
+        "footprint_source": {
+          "type": "string",
+          "pattern": "^(config:.+|geometry:.+|glb:bbox|equipment_spec:.+)$"
+        },
+        "params": {"type": "object"},
+        "visual_cue": {"type": "string"},
+        "glb_gap": {"type": "string"},
+        "implemented_in": {"type": "string", "pattern": "^[a-z_/]+\\.py:\\d+$"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"status": {"const": "existing"}}},
+          "then": {"required": ["implemented_in"]}
+        }
+      ]
+    },
+    "propAsset": {
+      "type": "object",
+      "required": ["source", "status", "module"],
+      "properties": {
+        "source": {"$ref": "#/definitions/source"},
+        "status": {"$ref": "#/definitions/status"},
+        "module": {"type": "string"},
+        "params": {"type": "object"},
+        "mechanism_key": {"type": "string"},
+        "glb_gap": {"type": "string"},
+        "implemented_in": {"type": "string"}
+      }
+    }
+  }
+}

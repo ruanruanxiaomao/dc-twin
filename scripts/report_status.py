@@ -68,7 +68,9 @@ def refactor_facts():
            "ul_skus": 0, "ul_max_util": None, "rack_cells": 0,
            "models": 0, "deployed": [], "ast": None,
            "cap_aisles": 0, "cap_per_h": 0, "cap_load": 0, "cap_dev": None,
-           "reflow_rows": None, "reflow_shelf": None, "reflow_rows_ref": None}
+           "reflow_rows": None, "reflow_shelf": None, "reflow_rows_ref": None,
+           "asset_rack": 0, "asset_equip": 0, "asset_glb_roots": 0,
+           "asset_pending": 0, "asset_gate": None}
     try:
         rack = json.load(open(os.path.join(CONFIG, 'rack_spec.json'), encoding='utf-8'))
         out["rack_types"] = len(rack.get('types') or {})
@@ -119,6 +121,23 @@ def refactor_facts():
         out["reflow_rows"] = (dens.get('reach') or {}).get('rows')
         out["reflow_shelf"] = (dens.get('reach') or {}).get('shelf')
         out["reflow_rows_ref"] = (dens.get('counterbalance') or {}).get('rows')
+    except Exception:                       # noqa: BLE001
+        pass
+    try:
+        asp = json.load(open(os.path.join(CONFIG, 'asset_spec.json'), encoding='utf-8'))
+        out["asset_rack"] = len(asp.get('rack_assets') or {})
+        out["asset_equip"] = len(asp.get('equipment_assets') or {})
+        out["asset_glb_roots"] = int((asp.get('meta', {}).get('provenance', {})
+                                      .get('measured', {}) or {}).get('asset_roots') or 0)
+        areas = ("rack_assets", "equipment_assets", "scene_assets",
+                 "conveyor_assets", "sorter_assets")
+        out["asset_pending"] = sum(1 for s in areas
+                                   for v in (asp.get(s) or {}).values()
+                                   if isinstance(v, dict)
+                                   and v.get('status') in ('new', 'variant', 'idle_master'))
+        ac = json.load(open(os.path.join(OUT, 'asset_consistency_report.json'),
+                            encoding='utf-8'))
+        out["asset_gate"] = ac.get('verdict')
     except Exception:                       # noqa: BLE001
         pass
     for name in ("unit_load_spec", "rack_spec", "equipment_spec", "capacity_spec"):
@@ -431,7 +450,7 @@ def main():
             inv.get('stockout', 'n/a'), inv.get('expired_units', 'n/a'),
             inv.get('expired_value', 'n/a'), inv.get('open_lots', 'n/a'),
             inv.get('fefo_violations', 'n/a'))),
-        ('重构层（R0–R5）', '四份 spec（%s/4）+ schema（%s/4）：货架 %s 类（按存取机理）、设备 %s 类；'
+        ('重构层（R0–R5 + R8.1）', '四份 spec（%s/4）+ schema（%s/4）：货架 %s 类（按存取机理）、设备 %s 类；'
                           '车型库 %s 个（默认部署 %s）；集装单元 %s 个 SKU（托盘 %s / 料箱 %s，'
                           '最高载荷利用率 %s%%）；当前布局货道 %s 个（默认 0 = 未启用深位）；'
                           'AST 耦合开关 %s（默认关）；`capacity_model.py` / 单元层 / 货架机理 / '
@@ -440,8 +459,11 @@ def main():
                           '解析库容已接主链：%s 条巷道 / 能力 %s 单/h / 负荷 %s / '
                           '与仿真偏差 %s%%；密度重排（默认关）同预算下平衡重 %s 行 → '
                           '曲臂 %s 行（%s 货位），两边 0 违规；'
+                          '资产目录（R8.1）：货架 %s / 设备 %s 条，GLB 母版实测 %s 个、已接 5；'
+                          '待落地 %s 项（`--strict` 仍红，属 R8.2 未完成，非回归）；'
+                          '门 `check_asset_consistency.py`（5 道目录门 + 7 反例自检，verdict=%s）；'
                           '门：`dc run --scope refactor`（R0 口径 + R1 单元 + R2 货架 + R3 设备 '
-                          '+ R4 库容 + R5 密度，6 步）'
+                          '+ R4 库容 + R5 密度 + R8.1 资产，7 步）'
          % (ref['specs'], ref['schemas'], ref['rack_types'], ref['equipment_types'],
             ref['models'], "、".join(ref['deployed']) or "n/a", ref['ul_skus'],
             ref['ul_pallet'], ref['ul_tote'],
@@ -449,7 +471,9 @@ def main():
             "开" if ref['ast'] else "关",
             ref['cap_aisles'], ref['cap_per_h'], ref['cap_load'],
             round(ref['cap_dev'], 1) if ref['cap_dev'] is not None else 'n/a',
-            ref['reflow_rows_ref'], ref['reflow_rows'], ref['reflow_shelf'])),
+            ref['reflow_rows_ref'], ref['reflow_rows'], ref['reflow_shelf'],
+            ref['asset_rack'], ref['asset_equip'], ref['asset_glb_roots'],
+            ref['asset_pending'], ref['asset_gate'] or 'n/a')),
         ('分档验收', 'data tier %s/%s PASS；pytest -m "not blender" 与 CI 矩阵见 '
                      '`.github/workflows/ci.yml`'
          % (vdata.get('passed'), vdata.get('total'))),

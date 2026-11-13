@@ -1,0 +1,275 @@
+{
+  "schema_version": "1.0",
+  "kind": "asset_spec",
+  "note": "3D 资产目录（R8）。键与 rack_spec.types / equipment_spec.types 一一对应，外观与行为共用一个 mechanism_key，杜绝『看着是驶入式、跑起来是横梁式』。source 只有两种写法：glb:<节点名>（须在 GLB 实测清单内）或 procedural:<函数名>（模块内的真实函数）。默认不接入主链：asset_spec 不被 build_dc 读取时，产出与现状逐字节一致。",
+  "default_off": true,
+  "meta": {
+    "provenance": {
+      "glb": "assets/cargotwin_assets.glb",
+      "license": "MIT (cargoTwin)",
+      "measured": {
+        "magic": "glTF",
+        "version": 2,
+        "bytes": 700396,
+        "nodes": 164,
+        "meshes": 126,
+        "asset_roots": 38
+      },
+      "method": "只读解析 GLB 的 JSON chunk（struct.unpack('<II', d[12:20]) → json.loads(d[20:20+jlen])），按 '__' 后缀去重取 asset_ 根。",
+      "wired_at_r81": 5,
+      "idle_masters": 33
+    },
+    "authority": {
+      "rack_behavior": "config/rack_spec.json#types",
+      "equipment_behavior": "config/equipment_spec.json#types",
+      "footprint_geometry": "config/rack_spec.json#types[*].geometry",
+      "layout": "config/layout_spec.json"
+    },
+    "mechanism_rule": "rack_assets 的键集合 == rack_spec.types 的键集合；equipment_assets 的键集合 == equipment_spec.types 的键集合。双向相等，多一个或少一个都判红。",
+    "status_enum": [
+      "existing",
+      "idle_master",
+      "variant",
+      "new",
+      "gap",
+      "deferred"
+    ],
+    "status_meaning": {
+      "existing": "母版/程序化函数已接进 build_dc，外观就是它；须给 implemented_in",
+      "idle_master": "GLB 母版存在但尚未接入（闲置母版），R8.2 接",
+      "variant": "复用同一母版 + 参数化差异（门架/货叉/高度），尚未实现",
+      "new": "需新增程序化函数，尚未实现",
+      "gap": "无母版且资料数值不足，只做外观或先挂着"
+    },
+    "footprint_rule": "货架 palette 模块 = 3 个货格宽 × depth_positions 个货格深；由 rack_spec.geometry 的 clearW/clearD + structW/structD 复算，asset_spec 里写的 footprint_m 必须与之相等（浮点容差 1e-6），否则判红。方案书 §16.4 示例写的 1.2 m 深是示意值，真实值由 EUR 1200×800 推出的 clearD 1.3 + structD 0.05 = 1.35 m 决定，以 geometry 为准。"
+  },
+  "render_paths": {
+    "blender": {
+      "generator": "scripts/build_dc.py",
+      "asset_glb": "assets/cargotwin_assets.glb",
+      "export": "scripts/export_glb.py"
+    },
+    "canvas2d": {
+      "editor": "submission/editor.js",
+      "preview": "submission/twin3d.js",
+      "demo": "demo/app.js"
+    }
+  },
+  "rack_module": {
+    "bays": 3,
+    "axis_note": "footprint_m = [bays × (clearW + structW), depth_positions × (clearD + structD)]"
+  },
+  "rack_assets": {
+    "selective_pallet": {
+      "name_cn": "横梁式货架",
+      "status": "existing",
+      "source": "procedural:unit_rack_mesh",
+      "module": "scripts/build_dc.py",
+      "depth_positions": 1,
+      "footprint_m": [2.91, 1.35],
+      "visual_cue": "立柱 + 前后层梁 + 横撑，单深，托盘直接可见",
+      "implemented_in": "scripts/build_dc.py:174",
+      "glb_fallback": "glb:asset_rack"
+    },
+    "double_deep": {
+      "name_cn": "双深位货架",
+      "status": "new",
+      "source": "procedural:rack_double_deep",
+      "module": "scripts/rack_assets.py",
+      "depth_positions": 2,
+      "footprint_m": [2.91, 2.7],
+      "visual_cue": "前后双托 + 支撑轨，后位被前位挡住而半隐",
+      "behavior_ref": "rack_spec.types.double_deep.rear_blocked_by_front"
+    },
+    "drive_in": {
+      "name_cn": "驶入式货架",
+      "status": "new",
+      "source": "procedural:rack_drive_in",
+      "module": "scripts/rack_assets.py",
+      "depth_positions": "from_rack",
+      "footprint_m": null,
+      "visual_cue": "叉车驶入通道 + 两侧导轨 + 深位托盘渐隐，单端开口",
+      "behavior_ref": "rack_spec.types.drive_in.single_end"
+    },
+    "drive_through": {
+      "name_cn": "贯通式货架",
+      "status": "new",
+      "source": "procedural:rack_drive_through",
+      "module": "scripts/rack_assets.py",
+      "depth_positions": "from_rack",
+      "footprint_m": null,
+      "visual_cue": "同驶入式但两端开口贯通"
+    },
+    "pallet_shuttle": {
+      "name_cn": "穿梭式货架",
+      "status": "new",
+      "source": "procedural:rack_shuttle",
+      "module": "scripts/rack_assets.py",
+      "depth_positions": "from_rack",
+      "footprint_m": null,
+      "visual_cue": "入口交接位 + 穿梭车在轨（procedural:shuttle_car），深位由车搬运",
+      "glb_gap": "GLB 无穿梭车母版，车体走程序化"
+    },
+    "mobile": {
+      "name_cn": "移动式货架",
+      "status": "new",
+      "source": "procedural:rack_mobile",
+      "module": "scripts/rack_assets.py",
+      "depth_positions": 1,
+      "footprint_m": [2.91, 1.35],
+      "visual_cue": "可移动底座 + 密集排列 + 只留一条活动通道",
+      "behavior_ref": "rack_spec.types.mobile.open_close_s"
+    },
+    "carton_flow": {
+      "name_cn": "流利式货架",
+      "status": "new",
+      "source": "procedural:rack_carton_flow",
+      "module": "scripts/rack_assets.py",
+      "depth_positions": 1,
+      "footprint_m": [1.95, 0.54],
+      "visual_cue": "流利条微斜，周转箱从补货端滑向拣选端",
+      "footprint_note": "料箱货架（clearW 0.60 / clearD 0.50）比托盘货架小一号，footprint 由自己的 geometry 复算，不是照抄托盘"
+    },
+    "pallet_gravity": {
+      "name_cn": "重力式货架",
+      "status": "new",
+      "source": "procedural:rack_gravity",
+      "module": "scripts/rack_assets.py",
+      "depth_positions": "from_rack",
+      "footprint_m": null,
+      "visual_cue": "重力辊道带坡度，高端入低端出，天然 FIFO"
+    },
+    "push_back": {
+      "name_cn": "压入式货架",
+      "status": "new",
+      "source": "procedural:rack_push_back",
+      "module": "scripts/rack_assets.py",
+      "depth_positions": "from_rack",
+      "footprint_m": null,
+      "visual_cue": "嵌套小车微斜，同侧推入嵌套，LIFO"
+    }
+  },
+  "equipment_assets": {
+    "forklift_counterbalance": {
+      "name_cn": "平衡重式叉车",
+      "status": "existing",
+      "source": "glb:asset_forklift",
+      "footprint_m": [2.0, 1.2],
+      "footprint_source": "config:data/config.json#forklift",
+      "implemented_in": "scripts/build_dc.py:496"
+    },
+    "forklift_reach": {
+      "name_cn": "前移式叉车",
+      "status": "variant",
+      "source": "glb:asset_forklift",
+      "params": {"mast": "reach_extend"},
+      "footprint_m": [2.0, 1.2],
+      "footprint_source": "config:data/config.json#forklift",
+      "visual_cue": "共用平衡重母版，门架前移伸出"
+    },
+    "forklift_vna": {
+      "name_cn": "窄巷道三向叉车",
+      "status": "gap",
+      "source": "glb:asset_forklift",
+      "params": {"mast": "tri_lateral"},
+      "footprint_m": [2.0, 1.2],
+      "footprint_source": "config:data/config.json#forklift",
+      "visual_cue": "共用平衡重母版，加三向堆垛头",
+      "glb_gap": "GLB 无三向堆垛头，只有车体母版可复用"
+    },
+    "stacker_unitload": {
+      "name_cn": "单元载荷堆垛机",
+      "status": "idle_master",
+      "source": "glb:asset_stacker_crane",
+      "footprint_m": [1.6, 1.4],
+      "footprint_source": "glb:bbox",
+      "visual_cue": "立柱 + 载货台 + 货叉，沿巷道轨行走"
+    },
+    "stacker_miniload": {
+      "name_cn": "小型堆垛机",
+      "status": "variant",
+      "source": "glb:asset_stacker_crane",
+      "params": {"mast": "narrow", "platform": "tote"},
+      "footprint_m": [1.4, 1.2],
+      "footprint_source": "glb:bbox",
+      "visual_cue": "共用堆垛机母版，载货台换料箱托板"
+    },
+    "pallet_shuttle": {
+      "name_cn": "托盘穿梭车",
+      "status": "new",
+      "source": "procedural:shuttle_car",
+      "module": "scripts/rack_assets.py",
+      "footprint_m": [1.2, 1.0],
+      "footprint_source": "equipment_spec:deep_positions",
+      "visual_cue": "矮车体 + 升降销 + 四轮在轨",
+      "glb_gap": "GLB 无穿梭车母版；换向时间 change_aisle_s 属资料缺口"
+    },
+    "amr_bin": {
+      "name_cn": "料箱机器人",
+      "status": "idle_master",
+      "source": "glb:asset_amr_cart",
+      "footprint_m": [1.0, 0.8],
+      "footprint_source": "glb:bbox",
+      "visual_cue": "料箱车形态，多格料箱"
+    },
+    "agv_latent_rmfs": {
+      "name_cn": "潜伏式 AGV（货到人）",
+      "status": "existing",
+      "source": "glb:asset_amr",
+      "footprint_m": [1.4594, 1.4594],
+      "footprint_source": "geometry:AGV_RADIUS*2",
+      "implemented_in": "scripts/build_dc.py:466"
+    },
+    "conveyor_roller": {
+      "name_cn": "辊道输送机",
+      "status": "new",
+      "source": "procedural:conveyor_roller",
+      "module": "scripts/zone_detail.py",
+      "footprint_m": [1.0, 0.8],
+      "footprint_source": "equipment_spec:ast_mm",
+      "visual_cue": "密排辊筒 + 侧板，与带式区分"
+    },
+    "sorter_crossbelt": {
+      "name_cn": "交叉带分拣机",
+      "status": "new",
+      "source": "procedural:sorter_crossbelt",
+      "module": "scripts/zone_detail.py",
+      "footprint_m": [1.2, 0.6],
+      "footprint_source": "equipment_spec:ast_mm",
+      "visual_cue": "环线小车 + 交叉带台面，与斜滑道区分",
+      "glb_gap": "GLB 无交叉带母版；准确率百分比属资料缺口"
+    }
+  },
+  "scene_assets": {
+    "_note": "只有外观、没有行为键的场景道具。不参与 mechanism_key 双向校验，但 glb 源同样必须可解析。",
+    "forklift_loaded": {"source": "glb:asset_forklift_loaded", "status": "idle_master", "use": "作业中的带载叉车"},
+    "gantry_crane": {"source": "glb:asset_gantry_crane", "status": "idle_master", "use": "龙门吊（园区/堆场）"},
+    "scanner_arch": {"source": "glb:asset_scanner_arch", "status": "idle_master", "use": "标识识别门（§6.1 identification）"},
+    "robot_palletize": {"source": "procedural:robot_arm", "status": "new", "use": "码垛机械臂，无母版，asset_machine 兜底"},
+    "ctu": {"source": "procedural:ctu_robot", "status": "gap", "use": "CTU/四向车，无母版且技术数值不在分发包", "glb_gap": "GLB 无 CTU/四向车母版；换向时间与定位精度只有视频名，技术参考 ch2§2.5 不在分发包"}
+  },
+  "conveyor_assets": {
+    "belt": {"source": "procedural:conveyor", "module": "scripts/zone_detail.py", "status": "existing", "implemented_in": "scripts/zone_detail.py:90", "mechanism_key": "conveyor_belt"},
+    "roller": {"source": "procedural:conveyor_roller", "module": "scripts/zone_detail.py", "status": "new", "params": {"roller_pitch_m": 0.1}, "mechanism_key": "conveyor_roller"},
+    "gravity_roller": {"source": "procedural:conveyor_gravity", "module": "scripts/zone_detail.py", "status": "new", "params": {"slope_deg": 3}, "glb_gap": "GLB 无重力辊道母版"},
+    "accumulation": {"source": "procedural:conveyor_accum", "module": "scripts/zone_detail.py", "status": "new", "params": {"zero_pressure": true}}
+  },
+  "sorter_assets": {
+    "chute": {"source": "procedural:chute", "module": "scripts/zone_detail.py", "status": "existing", "implemented_in": "scripts/zone_detail.py:167"},
+    "crossbelt": {"source": "procedural:sorter_crossbelt", "module": "scripts/zone_detail.py", "status": "new", "glb_gap": "GLB 无交叉带母版"},
+    "slider": {"source": "procedural:sorter_slider", "module": "scripts/zone_detail.py", "status": "new"},
+    "swing_wheel": {"source": "procedural:sorter_swing_wheel", "module": "scripts/zone_detail.py", "status": "new"},
+    "narrow_belt": {"source": "procedural:sorter_narrow_belt", "module": "scripts/zone_detail.py", "status": "new"},
+    "tilt_tray": {"source": "procedural:sorter_tilt_tray", "module": "scripts/zone_detail.py", "status": "new"},
+    "put_wall": {"source": "procedural:sorter_put_wall", "module": "scripts/zone_detail.py", "status": "new"}
+  },
+  "deferred_rack_types": {
+    "_note": "D8 定本期 9 类，其余机理不进 rack_spec、也不进 rack_assets；列在这里只是让组装器的 palette 知道它们『还没来』。门会校验它们确实不在 rack_spec 里。",
+    "carousel_horizontal": {"name_cn": "水平回转货架", "reason": "D8 未选入本期 9 类"},
+    "vcm": {"name_cn": "垂直回转货柜（VCM）", "reason": "D8 未选入本期 9 类"},
+    "vlm": {"name_cn": "垂直升降货柜（VLM）", "reason": "D8 未选入本期 9 类"},
+    "mezzanine": {"name_cn": "阁楼式货架", "reason": "D8 未选入本期 9 类"},
+    "cantilever": {"name_cn": "悬臂式货架", "reason": "D8 未选入本期 9 类"},
+    "shelving": {"name_cn": "搁板式货架", "reason": "D8 未选入本期 9 类"}
+  }
+}

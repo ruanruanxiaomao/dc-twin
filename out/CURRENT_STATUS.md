@@ -5,11 +5,11 @@
 
 | 指标 | 当前值 |
 |---|---|
-| 生成时间 | 2026-11-13 17:28:29 |
+| 生成时间 | 2026-11-13 18:08:06 |
 | Blender | 5.2.3 LTS |
 | 布局来源 | config/layout_spec.json → spec_layout.py（L1–L13 PASS，issues=0 warnings=148；38 扇门） |
 | AP 互斥 | 148 对（WARN，两 AP <2R 不能同时占用）；预约表复核同时占用 0 次；加宽变体互斥 29 对 |
-| 四层配置 | layout_spec / fleet_spec / demand_spec / 8 个 scenarios + 13 份 schema；4 个布局 spec（当前 / areas / f4 / wide）；本次审计 4 个变体，均 PASS |
+| 四层配置 | layout_spec / fleet_spec / demand_spec / 8 个 scenarios + 14 份 schema；4 个布局 spec（当前 / areas / f4 / wide）；本次审计 4 个变体，均 PASS |
 | 场景/KPI | 8 个冻结场景（config/scenarios）× 342 次运行；解析层 25 项 KPI + tick 层 62 项 KPI（去重 77 项），每项带 definition/formula/source |
 | 布局 | 4 仓 / 196 货架 / 441 库位（392 SHELF + 21 HOME）/ 10 月台 / 6 站 / 21 AGV |
 | 布局审计 | issues=0 warnings=0 verdict=PASS |
@@ -32,10 +32,10 @@
 | 车队/交通复核 | 状态迁移 147 次/非法 0；最低电量 53.986%；预约表顶点 0 / 边交换 0 |
 | 数据适配/复现 | CSV 24 行 schema=PASS；全新空目录复现 10/10 步、11 份 JSON 逐字节一致 |
 | 验收 | 40/40 PASS（A1–A40）；负测试 17/17（3 个测试文件） |
-| 开源交付层 | dc CLI 7 命令 / 47 步链（data 14 · scenarios 24 · full 47；game 3 步＝逐字节基准 + 游戏测试 + 浏览器点击流）；输出契约 sidecar 49 份 / manifest 91 个产物；静态 Demo 8 个场景 · 21 台车 |
+| 开源交付层 | dc CLI 7 命令 / 47 步链（data 14 · scenarios 24 · full 47；game 3 步＝逐字节基准 + 游戏测试 + 浏览器点击流）；输出契约 sidecar 49 份 / manifest 92 个产物；静态 Demo 8 个场景 · 21 台车 |
 | 游戏层 | 关卡 5 个 / 目标 15 条 / 8 类玩家命令（已实现 9，占位 BUILD_STATION、MANUAL_ASSIGN）/ 存档槽 1 个 / ADR 10 篇；批跑产物逐字节不变见 `scripts/step_baseline.py` |
 | 库存层 | SKU 240 / 库位 392（拣选面 24）/ 期初 10512 件（占用 ¥92696.06）/ 期初批次 796；最近一次 baseline：补货触发 0 次、缺货 0 次、过期报废 1657.0 件（¥14655.28）、期末未结批次 689、FEFO 违规 0；守恒/补货/批次/效期四门见 `python -m dc_twin run --scope inventory` |
-| 重构层（R0–R5） | 四份 spec（4/4）+ schema（4/4）：货架 9 类（按存取机理）、设备 10 类；车型库 2 个（默认部署 AMR-250）；集装单元 240 个 SKU（托盘 180 / 料箱 60，最高载荷利用率 99.3%）；当前布局货道 0 个（默认 0 = 未启用深位）；AST 耦合开关 关（默认关）；`capacity_model.py` / 单元层 / 货架机理 / 多车型与按车型采购均已落地，**默认全部不改变行为**；资料 5 处口径 bug（B1–B5）修正并以 LEGACY 双版做负对照；解析库容已接主链：22 条巷道 / 能力 523.2 单/h / 负荷 0.057 / 与仿真偏差 2.9%；密度重排（默认关）同预算下平衡重 4 行 → 曲臂 5 行（340 货位），两边 0 违规；门：`dc run --scope refactor`（R0 口径 + R1 单元 + R2 货架 + R3 设备 + R4 库容 + R5 密度，6 步） |
+| 重构层（R0–R5 + R8.1） | 四份 spec（4/4）+ schema（4/4）：货架 9 类（按存取机理）、设备 10 类；车型库 2 个（默认部署 AMR-250）；集装单元 240 个 SKU（托盘 180 / 料箱 60，最高载荷利用率 99.3%）；当前布局货道 0 个（默认 0 = 未启用深位）；AST 耦合开关 关（默认关）；`capacity_model.py` / 单元层 / 货架机理 / 多车型与按车型采购均已落地，**默认全部不改变行为**；资料 5 处口径 bug（B1–B5）修正并以 LEGACY 双版做负对照；解析库容已接主链：22 条巷道 / 能力 523.2 单/h / 负荷 0.057 / 与仿真偏差 2.9%；密度重排（默认关）同预算下平衡重 4 行 → 曲臂 5 行（340 货位），两边 0 违规；资产目录（R8.1）：货架 9 / 设备 10 条，GLB 母版实测 38 个、已接 5；待落地 28 项（`--strict` 仍红，属 R8.2 未完成，非回归）；门 `check_asset_consistency.py`（5 道目录门 + 7 反例自检，verdict=ASSET_CONSISTENCY_OK）；门：`dc run --scope refactor`（R0 口径 + R1 单元 + R2 货架 + R3 设备 + R4 库容 + R5 密度 + R8.1 资产，7 步） |
 | 分档验收 | data tier 12/12 PASS；pytest -m "not blender" 与 CI 矩阵见 `.github/workflows/ci.yml` |
 
 ## 仍保留的边界（如实声明）

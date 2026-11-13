@@ -48,6 +48,19 @@ FORBIDDEN = (
 )
 
 
+def _banned_pattern(frag):
+    """废弃表述按**独立片段**匹配，不做裸子串。
+
+    踩过的坑：`'4 份 schema' in text` 会被 `'14 份 schema'` 命中——新增一份 schema
+    （asset_spec）就把这条门判红，红得莫名其妙。左右各加一个「不紧邻数字/字母」的
+    边界：`14 份 schema` 里的 `4` 前面是 `1`，不算；真正写着 `4 份 schema` 的旧文照旧抓。
+    """
+    return re.compile(r'(?<![0-9A-Za-z])' + re.escape(frag) + r'(?![0-9A-Za-z])')
+
+
+_BANNED = tuple((frag, _banned_pattern(frag)) for frag in FORBIDDEN)
+
+
 def facts():
     """从产物现算「唯一真相」数字，不读任何二手文档。"""
     scen = sorted(glob.glob(os.path.join(CONFIG, 'scenarios', '*.json')))
@@ -101,8 +114,8 @@ def expected_fragments(f):
 def check_text(text, f):
     """返回 (problems, notes)。文本层面的所有判定都在这里，便于 self-test 复用。"""
     problems, notes = [], []
-    for bad in FORBIDDEN:
-        if bad in text:
+    for bad, pat in _BANNED:
+        if pat.search(text):
             problems.append('废弃表述仍在：%r' % bad)
     for frag in expected_fragments(f):
         if frag not in text:
@@ -161,9 +174,16 @@ def self_test():
         ('原样文本', real, False),
         ('篡改场景数', real.replace('%d 个冻结场景' % f['scenarios'], '10 个冻结场景', 1), True),
         ('塞回旧表述', real + '\n- 运营层是离线回放\n', True),
+        ('塞回 4 份 schema', real + '\n- 当时只有 4 份 schema\n', True),
         ('删除口径纪律', real.replace('## 口径纪律', '## 其他'), True),
     ]
     bad = 0
+    # 边界用例：14 份 schema 不该被当成旧的「4 份 schema」
+    if _banned_pattern('4 份 schema').search('现在是 14 份 schema'):
+        print('  [BAD] 子串误伤：14 份 schema 被判成 4 份 schema')
+        bad += 1
+    else:
+        print('  [PASS] 子串不误伤（14 份 schema）')
     for name, text, should_fail in cases:
         problems, _ = check_text(text, f)
         failed = bool(problems)

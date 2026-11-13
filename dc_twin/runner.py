@@ -112,6 +112,7 @@ REFACTOR_CHAIN = [
     ("scripts/check_equipment.py", ("--quiet",), "python"),      # R3 设备类型/多车型/AST/采购
     ("scripts/check_capacity_cross.py", ("--quiet",), "python"),  # R4 解析库容接主链 + 交叉验证
     ("scripts/check_reflow.py", ("--quiet",), "python"),         # R5 库容密度重排 + 越界负测试
+    ("scripts/check_asset_consistency.py", ("--quiet",), "python"),  # R8.1 3D 资产目录一致性
 ]
 
 SCOPES = {
