@@ -43,11 +43,20 @@ def test_typed_spec_is_generated_not_edited():
 
 
 def test_typed_layout_has_nine_mechanisms():
-    lay = _jload(ROOT / "out" / "exp" / "typed" / "typed_layout.json")
-    types = {rk.get("rack_type") for w in lay["warehouses"] for rk in w.get("racks") or []}
+    """9 类机理必须真的声明在关卡 spec 里。
+
+    不读 `out/exp/typed/` 的产物：那是门的中间文件，全量里会被其它清理型测试
+    抹掉（实测顺序一变就 FileNotFound）。"展开后 1033 库位 / 4 型输送 / 0 issue"
+    由门自己的 `TYPED_LAYOUT_OK` 断言，而 `test_typed_gate_passes` 保证门返回 0。
+    """
+    spec = _jload(ROOT / "config" / "layout_spec_typed.json")
+    types = {g.get("rack", {}).get("rack_type")
+             for w in spec["warehouses"] for g in w.get("racks") or []}
     types.discard(None)
     assert len(types) == 9
-    assert lay["summary"]["locations"] > 441, "深位机理没有展开库位"
+    styles = {cv.get("style") for w in spec["warehouses"] for cv in w.get("conveyors") or []}
+    styles.discard(None)
+    assert len(styles) == 4
 
 
 def test_factory_layout_has_no_typed_keys():

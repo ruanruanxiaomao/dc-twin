@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0",
+  "kind": "milestone_v1_freeze",
+  "note": "v1.0 冻结锚。默认产物、金标准计数与验收口径都锁在这里；任何一项变动都必须显式重冻并写 ADR，否则门与 pytest 同时红。",
+  "anchors": {
+    "data/layout.json": {
+      "sha256_prefix": "9dcaf196",
+      "bytes": 264148,
+      "note": "默认布局（未启用面积/分型/宽度轴）"
+    },
+    "out/build_report.json": {
+      "sha256_prefix": "f86ae7a2",
+      "bytes": 3613,
+      "note": "默认构建报告（counts 与 .blend 实测一致）"
+    },
+    "out/dc_preview.glb": {
+      "sha256_prefix": "a5e90872",
+      "bytes": 929260,
+      "note": "默认 GLB（ADR-13 规整后，同一场景两次导出逐字节相同）"
+    }
+  },
+  "counts": {
+    "objects": 2345,
+    "meshes": 394,
+    "materials": 86,
+    "racks": 196,
+    "locations": 441,
+    "warehouses": 4
+  },
+  "step_baseline": {
+    "scenarios": 8,
+    "artifacts": 24
+  },
+  "acceptance": {
+    "total": 40,
+    "passed": 40
+  },
+  "refactor_chain_steps": 13,
+  "backlog_v1_1": [
+    "VNA 窄巷道车（设备层第 11 类，需 AST 联动与 3D 几何）",
+    "R2 上架半层（库位半高上架，需库位粒度与拣选路径联动）",
+    "conveyor 进 L2/L3（现只挡导航不判重叠；补它需重跑默认 L3 并签署重冻）",
+    "宽度缩小卡一跨无专例（现由 AREA_SHRINK_NEG 的 L2/L3/L6 兜底）",
+    "逐 SKU 需求方差（现用统一 cv=0.3，数据里没有逐 SKU 样本）",
+    "报童离散分布（泊松/经验分布需分位表，现只支持 normal/uniform）",
+    "7 型分拣同场（功能带放不下 7 个站，几何差异现由 R8.2 探针承担）",
+    "编辑器前端接 typed 关卡 spec（现 console 仍读出厂布局）",
+    "分型常量的单一真相源（SORTER_KINDS/CONVEYOR_STYLES 应进 asset_spec，避免 cross_belt 这类笔误）"
+  ]
+}

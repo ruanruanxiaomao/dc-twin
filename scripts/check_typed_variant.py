@@ -180,8 +180,12 @@ def main(argv=None):
     ap.add_argument("--self-test", action="store_true")
     a = ap.parse_args(argv)
 
-    for f in TMP.glob("*.json"):
-        f.unlink(missing_ok=True)
+    # 只清本门自己写的 9 个文件，**不要 glob 整个目录再批量删**：
+    # 一次 unlink 50 个文件会触发宿主的安全删除阈值（bulk delete），
+    # 在 pytest 里表现为一条莫名其妙的 FAILED（实测 count=50 正好踩线）。
+    for tag in ("typed", "factory", "factory_typed"):
+        for suf in ("layout", "report", "spec_layout"):
+            (TMP / ("%s_%s.json" % (tag, suf))).unlink(missing_ok=True)
 
     typed_rc, typed, typed_rep = _run(CONFIG / "layout_spec_typed.json", "typed")
     fac_rc, fac, fac_rep = _run(CONFIG / "layout_spec.json", "factory")

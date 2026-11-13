@@ -5,7 +5,7 @@
 
 | 指标 | 当前值 |
 |---|---|
-| 生成时间 | 2026-11-13 21:16:25 |
+| 生成时间 | 2026-11-13 21:21:45 |
 | Blender | 5.2.3 LTS |
 | 布局来源 | config/layout_spec.json → spec_layout.py（L1–L13 PASS，issues=0 warnings=148；38 扇门） |
 | AP 互斥 | 148 对（WARN，两 AP <2R 不能同时占用）；预约表复核同时占用 0 次；加宽变体互斥 29 对 |
@@ -32,7 +32,7 @@
 | 车队/交通复核 | 状态迁移 147 次/非法 0；最低电量 53.986%；预约表顶点 0 / 边交换 0 |
 | 数据适配/复现 | CSV 24 行 schema=PASS；全新空目录复现 10/10 步、11 份 JSON 逐字节一致 |
 | 验收 | 40/40 PASS（A1–A40）；负测试 17/17（3 个测试文件） |
-| 开源交付层 | dc CLI 7 命令 / 47 步链（data 14 · scenarios 24 · full 47；game 3 步＝逐字节基准 + 游戏测试 + 浏览器点击流）；输出契约 sidecar 57 份 / manifest 121 个产物；静态 Demo 8 个场景 · 21 台车 |
+| 开源交付层 | dc CLI 7 命令 / 47 步链（data 14 · scenarios 24 · full 47；game 3 步＝逐字节基准 + 游戏测试 + 浏览器点击流）；输出契约 sidecar 59 份 / manifest 122 个产物；静态 Demo 8 个场景 · 21 台车 |
 | 游戏层 | 关卡 5 个 / 目标 15 条 / 8 类玩家命令（已实现 9，占位 BUILD_STATION、MANUAL_ASSIGN）/ 存档槽 1 个 / ADR 10 篇；批跑产物逐字节不变见 `scripts/step_baseline.py` |
 | 库存层 | SKU 240 / 库位 392（拣选面 24）/ 期初 10512 件（占用 ¥92696.06）/ 期初批次 796；最近一次 baseline：补货触发 0 次、缺货 0 次、过期报废 1657.0 件（¥14655.28）、期末未结批次 689、FEFO 违规 0；守恒/补货/批次/效期四门见 `python -m dc_twin run --scope inventory` |
 | 重构层（R0–R5 + R8.1–R8.11） | 四份 spec（4/4）+ schema（4/4）：货架 9 类（按存取机理）、设备 10 类；车型库 2 个（默认部署 AMR-250）；集装单元 240 个 SKU（托盘 180 / 料箱 60，最高载荷利用率 99.3%）；当前布局货道 0 个（默认 0 = 未启用深位）；AST 耦合开关 关（默认关）；`capacity_model.py` / 单元层 / 货架机理 / 多车型与按车型采购均已落地，**默认全部不改变行为**；资料 5 处口径 bug（B1–B5）修正并以 LEGACY 双版做负对照；解析库容已接主链：22 条巷道 / 能力 523.2 单/h / 负荷 0.057 / 与仿真偏差 2.9%；密度重排（默认关）同预算下平衡重 4 行 → 曲臂 5 行（340 货位），两边 0 违规；资产目录（R8.1）：货架 9 / 设备 10 条，GLB 母版实测 38 个、设备侧仍只接 5；待落地 11 项（`--strict` 仍红，属 R8.3 未完成，非回归）；门 `check_asset_consistency.py`（5 道目录门 + 7 反例自检，verdict=ASSET_CONSISTENCY_OK）；R8.2 派发：9 类机理 → 9 种几何指纹、Blender 探针 0 种坐标形状（verdict=ASSET_DISPATCH_OK，默认关=布局不声明 rack_type 就不走派发）；R8.3 带机理整场：7 类机理入场景 / fallback=0 / 锚点=counts+GLB 结构指纹（GLB 字节不可复现，ADR-12）；门：`dc run --scope refactor`（R0 口径 + R1 单元 + R2 货架 + R3 设备 + R4 库容 + R5 密度 + R8.1 资产目录 + R8.2 派发 + R8.9 提交事务 + R8.11 登记册 + D11-A 分型 + R5 库存策略，13 步） |
@@ -43,6 +43,7 @@
 | 实体登记册（R8.11） | 9 类实体（货架/月台/站/功能区/充电位/障碍/输送线/待命位/室外装备）登记成唯一清单，每类显式写"谁消费它"；L2/L3 取 5 类、导航取 6 类，差异（输送线只挡不撞）写在册子里而不是散在两处手写清单；几何与 spec_layout 逐架比对 196 货架 / 242 实体（同序），物理区 3 / 逻辑区 18（逻辑区不许带 rect）；verdict=REGISTRY_COVERAGE_OK；自检 5 反例（未登记键/孤儿类/消费者笔误/放宽集合/物理区缺 rect） |
 | 分型关卡场景（D11-A） | 出厂冻结、另出 11 组 / 9 类机理的关卡变体：9 类货架 8 组各拆两半（F1 补 push_back）、4 型输送按中点拆段各占一段，1033 库位（出厂 441）、0 issue；3D 变体 GLB 1,084,312 字节 / 2716 节点；门 TYPED_VARIANT_OK 四子门：spec 必须脚本生成、9 类/4 型真的用上、出厂 layout 逐字节不变且无分型键、指纹复用 R8.2 探针（9/4/7 两两不同）；B 方案（出厂 typed）属 v1 后签署重冻 |
 | 库存策略（R5） | EOQ / ROP+SS / 报童 / GMROI 四式**闭式**（无搜索、无 rng）：EOQ=1443.38（D=12500, S=180, H=2.16）、ROP=10.61（z=1.6449 / μ_L=6.25 / SS=4.36，σ_L 按 √L 放大）、报童 Q=107.97（fractile=0.625）、GMROI=1.40；定义域即断言（H≤0 / σ<0 / SL 端点 / v≥p 全抛错，p≤c 返回 0）；两处开关联锁，半开抛错不静默降级；verdict=POLICY_CLOSED_FORM_OK；默认关（出厂 policy 仍 reorder_point、enabled=false），check_reorder 与 check_inventory 数字不变 |
+| v1.0 冻结（里程碑） | 三锚 SHA 钉住：layout 9dcaf196（264,148 字节）/ build_report f86ae7a2 / GLB a5e90872（929,260 字节），计数 4 仓·196 架·441 库位·2345 对象；验收 A1–A40 40/40、STEP_BASELINE 8 场景/24 产物逐字节一致、pytest 全量绿、doctor 全 OK；verdict=MILESTONE_V1_OK；v1.1 backlog 9 条显式记账（VNA/R2 上架半/conveyor-L3/宽度缩边/逐 SKU 方差/离散报童/7 型同场/前端接 typed spec/分型常量真相源），重冻须同提交改锚+写 ADR+跑 full 与 A1–A40 |
 | 分档验收 | data tier 12/12 PASS；pytest -m "not blender" 与 CI 矩阵见 `.github/workflows/ci.yml` |
 
 ## 仍保留的边界（如实声明）

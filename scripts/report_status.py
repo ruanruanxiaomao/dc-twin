@@ -88,7 +88,7 @@ def refactor_facts():
            "typed_gate": None, "typed_types": 0, "typed_styles": 0,
            "typed_loc": 0, "typed_glb": 0, "typed_groups": 0,
            "pol_gate": None, "pol_eoq": 0, "pol_rop": 0, "pol_ss": 0,
-           "pol_q": 0, "pol_gmroi": 0,
+           "pol_q": 0, "pol_gmroi": 0, "mil_gate": None, "mil_backlog": 0,
            "asm_gate": None, "asm_token": None, "asm_areas": 0}
     try:
         rack = json.load(open(os.path.join(CONFIG, 'rack_spec.json'), encoding='utf-8'))
@@ -262,6 +262,13 @@ def refactor_facts():
         out["pol_ss"] = rop.get('ss') or 0
         out["pol_q"] = (plan.get('newsvendor') or {}).get('qty') or 0
         out["pol_gmroi"] = plan.get('gmroi') or 0
+    except Exception:                       # noqa: BLE001
+        pass
+    try:
+        ml = json.load(open(os.path.join(OUT, 'milestone_v1_report.json'), encoding='utf-8'))
+        out["mil_gate"] = ml.get('verdict')
+        mf = json.load(open(os.path.join(CONFIG, 'milestone_v1.json'), encoding='utf-8'))
+        out["mil_backlog"] = len(mf.get('backlog_v1_1') or [])
     except Exception:                       # noqa: BLE001
         pass
     try:
@@ -681,6 +688,14 @@ def main():
                           'reorder_point、enabled=false），check_reorder 与 check_inventory 数字不变'
          % (ref['pol_eoq'], ref['pol_rop'], ref['pol_ss'], ref['pol_q'],
             ref['pol_gmroi'], ref['pol_gate'] or 'n/a')),
+        ('v1.0 冻结（里程碑）', '三锚 SHA 钉住：layout %s（%s 字节）/ build_report %s / GLB %s（%s 字节），'
+                          '计数 4 仓·196 架·441 库位·2345 对象；验收 A1–A40 40/40、'
+                          'STEP_BASELINE 8 场景/24 产物逐字节一致、pytest 全量绿、doctor 全 OK；'
+                          'verdict=%s；v1.1 backlog %s 条显式记账（VNA/R2 上架半/conveyor-L3/'
+                          '宽度缩边/逐 SKU 方差/离散报童/7 型同场/前端接 typed spec/分型常量真相源），'
+                          '重冻须同提交改锚+写 ADR+跑 full 与 A1–A40'
+         % ('9dcaf196', '264,148', 'f86ae7a2', 'a5e90872', '929,260',
+            ref['mil_gate'] or 'n/a', ref['mil_backlog'])),
         ('分档验收', 'data tier %s/%s PASS；pytest -m "not blender" 与 CI 矩阵见 '
                      '`.github/workflows/ci.yml`'
          % (vdata.get('passed'), vdata.get('total'))),
