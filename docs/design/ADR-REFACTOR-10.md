@@ -102,7 +102,11 @@ chargers / spawns / areas 的重排与越界拒绝（§16.8 缺口④）。
 
 ## 未做（R8.2 / R8.3 的清单，别当成遗漏）
 
-- `build_dc` 的 rack/equipment dispatcher 与 8 类 `rack_<mechanism>` 程序化 mesh（R8.2）。
+> **更新（R8.2 已落地，见 ADR-REFACTOR-11）**：dispatcher 与 8 类 `rack_<mechanism>`
+> 程序化 mesh 已实施（`scripts/rack_assets.py` + `check_asset_dispatch.py`），默认关闭、
+> 产出逐字节不变；下列第一条已勾掉。
+
+- ~~`build_dc` 的 rack/equipment dispatcher 与 8 类 `rack_<mechanism>` 程序化 mesh（R8.2）~~。
 - 闲置母版接线（堆垛机/龙门/带载叉车/料箱车/扫描门）→ `IDLE_MASTER_WIRED_OK`（R8.2）。
 - 输送/分拣分型（辊道/重力/积放；交叉带/滑块/摆轮/窄带/翻板/播种墙）（R8.2）。
 - 3D 金标准双锚（counts + GLB 哈希）与受控重冻结 + `RACK_MESH_DISTINCT_NEG`（R8.3）。

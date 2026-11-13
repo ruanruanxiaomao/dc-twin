@@ -66,7 +66,7 @@ def test_claims_are_true(ctx):
     spec = ctx[0]
     ok, detail, problems = cac.check_truthful(spec)
     assert ok, problems
-    assert detail["lines_checked"] >= 5
+    assert detail["claims_checked"] >= 5
 
 
 def test_footprint_follows_geometry(ctx):

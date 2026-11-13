@@ -32,6 +32,7 @@ BLEND = os.path.join(OUT, 'distribution_center.blend')
 
 LAYOUT = json.load(open(os.path.join(DATA, 'layout.json'), encoding='utf-8'))
 import scene_config  # noqa: E402  (要在 LAYOUT 之后才能定位 data/)
+import rack_assets  # noqa: E402  (R8 程序化货架几何：纯数据，不碰 bpy)
 CFG = scene_config.load()
 RNG = random.Random(LAYOUT['seed'])
 COUNTS = {}
@@ -223,6 +224,82 @@ def rack_mesh_for_heat(heat, levels=4):
     return RACK_MESHES[k]
 
 
+# ---------------------------------------------------------------- R8 资产派发
+#
+# 开关是「布局里有没有 rack_type」，不是又一个全局布尔：
+# 默认 layout 的货架组没有 rack_type（rack_spec 也没展开深位），于是解析结果
+# 一定是 legacy，产出与现状逐字节一致。想看图型差异，就得显式声明机理——
+# 那一步会同时改库容/行为，绕不过去，也就不会出现"外观变了行为没变"的幻觉。
+
+_ASSET_SPEC = None
+_ASSET_SPEC_PATH = None
+
+
+def asset_spec():
+    """读 config/asset_spec.json；DC_ASSET_SPEC 可指向 override（负对照用）。"""
+    global _ASSET_SPEC, _ASSET_SPEC_PATH
+    p = os.environ.get('DC_ASSET_SPEC') or os.path.join(ROOT, 'config', 'asset_spec.json')
+    if _ASSET_SPEC is None or p != _ASSET_SPEC_PATH:
+        _ASSET_SPEC = (json.load(open(p, encoding='utf-8')) if os.path.exists(p) else None)
+        _ASSET_SPEC_PATH = p
+    return _ASSET_SPEC
+
+
+RACK_TYPE_MESHES = {}
+MAT_SLOTS = ('rack_post', 'rack_beam', 'steel', 'rack_deck')
+
+
+def rack_type_mesh(mechanism, levels):
+    """把 rack_assets 的盒子列表做成 mesh（[0,1]^3 归一化，与 unit_rack_mesh 同口径）。"""
+    k = (mechanism, levels)
+    if k in RACK_TYPE_MESHES:
+        return RACK_TYPE_MESHES[k]
+    g = rack_assets.geometry(mechanism, levels)
+    bm = bmesh.new()
+    for lo, hi, slot in g['boxes']:
+        add_bm_box(bm, lo, hi, slot)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    m = bpy.data.meshes.new('RACK_%s_%d' % (mechanism.upper(), levels))
+    bm.to_mesh(m)
+    bm.free()
+    for key in MAT_SLOTS:
+        m.materials.append(material(key))
+    RACK_TYPE_MESHES[k] = m
+    return m
+
+
+def rack_mesh_for(rk, heat, levels):
+    """R8.2 dispatcher：声明了 rack_type 就按机理建，否则走现状（逐字节不变）。
+
+    **短路先判**：整份布局里一个 rack_type 都没有时，连 asset_spec 都不读、也不往
+    COUNTS 里塞任何键——默认构建的 build_report.json 必须与 R8 之前逐字节一致。
+    """
+    if not _dispatch_active():
+        return rack_mesh_for_heat(heat, levels)
+    spec = asset_spec()
+    if spec is not None:
+        d = rack_assets.resolve(rk, spec)
+        if d['mode'] == 'procedural':
+            COUNTS.setdefault('rack_dispatch', {})
+            COUNTS['rack_dispatch'][d['mechanism']] = \
+                COUNTS['rack_dispatch'].get(d['mechanism'], 0) + 1
+            return rack_type_mesh(d['mechanism'], levels)
+        COUNTS['rack_dispatch_fallback'] = COUNTS.get('rack_dispatch_fallback', 0) + 1
+    return rack_mesh_for_heat(heat, levels)
+
+
+_DISPATCH_ACTIVE = None
+
+
+def _dispatch_active():
+    """布局里是否有货架声明了 rack_type（一次算好，避免逐架扫）。"""
+    global _DISPATCH_ACTIVE
+    if _DISPATCH_ACTIVE is None:
+        _DISPATCH_ACTIVE = any('rack_type' in rk
+                               for wh in LAYOUT['warehouses'] for rk in wh['racks'])
+    return _DISPATCH_ACTIVE
+
+
 def extract_asset(root, name):
     """把 cargoTwin 的 asset_<name> Empty 下所有子网格烘成一个 root 局部空间的 mesh。"""
     inv = root.matrix_world.inverted()
@@ -252,8 +329,25 @@ def extract_asset(root, name):
 
 
 def import_assets():
-    wanted = ('asset_amr', 'asset_pallet_boxes', 'asset_forklift',
-              'asset_truck_box', 'asset_dock_leveler')
+    """R8.2：默认仍只取 5 个母版（字节不变）；资产目录声明 equipment_dispatch 时，
+    把 equipment_assets/scene_assets 里所有 ``glb:`` 母版一并接入（33 闲置母版中的 6 个）。
+
+    注意口径：**接进构建 ≠ 摆进场景**。这里只保证母版被 extract 进 assets、
+    出现在 build_report.asset_meshes 里；摆放位置属于装配（R8.3），不在本轮声称。
+    """
+    wanted = ['asset_amr', 'asset_pallet_boxes', 'asset_forklift',
+              'asset_truck_box', 'asset_dock_leveler']
+    spec = asset_spec()
+    if spec is not None and (spec.get('activate') or {}).get('equipment_dispatch'):
+        extra = []
+        for sect in ('equipment_assets', 'scene_assets'):
+            for v in (spec.get(sect) or {}).values():
+                if isinstance(v, dict) and str(v.get('source', '')).startswith('glb:'):
+                    extra.append(v['source'].split(':', 1)[1])
+        for n in sorted(set(extra)):
+            if n not in wanted:
+                wanted.append(n)
+        COUNTS['asset_masters_requested'] = len(wanted)
     bpy.ops.import_scene.gltf(filepath=ASSET_GLB)
     out = {}
     for n in wanted:
@@ -399,7 +493,7 @@ def build_racks_and_cargo(assets):
             rl, rh, rd = rk['size']
             levels = rk['levels']
             heat = HEAT.get(rk['id'], 0.0)
-            mesh = rack_mesh_for_heat(heat, levels)
+            mesh = rack_mesh_for(rk, heat, levels)
             heat_key = HEAT_KEYS[min(4, int(max(0.0, min(heat, 1.0)) * 5))]
             COUNTS['heat_buckets'][heat_key] += 1
             o = bpy.data.objects.new(rk['id'], mesh)

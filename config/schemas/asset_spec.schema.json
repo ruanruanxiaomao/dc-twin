@@ -10,6 +10,15 @@
     "kind": {"const": "asset_spec"},
     "note": {"type": "string"},
     "default_off": {"const": true, "description": "P3：未启用时 build_dc 走现状，字节不变"},
+    "activate": {
+      "type": "object",
+      "description": "R8 的显式开关。货架派发看布局是否声明 rack_type；设备母版接线看 equipment_dispatch。",
+      "properties": {
+        "_note": {"type": "string"},
+        "equipment_dispatch": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
     "meta": {
       "type": "object",
       "required": ["provenance", "authority", "mechanism_rule", "status_enum", "footprint_rule"],

@@ -70,7 +70,8 @@ def refactor_facts():
            "cap_aisles": 0, "cap_per_h": 0, "cap_load": 0, "cap_dev": None,
            "reflow_rows": None, "reflow_shelf": None, "reflow_rows_ref": None,
            "asset_rack": 0, "asset_equip": 0, "asset_glb_roots": 0,
-           "asset_pending": 0, "asset_gate": None}
+           "asset_pending": 0, "asset_gate": None,
+           "disp_distinct": 0, "disp_types": 0, "disp_geoms": 0, "disp_gate": None}
     try:
         rack = json.load(open(os.path.join(CONFIG, 'rack_spec.json'), encoding='utf-8'))
         out["rack_types"] = len(rack.get('types') or {})
@@ -138,6 +139,16 @@ def refactor_facts():
         ac = json.load(open(os.path.join(OUT, 'asset_consistency_report.json'),
                             encoding='utf-8'))
         out["asset_gate"] = ac.get('verdict')
+    except Exception:                       # noqa: BLE001
+        pass
+    try:
+        ar = json.load(open(os.path.join(OUT, 'asset_dispatch_report.json'), encoding='utf-8'))
+        out["disp_gate"] = ar.get('verdict')
+        dd = (ar.get('gates', {}).get('RACK_MESH_DISTINCT_OK', {}) or {}).get('detail') or {}
+        out["disp_distinct"] = dd.get('distinct') or 0
+        out["disp_types"] = dd.get('types') or 0
+        pr = (ar.get('gates', {}).get('RACK_MESH_PROBE_OK', {}) or {}).get('detail') or {}
+        out["disp_geoms"] = pr.get('distinct_geoms') or 0
     except Exception:                       # noqa: BLE001
         pass
     for name in ("unit_load_spec", "rack_spec", "equipment_spec", "capacity_spec"):
@@ -450,7 +461,7 @@ def main():
             inv.get('stockout', 'n/a'), inv.get('expired_units', 'n/a'),
             inv.get('expired_value', 'n/a'), inv.get('open_lots', 'n/a'),
             inv.get('fefo_violations', 'n/a'))),
-        ('重构层（R0–R5 + R8.1）', '四份 spec（%s/4）+ schema（%s/4）：货架 %s 类（按存取机理）、设备 %s 类；'
+        ('重构层（R0–R5 + R8.1/R8.2）', '四份 spec（%s/4）+ schema（%s/4）：货架 %s 类（按存取机理）、设备 %s 类；'
                           '车型库 %s 个（默认部署 %s）；集装单元 %s 个 SKU（托盘 %s / 料箱 %s，'
                           '最高载荷利用率 %s%%）；当前布局货道 %s 个（默认 0 = 未启用深位）；'
                           'AST 耦合开关 %s（默认关）；`capacity_model.py` / 单元层 / 货架机理 / '
@@ -459,11 +470,13 @@ def main():
                           '解析库容已接主链：%s 条巷道 / 能力 %s 单/h / 负荷 %s / '
                           '与仿真偏差 %s%%；密度重排（默认关）同预算下平衡重 %s 行 → '
                           '曲臂 %s 行（%s 货位），两边 0 违规；'
-                          '资产目录（R8.1）：货架 %s / 设备 %s 条，GLB 母版实测 %s 个、已接 5；'
-                          '待落地 %s 项（`--strict` 仍红，属 R8.2 未完成，非回归）；'
+                          '资产目录（R8.1）：货架 %s / 设备 %s 条，GLB 母版实测 %s 个、设备侧仍只接 5；'
+                          '待落地 %s 项（`--strict` 仍红，属 R8.3 未完成，非回归）；'
                           '门 `check_asset_consistency.py`（5 道目录门 + 7 反例自检，verdict=%s）；'
+                          'R8.2 派发：%s 类机理 → %s 种几何指纹、Blender 探针 %s 种坐标形状'
+                          '（verdict=%s，默认关=布局不声明 rack_type 就不走派发）；'
                           '门：`dc run --scope refactor`（R0 口径 + R1 单元 + R2 货架 + R3 设备 '
-                          '+ R4 库容 + R5 密度 + R8.1 资产，7 步）'
+                          '+ R4 库容 + R5 密度 + R8.1 资产目录 + R8.2 派发，8 步）'
          % (ref['specs'], ref['schemas'], ref['rack_types'], ref['equipment_types'],
             ref['models'], "、".join(ref['deployed']) or "n/a", ref['ul_skus'],
             ref['ul_pallet'], ref['ul_tote'],
@@ -473,7 +486,9 @@ def main():
             round(ref['cap_dev'], 1) if ref['cap_dev'] is not None else 'n/a',
             ref['reflow_rows_ref'], ref['reflow_rows'], ref['reflow_shelf'],
             ref['asset_rack'], ref['asset_equip'], ref['asset_glb_roots'],
-            ref['asset_pending'], ref['asset_gate'] or 'n/a')),
+            ref['asset_pending'], ref['asset_gate'] or 'n/a',
+            ref['disp_distinct'], ref['disp_types'], ref['disp_geoms'],
+            ref['disp_gate'] or 'n/a')),
         ('分档验收', 'data tier %s/%s PASS；pytest -m "not blender" 与 CI 矩阵见 '
                      '`.github/workflows/ci.yml`'
          % (vdata.get('passed'), vdata.get('total'))),

@@ -113,6 +113,7 @@ REFACTOR_CHAIN = [
     ("scripts/check_capacity_cross.py", ("--quiet",), "python"),  # R4 解析库容接主链 + 交叉验证
     ("scripts/check_reflow.py", ("--quiet",), "python"),         # R5 库容密度重排 + 越界负测试
     ("scripts/check_asset_consistency.py", ("--quiet",), "python"),  # R8.1 3D 资产目录一致性
+    ("scripts/check_asset_dispatch.py", ("--quiet",), "python"),     # R8.2 货架派发 + 几何分型
 ]
 
 SCOPES = {

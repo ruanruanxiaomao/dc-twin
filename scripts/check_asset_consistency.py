@@ -169,6 +169,33 @@ def check_sources(spec, glb):
                           "glb_roots": len(roots)}, problems
 
 
+def _symbol_in_enclosing_function(path, line, sym):
+    """符号是否出现在 line 所在的函数体里（AST 取证，抗行号腐烂）。
+
+    早期版本要求"该行 ±10 行内出现符号"——结果自己改一次 build_dc，行号全飘，
+    两条真实声明被判成撒谎。行号天天变，**函数归属**才是稳定的：
+    只要 implemented_in 指对了函数，函数内部挪几行不该判红；指到别的函数才算错。
+    """
+    import ast
+    src = Path(path).read_text(encoding="utf-8", errors="replace")
+    lines = src.splitlines()
+    try:
+        tree = ast.parse(src)
+    except SyntaxError:
+        return sym in "\n".join(lines[max(0, line - 11):line + 10])
+    best = None
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            end_ln = getattr(node, "end_lineno", None) or node.lineno
+            if node.lineno <= line <= end_ln:
+                if best is None or node.lineno > best.lineno:
+                    best = node
+    if best is None:
+        return sym in "\n".join(lines[max(0, line - 11):line + 10])
+    seg = "\n".join(lines[best.lineno - 1:(best.end_lineno or best.lineno)])
+    return sym in seg
+
+
 def check_truthful(spec):
     problems = []
     claims = 0
@@ -189,18 +216,17 @@ def check_truthful(spec):
             if not p.exists():
                 problems.append("%s 的 implemented_in 指向不存在的文件 %s" % (k, fp))
                 continue
-            lines = p.read_text(encoding="utf-8", errors="replace").splitlines()
             n = int(ln or 0)
-            if not 1 <= n <= len(lines):
+            total = len(p.read_text(encoding="utf-8", errors="replace").splitlines())
+            if not 1 <= n <= total:
                 problems.append("%s 的 implemented_in 行号 %d 越界（%s 共 %d 行）"
-                                % (k, n, fp, len(lines)))
+                                % (k, n, fp, total))
                 continue
-            window = "\n".join(lines[max(0, n - 11):n + 10])
             sym = _procedural_symbol(v) if v["source"].startswith("procedural:") else \
                 v["source"].split(":", 1)[1]
-            if sym.split(".")[-1] not in window:
-                problems.append("%s 的 implemented_in 处（%s）找不到符号 %s" % (k, where, sym))
-    return not problems, {"lines_checked": claims}, problems
+            if not _symbol_in_enclosing_function(p, n, sym.split(".")[-1]):
+                problems.append("%s 的 implemented_in（%s）所在函数里找不到符号 %s" % (k, where, sym))
+    return not problems, {"claims_checked": claims}, problems
 
 
 def check_footprint(spec, rack):
@@ -276,7 +302,11 @@ def self_test():
     s = copy.deepcopy(spec)
     s["rack_assets"]["double_deep"]["status"] = "existing"
     s["rack_assets"]["double_deep"]["implemented_in"] = "scripts/build_dc.py:174"
-    cases.append(("false_claim", not check_sources(s, glb)[0] and not check_truthful(s)[0], []))
+    cases.append(("false_claim", not check_truthful(s)[0], []))
+    # 5b 指到别的函数去了：implemented_in 合法但函数不对，必须抓
+    s2 = copy.deepcopy(spec)
+    s2["equipment_assets"]["agv_latent_rmfs"]["implemented_in"] = "scripts/build_dc.py:175"
+    cases.append(("claim_wrong_function", not check_truthful(s2)[0], []))
     # 6 footprint 凑数
     s = copy.deepcopy(spec); s["rack_assets"]["double_deep"]["footprint_m"] = [3.0, 2.4]
     cases.append(("fake_footprint", not check_footprint(s, rack)[0], []))
