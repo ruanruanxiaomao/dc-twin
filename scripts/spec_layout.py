@@ -346,6 +346,11 @@ def expand(spec, fleet_counts=None):
                     'rotation': 0, 'levels': lv, 'model': g.get('model', 'rack_double'),
                     'blocks_grid': True, 'floor': 1,
                 }
+                # 3D 需要**货架粒度**的机理键（一个货架组一份 mesh）。声明了 rack_type
+                # 才写；默认布局没有这个键，data/layout.json 逐字节不变。
+                # 键与库位上的 rack_type 同源（都来自 group 声明），不是第二套标签。
+                if rt_spec:
+                    rk['rack_type'] = rt
                 w['racks'].append(rk)
                 cx = rk['position'][0] + rk['size'][0] / 2
                 for side, dz in enumerate((-ap_off, rk['size'][2] + ap_off)):

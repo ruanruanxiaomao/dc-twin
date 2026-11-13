@@ -199,19 +199,17 @@ def check_default_off(spec, layout=None):
 
 # ---------------------------------------------------------------- 渲染层探针
 
-BLENDER_CANDIDATES = (
-    os.environ.get("BLENDER", ""),
-    r"C:/Program Files/Blender Foundation/Blender 5.2/blender.exe",
-    "/Applications/Blender.app/Contents/MacOS/Blender",
-    "/usr/bin/blender",
-)
-
-
 def find_blender():
+    """优先用项目统一的解析器（BLENDER_EXE → PATH → 常见安装位置）。"""
+    try:
+        sys.path.insert(0, str(ROOT))
+        from dc_twin.paths import blender_exe
+        b = blender_exe()
+        if b:
+            return b
+    except Exception:                                             # noqa: BLE001
+        pass
     import shutil
-    for c in BLENDER_CANDIDATES:
-        if c and Path(c).exists():
-            return c
     return shutil.which("blender")
 
 
@@ -252,6 +250,138 @@ def check_probe():
         problems.append("Blender 里建出来的 mesh 有重复：%s" % ",".join(dup))
     return not problems, {"blender": d.get("blender"), "mechanisms": len(geoms),
                           "distinct_geoms": len(set(geoms.values()))}, problems
+
+
+
+# ------------------------------------------------- 带机理的整场构建（R8.3）
+
+TYPED_TYPES = ("double_deep", "drive_in", "drive_through", "pallet_shuttle",
+               "mobile", "carton_flow", "pallet_gravity")
+TYPED_DIR = OUT / "exp" / "typed"
+TYPED_GOLDEN = ROOT / "tests" / "golden" / "typed_3d.json"
+
+
+def make_typed_spec(base=None):
+    """把每个货架组轮着声明一种机理。顺序固定 —— 否则每次跑出来的场景都不一样。"""
+    spec = copy.deepcopy(base or jload(CONFIG / "layout_spec.json"))
+    i = 0
+    for wh in spec["warehouses"]:
+        for g in wh["racks"]:
+            t = TYPED_TYPES[i % len(TYPED_TYPES)]
+            g["rack_type"] = t
+            if t in ("drive_in", "drive_through", "pallet_shuttle", "pallet_gravity"):
+                g.setdefault("lane_depth", 4)
+            i += 1
+    return spec, i
+
+
+def build_typed_layout():
+    """生成 spec → 展开成布局。返回 (layout, layout_sha, 组数)。"""
+    import hashlib
+    TYPED_DIR.mkdir(parents=True, exist_ok=True)
+    spec, groups = make_typed_spec()
+    sp = TYPED_DIR / "typed_spec.json"
+    sp.write_text(json.dumps(spec, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    r = _py(["scripts/spec_layout.py", "--spec", str(sp),
+             "--out", str(TYPED_DIR / "spec_layout.json"),
+             "--report", str(TYPED_DIR / "report.json"),
+             "--write", str(TYPED_DIR / "typed_layout.json"), "--quiet"])
+    if r.returncode != 0:
+        raise RuntimeError("spec_layout 失败：%s" % ((r.stdout or "") + (r.stderr or ""))[-400:])
+    rep = jload(TYPED_DIR / "report.json")
+    return TYPED_DIR / "typed_layout.json", rep.get("layout_sha256"), groups
+
+
+def _py(args):
+    import subprocess
+    return subprocess.run([sys.executable] + args, cwd=str(ROOT),
+                          capture_output=True, encoding="utf-8", errors="replace")
+
+
+def run_typed_build():
+    """Blender 里把带机理的整场建出来；返回摘要（含 glb 哈希）。"""
+    import hashlib
+    import subprocess
+    b = find_blender()
+    if not b:
+        return None, "找不到 Blender（设 BLENDER 环境变量）"
+    layout, sha, groups = build_typed_layout()
+    r = subprocess.run([b, "-b", "--factory-startup", "-P",
+                        str(ROOT / "scripts" / "typed_build_probe.py"), "--",
+                        str(layout), str(TYPED_DIR / "scene")],
+                       capture_output=True, encoding="utf-8", errors="replace", cwd=str(ROOT))
+    if r.returncode != 0 or "TYPED_BUILD_OK" not in (r.stdout or ""):
+        return None, "typed build 失败：%s" % ((r.stdout or "") + (r.stderr or ""))[-500:]
+    summ = jload(TYPED_DIR / "scene" / "typed_summary.json")
+    glb = TYPED_DIR / "scene" / "dc_preview.glb"
+    summ["glb_structure"] = glb_structure_digest(glb)
+    summ["glb_bytes"] = glb.stat().st_size
+    summ["layout_sha256"] = sha
+    summ["groups"] = groups
+    return summ, ""
+
+
+def glb_structure_digest(path):
+    """GLB 的**结构指纹**：mesh 名 + primitive 数 + 顶点数 + 材质名。
+
+    **为什么不是 sha256(file)**：同一份数据连跑两次，实测（Blender 5.2.41）：
+
+    * 默认场景：JSON chunk 完全一致，二进制 1864/665196 字节不同，全部落在 7 个
+      **索引缓冲**里；排序后完全相同 → 只是三角化顺序不同，几何没变；
+    * 带机理场景：两次运行相差 1 个**未被引用的 accessor**（889 vs 888，字节
+      1185888 vs 1185036），但 mesh / primitive / 顶点数 / 材质逐个相同。
+
+    也就是说字节哈希此刻不可用（会把"当时怎么调度"写进金标准），而结构指纹稳定。
+    把不稳定当成"金标准"的下场是门永远红、且红得没信息量；把不稳定**记下来**、
+    锚住真正稳定的那一层，才是这一层能给的证据。字节级复现列为 R8.4 待修。
+    """
+    import hashlib
+    import struct
+    d = Path(path).read_bytes()
+    jlen, _jt = struct.unpack("<II", d[12:20])
+    doc = json.loads(d[20:20 + jlen])
+    rows = []
+    for m in doc.get("meshes", []):
+        prims = []
+        for pr in m.get("primitives", []):
+            pos = (pr.get("attributes") or {}).get("POSITION")
+            acc = doc["accessors"][pos] if isinstance(pos, int) else {}
+            prims.append((pr.get("mode", 4), acc.get("count"), acc.get("type")))
+        rows.append((m.get("name"), tuple(prims)))
+    rows.sort()
+    mats = sorted(x.get("name", "") for x in doc.get("materials", []))
+    nodes = sorted(n.get("name", "") for n in doc.get("nodes", []))
+    payload = json.dumps({"meshes": rows, "materials": mats,
+                          "nodes": len(nodes)}, sort_keys=True)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _anchors(summ):
+    return {
+        "dispatch": summ.get("dispatch") or {},
+        "fallback": summ.get("fallback"),
+        "typed_racks": summ.get("typed_racks"),
+        "pallets_built": summ.get("pallets_built"),
+        "objects": summ.get("objects"),
+        "meshes": summ.get("meshes"),
+        "glb_structure": summ.get("glb_structure"),
+        "glb_nodes": (summ.get("glb") or {}).get("nodes"),
+        "glb_meshes": (summ.get("glb") or {}).get("meshes"),
+        "layout_sha256": summ.get("layout_sha256"),
+    }
+
+
+def compare_anchor(summ, golden):
+    """双锚比对：counts 与 GLB 哈希。任一漂移都判红，并说出漂在哪。"""
+    problems = []
+    got = _anchors(summ)
+    want = golden.get("anchors") or {}
+    for k in ("dispatch", "fallback", "typed_racks", "pallets_built",
+              "objects", "meshes", "glb_structure",
+              "glb_nodes", "glb_meshes", "layout_sha256"):
+        if got.get(k) != want.get(k):
+            problems.append("%s 变了：%r → %r" % (k, want.get(k), got.get(k)))
+    return not problems, {"comparison": "counts + glb_structure(量化/排序无关)", "checked": len(want)}, problems
 
 
 # ---------------------------------------------------------------- self test
@@ -297,6 +427,17 @@ def self_test():
     lay2["warehouses"][0]["racks"][0]["rack_type"] = "double_deep"
     cases.append(("typed_default_layout", not check_default_off(spec, lay2)[0]))
 
+    # 4b 锚点必须能抓漂移：counts 与结构指纹各注入一次
+    fake = {"dispatch": {"a": 1}, "fallback": 0, "typed_racks": 2, "pallets_built": 3,
+            "objects": 4, "meshes": 5, "glb_structure": "x",
+            "glb": {"nodes": 6, "meshes": 7}, "layout_sha256": "L"}
+    gold = {"anchors": _anchors(fake)}
+    cases.append(("anchor_matches", compare_anchor(fake, gold)[0]))
+    bad = copy.deepcopy(fake); bad["dispatch"] = {"a": 2}
+    cases.append(("anchor_count_drift", not compare_anchor(bad, gold)[0]))
+    bad = copy.deepcopy(fake); bad["glb_structure"] = "y"
+    cases.append(("anchor_glb_drift", not compare_anchor(bad, gold)[0]))
+
     # 5 设备开关被打开
     s = copy.deepcopy(spec)
     s.setdefault("activate", {})["equipment_dispatch"] = True
@@ -316,6 +457,10 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="R8.2 门：货架派发与几何分型")
     ap.add_argument("--quiet", action="store_true")
     ap.add_argument("--self-test", action="store_true")
+    ap.add_argument("--typed-build", action="store_true",
+                    help="带 rack_type 的整场构建并与 tests/golden/typed_3d.json 比对（约 60 s）")
+    ap.add_argument("--freeze", action="store_true",
+                    help="与 --typed-build 连用：把本次结果写成新的锚点（受控重冻结，需人看着跑）")
     ap.add_argument("--probe", action="store_true",
                     help="跑/校验 Blender 渲染层探针（约 10 s，需要本机 Blender）")
     a = ap.parse_args(argv)
@@ -358,6 +503,35 @@ def main(argv=None):
             if not a.quiet:
                 print("%-26s %s%s" % ("RACK_MESH_PROBE_OK", "PASS" if ok else "FAIL",
                                       "" if ok else "  -> " + "; ".join(problems[:2])))
+
+    if a.typed_build:
+        summ, why = run_typed_build()
+        if summ is None:
+            gates["TYPED_BUILD_OK"] = {"ok": False, "detail": {}, "problems": [why]}
+            failed.append("TYPED_BUILD_OK")
+            if not a.quiet:
+                print("%-26s FAIL  -> %s" % ("TYPED_BUILD_OK", why))
+        else:
+            anchors = _anchors(summ)
+            if a.freeze:
+                TYPED_GOLDEN.parent.mkdir(parents=True, exist_ok=True)
+                TYPED_GOLDEN.write_text(json.dumps(
+                    {"schema_version": "1.0", "kind": "typed_3d_golden",
+                     "note": "带 rack_type 的整场：counts + GLB 结构指纹双锚（字节哈希不可复现，见 ADR-12）。默认构建的锚点不在这里。",
+                     "anchors": anchors}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+                ok, detail, problems = True, {"frozen": str(TYPED_GOLDEN.relative_to(ROOT))}, []
+            elif TYPED_GOLDEN.exists():
+                ok, detail, problems = compare_anchor(summ, jload(TYPED_GOLDEN))
+            else:
+                ok, detail, problems = False, {}, [
+                    "没有 tests/golden/typed_3d.json（确认结果符合预期后加 --freeze 冻结一次）"]
+            gates["TYPED_BUILD_OK"] = {"ok": ok, "detail": detail, "problems": problems}
+            if not ok:
+                failed.append("TYPED_BUILD_OK")
+            if not a.quiet:
+                print("%-26s %s%s" % ("TYPED_BUILD_OK", "PASS" if ok else "FAIL",
+                                      "" if ok else "  -> " + "; ".join(problems[:2])))
+                print("                           %s" % json.dumps(anchors, ensure_ascii=False)[:220])
 
     rep = {"schema_version": "1.0", "kind": "asset_dispatch_report",
            "verdict": "ASSET_DISPATCH_OK" if not failed else "ASSET_DISPATCH_FAIL",

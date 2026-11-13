@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "kind": "typed_3d_golden",
+  "note": "带 rack_type 的整场：counts + GLB 哈希双锚。默认构建的锚点不在这里。",
+  "anchors": {
+    "dispatch": {
+      "double_deep": 40,
+      "drive_in": 40,
+      "drive_through": 40,
+      "pallet_shuttle": 40,
+      "mobile": 12,
+      "carton_flow": 12,
+      "pallet_gravity": 12
+    },
+    "fallback": 0,
+    "typed_racks": 196,
+    "pallets_built": 240,
+    "objects": 2346,
+    "meshes": 394,
+    "glb_structure": "359b82ed2018949b0c79a4888cbc6dde38ac317e0a1d415a5224c3374b82f89c",
+    "glb_nodes": 2284,
+    "glb_meshes": 391,
+    "layout_sha256": "0ea8b2ed47b93134163fa4e9e2cdfa5ead099c0d0bf680e5a518cebdb63119a2"
+  }
+}
