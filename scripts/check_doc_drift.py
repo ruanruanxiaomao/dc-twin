@@ -66,7 +66,10 @@ def facts():
     scen = sorted(glob.glob(os.path.join(CONFIG, 'scenarios', '*.json')))
     runs = 0
     runs_root = os.path.join(ROOT, 'runs')
-    for d in os.listdir(runs_root):
+    # runs/ 是 .gitignore 的生成物，清理工作区后可能整个不存在。把它当"永远在"
+    # 会让口径门在干净环境里直接崩（实测 WinError 3），而不是给出可读的判定。
+    top = sorted(os.listdir(runs_root)) if os.path.isdir(runs_root) else []
+    for d in top:
         sub = os.path.join(runs_root, d)
         if os.path.isdir(sub) and d != 'logs':
             runs += sum(1 for p in os.listdir(sub) if os.path.isdir(os.path.join(sub, p)))
@@ -74,6 +77,8 @@ def facts():
 
     def keys(kind):
         base = os.path.join(runs_root, 'baseline')
+        if not os.path.isdir(base):
+            return set()
         dirs = sorted(d for d in os.listdir(base)
                       if os.path.isfile(os.path.join(base, d, kind)))
         if not dirs:

@@ -42,7 +42,12 @@ def test_manifest_artifact_hashes_match_disk():
     m = json.loads(p.read_text(encoding="utf-8"))
     assert m["schema_version"] == "1.0" and m["seed"] is not None
     assert m["counts"]["artifacts"] > 10
+    # 必需产物（out 顶层报告 / 金标准）缺失或哈希不符 → 红。
+    # 可重建产物（out/renders 截图）被清理过 → 允许缺失：清理工作区不该让
+    # 交付契约变红，否则"跑门 → 重钉 → 补提交"这套假失败会永远循环。
     bad = [a["path"] for a in m["artifacts"]
-           if not (ROOT / a["path"]).exists()
-           or _sha(ROOT / a["path"]) != a["sha256"]]
+           if (ROOT / a["path"]).exists()
+           and _sha(ROOT / a["path"]) != a["sha256"]]
+    bad += [a["path"] for a in m["artifacts"]
+            if not (ROOT / a["path"]).exists() and a.get("class") != "rebuildable"]
     assert not bad, "stale artifacts (re-run manifest.py): %s" % bad[:8]

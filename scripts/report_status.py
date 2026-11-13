@@ -41,20 +41,13 @@ def art_count():
     读 manifest 会制造循环依赖：manifest 要哈希 CURRENT_STATUS.md，而状态表又要
     引用 manifest 的计数 → "先跑谁"都有一边过期，文件每轮都变脏（实测就是
     "83 → 91" 这种差一个周期的数字）。自己按同一套规则数，断掉这个环。
+
+    "同一套规则"现在字面成立：直接调 manifest.artifact_files()。此前这里复制了
+    一份 rglob + 黑名单，两处各自演化——那正是 R8.11 记过的"同一份现实写两遍"。
     """
-    root = Path(OUT)          # 本文件里 OUT 是字符串（历史原因），这里显式转
-    n = 0
-    for p in sorted(root.rglob('*')):
-        if not p.is_file() or p.name == 'manifest.json' or p.name.endswith('.meta.json'):
-            continue
-        parts = p.relative_to(root).parts
-        # 与 manifest 同口径：实验产物（out/exp/）不进交付清单
-        if ('exp' in parts or 'frames' in parts or p.suffix in ('.blend1', '.blend2')
-                or p.name in ('manifest_check.json', 'junit.xml',
-                              'validate_data_check_report.json')):
-            continue
-        n += 1
-    return n
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import manifest as _manifest
+    return len(_manifest.artifact_files())
 
 
 def refactor_facts():
@@ -400,7 +393,9 @@ def main():
     scenario_specs = sorted(glob.glob(os.path.join(CONFIG, 'scenarios', '*.json')))
     run_dirs = []
     runs_root = os.path.join(ROOT, 'runs')
-    for d in sorted(os.listdir(runs_root)):
+    # runs/ 是 .gitignore 的生成物，清理工作区后可能整个不存在。工具链不能假设
+    # "生成物永远在"——那正是"清理一次、状态脚本崩一次"的来源（实测 WinError 3）。
+    for d in (sorted(os.listdir(runs_root)) if os.path.isdir(runs_root) else []):
         sub = os.path.join(runs_root, d)
         if not os.path.isdir(sub) or d == 'logs':
             continue
@@ -410,11 +405,12 @@ def main():
     #   · 解析层 kpi.json   —— kpi.py 的 M/M/c 近似（25 项）
     #   · tick 层 sim_kpi.json —— sim_engine 的逐 tick 实测（27 项）
     base_root = os.path.join(ROOT, 'runs', 'baseline')
-    base_runs = sorted(d for d in os.listdir(base_root)
-                       if os.path.isfile(os.path.join(base_root, d, 'kpi.json')))
+    base_names = sorted(os.listdir(base_root)) if os.path.isdir(base_root) else []
+    base_runs = [d for d in base_names
+                 if os.path.isfile(os.path.join(base_root, d, 'kpi.json'))]
     base_kpi = j(base_root, base_runs[-1], 'kpi.json') if base_runs else {}
-    sim_runs = sorted(d for d in os.listdir(base_root)
-                      if os.path.isfile(os.path.join(base_root, d, 'sim_kpi.json')))
+    sim_runs = [d for d in base_names
+                if os.path.isfile(os.path.join(base_root, d, 'sim_kpi.json'))]
     base_sim = j(base_root, sim_runs[-1], 'sim_kpi.json') if sim_runs else {}
     analytic_keys = set(base_kpi.get('metrics', {}))
     tick_keys = set(base_sim.get('metrics', {}))

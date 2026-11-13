@@ -132,25 +132,53 @@ def write_traceability() -> Path:
     return p
 
 
+#: 只会被清理/重建、缺失不算产线异常的目录（相对 out/）。
+REBUILDABLE_DIRS = ("renders",)
+
+
+def artifact_files():
+    """manifest 要收录的产物：**白名单**，不是 rglob 之后一长串排除。
+
+    过去是 `OUT.rglob("*")` 加黑名单，于是每多一个调试目录（r810/r811/variants）、
+    每多一种临时文件（junit2.xml / *.log / *.bak）就得补一条排除。漏一条的后果
+    不是"少收一个文件"，而是**把调试垃圾钉进交付清单**：此后任何人清理工作区，
+    `test_manifest_artifact_hashes_match_disk` 都会红，看起来像"提交/产物坏了"。
+    实测：清掉 runs/artifacts/frames 后 manifest 有 25 条 missing。
+
+    现在只收两处：out 顶层文件（报告 / 金标准 / 侧车），以及 out/renders 下的图。
+    顶层是**必需产物**，renders 是**可重建**（删了只是少几张截图）。
+    """
+    root = Path(OUT)
+    found = [p for p in sorted(root.glob("*")) if p.is_file()]
+    for d in REBUILDABLE_DIRS:
+        sub = root / d
+        if sub.is_dir():
+            found += [p for p in sorted(sub.rglob("*")) if p.is_file()]
+    keep = []
+    for p in found:
+        if p.name == "manifest.json" or p.name.endswith(".meta.json"):
+            continue
+        if p.name == ".gitkeep" or p.suffix in (".blend1", ".blend2"):
+            continue
+        if p.name in ("manifest_check.json", "validate_data_check_report.json"):
+            continue        # 校验器自己的输出，不进交付清单
+        keep.append(p)
+    return keep
+
+
 def build_manifest() -> dict:
     gen, inputs = generator(), input_rows()
     write_traceability()          # must precede artifact hashing
     n_meta = write_sidecars(gen, inputs)
     artifacts = []
-    for p in sorted(OUT.rglob("*")):
-        if not p.is_file() or p.name == "manifest.json" or p.name.endswith(".meta.json"):
-            continue
-        rel_parts = p.relative_to(OUT).parts
-        # out/exp/ 是**压力实验**产物（check_reorder 缩库存/加压需求跑出来的），
-        # 数字是故意失真的。把它算进交付清单，等于让"实验数据"混进"交付数据"，
-        # 审阅时根本分不清哪份是产线跑的。与 .gitignore 的 out/exp/ 同口径。
-        if ("exp" in rel_parts
-                or "frames" in rel_parts or p.suffix in (".blend1", ".blend2")
-                or p.name in ("manifest_check.json", "junit.xml",
-                              "validate_data_check_report.json")):
-            continue    # intermediate frames / backups / verifier's own output
+    for p in artifact_files():
         rel = p.relative_to(ROOT).as_posix()
-        artifacts.append({"path": rel, "sha256": sha256(p), "bytes": p.stat().st_size})
+        # class 决定"缺失算不算漂移"：顶层报告/金标准缺了就是真出事，
+        # 截图缺了只是被清理过。
+        cls = "rebuildable" if p.relative_to(OUT).parts[0] in REBUILDABLE_DIRS \
+            else "required"
+        artifacts.append({"path": rel, "sha256": sha256(p), "bytes": p.stat().st_size,
+                          "class": cls})
     m = {
         "schema_version": "1.0", "kind": "artifact_manifest",
         "generated_at": utc_now(), "generator": gen, "seed": seed_of(),
@@ -172,11 +200,15 @@ def check_manifest() -> int:
               file=sys.stderr)
         return 2
     m = json.loads(p.read_text(encoding="utf-8"))
-    drift = []
+    drift, absent = [], []
     for row in m["artifacts"]:
         q = ROOT / row["path"]
         if not q.exists():
-            drift.append({"path": row["path"], "reason": "missing"})
+            # 可重建产物（截图）被清理过不算漂移；必需产物缺了才算。
+            if row.get("class") == "rebuildable":
+                absent.append(row["path"])
+            else:
+                drift.append({"path": row["path"], "reason": "missing"})
         elif sha256(q) != row["sha256"]:
             drift.append({"path": row["path"], "reason": "sha256 differs"})
     for row in m["inputs"]:
@@ -184,12 +216,13 @@ def check_manifest() -> int:
         if not q.exists() or sha256(q) != row["sha256"]:
             drift.append({"path": row["path"], "reason": "input changed"})
     report = {"schema_version": "1.0", "kind": "manifest_check",
-             "generated_at": utc_now(), "verdict": "PASS" if not drift else "FAIL",
-             "checked": len(m["artifacts"]) + len(m["inputs"]), "drift": drift}
+             "generated_at": utc_now(),              "verdict": "PASS" if not drift else "FAIL",
+             "checked": len(m["artifacts"]) + len(m["inputs"]), "drift": drift,
+             "absent_rebuildable": len(absent)}
     (OUT / "manifest_check.json").write_text(
         json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print("MANIFEST_%s checked=%d drift=%d" %
-          (report["verdict"], report["checked"], len(drift)))
+    print("MANIFEST_%s checked=%d drift=%d cleared=%d" %
+          (report["verdict"], report["checked"], len(drift), len(absent)))
     for d in drift[:10]:
         print("  DRIFT", d["path"], d["reason"])
     return 0 if not drift else 1

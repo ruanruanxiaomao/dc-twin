@@ -74,6 +74,20 @@ tests/contract/test_report_contracts.py::test_manifest_artifact_hashes_match_dis
 已记入 v1.1 backlog 第 10 条（把 `--probe` 的报告写到 `out/exp/`，别覆盖主报告）。
 除这两条外，全量 **379 绿 + 1 skip**。
 
+### 6.1 "清理工作区"不再制造假红（v1.0 后的修正）
+
+上面这 2 条**只由"重跑门"触发**，与"清理生成物"无关——后者曾是另一类假红，已修：
+
+- `manifest.py` 过去用 `OUT.rglob("*")` + 黑名单收集产物，把 `out/r810/`、
+  `junit2.xml`、`*.bak` 这类调试垃圾也钉进交付清单。清一次目录就有 25 条 missing。
+- 现在改成**白名单**（`artifact_files()`：out 顶层 + `out/renders`），并给每条产物标
+  `class`：顶层报告/金标准是 `required`（缺失即红），`out/renders` 截图是
+  `rebuildable`（缺失只计入 `cleared`，不判红）。
+- 双向验证过：删一张截图 → 契约测试仍 2 passed（`cleared=1`）；
+  删 `out/areas_report.json` → 立即红。
+- 顺带修掉 `report_status.py` / `check_doc_drift.py` 对 `runs/` 目录存在的硬假设
+  （清理后 `os.listdir` 抛 WinError 3，状态与口径门直接崩，而不是给出判定）。
+
 ## 七、怎么复核这份冻结
 
 ```bash
