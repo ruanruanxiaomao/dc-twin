@@ -112,3 +112,93 @@ def test_cramped_group_raises():
     g["origin"] = [4, 66]      # 起点进深 66+3=69，已经在功能带里
     with pytest.raises(ls.SolveError):
         ls.free_depth_for_group(wh, g, 1.35, 4.0, band, siblings=[g])
+
+
+# ---------------- R8.10 宽度轴 ----------------
+
+def test_bays_blocked_by_east_wall_or_spawn():
+    """跨数的上限必须能说出"被谁挡住"：右列被东墙/待命位挡，左列被兄弟组挡。"""
+    wh = _wh()
+    groups = {g["zone"]: g for g in wh["racks"]}
+    spawns = [{"x": float(p[0]), "id": "spawn_%02d" % (i + 1)}
+              for i, p in enumerate(wh["spawns"]["points"])]
+    a = ls.free_bays_for_group(wh, groups["A"], 3.0, 0.6, siblings=wh["racks"],
+                               rows=4, rack_depth=1.2, aisle=4.0, blockers=spawns)
+    b = ls.free_bays_for_group(wh, groups["B"], 3.0, 0.6, siblings=wh["racks"],
+                               rows=4, rack_depth=1.2, aisle=4.0, blockers=spawns)
+    assert a["blocked_by"].startswith("sibling_zone_B")
+    assert b["blocked_by"].startswith("spawn_")
+    assert a["limit_x"] < b["limit_x"]
+
+
+def test_more_width_more_bays_only_on_east_column():
+    """宽度 +20：东列跨数涨，左列一格不动（红利不该落到被兄弟组挡住的列）。"""
+    wh = _wh()
+    groups = {g["zone"]: g for g in wh["racks"]}
+    spawns = [{"x": float(p[0]), "id": "spawn_%02d" % (i + 1)}
+              for i, p in enumerate(wh["spawns"]["points"])]
+    kw = dict(siblings=wh["racks"], rows=4, rack_depth=1.2, aisle=4.0, blockers=spawns)
+    before = {z: ls.free_bays_for_group(wh, g, 3.0, 0.6, **kw)["bays"]
+              for z, g in groups.items()}
+    wh["size"]["width"] = 120.0
+    w100 = {p[0] for p in wh["spawns"]["points"]}          # 待命位还没移：会被挡住
+    assert max(w100) == pytest.approx(98.25)
+    after = {z: ls.free_bays_for_group(wh, g, 3.0, 0.6, **kw)["bays"]
+             for z, g in groups.items()}
+    # 厂房变宽了，但待命位还钉在 98.25 —— 右列**一跨都不该涨**（挡得住才是对的）
+    assert after["B"] == before["B"]
+    assert after["A"] == before["A"]
+    # 待命位跟着东墙走了，才拿得到完整宽度红利
+    wh["area_baseline"] = {"width": 100}
+    ls.shift_spawns_x(wh, 120)
+    spawns2 = [{"x": float(p[0]), "id": "spawn_%02d" % (i + 1)}
+               for i, p in enumerate(wh["spawns"]["points"])]
+    kw2 = dict(kw, blockers=spawns2)
+    freed = {z: ls.free_bays_for_group(wh, g, 3.0, 0.6, **kw2)["bays"]
+             for z, g in groups.items()}
+    assert freed["B"] > after["B"] + 3
+    assert freed["A"] == before["A"]
+
+
+def test_spawn_x_shift_is_idempotent_and_reversible():
+    """待命位锚东墙：推两次不叠加，改回原宽能回到原坐标。"""
+    wh = _wh()
+    east0 = max(p[0] for p in wh["spawns"]["points"])
+    west0 = min(p[0] for p in wh["spawns"]["points"])
+    wh["area_baseline"] = {"width": 100}
+    ls.shift_spawns_x(wh, 120)
+    east1 = sorted({p[0] for p in wh["spawns"]["points"]})
+    ls.shift_spawns_x(wh, 120)
+    east2 = sorted({p[0] for p in wh["spawns"]["points"]})
+    assert east1 == east2, "幂等：第二次不能把点再推 20 m"
+    assert max(east2) == pytest.approx(east0 + 20)
+    assert min(p[0] for p in wh["spawns"]["points"]) == pytest.approx(west0)
+    ls.shift_spawns_x(wh, 100)
+    assert max(p[0] for p in wh["spawns"]["points"]) == pytest.approx(east0)
+
+
+def test_no_width_baseline_means_no_shift():
+    """没有 area_baseline.width 就不推断（与 shift_band 同一条纪律）。"""
+    wh = _wh()
+    before = [list(p) for p in wh["spawns"]["points"]]
+    _wh2, rec = ls.shift_spawns_x(wh, 140)
+    assert rec["moved"] == 0 and rec["dx"] == 0.0
+    assert wh["spawns"]["points"] == before
+
+
+def test_orientation_z_bays_raises():
+    """宽度轴只实现 orientation='x'：别的排布必须报错，不许猜方向。"""
+    wh = _wh()
+    g = copy.deepcopy(wh["racks"][0])
+    g["orientation"] = "z"
+    with pytest.raises(ls.SolveError):
+        ls.free_bays_for_group(wh, g, 3.0, 0.6, siblings=[g], rows=4)
+
+
+def test_cramped_bays_raises():
+    """起点已经贴到东墙、连一跨都放不下时必须抛错。"""
+    wh = _wh()
+    g = copy.deepcopy(wh["racks"][0])
+    g["origin"] = [96, 10]     # start_x=98，limit=99，剩 1 m < 3.6 m 节距
+    with pytest.raises(ls.SolveError):
+        ls.free_bays_for_group(wh, g, 3.0, 0.6, siblings=[g], rows=4)

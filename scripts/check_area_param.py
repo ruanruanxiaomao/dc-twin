@@ -88,6 +88,27 @@ def _reflow_from_size(spec):
     return s
 
 
+def _reflow_bays(spec, width):
+    """打开"跨数来自厂房宽度"（R8.10），并显式给宽度基线。
+
+    基线必须**先记旧宽、再改新宽**：反过来记的话 `dx` 恒为 0，门会看到"宽度变了
+    但待命位没动"——那正是第一版踩的坑，只是这次连红都红不出来（因为货架上限
+    被待命位挡住，看起来"很守法"）。
+
+    只给 W 仓声明 `width_budget`：前置仓宽度没变，它们必须一个数都不动，
+    这同时是"默认关闭/未声明不生效"的对照。
+    """
+    s = copy.deepcopy(spec)
+    for wh in s["warehouses"]:
+        wh.setdefault("area_baseline", {})["width"] = wh["size"]["width"]
+    w0 = s["warehouses"][0]
+    w0["size"]["width"] = width
+    for g in w0["racks"]:
+        g["width_budget"] = "from_size"
+    s.setdefault("options", {})["reflow_bays"] = True
+    return s
+
+
 def _grid(layout):
     w = layout["warehouses"][0]
     g = w.get("grid") or {}
@@ -306,6 +327,78 @@ def check_deliver(rc, layout, report, base_layout):
                           "forward_z": fwd[:3], "base_forward_z": base_fwd[:3]}, problems
 
 
+def _bays_of(layout):
+    """把一份布局的跨数与归因取出来：{zone: (bays, blocked_by)} + 待命位 x 列表。"""
+    wh = next((w for w in layout["warehouses"] if w["id"] == "W"), None)
+    if wh is None:
+        return {}, []
+    recs = {r["zone"]: (int(r.get("bays_derived") or 0), r.get("blocked_by") or "")
+            for r in (wh.get("area_solve_bays") or [])}
+    xs = sorted({round(float(r["position"][0]), 3) for r in (wh["spawn"] or {}).get("robots") or []})
+    return recs, xs
+
+
+def check_bays(rc, wide, report, narrow, base_layout):
+    """R8.10 宽度轴：**只改宽度**，右列跨数必须真的跟着涨，左列必须一个都不动。
+
+    为什么必须做两次（同宽 100 对照 vs 宽 120）：求解器一旦打开，**左列也会从
+    声明的 10 跨填到 13 跨**——那是"填满已有空隙"，与宽度无关。只看一次 120 的
+    结果，会把"本来就会发生的填满"当成"宽度红利"，门就成了摆设。所以基准是
+    `narrow`（同样打开求解、宽度不变），只有 120 相对 100 的**增量**才是宽度的功劳。
+
+    右列/左列不按 zone 名硬编码，按 `blocked_by` 判：被 `east_wall` 或某个
+    `spawn_XX` 挡住的是右列（东墙/待命位），被 `sibling_zone_X` 挡住的是左列。
+    布局改名时门不会跟着瞎。
+    """
+    problems = []
+    issues = (report or {}).get("issues") or []
+    if rc != 0:
+        problems.append("宽度求解后校验仍拒绝（退出码 %s）——布局写不进 data/" % rc)
+    if issues:
+        problems.append("仍有 %d 条 issue（要求 0）：%s"
+                        % (len(issues), (issues[0].get("message") or "")[:50]))
+    if wide is None or narrow is None:
+        problems.append("宽度求解没有产出布局")
+        return False, {"issues": len(issues)}, problems
+    wr, wxs = _bays_of(wide)
+    nr, nxs = _bays_of(narrow)
+    if not wr:
+        problems.append("布局里没有 area_solve_bays 记录——宽度轴根本没接上")
+        return False, {"wide": wr}, problems
+    if set(wr) != set(nr):
+        problems.append("两次求解的组集合不同（%s vs %s）" % (sorted(wr), sorted(nr)))
+    east = [z for z, (_b, who) in wr.items()
+            if who.startswith("east_wall") or who.startswith("spawn_")]
+    west = [z for z, (_b, who) in wr.items() if who.startswith("sibling_zone_")]
+    if not east:
+        problems.append("没有任何组以东墙/待命位为上限——宽度根本没参与求解")
+    gain, same = {}, {}
+    for z in east:
+        gain[z] = wr[z][0] - nr.get(z, (0, ""))[0]
+        if gain[z] <= 0:
+            problems.append("宽度 +20 后右列 zone=%s 跨数没涨（%s → %s）"
+                            % (z, nr.get(z, (0, ""))[0], wr[z][0]))
+    for z in west:
+        same[z] = wr[z][0] - nr.get(z, (0, ""))[0]
+        if same[z] != 0:
+            problems.append("宽度 +20 后左列 zone=%s 跨数变了（%s → %s）"
+                            "——宽度红利不该落到被兄弟组挡住的列"
+                            % (z, nr.get(z, (0, ""))[0], wr[z][0]))
+    if wxs and nxs and max(wxs) <= max(nxs):
+        problems.append("待命位没跟着东墙走（x %s → %s）：货架会上来把发车点吃掉"
+                        % (nxs[-1], wxs[-1]))
+    wl = wide["summary"]["locations"]
+    nl = narrow["summary"]["locations"]
+    if wl <= nl:
+        problems.append("库位没有增加（%s → %s）——宽度没进库容" % (nl, wl))
+    return not problems, {"east_gain": gain, "west_delta": same,
+                          "wide_bays": {z: wr[z][0] for z in wr},
+                          "narrow_bays": {z: nr[z][0] for z in nr},
+                          "spawn_x": {"narrow": nxs[-1:], "wide": wxs[-1:]},
+                          "locations": {"narrow": nl, "wide": wl},
+                          "issues": len(issues)}, problems
+
+
 def check_shrink(rc, report):
     problems = []
     issues = report.get("issues") or []
@@ -334,6 +427,8 @@ def main(argv=None):
     rc0, base, _ = _run(spec, "base")
     rc1, big, rep1 = _run(_resize(spec, W + 20, D + 14), "big")
     rc3, fill, rep3 = _run(_resize(_reflow_from_size(spec), W + 20, D + 14), "fill")
+    rc4, narrow_bays, rep4 = _run(_reflow_bays(spec, W), "bays_narrow")
+    rc5, wide_bays, rep5 = _run(_reflow_bays(spec, W + 20), "bays_wide")
     rc2, small, rep2 = _run(_resize(spec, max(20, W // 3), max(20, D // 3)), "small")
 
     if a.self_test:
@@ -363,10 +458,17 @@ def main(argv=None):
         # 交付门反例：拿"被拒的那份"喂进去必须红
         ok_deliver, _, _ = check_deliver(1, base, {"issues": [{"rule": "L6",
                                                                "message": "x"}]}, base)
+        # 宽度轴负对照 1：拿"没求解过的基准布局"当求解结果 → 没有记录必须红
+        ok_bays_none, _, _ = check_bays(0, base, {"issues": []}, base, base)
+        # 宽度轴负对照 2：同样打开求解但**宽度没变**（两次都是 100）→ 右列没涨必须红。
+        # 这条才是防"只要开了开关就绿"的关键：它证明门比的是增量，不是开关状态。
+        ok_bays_flat, _, _ = check_bays(0, narrow_bays, {"issues": []},
+                                        narrow_bays, base)
         good = ((not ok_self) and (not ok_shrink) and (not ok_fill)
                 and (not ok_solve) and (not ok_bad_rules) and (not ok_no_gain)
                 and (not ok_causal) and (not ok_deliver)
-                and rc0 == 0 and rc1 == 0)
+                and (not ok_bays_none) and (not ok_bays_flat)
+                and rc0 == 0 and rc1 == 0 and rc4 == 0 and rc5 == 0)
         print("AREA_SELF_TEST %s" % ("PASS" if good else "FAIL"))
         print("  no_change_detected  %s" % ("ok" if not ok_self else "MISSED"))
         print("  silent_shrink       %s" % ("ok" if not ok_shrink else "MISSED"))
@@ -377,6 +479,8 @@ def main(argv=None):
         print("  deliver_rejected    %s" % ("ok" if not ok_deliver else "MISSED"))
         print("  residual_attribution_causal %s"
               % ("ok" if not ok_causal else "MISSED"))
+        print("  bays_not_solved     %s" % ("ok" if not ok_bays_none else "MISSED"))
+        print("  bays_no_width_gain  %s" % ("ok" if not ok_bays_flat else "MISSED"))
         return 0 if good else 1
 
     gates, failed = {}, []
@@ -384,6 +488,8 @@ def main(argv=None):
                      ("AREA_FILL_OK", lambda: check_fill(rc3, fill, rep3, base)),
                      ("AREA_SOLVE_OK", lambda: check_solve(rc3, fill, rep3, base, spec)),
                      ("AREA_DELIVER_OK", lambda: check_deliver(rc3, fill, rep3, base)),
+                     ("AREA_BAYS_OK", lambda: check_bays(rc5, wide_bays, rep5,
+                                                         narrow_bays, base)),
                      ("AREA_SHRINK_NEG", lambda: check_shrink(rc2, rep2))):
         try:
             ok, detail, problems = fn()
@@ -402,10 +508,12 @@ def main(argv=None):
            "verdict": "AREA_PARAM_OK" if not failed else "AREA_PARAM_FAIL",
            "failed": failed, "gates": gates,
            "sizes": {"base": [W, D], "big": [W + 20, D + 14],
+                     "bays": {"narrow": [W, D], "wide": [W + 20, D]},
                      "small": [max(20, W // 3), max(20, D // 3)]},
-           "note": "验四件事：参数传导到壳体/货架/导航格、越界必须拒绝、"
+           "note": "验五件事：参数传导到壳体/货架/导航格、越界必须拒绝、"
                    "D10b 求解器让\"填满进深\"变成 0 结构性冲突且库容真增、"
-                   "残留 L6 必须逐条归因（场外装备未重排，属 R8.8）。"
+                   "残留 L6 必须逐条归因（场外装备未重排，属 R8.8）、"
+                   "R8.10 宽度轴只对东列放跨（同宽对照做基准，待命位锚东墙）。"
                    "交互重摆（D10a 拖拽）未在此声称。"}
     TMP.mkdir(parents=True, exist_ok=True)
     (OUT / "area_param_report.json").write_text(

@@ -44,3 +44,25 @@ def test_no_change_is_caught():
 def test_silent_shrink_is_caught():
     ok, _detail, _problems = cap.check_shrink(0, {"issues": []})
     assert not ok
+
+
+def _bays_file(tag):
+    import json
+    return json.loads((ROOT / "out" / "exp" / "area" / ("%s_layout.json" % tag))
+                      .read_text(encoding="utf-8"))
+
+
+def test_width_axis_gain_lands_on_east_column_only():
+    """R8.10：宽度 +20 的跨数增量必须全落在东列，左列一格不动。"""
+    narrow, wide = _bays_file("bays_narrow"), _bays_file("bays_wide")
+    ok, detail, problems = cap.check_bays(0, wide, {"issues": []}, narrow, None)
+    assert ok, problems
+    assert detail["east_gain"] and all(v > 0 for v in detail["east_gain"].values())
+    assert all(v == 0 for v in detail["west_delta"].values())
+
+
+def test_width_axis_no_gain_is_caught():
+    """同宽对照：开关打开但宽度没变，门必须判红（否则门只认开关状态）。"""
+    narrow = _bays_file("bays_narrow")
+    ok, _detail, problems = cap.check_bays(0, narrow, {"issues": []}, narrow, None)
+    assert not ok and problems

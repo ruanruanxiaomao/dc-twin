@@ -280,6 +280,11 @@ def expand(spec, fleet_counts=None):
                             if float(r[1]) >= old_north - 1e-6:
                                 r[1] = round(float(r[1]) + sh, 6)
 
+        # R8.10（默认关闭）：宽度轴。**待命位锚东墙**——宽度变了先让它们跟着东墙走，
+        # 否则放大的货架会先把发车点吃掉（宽 +20 实测 6 条 HOME-W-R07..R12 不可达）。
+        # 不平移不报错，因为下面的 blockers 会挡住货架；最坏结果是少拿宽度红利。
+        if (spec.get('options') or {}).get('reflow_bays'):
+            wh, _x_rec = layout_solver.shift_spawns_x(wh, float(wh['size']['width']))
         W, D, H = (wh['size']['width'], wh['size']['depth'], wh['size']['height'])
         zones = []
         for z in wh.get('zones', [{'id': 'Z1', 'name': 'Zone Z1',
@@ -295,6 +300,8 @@ def expand(spec, fleet_counts=None):
             'id': wh['id'], 'kind': wh.get('kind', 'REGIONAL'),
             # 功能带重排的取证：平移了多少、带从哪儿挪到哪儿。默认布局没有这个键。
             **({'area_reflow': wh['area_reflow']} if wh.get('area_reflow') else {}),
+            # 宽度轴的取证：待命位跟着东墙移了多少（默认布局没有这两个键）。
+            **({'area_reflow_x': wh['area_reflow_x']} if wh.get('area_reflow_x') else {}),
             'origin': [r2(ox), r2(oz)], 'size': dict(wh['size']),
             'grid': {'cell_size': defaults['grid']['cell_size'],
                      'cols': int(W / defaults['grid']['cell_size']),
@@ -352,6 +359,27 @@ def expand(spec, fleet_counts=None):
                         'rows_derived': int(new_rows), 'depth_used': used,
                     })
                     rows = new_rows
+                # R8.10（默认关闭）：**宽度轴**，与深度轴完全对称——问求解器"到哪儿
+                # 不能再排"，而不是"厂房多宽就排多宽"。宽度放大 20 m 时，右列组被
+                # 右墙挡住、左列组被右列组挡住，各自拿到自己的跨数；默认布局没有
+                # `width_budget` 也不会进这段，bays 仍是声明值（逐字节不变）。
+                if (spec.get('options') or {}).get('reflow_bays'):
+                    if group.get('width_budget') == 'from_size':
+                        binfo = layout_solver.free_bays_for_group(
+                            wh, group, RL, gap, siblings=wh['racks'],
+                            rows=rows, rack_depth=RD, aisle=aw,
+                            # 待命位是 x 方向的硬障碍：它们是 AGV 的发车点，
+                            # 货架排上去等于把车"停在货架里"（L6 只报 AP 不可达，
+                            # 归因要写清是哪个 spawn 挡的）。
+                            blockers=[{'x': float(p[0]), 'id': 'spawn_%02d' % (i + 1)}
+                                      for i, p in enumerate(
+                                          (wh.get('spawns') or {}).get('points') or [])])
+                        w.setdefault('area_solve_bays', []).append({
+                            'zone': group.get('zone'), 'bays_declared': int(bays),
+                            'bays_derived': int(binfo['bays']),
+                            'start_x': binfo['start_x'], 'limit_x': binfo['limit_x'],
+                            'blocked_by': binfo['blocked_by']})
+                        bays = int(binfo['bays'])
                 for ri in range(rows):
                     for bi in range(bays):
                         if group.get('orientation', 'x') == 'x':
