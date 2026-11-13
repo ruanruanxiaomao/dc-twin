@@ -174,7 +174,7 @@
         "glb_fallback": {"$ref": "#/definitions/source"},
         "glb_gap": {"type": "string"},
         "params": {"type": "object"},
-        "implemented_in": {"type": "string", "pattern": "^[a-z_/]+\\.py:\\d+$"}
+        "implemented_in": {"type": "string", "pattern": "^[a-z_/]+\\.py(:\\d+|#[A-Za-z_][A-Za-z0-9_]*)$"}
       },
       "allOf": [
         {
@@ -205,7 +205,7 @@
         "params": {"type": "object"},
         "visual_cue": {"type": "string"},
         "glb_gap": {"type": "string"},
-        "implemented_in": {"type": "string", "pattern": "^[a-z_/]+\\.py:\\d+$"}
+        "implemented_in": {"type": "string", "pattern": "^[a-z_/]+\\.py(:\\d+|#[A-Za-z_][A-Za-z0-9_]*)$"}
       },
       "allOf": [
         {

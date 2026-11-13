@@ -197,6 +197,12 @@ def _symbol_in_enclosing_function(path, line, sym):
 
 
 def check_truthful(spec):
+    """implemented_in 支持两种写法：`path.py:LINE` 与 `path.py#function`。
+
+    后者是 R8.5 加的：行号会随着每次编辑漂移（这一轮又漂了两次，把两条真声明判成
+    撒谎），而**函数名不会**。新条目一律写函数名，老条目保持行号兼容。
+    """
+    import ast
     problems = []
     claims = 0
     for sect in ("rack_assets", "equipment_assets", "scene_assets",
@@ -205,6 +211,31 @@ def check_truthful(spec):
             if k == "_note" or not isinstance(v, dict):
                 continue
             where = v.get("implemented_in")
+            if isinstance(where, str) and "#" in where:
+                fp, _, fn = where.partition("#")
+                p = ROOT / fp
+                if not p.exists():
+                    problems.append("%s 的 implemented_in 指向不存在的文件 %s" % (k, fp))
+                    continue
+                claims += 1
+                sym = (_procedural_symbol(v) if v["source"].startswith("procedural:")
+                       else v["source"].split(":", 1)[1]).split(".")[-1]
+                src = p.read_text(encoding="utf-8", errors="replace")
+                try:
+                    tree = ast.parse(src)
+                except SyntaxError:
+                    problems.append("%s 的 %s 无法解析" % (k, fp))
+                    continue
+                fn_node = next((n for n in ast.walk(tree)
+                                if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
+                                and n.name == fn), None)
+                if fn_node is None:
+                    problems.append("%s 的 implemented_in 指向不存在的函数 %s#%s" % (k, fp, fn))
+                    continue
+                seg = "\n".join(src.splitlines()[fn_node.lineno - 1:fn_node.end_lineno])
+                if sym not in seg:
+                    problems.append("%s 的 %s#%s 里找不到符号 %s" % (k, fp, fn, sym))
+                continue
             if v.get("status") == "existing" and not where:
                 problems.append("%s 状态 existing 却没给 implemented_in" % k)
                 continue

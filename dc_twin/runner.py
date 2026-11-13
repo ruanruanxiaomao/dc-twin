@@ -114,6 +114,7 @@ REFACTOR_CHAIN = [
     ("scripts/check_reflow.py", ("--quiet",), "python"),         # R5 库容密度重排 + 越界负测试
     ("scripts/check_asset_consistency.py", ("--quiet",), "python"),  # R8.1 3D 资产目录一致性
     ("scripts/check_asset_dispatch.py", ("--quiet",), "python"),     # R8.2 货架派发 + 几何分型
+    ("scripts/check_area_param.py", ("--quiet",), "python"),         # R8.6 厂房面积参数化 + 越界拒绝
 ]
 
 SCOPES = {

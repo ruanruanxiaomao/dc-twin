@@ -74,7 +74,9 @@ def refactor_facts():
            "disp_distinct": 0, "disp_types": 0, "disp_geoms": 0, "disp_gate": None,
            "typed_mech": 0, "typed_fallback": None,
            "glb_bytes": 0, "glb_sha": None, "glb_geom": None, "glb_canon": False,
-           "glb_saved": 0, "masters_placed": 0, "masters_unplaced": []}
+           "glb_saved": 0, "masters_placed": 0, "masters_unplaced": [],
+           "cv_styles": 0, "sr_kinds": 0, "eq_bodies": 0, "var_gate": None,
+           "area_base_cols": 0, "area_big_cols": 0, "area_gate": None}
     try:
         rack = json.load(open(os.path.join(CONFIG, 'rack_spec.json'), encoding='utf-8'))
         out["rack_types"] = len(rack.get('types') or {})
@@ -165,6 +167,21 @@ def refactor_facts():
             out["typed_fallback"] = t.get('fallback')
             out["masters_placed"] = len(t.get('master_props') or {})
             out["masters_unplaced"] = t.get('master_props_unplaced') or []
+    except Exception:                       # noqa: BLE001
+        pass
+    try:
+        vp = json.load(open(os.path.join(OUT, 'variant_probe.json'), encoding='utf-8'))
+        out["cv_styles"] = len(vp.get('conveyors') or {})
+        out["sr_kinds"] = len(vp.get('sorters') or {})
+        out["eq_bodies"] = len(vp.get('equipment_bodies') or {})
+    except Exception:                       # noqa: BLE001
+        pass
+    try:
+        ap = json.load(open(os.path.join(OUT, 'area_param_report.json'), encoding='utf-8'))
+        out["area_gate"] = ap.get('verdict')
+        d = (ap.get('gates', {}).get('AREA_PARAM_OK', {}) or {}).get('detail') or {}
+        out["area_base_cols"] = (d.get('base') or {}).get('grid', [0])[0]
+        out["area_big_cols"] = (d.get('big') or {}).get('grid', [0])[0]
     except Exception:                       # noqa: BLE001
         pass
     for name in ("unit_load_spec", "rack_spec", "equipment_spec", "capacity_spec"):
@@ -514,6 +531,15 @@ def main():
          % (ref['glb_bytes'], ref['glb_saved'], ref['glb_sha'] or 'n/a',
             ref['glb_geom'] or 'n/a', ref['masters_placed'],
             "、".join(ref['masters_unplaced']) or "无")),
+        ('分型与面积（R8.5/R8.6）', '输送台面 %s 型（带式/辊道/重力/积放）、分拣末端 %s 型'
+                          '（斜滑道/交叉带/滑块/摆轮/窄带/翻板/播种墙）、无母版车体 %s 个'
+                          '（穿梭车/CTU/码垛臂），三组几何两两不同（Blender 探针按坐标比，'
+                          '不是按数量比）；面积参数化：货架格 %s→%s 列随厂房尺寸重算，'
+                          '缩到装不下被 L2/L3/L6 拒绝（verdict=%s）；'
+                          '"填满进深"会被 L3/L4/L6 拒（1022 处），说明面积进库容必须配功能区'
+                          '重排（D10b），当前不假装已实现'
+         % (ref['cv_styles'], ref['sr_kinds'], ref['eq_bodies'],
+            ref['area_base_cols'], ref['area_big_cols'], ref['area_gate'] or 'n/a')),
         ('分档验收', 'data tier %s/%s PASS；pytest -m "not blender" 与 CI 矩阵见 '
                      '`.github/workflows/ci.yml`'
          % (vdata.get('passed'), vdata.get('total'))),

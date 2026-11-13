@@ -297,6 +297,15 @@ def expand(spec, fleet_counts=None):
                 # 这才是设备层"窄巷道换库容"的兑现方式。默认 false 时**一个数都不动**。
                 if (spec.get('options') or {}).get('reflow_rows'):
                     budget = group.get('depth_budget')
+                    if budget == 'from_size':
+                        # R8.6：预算从**厂房进深**推。改 wh.size 才会真的改变行数——
+                        # 这就是"自定义面积不只是换个壳"的落点（§16.8）。留 1 m 施工余量。
+                        budget = float(wh['size']['depth']) - float(oz) - float(gz) - float(mz) - 1.0
+                        if budget <= 0:
+                            # 进深连一行都放不下：不在这里造 issue（expand 阶段还没有
+                            # issues 列表），退回"一行"让 L2/L3 去报越界——越界必须由
+                            # 校验层拒绝，不能靠生成器私下兜住。
+                            budget = RD + aw
                     if budget is None:
                         # 没给预算就按当前声明行数实际占用的进深，重排结果与原来一致
                         budget = rows * (RD + aw) - aw

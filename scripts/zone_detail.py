@@ -25,6 +25,7 @@ C = {
     'tote': '#2f6fb5', 'carton': '#c99b62', 'hi_vis': '#f2c230',
     'leg': '#2b3038', 'skin': '#d9b48f', 'screen': '#5b6472',
     'cage': '#2f6fb5', 'steel': '#8f98a3', 'rubber': '#1b1e23',
+    'belt_dark': '#2b3038', 'tray': '#8b96a3',
 }
 
 
@@ -87,8 +88,48 @@ def cage_trolley(name, x, z, coll, rot=0.0):
 
 # ---------------------------------------------------------------- 输送线
 
-def conveyor(name, path, width, coll, belt_h=0.78):
-    """沿折线画输送线：皮带 + 两侧护栏 + 支腿 + 线上包裹（位置按里程定，不用随机）。"""
+#: 输送带台面分型（§16.7）。默认仍只有带式，其余为程序化变体。
+CONVEYOR_STYLES = ('belt', 'roller', 'gravity', 'accumulation')
+
+
+def _roller_deck(name, i, cx, cz, rot, seg, w, belt_h, style, coll):
+    """辊道台面：密排辊子；重力式沿段给坡度（入口高、出口低）；积放式加挡停块。"""
+    pitch = 0.12
+    n = max(2, int(seg / pitch))
+    slope = 0.045 if style == 'gravity' else 0.0          # ≈2.6°
+    for k in range(n):
+        t = (k + 0.5) / n
+        px = cx + math.cos(rot) * (t - 0.5) * seg
+        pz = cz + math.sin(rot) * (t - 0.5) * seg
+        h = belt_h + slope * seg * (0.5 - t)
+        _box('%s_ROLL%d_%d' % (name, i, k), px, pz, h, 0.09, w * 0.94, 0.05,
+             'steel', coll, rot)
+    # 辊道两侧的边梁（辊子不能悬空）
+    for s_ in (-1, 1):
+        ox = -math.sin(rot) * s_ * (w / 2)
+        oz = math.cos(rot) * s_ * (w / 2)
+        _box('%s_CARRIER%d_%d' % (name, i, s_), cx + ox, cz + oz, belt_h - 0.05,
+             seg, 0.05, 0.12, 'belt_dark', coll, rot)
+    if style == 'accumulation':
+        for k in range(1, max(1, int(seg / 1.2))):
+            t = k / max(1, int(seg / 1.2))
+            px = cx + math.cos(rot) * (t - 0.5) * seg
+            pz = cz + math.sin(rot) * (t - 0.5) * seg
+            for s_ in (-1, 1):
+                ox = -math.sin(rot) * s_ * (w * 0.42)
+                oz = math.cos(rot) * s_ * (w * 0.42)
+                _box('%s_STOP%d_%d_%d' % (name, i, k, s_), px + ox, pz + oz,
+                     belt_h + 0.09, 0.06, 0.06, 0.12, 'rail', coll, rot)
+
+
+def conveyor(name, path, width, coll, belt_h=0.78, style='belt'):
+    """沿折线画输送线：台面（带式/辊道/重力/积放）+ 护栏 + 支腿 + 线上包裹。
+
+    `style` 缺省 `belt`，与 R8.5 之前**逐字节一致**；其余分型只在数据显式声明时启用。
+    包裹位置仍按里程定，不引入随机数（否则金标准立刻失效）。
+    """
+    if style not in CONVEYOR_STYLES:
+        raise ValueError('未知输送带分型 %r（可选 %s）' % (style, CONVEYOR_STYLES))
     w = max(0.6, width)
     total = 0.0
     parcels = 0
@@ -100,10 +141,13 @@ def conveyor(name, path, width, coll, belt_h=0.78):
             continue
         rot = math.atan2(dz, dx)
         cx, cz = (x0 + x1) / 2, (z0 + z1) / 2
-        # 皮带本体 + 深色带面：两条叠在一起才有"带子在转"的层次
-        _box('%s_BELT%d' % (name, i), cx, cz, belt_h, seg, w, 0.16, 'belt', coll, rot)
-        _box('%s_TOP%d' % (name, i), cx, cz, belt_h + 0.09, seg, w * 0.86, 0.03,
-             'belt_top', coll, rot)
+        if style == 'belt':
+            # 皮带本体 + 深色带面：两条叠在一起才有"带子在转"的层次
+            _box('%s_BELT%d' % (name, i), cx, cz, belt_h, seg, w, 0.16, 'belt', coll, rot)
+            _box('%s_TOP%d' % (name, i), cx, cz, belt_h + 0.09, seg, w * 0.86, 0.03,
+                 'belt_top', coll, rot)
+        else:
+            _roller_deck(name, i, cx, cz, rot, seg, w, belt_h, style, coll)
         # 侧护栏
         for s in (-1, 1):
             ox = -math.sin(rot) * s * (w / 2 + 0.04)
@@ -185,6 +229,85 @@ def chute(name, x, z, coll, rot=0.0, length=3.0, width=0.9, drop=0.55):
     return 5
 
 
+#: 分拣分型（§16.7）。GLB 里除斜滑道外都没有母版，全部程序化。
+SORTER_KINDS = ('chute', 'crossbelt', 'slider', 'swing_wheel',
+                'narrow_belt', 'tilt_tray', 'put_wall')
+
+
+def sorter(name, x, z, coll, rot=0.0, kind='chute', length=3.0, width=0.9, drop=0.55):
+    """按分型搭一个分拣末端。缺省 `chute` = R8.5 之前的行为（逐字节不变）。
+
+    每种分型必须有**看得出的结构差异**，否则等于没做：交叉带是环线小车、滑块是
+    侧推板、摆轮是三轮、窄带是窄皮带、翻板是斜托盘、播种墙是格口阵列。差异由
+    `variant_probe` 在 Blender 里量（顶点数/对象数），不靠渲染图用眼睛比。
+    """
+    if kind not in SORTER_KINDS:
+        raise ValueError('未知分拣分型 %r（可选 %s）' % (kind, SORTER_KINDS))
+    if kind == 'chute':
+        # drop 必须由调用方给：sorting_line 原来用 0.5，这里若默认 0.55 会悄悄改掉
+        # 默认场景的滑道坡度（第一次跑就撞出 GLB 换了 436 字节）。
+        return chute(name, x, z, coll, rot=rot, length=length, width=width, drop=drop)
+
+    n = 0
+    dx, dz = math.cos(rot), math.sin(rot)
+    px, pz = -math.sin(rot), math.cos(rot)
+
+    if kind in ('slider', 'swing_wheel', 'tilt_tray', 'crossbelt', 'narrow_belt'):
+        # 共用一个台面：分型差异体现在台面之上的机构
+        bed_w = width * (0.5 if kind == 'narrow_belt' else 1.0)
+        _plate(name + '_BED', x, z, rot, length, bed_w, 0.9, 0.88, 0.07, 'chute', coll)
+        n += 1
+    if kind == 'slider':
+        for k in range(3):
+            u = -length / 2 + length * (k + 0.5) / 3
+            _box('%s_PUSH%d' % (name, k), x + dx * u + px * (width * 0.45),
+                 z + dz * u + pz * (width * 0.45), 1.02,
+                 0.5, 0.08, 0.26, 'steel', coll, rot)
+            n += 1
+    elif kind == 'swing_wheel':
+        for k in range(3):
+            u = -length / 2 + length * (k + 0.5) / 3
+            _box('%s_WHEEL%d' % (name, k), x + dx * u, z + dz * u, 0.98,
+                 0.34, 0.12, 0.12, 'rubber', coll, rot)
+            n += 1
+    elif kind == 'tilt_tray':
+        for k in range(3):
+            u = -length / 2 + length * (k + 0.5) / 3
+            _plate('%s_TRAY%d' % (name, k), x + dx * u, z + dz * u, rot,
+                   0.8, width * 0.9, 0.96 + 0.06 * k, 0.92 + 0.06 * k, 0.05,
+                   'tray', coll)
+            n += 1
+    elif kind == 'crossbelt':
+        # 环线：两侧各一排小车，中间留出主线
+        for s_ in (-1, 1):
+            for k in range(4):
+                u = -length / 2 + length * (k + 0.5) / 4
+                _box('%s_CAR%d_%d' % (name, s_, k), x + dx * u + px * s_ * (width * 0.4),
+                     z + dz * u + pz * s_ * (width * 0.4), 1.0,
+                     0.5, 0.5, 0.12, 'tray', coll, rot)
+                n += 1
+    elif kind == 'narrow_belt':
+        _box(name + '_NARROW', x, z, 0.86, length, 0.34, 0.05, 'belt_top', coll, rot)
+        n += 1
+    elif kind == 'put_wall':
+        for i in range(3):
+            for j in range(2):
+                bx = x + px * (j - 0.5) * (width * 0.55)
+                bz = z + pz * (j - 0.5) * (width * 0.55)
+                _box('%s_CELL%d_%d' % (name, i, j), bx + dx * (i - 1) * 0.9,
+                     bz + dz * (i - 1) * 0.9, 0.9,
+                     0.8, width * 0.5, 0.7, 'tote', coll, rot)
+                n += 1
+    # 末端支撑腿（除播种墙自带格口）
+    if kind != 'put_wall':
+        for s_ in (-1, 1):
+            _box('%s_FOOT%d' % (name, s_), x + dx * (length / 2 - 0.3) + px * s_ * (width * 0.4),
+                 z + dz * (length / 2 - 0.3) + pz * s_ * (width * 0.4), 0.4,
+                 0.08, 0.08, 0.8, 'steel', coll, rot)
+            n += 1
+    return n
+
+
 def sort_station(name, x, z, coll, rot=0.0):
     """分拣台：台面 + 显示器 + 扫码枪 + 两个周转箱。"""
     _box(name + '_TOP', x, z, 0.86, 2.4, 1.0, 0.08, 'steel', coll, rot)
@@ -200,7 +323,7 @@ def sort_station(name, x, z, coll, rot=0.0):
     return 9
 
 
-def sorting_line(coll, rect, name='SORT'):
+def sorting_line(coll, rect, name='SORT', sorter_kind='chute', conveyor_style='belt'):
     """在工位 rect 里搭一条分拣线：输送带 + 滑道 + 两端分拣台。
 
     只在 rect 内部排版——越界就会压到巷道和货架，那是数据画的边界，不能为了
@@ -209,15 +332,16 @@ def sorting_line(coll, rect, name='SORT'):
     x0, z0, x1, z1 = rect
     w, d = x1 - x0, z1 - z0
     cz_line = z0 + 1.0                       # 主线贴南侧
-    conveyor(name + '_LINE', [(x0 + 1.2, cz_line), (x1 - 1.2, cz_line)], 0.9, coll)
+    conveyor(name + '_LINE', [(x0 + 1.2, cz_line), (x1 - 1.2, cz_line)], 0.9, coll,
+             style=conveyor_style)
 
     # 4 条滑道：从主线朝北滑出，长度受 rect 深度约束
     n = 4
     run = max(1.6, min(2.6, d - 2.0))
     for i in range(n):
         bx = x0 + 3.2 + (w - 6.4) * i / (n - 1)
-        chute('%s_CH%d' % (name, i), bx, cz_line + run / 2 + 0.5, coll,
-              rot=math.radians(90), length=run, width=1.05, drop=0.5)
+        sorter('%s_CH%d' % (name, i), bx, cz_line + run / 2 + 0.5, coll,
+               rot=math.radians(90), kind=sorter_kind, length=run, width=1.05, drop=0.5)
 
     # 两端分拣台 + 作业员（贴着滑道外侧，不压主线）
     for i, sx in enumerate((x0 + 1.5, x1 - 1.5)):
@@ -259,12 +383,16 @@ def build(dc_module):
     parcels = 0
     for wh in D.LAYOUT['warehouses']:
         for cv in wh.get('conveyors', []) or []:
+            # 分型来自数据：没有 style 字段就是 belt / chute，与 R8.5 之前一致
             parcels += conveyor(cv['id'].replace('-', ''), cv['path'],
-                                float(cv.get('width', 1.0)), coll)
+                                float(cv.get('width', 1.0)), coll,
+                                style=cv.get('style', 'belt'))
         for st in wh.get('stations', []) or []:
             kind = st.get('kind')
             if kind == 'SORTING':
-                n += sorting_line(coll, st['rect'], st['id'].replace('-', ''))
+                n += sorting_line(coll, st['rect'], st['id'].replace('-', ''),
+                                  sorter_kind=st.get('sorter', 'chute'),
+                                  conveyor_style=st.get('conveyor_style', 'belt'))
             elif kind == 'PACKING':
                 n += pack_line(coll, st['rect'], st['id'].replace('-', ''))
     D.COUNTS['zone_detail_parts'] = n

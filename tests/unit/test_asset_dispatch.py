@@ -92,3 +92,12 @@ def test_dispatch_gate_self_test():
     assert r.returncode == 0, (r.stdout or "") + (r.stderr or "")
     assert "ASSET_DISPATCH_SELF_TEST PASS" in (r.stdout or "")
     assert "MISSED" not in (r.stdout or "")
+
+
+def test_variant_gate_reads_probe():
+    """探针产物存在时，分型门必须通过；没有产物就跳过（洁净室不跑 Blender）。"""
+    probe = ROOT / "out" / "variant_probe.json"
+    if not probe.exists():
+        pytest.skip("没有 out/variant_probe.json")
+    r = _subproc.run(["scripts/check_asset_dispatch.py", "--quiet"], cwd=str(ROOT))
+    assert r.returncode == 0, (r.stdout or "") + (r.stderr or "")

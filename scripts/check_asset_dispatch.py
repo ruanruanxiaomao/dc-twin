@@ -407,6 +407,62 @@ def compare_anchor(summ, golden):
     return not problems, {"comparison": "counts + glb_sha256(已规整) + structure", "checked": len(want)}, problems
 
 
+
+# ------------------------------------------------- 输送/分拣/车体分型（R8.5）
+
+VARIANT_PROBE = OUT / "variant_probe.json"
+VARIANT_SOURCES = ("zone_detail.py", "equipment_assets.py", "rack_assets.py")
+
+
+def _variant_source_sha():
+    import hashlib
+    h = hashlib.sha256()
+    for n in VARIANT_SOURCES:
+        h.update((ROOT / "scripts" / n).read_bytes())
+    return h.hexdigest()
+
+
+def run_variant_probe():
+    import subprocess
+    b = find_blender()
+    if not b:
+        return False, "找不到 Blender（设 BLENDER_EXE）"
+    r = subprocess.run([b, "-b", "--factory-startup", "-P",
+                        str(ROOT / "scripts" / "variant_probe.py")],
+                       capture_output=True, encoding="utf-8", errors="replace", cwd=str(ROOT))
+    if r.returncode != 0 or "VARIANT_PROBE_OK" not in (r.stdout or ""):
+        return False, "分型探针失败：%s" % ((r.stdout or "") + (r.stderr or ""))[-400:]
+    return True, ""
+
+
+def check_variants(rep=None):
+    """4 种输送台面 / 7 种分拣末端 / 3 种程序化车体必须两两不同（按坐标，不按数量）。"""
+    problems = []
+    d = rep if rep is not None else (jload(VARIANT_PROBE) if VARIANT_PROBE.exists() else None)
+    if d is None:
+        return False, {}, ["没有 out/variant_probe.json（跑 --variant-probe 生成）"]
+    if d.get("source_sha") != _variant_source_sha():
+        problems.append("探针过期：zone_detail/equipment_assets/rack_assets 改过（重跑 --variant-probe）")
+    want = {"conveyors": 4, "sorters": 7, "equipment_bodies": 3}
+    for key, n in want.items():
+        rows = d.get(key) or {}
+        if len(rows) != n:
+            problems.append("%s 只有 %d 项（应 %d）" % (key, len(rows), n))
+            continue
+        geoms = [v.get("geom") for v in rows.values()]
+        if len(set(geoms)) != n:
+            dup = sorted(k for k in rows
+                         if geoms.count(rows[k].get("geom")) > 1)
+            problems.append("%s 有两项几何相同：%s" % (key, ",".join(dup)))
+        for k, v in rows.items():
+            if not v.get("verts"):
+                problems.append("%s/%s 没建出顶点" % (key, k))
+    return not problems, {"conveyors": d.get("distinct_conveyor"),
+                          "sorters": d.get("distinct_sorter"),
+                          "bodies": d.get("distinct_body"),
+                          "blender": d.get("blender")}, problems
+
+
 # ---------------------------------------------------------------- self test
 
 
@@ -472,6 +528,21 @@ def self_test():
               "master_props_unplaced": []}
     cases.append(("gantry_sneaked_in", not check_masters(sneaky)[0]))
 
+    # 4d 分型：几何重复必须被抓、探针过期必须被抓
+    fake_rep = {"source_sha": _variant_source_sha(),
+                "conveyors": {k: {"geom": "g%d" % i, "verts": 8}
+                              for i, k in enumerate(("belt", "roller", "gravity", "accum"))},
+                "sorters": {k: {"geom": "s%d" % i, "verts": 8}
+                            for i, k in enumerate("abcdefg")},
+                "equipment_bodies": {k: {"geom": "b%d" % i, "verts": 8}
+                                     for i, k in enumerate(("a", "b", "c"))}}
+    cases.append(("variants_ok", check_variants(fake_rep)[0]))
+    dup = copy.deepcopy(fake_rep)
+    dup["sorters"]["b"]["geom"] = dup["sorters"]["a"]["geom"]
+    cases.append(("variant_duplicate", not check_variants(dup)[0]))
+    stale = copy.deepcopy(fake_rep); stale["source_sha"] = "0" * 64
+    cases.append(("variant_probe_stale", not check_variants(stale)[0]))
+
     # 5 设备开关被打开
     s = copy.deepcopy(spec)
     s.setdefault("activate", {})["equipment_dispatch"] = True
@@ -495,6 +566,8 @@ def main(argv=None):
                     help="带 rack_type 的整场构建并与 tests/golden/typed_3d.json 比对（约 60 s）")
     ap.add_argument("--freeze", action="store_true",
                     help="与 --typed-build 连用：把本次结果写成新的锚点（受控重冻结，需人看着跑）")
+    ap.add_argument("--variant-probe", action="store_true",
+                    help="跑/校验输送·分拣·车体分型探针（约 15 s，需要本机 Blender）")
     ap.add_argument("--probe", action="store_true",
                     help="跑/校验 Blender 渲染层探针（约 10 s，需要本机 Blender）")
     a = ap.parse_args(argv)
@@ -574,6 +647,24 @@ def main(argv=None):
                 print("%-26s %s%s" % ("TYPED_BUILD_OK", "PASS" if ok else "FAIL",
                                       "" if ok else "  -> " + "; ".join(problems[:2])))
                 print("                           %s" % json.dumps(anchors, ensure_ascii=False)[:220])
+
+    if a.variant_probe:
+        ok_run, why = run_variant_probe()
+        if not ok_run:
+            gates["CONVEYOR_SORTER_VARIANT_OK"] = {"ok": False, "detail": {}, "problems": [why]}
+            failed.append("CONVEYOR_SORTER_VARIANT_OK")
+            if not a.quiet:
+                print("%-26s FAIL  -> %s" % ("CONVEYOR_SORTER_VARIANT_OK", why))
+        else:
+            ok, detail, problems = check_variants()
+            gates["CONVEYOR_SORTER_VARIANT_OK"] = {"ok": ok, "detail": detail,
+                                                   "problems": problems}
+            if not ok:
+                failed.append("CONVEYOR_SORTER_VARIANT_OK")
+            if not a.quiet:
+                print("%-26s %s%s" % ("CONVEYOR_SORTER_VARIANT_OK", "PASS" if ok else "FAIL",
+                                      "" if ok else "  -> " + "; ".join(problems[:2])))
+                print("                           %s" % json.dumps(detail, ensure_ascii=False)[:200])
 
     rep = {"schema_version": "1.0", "kind": "asset_dispatch_report",
            "verdict": "ASSET_DISPATCH_OK" if not failed else "ASSET_DISPATCH_FAIL",

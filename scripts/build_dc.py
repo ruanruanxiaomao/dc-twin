@@ -33,6 +33,7 @@ BLEND = os.path.join(OUT, 'distribution_center.blend')
 LAYOUT = json.load(open(os.path.join(DATA, 'layout.json'), encoding='utf-8'))
 import scene_config  # noqa: E402  (要在 LAYOUT 之后才能定位 data/)
 import rack_assets  # noqa: E402  (R8 程序化货架几何：纯数据，不碰 bpy)
+import equipment_assets  # noqa: E402  (R8.5 穿梭车/CTU/机械臂：无 GLB 母版，程序化)
 CFG = scene_config.load()
 RNG = random.Random(LAYOUT['seed'])
 COUNTS = {}
@@ -265,6 +266,28 @@ def rack_type_mesh(mechanism, levels):
     for key in MAT_SLOTS:
         m.materials.append(material(key))
     RACK_TYPE_MESHES[k] = m
+    return m
+
+
+EQUIPMENT_MESHES = {}
+MAT_EQ = ('steel', 'rack_beam', 'line_yellow')
+
+
+def equipment_mesh(name):
+    """程序化设备车体（[0,1]^3 归一化），给没有 GLB 母版的三类用。"""
+    if name in EQUIPMENT_MESHES:
+        return EQUIPMENT_MESHES[name]
+    g = equipment_assets.geometry(name)
+    bm = bmesh.new()
+    for lo, hi, slot in g['boxes']:
+        add_bm_box(bm, lo, hi, slot)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    m = bpy.data.meshes.new('EQ_%s' % name.upper())
+    bm.to_mesh(m)
+    bm.free()
+    for key in MAT_EQ:
+        m.materials.append(material(key))
+    EQUIPMENT_MESHES[name] = m
     return m
 
 
@@ -654,6 +677,15 @@ def build_master_props(assets):
     if stations:
         sx, sz = stations[0]['access_point']
         put('asset_amr_cart', 'AMR_CART_01', sx + 1.5, sz, 0.0)
+    # 码垛机械臂：程序化车体（无母版），站在包装区
+    pack = [st for st in stations if st.get('kind') == 'PACKING']
+    if pack:
+        r0, z0, r1, z1 = pack[0]['rect']
+        o = bpy.data.objects.new('ROBOT_ARM_01', equipment_mesh('robot_arm'))
+        c.objects.link(o)
+        o.location = ((r0 + r1) / 2 + 1.6, (z0 + z1) / 2, 0.05)
+        o.scale = (2.2, 2.2, 2.4)          # 归一化立方体 → 2.2×2.2×2.4 m
+        placed['procedural:robot_arm'] = 1
     racks = wh.get('racks') or []
     for i, rk in enumerate(racks[:2], 1):
         x, _h, z = rk['position']

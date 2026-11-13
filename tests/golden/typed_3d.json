@@ -15,21 +15,22 @@
     "fallback": 0,
     "typed_racks": 196,
     "pallets_built": 240,
-    "objects": 2351,
-    "meshes": 399,
-    "glb_structure": "2c285fd79c46fe766e1ec4bdded27c055b3be4235676b14565691d21d8fb542e",
-    "glb_nodes": 2289,
-    "glb_meshes": 395,
+    "objects": 2352,
+    "meshes": 400,
+    "glb_structure": "3b4db08606ca367d7b7df9ab01f73fdad19fcfb718207d10b9d2f06fe6d4577a",
+    "glb_nodes": 2290,
+    "glb_meshes": 396,
     "layout_sha256": "0ea8b2ed47b93134163fa4e9e2cdfa5ead099c0d0bf680e5a518cebdb63119a2",
     "master_props": {
       "asset_scanner_arch": 1,
       "asset_forklift_loaded": 1,
       "asset_amr_cart": 1,
+      "procedural:robot_arm": 1,
       "asset_stacker_crane": 2
     },
     "master_props_unplaced": [
       "asset_gantry_crane"
     ],
-    "glb_sha256": "ccd0cc10fdda6802d9264401a628681df6fc66c32876b3bfbffc6bb66318ca05"
+    "glb_sha256": "070f37f3dcda3d61a3b3c9187044dbbd2b58f99d0e2b93c0535aff50cf2e1a20"
   }
 }

@@ -71,7 +71,7 @@
         1.35
       ],
       "visual_cue": "立柱 + 前后层梁 + 横撑，单深，托盘直接可见",
-      "implemented_in": "scripts/build_dc.py:174",
+      "implemented_in": "scripts/build_dc.py#unit_rack_mesh",
       "glb_fallback": "glb:asset_rack"
     },
     "double_deep": {
@@ -86,7 +86,7 @@
       ],
       "visual_cue": "前后双托 + 支撑轨，后位被前位挡住而半隐",
       "behavior_ref": "rack_spec.types.double_deep.rear_blocked_by_front",
-      "implemented_in": "scripts/rack_assets.py:86"
+      "implemented_in": "scripts/rack_assets.py#rack_double_deep"
     },
     "drive_in": {
       "name_cn": "驶入式货架",
@@ -97,7 +97,7 @@
       "footprint_m": null,
       "visual_cue": "叉车驶入通道 + 两侧导轨 + 深位托盘渐隐，单端开口",
       "behavior_ref": "rack_spec.types.drive_in.single_end",
-      "implemented_in": "scripts/rack_assets.py:107"
+      "implemented_in": "scripts/rack_assets.py#rack_drive_in"
     },
     "drive_through": {
       "name_cn": "贯通式货架",
@@ -107,7 +107,7 @@
       "depth_positions": "from_rack",
       "footprint_m": null,
       "visual_cue": "同驶入式但两端开口贯通",
-      "implemented_in": "scripts/rack_assets.py:125"
+      "implemented_in": "scripts/rack_assets.py#rack_drive_through"
     },
     "pallet_shuttle": {
       "name_cn": "穿梭式货架",
@@ -117,7 +117,7 @@
       "depth_positions": "from_rack",
       "footprint_m": null,
       "visual_cue": "入口交接位 + 穿梭车在轨（procedural:shuttle_car），深位由车搬运",
-      "implemented_in": "scripts/rack_assets.py:130",
+      "implemented_in": "scripts/rack_assets.py#rack_shuttle",
       "note": "货架本体程序化；穿梭车车体另有 procedural:shuttle_car（无 GLB 母版）"
     },
     "mobile": {
@@ -132,7 +132,7 @@
       ],
       "visual_cue": "可移动底座 + 密集排列 + 只留一条活动通道",
       "behavior_ref": "rack_spec.types.mobile.open_close_s",
-      "implemented_in": "scripts/rack_assets.py:144"
+      "implemented_in": "scripts/rack_assets.py#rack_mobile"
     },
     "carton_flow": {
       "name_cn": "流利式货架",
@@ -146,7 +146,7 @@
       ],
       "visual_cue": "流利条微斜，周转箱从补货端滑向拣选端",
       "footprint_note": "料箱货架（clearW 0.60 / clearD 0.50）比托盘货架小一号，footprint 由自己的 geometry 复算，不是照抄托盘",
-      "implemented_in": "scripts/rack_assets.py:159"
+      "implemented_in": "scripts/rack_assets.py#rack_carton_flow"
     },
     "pallet_gravity": {
       "name_cn": "重力式货架",
@@ -156,7 +156,7 @@
       "depth_positions": "from_rack",
       "footprint_m": null,
       "visual_cue": "重力辊道带坡度，高端入低端出，天然 FIFO",
-      "implemented_in": "scripts/rack_assets.py:178"
+      "implemented_in": "scripts/rack_assets.py#rack_gravity"
     },
     "push_back": {
       "name_cn": "压入式货架",
@@ -166,7 +166,7 @@
       "depth_positions": "from_rack",
       "footprint_m": null,
       "visual_cue": "嵌套小车微斜，同侧推入嵌套，LIFO",
-      "implemented_in": "scripts/rack_assets.py:194"
+      "implemented_in": "scripts/rack_assets.py#rack_push_back"
     }
   },
   "equipment_assets": {
@@ -179,7 +179,7 @@
         1.2
       ],
       "footprint_source": "config:data/config.json#forklift",
-      "implemented_in": "scripts/build_dc.py:590"
+      "implemented_in": "scripts/build_dc.py#build_vehicles"
     },
     "forklift_reach": {
       "name_cn": "前移式叉车",
@@ -269,7 +269,7 @@
         1.4594
       ],
       "footprint_source": "geometry:AGV_RADIUS*2",
-      "implemented_in": "scripts/build_dc.py:560"
+      "implemented_in": "scripts/build_dc.py#build_vehicles"
     },
     "conveyor_roller": {
       "name_cn": "辊道输送机",
@@ -316,14 +316,17 @@
     },
     "robot_palletize": {
       "source": "procedural:robot_arm",
-      "status": "new",
-      "use": "码垛机械臂，无母版，asset_machine 兜底"
+      "status": "existing",
+      "use": "码垛机械臂，无母版，asset_machine 兜底",
+      "implemented_in": "scripts/equipment_assets.py#robot_arm",
+      "module": "scripts/equipment_assets.py"
     },
     "ctu": {
       "source": "procedural:ctu_robot",
-      "status": "gap",
-      "use": "CTU/四向车，无母版且技术数值不在分发包",
-      "glb_gap": "GLB 无 CTU/四向车母版；换向时间与定位精度只有视频名，技术参考 ch2§2.5 不在分发包"
+      "status": "new",
+      "module": "scripts/equipment_assets.py",
+      "use": "CTU/四向车，车体已程序化",
+      "gap_notes": "换向时间与定位精度只有视频名，技术参考 ch2§2.5 不在分发包；本布局未部署该设备"
     }
   },
   "conveyor_assets": {
@@ -331,34 +334,39 @@
       "source": "procedural:conveyor",
       "module": "scripts/zone_detail.py",
       "status": "existing",
-      "implemented_in": "scripts/zone_detail.py:90",
+      "implemented_in": "scripts/zone_detail.py#conveyor",
       "mechanism_key": "conveyor_belt"
     },
     "roller": {
-      "source": "procedural:conveyor_roller",
+      "source": "procedural:conveyor",
       "module": "scripts/zone_detail.py",
-      "status": "new",
+      "status": "existing",
       "params": {
-        "roller_pitch_m": 0.1
+        "roller_pitch_m": 0.1,
+        "style": "roller"
       },
-      "mechanism_key": "conveyor_roller"
+      "mechanism_key": "conveyor_roller",
+      "implemented_in": "scripts/zone_detail.py#conveyor"
     },
     "gravity_roller": {
-      "source": "procedural:conveyor_gravity",
+      "source": "procedural:conveyor",
       "module": "scripts/zone_detail.py",
-      "status": "new",
+      "status": "existing",
       "params": {
-        "slope_deg": 3
+        "slope_deg": 3,
+        "style": "gravity"
       },
-      "glb_gap": "GLB 无重力辊道母版"
+      "implemented_in": "scripts/zone_detail.py#conveyor"
     },
     "accumulation": {
-      "source": "procedural:conveyor_accum",
+      "source": "procedural:conveyor",
       "module": "scripts/zone_detail.py",
-      "status": "new",
+      "status": "existing",
       "params": {
-        "zero_pressure": true
-      }
+        "zero_pressure": true,
+        "style": "accumulation"
+      },
+      "implemented_in": "scripts/zone_detail.py#conveyor"
     }
   },
   "sorter_assets": {
@@ -366,38 +374,61 @@
       "source": "procedural:chute",
       "module": "scripts/zone_detail.py",
       "status": "existing",
-      "implemented_in": "scripts/zone_detail.py:167"
+      "implemented_in": "scripts/zone_detail.py#chute"
     },
     "crossbelt": {
-      "source": "procedural:sorter_crossbelt",
+      "source": "procedural:sorter",
       "module": "scripts/zone_detail.py",
-      "status": "new",
-      "glb_gap": "GLB 无交叉带母版"
+      "status": "existing",
+      "implemented_in": "scripts/zone_detail.py#sorter",
+      "params": {
+        "kind": "crossbelt"
+      }
     },
     "slider": {
-      "source": "procedural:sorter_slider",
+      "source": "procedural:sorter",
       "module": "scripts/zone_detail.py",
-      "status": "new"
+      "status": "existing",
+      "implemented_in": "scripts/zone_detail.py#sorter",
+      "params": {
+        "kind": "slider"
+      }
     },
     "swing_wheel": {
-      "source": "procedural:sorter_swing_wheel",
+      "source": "procedural:sorter",
       "module": "scripts/zone_detail.py",
-      "status": "new"
+      "status": "existing",
+      "implemented_in": "scripts/zone_detail.py#sorter",
+      "params": {
+        "kind": "swing_wheel"
+      }
     },
     "narrow_belt": {
-      "source": "procedural:sorter_narrow_belt",
+      "source": "procedural:sorter",
       "module": "scripts/zone_detail.py",
-      "status": "new"
+      "status": "existing",
+      "implemented_in": "scripts/zone_detail.py#sorter",
+      "params": {
+        "kind": "narrow_belt"
+      }
     },
     "tilt_tray": {
-      "source": "procedural:sorter_tilt_tray",
+      "source": "procedural:sorter",
       "module": "scripts/zone_detail.py",
-      "status": "new"
+      "status": "existing",
+      "implemented_in": "scripts/zone_detail.py#sorter",
+      "params": {
+        "kind": "tilt_tray"
+      }
     },
     "put_wall": {
-      "source": "procedural:sorter_put_wall",
+      "source": "procedural:sorter",
       "module": "scripts/zone_detail.py",
-      "status": "new"
+      "status": "existing",
+      "implemented_in": "scripts/zone_detail.py#sorter",
+      "params": {
+        "kind": "put_wall"
+      }
     }
   },
   "deferred_rack_types": {
