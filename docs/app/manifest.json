@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
   "kind": "webapp_snapshot",
-  "generated_at": "2026-11-13T12:16:30+00:00",
-  "commit": "55e3af4",
+  "generated_at": "2026-11-13T12:24:12+00:00",
+  "commit": "ca814ae",
   "glb": "out/dc_preview.glb",
   "api": {
     "bootstrap": 226174,
