@@ -65,7 +65,7 @@ def refactor_facts():
     """
     out = {"rack_types": 0, "equipment_types": 0, "specs": 0, "schemas": 0,
            "gate_ok": None, "stage": "R1", "ul_pallet": 0, "ul_tote": 0,
-           "ul_skus": 0, "ul_max_util": None}
+           "ul_skus": 0, "ul_max_util": None, "rack_cells": 0}
     try:
         rack = json.load(open(os.path.join(CONFIG, 'rack_spec.json'), encoding='utf-8'))
         out["rack_types"] = len(rack.get('types') or {})
@@ -83,6 +83,13 @@ def refactor_facts():
                  for x in m.get('skus', [])
                  if x.get('unit_load') and x['unit_load'].get('rating_kg')]
         out["ul_max_util"] = round(max(utils), 4) if utils else None
+    except Exception:                       # noqa: BLE001
+        pass
+    try:
+        import json as _json
+        lay = _json.load(open(os.path.join(DATA, 'layout.json'), encoding='utf-8'))
+        out["rack_cells"] = len({l["cell_id"] for w in lay.get('warehouses', [])
+                                 for l in w.get('locations', []) if l.get("cell_id")})
     except Exception:                       # noqa: BLE001
         pass
     for name in ("unit_load_spec", "rack_spec", "equipment_spec", "capacity_spec"):
@@ -395,14 +402,15 @@ def main():
             inv.get('stockout', 'n/a'), inv.get('expired_units', 'n/a'),
             inv.get('expired_value', 'n/a'), inv.get('open_lots', 'n/a'),
             inv.get('fefo_violations', 'n/a'))),
-        ('重构层（R0–R1）', '四份 spec（%s/4）+ schema（%s/4）：货架 %s 类（按存取机理）、设备 %s 类；'
+        ('重构层（R0–R2）', '四份 spec（%s/4）+ schema（%s/4）：货架 %s 类（按存取机理）、设备 %s 类；'
                           '集装单元 %s 个 SKU（托盘 %s / 料箱 %s，最高载荷利用率 %s%%）；'
-                          '`capacity_model.py` 与单元层均已落地但**默认关闭**（引擎未接主链），'
+                          '当前布局货道 %s 个（默认 0 = 未启用深位，字节不变）；'
+                          '`capacity_model.py` / 单元层 / 货架机理均已落地但**默认关闭**，'
                           '资料 5 处口径 bug（B1–B5）修正并以 LEGACY 双版做负对照；'
-                          '门：`check_capacity_spec.py`（R0）+ `check_compatibility.py`（R1，均在验收/库存链）'
+                          '门：`dc run --scope refactor`（R0 口径 + R1 单元 + R2 货架，3 步）'
          % (ref['specs'], ref['schemas'], ref['rack_types'], ref['equipment_types'],
             ref['ul_skus'], ref['ul_pallet'], ref['ul_tote'],
-            round((ref['ul_max_util'] or 0) * 100, 1))),
+            round((ref['ul_max_util'] or 0) * 100, 1), ref['rack_cells'])),
         ('分档验收', 'data tier %s/%s PASS；pytest -m "not blender" 与 CI 矩阵见 '
                      '`.github/workflows/ci.yml`'
          % (vdata.get('passed'), vdata.get('total'))),

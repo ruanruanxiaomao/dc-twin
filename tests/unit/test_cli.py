@@ -23,7 +23,8 @@ def test_doctor_collect_is_pass_and_has_checks():
 
 
 def test_scopes_have_expected_step_counts_and_are_ordered():
-    assert set(runner.SCOPES) == {"data", "scenarios", "game", "inventory", "full"}
+    assert set(runner.SCOPES) == {"data", "scenarios", "game", "inventory",
+                                 "refactor", "full"}
     assert len(runner.SCOPES["data"]) == 14   # + spec_areas / check_process / gen_inventory
     assert len(runner.SCOPES["scenarios"]) > len(runner.SCOPES["data"])
     assert len(runner.SCOPES["full"]) > len(runner.SCOPES["scenarios"])

@@ -4,6 +4,48 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] — R2 货架存取层（G1 核心，默认关闭）
+
+Racks now have mechanics: a cell can be several slots deep, the rear slot is blocked by
+the front one, drive-in is LIFO, gravity flow is FIFO, and a physically-LIFO rack that is
+asked to run FEFO is a **counted conflict** rather than a silent contradiction.
+None of it is active by default — `spec_layout` only expands depth slots when a rack
+group declares `rack_type`, and the shipped layout declares none, so the v3 golden is
+still byte-identical. **No refreeze was needed**, which is exactly what D4 bought.
+
+### Added
+
+- **`scripts/rack_access.py`** — pure mechanics: for a lane's depth occupancy, which slot
+  can be picked, which are blocked, whether a reshuffle is needed, and the physical
+  out-order (FIFO/LIFO). Five controls in `--self-test`, including "drive-in puts deepest
+  but push-back puts shallowest" — both are LIFO, and that difference is why §5.5 insists
+  they are not the same thing.
+- **`spec_layout` opt-in depth expansion**: a rack group with `rack_type` emits
+  `rack_type` / `access_mechanism` / `cell_id` / `depth_index` / `n_depth` per slot;
+  `aisle_depth` mechanisms take an explicit `lane_depth`.
+- **Engine**: `_build_rack_cells` indexes lanes; `_pick_loc` resolves a random slot to the
+  one the mechanism allows, emitting `SLOT_BLOCKED` + `RESHUFFLE` when the chosen slot is
+  behind a filled one; `FIFO_LIFO_CONFLICT` is emitted once per run when LIFO lanes meet
+  FEFO. `sim_state` gains a `rack` block only when lanes exist.
+- **`scripts/check_rack_access.py`** + `dc run --scope refactor` (R0 + R1 + R2 gates, 3 steps).
+
+### Scope boundary (ADR-REFACTOR-06)
+
+Only the **pick** half is wired. Putaway slot choice, mobile aisle open/close time and
+shuttle change-aisle time stay analytic: wiring them would change service times and the
+stock write path, which belongs with the stock-policy phase and its own refreeze.
+
+### Verified
+
+| Gate | Evidence |
+|---|---|
+| RACK_TAXONOMY_OK | default layout: 0 lanes; double-deep expands to depth {0,1}; drive-in honours `lane_depth=5` |
+| DEEP_BLOCK_NEG | rear slot with a filled front → `SLOT_BLOCKED` + `RESHUFFLE`, pick redirected to the front |
+| FIFO_LIFO_OK | LIFO lane order reversed, gravity lane order preserved |
+| CONFLICT_NEG | drive-in + FEFO → conflict event; gravity + FEFO → none |
+| EFFECTIVE_CAP_OK | effective < nominal; deducts clamp at 0 |
+| DEFAULT_OFF | shipped layout has no `cell_id`; `data/layout.json` unchanged; v3 golden byte-identical |
+
 ## [Unreleased] — R1 集装单元层（G3，默认关闭）
 
 Each SKU now has a handling unit: pallet or tote, footprint, gross weight, load rating,

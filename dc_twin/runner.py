@@ -103,11 +103,20 @@ INVENTORY_CHAIN = [
     ("scripts/report_refreeze.py", ("--quiet",), "python"),   # 门 7 REFREEZE_OK
 ]
 
+#: 资料驱动重构的门（R0–R8）。**不进 full**：它验的是"新机制对不对"，
+#: 不是"交付链跑得通"；混进 full 会让 CI 每次都跑一遍重构实验。
+REFACTOR_CHAIN = [
+    ("scripts/check_capacity_spec.py", ("--quiet",), "python"),   # R0 口径 + B1–B5 负对照
+    ("scripts/check_compatibility.py", ("--quiet",), "python"),   # R1 集装单元
+    ("scripts/check_rack_access.py", ("--quiet",), "python"),     # R2 货架机理
+]
+
 SCOPES = {
     "data": DATA_CHAIN,
     "scenarios": DATA_CHAIN + SCENARIO_CHAIN,
     "game": GAME_CHAIN,
     "inventory": INVENTORY_CHAIN,
+    "refactor": REFACTOR_CHAIN,
     "full": DATA_CHAIN + SCENARIO_CHAIN + BLENDER_CHAIN + POST_CHAIN + ACCEPT_CHAIN,
 }
 

@@ -25,6 +25,11 @@ from pathlib import Path
 
 from dc_root import project_root  # noqa: E402
 ROOT = project_root(__file__)
+
+try:                                     # R2：货架存取机理（纯函数，可单测）
+    import rack_access as rack_access
+except ImportError:                      # 打包/独立运行时留个明确的降级，不静默
+    rack_access = None
 CONFIG, DATA, OUT, RUNS = ROOT / "config", ROOT / "data", ROOT / "out", ROOT / "runs"
 
 # 死锁退让参数：被同一台车挡住这么久，且我方 id 更大，就后退让路。
@@ -527,6 +532,7 @@ class Simulation:
         self.fleet, self.demand, self.layout, self.grid = fleet, demand, layout, grid
         self.cfg = cfg
         self.world = World(layout, grid)
+        self._build_rack_cells(layout)
         self.tick = self.spec["tick_s"]
         self.horizon = self.spec["horizon_s"]
         self.seed = self.sc.get("seed", self.spec["seed"])
@@ -694,6 +700,12 @@ class Simulation:
         self.ul_overload_n = 0
         self.ul_first_read_n = 0
         self.ul_rescan_n = 0
+        # ---- R2 货架存取层（默认无货道元数据 → 全空，行为与历史一致）
+        # 注意：`rack_cells` / `loc_cell` 在 `_build_rack_cells()` 里赋值，
+        # **这里不能重新赋空**——那会把已经建好的货道索引冲掉（第一次就踩了这个）。
+        self.rack_blocked_n = 0
+        self.rack_reshuffle_n = 0
+        self.rack_conflict_n = 0
 
         sp = CONFIG / "inventory_spec.json"
         spec_override = Simulation.inventory_spec_override
@@ -1520,11 +1532,85 @@ class Simulation:
         return out
 
     # ---------- demand ----------
+    def _build_rack_cells(self, layout):
+        """把「一个货道拆成多个深位」的元数据聚成索引（R2）。
+
+        默认布局的库位没有 `cell_id`（spec_layout 只在声明了 rack_type 时才展开深位），
+        所以这里默认什么都建不出来 —— 这是"默认字节不变"的实现方式。
+        """
+        cells, loc_cell, mechanisms = {}, {}, {}
+        for w in layout.get("warehouses", []):
+            for loc in w.get("locations", []):
+                cid = loc.get("cell_id")
+                if not cid:
+                    continue
+                mech = loc.get("access_mechanism") or "single_deep_direct"
+                cells.setdefault(cid, {"mechanism": mech, "depths": {}})
+                cells[cid]["depths"][int(loc.get("depth_index", 0))] = loc["id"]
+                loc_cell[loc["id"]] = cid
+                mechanisms[loc["id"]] = mech
+        for cid, c in cells.items():
+            c["locs"] = [c["depths"][k] for k in sorted(c["depths"])]
+        self.rack_cells = cells
+        self.loc_cell = loc_cell
+        # 库位字典索引：`_pick_loc` 里拿到的是 dict（by_kind 存的是对象），
+        # 而货道索引存的是 id。两处都要能互查，否则会出现"用 dict 当 key"的错。
+        self.loc_by_id = {loc["id"]: loc
+                          for w in layout.get("warehouses", [])
+                          for loc in w.get("locations", [])}
+
+    def _loc_qty(self, loc):
+        """某库位当前结存（不区分 SKU —— 一个库位只有一个 SKU）。"""
+        info = self.inv_loc.get(loc)
+        if not info:
+            return 0.0
+        return float(self.inv.get(info["sku"], {}).get(loc, 0.0))
+
+    def _resolve_slot(self, loc, operation="pick"):
+        """把"随机选中的库位"落到货架机理允许的那个深位。
+
+        返回 (可用库位, 是否发生阻挡/重排)。**只有多深位货道才会走到分支**，
+        单深位（selective）原样返回。
+        """
+        lid = loc["id"] if isinstance(loc, dict) else loc
+        cid = self.loc_cell.get(lid)
+        if not cid or rack_access is None:
+            return loc, False
+        cell = self.rack_cells[cid]
+        if len(cell["locs"]) < 2:
+            return loc, False
+        occ = [self._loc_qty(l) > 1e-9 for l in cell["locs"]]
+        res = rack_access.resolve(cell["mechanism"], occ, operation)
+        if res["slot"] is None:
+            return loc, False
+        target = cell["locs"][res["slot"]]
+        if target == lid:
+            return loc, False
+        # 选中的深位不可作业（被前位挡住 / 该深位是空的而货在别处）
+        if lid in [cell["locs"][i] for i in res["blocked"]] or res["blocked"]:
+            self.rack_blocked_n += 1
+            self.log.emit(self.t, "SLOT_BLOCKED", location=lid, cell=cid,
+                          mechanism=cell["mechanism"],
+                          depth_index=cell["locs"].index(lid),
+                          accessible_index=res["slot"])
+            if res["reshuffle"]:
+                self.rack_reshuffle_n += 1
+                self.log.emit(self.t, "RESHUFFLE", cell=cid,
+                              mechanism=cell["mechanism"],
+                              moved=len(res["blocked"]), target=target)
+        return self.loc_by_id.get(target, target), True
+
     def _pick_loc(self, wid, kind, rng):
         pool = self.world.by_kind[wid].get(kind) or self.world.by_kind[wid].get("SHELF", [])
         if not pool:
             return None
-        return rng.choice(pool)
+        loc = rng.choice(pool)
+        if not self.rack_cells:
+            return loc
+        # 只对取货做机理校正；上架仍按原逻辑（R2 只接"取"这一半，见 ADR-REFACTOR-06）
+        if kind == "SHELF":
+            loc, _ = self._resolve_slot(loc, "pick")
+        return loc
 
     def new_order(self, t):
         mix = self.overrides.get("demand.orders.mix", self.demand["orders"]["mix"])
@@ -1980,6 +2066,22 @@ class Simulation:
     def _cmd_manual_assign(self, cmd):
         raise NotImplementedError("MANUAL_ASSIGN 尚未实现（P4 落地）")
 
+    def _rack_conflicts(self):
+        """物理 LIFO 货道 + FEFO 批次策略 = 结构性冲突，开局统计一次。
+
+        每个货道发一条事件太吵（一个仓几百条），所以聚合成一条带计数。
+        """
+        if not self.rack_cells or rack_access is None or not self.lot_expiry_enabled:
+            return
+        bad = [cid for cid in sorted(self.rack_cells)
+               if rack_access.conflict(self.rack_cells[cid]["mechanism"],
+                                       self.lot_policy)["conflict"]]
+        if not bad:
+            return
+        self.rack_conflict_n = len(bad)
+        self.log.emit(0.0, "FIFO_LIFO_CONFLICT", cells=len(bad),
+                      lot_policy=self.lot_policy, sample=bad[:5])
+
     def _init_run(self):
         """把批跑的一次性初值收敛到一处。
 
@@ -1993,6 +2095,7 @@ class Simulation:
         self.lam = self.per_hour / 3600.0
         self.done = False
         self._started = True
+        self._rack_conflicts()
         if self.ext:
             self.next_arrival = self.ext[0]["t_arrive"]
         else:
@@ -2600,6 +2703,15 @@ class Simulation:
 
     def _state(self):
         d = self._state_payload()
+        # R2：货架统计只在布局带货道元数据时出现（默认没有 → 字节不变）
+        if self.rack_cells:
+            d["rack"] = {
+                "cells": len(self.rack_cells),
+                "multi_depth": sum(1 for c in self.rack_cells.values() if len(c["locs"]) > 1),
+                "slot_blocked": self.rack_blocked_n,
+                "reshuffles": self.rack_reshuffle_n,
+                "fifo_lifo_conflicts": self.rack_conflict_n,
+            }
         # R1：集装单元统计只在启用时出现。加一个恒为 0 的键也会改 sim_state 字节，
         # "默认字节不变"就会被一个装饰性字段破掉。
         if self.ul_enabled:

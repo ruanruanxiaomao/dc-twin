@@ -26,6 +26,7 @@ import sys
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 DATA = os.path.join(ROOT, 'data')
+CONFIG = os.path.join(ROOT, 'config')
 OUT = os.path.join(ROOT, 'out')
 EPS = 1e-6
 
@@ -108,6 +109,18 @@ def check_schema(spec):
 
 
 # ---------------------------------------------------------------- 展开
+def _rack_types():
+    """读 config/rack_spec.json 的 types；缺文件返回 {}（退回"只有一种货架"的现状）。"""
+    path = os.path.join(CONFIG, "rack_spec.json")
+    if not os.path.exists(path):
+        return {}
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f).get("types") or {}
+    except Exception:                      # noqa: BLE001
+        return {}
+
+
 def expand(spec, fleet_counts=None):
     """按 §5.4 伪代码展开；坐标一律 = warehouse.origin + 局部坐标。
 
@@ -117,6 +130,8 @@ def expand(spec, fleet_counts=None):
     With the shipped fleet_spec (12/3/3/3 = 21) output is byte-identical to the
     frozen baseline.
     """
+    #: R2：货架类型库（缺文件 → {}，退回"只有一种货架"）
+    rack_spec_types = _rack_types()
     fleet_info = {'source': 'config/fleet_spec.json' if fleet_counts is not None else None,
                   'per_warehouse': {}, 'overflow': []}
     defaults = spec['defaults']
@@ -181,6 +196,15 @@ def expand(spec, fleet_counts=None):
                             size = [RD, top, RL]
                         rid = 'RACK-%s%s%d%02d' % (wh['id'], group['zone'], ri + 1, bi + 1)
                         items.append(([x, 0, z], size, levels, rid))
+            # R2（可选）：货架存取机理。**只有 group 显式声明 rack_type 才会展开深位**，
+            # 默认布局里没有这个键 → data/layout.json 与历史逐字节一致（D4）。
+            rt = (group.get("rack") or {}).get("rack_type") or group.get("rack_type")
+            rt_spec = (rack_spec_types.get(rt) if (rt and rack_spec_types) else None)
+            n_depth = 1
+            if rt_spec:
+                nd = rt_spec.get("n_depth")
+                n_depth = int(nd) if isinstance(nd, int) else int(group.get("lane_depth", 4))
+
             for pos, size, lv, rid in items:
                 rk = {
                     'id': rid, 'zone': group.get('zone', zones[-1]['id']),
@@ -191,16 +215,28 @@ def expand(spec, fleet_counts=None):
                 }
                 w['racks'].append(rk)
                 cx = rk['position'][0] + rk['size'][0] / 2
-                for dz in (-ap_off, rk['size'][2] + ap_off):
-                    shelf_n += 1
-                    face = 90.0 if (rk['size'][2] / 2 - dz) > 0 else -90.0
-                    w['locations'].append({
-                        'id': 'SHELF-%s%04d' % (wh['id'], shelf_n), 'kind': 'SHELF',
-                        'zone': rk['zone'], 'floor': 1, 'rack_id': rid,
-                        'level_range': [1, lv],
-                        'access_point': [r2(cx), r2(rk['position'][2] + dz)],
-                        'face_deg': face,
-                    })
+                for side, dz in enumerate((-ap_off, rk['size'][2] + ap_off)):
+                    # 深位：一个"货道"按 n_depth 拆成多个库位，靠通道的 depth_index=0。
+                    # 只声明了 rack_type 才拆；否则仍然「每侧一个库位」。
+                    for di in range(n_depth):
+                        shelf_n += 1
+                        face = 90.0 if (rk['size'][2] / 2 - dz) > 0 else -90.0
+                        loc = {
+                            'id': 'SHELF-%s%04d' % (wh['id'], shelf_n), 'kind': 'SHELF',
+                            'zone': rk['zone'], 'floor': 1, 'rack_id': rid,
+                            'level_range': [1, lv],
+                            'access_point': [r2(cx), r2(rk['position'][2] + dz)],
+                            'face_deg': face,
+                        }
+                        if rt_spec:
+                            loc.update({
+                                'rack_type': rt,
+                                'access_mechanism': rt_spec['access_mechanism'],
+                                'cell_id': '%s-S%d' % (rid, side),
+                                'depth_index': di,
+                                'n_depth': n_depth,
+                            })
+                        w['locations'].append(loc)
         # ---- 月台（strip）+ 门元数据
         docks = wh.get('docks', {})
         if isinstance(docks, list):

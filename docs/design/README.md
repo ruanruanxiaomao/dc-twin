@@ -47,3 +47,4 @@ contradict the engine. They are recorded here because the *reasons* outlive the 
 | [REFACTOR-03](ADR-REFACTOR-03.md) | Analytic capacity layer **does not replace** the DES; they cross-validate at 15% | Assumption-level factors can never be quoted as findings |
 | [REFACTOR-04](ADR-REFACTOR-04.md) | The material's five calibre bugs are fixed **and** kept as `LEGACY` for negative controls | B1 capacity unit is pinned: `C_a` is composite cycles/h, so `in=out=C_a ⇒ ρ=1.0` |
 | [REFACTOR-05](ADR-REFACTOR-05.md) | Every new mechanism is config-gated off by default; one behaviour change = one refreeze | Racks (v4) and equipment (v5) must refreeze separately, never together |
+| [REFACTOR-06](ADR-REFACTOR-06.md) | Rack mechanics wired into the **pick** path only, behind an explicit `rack_type` | Putaway/aisle-open/shuttle times stay analytic; LIFO rack + FEFO is counted, not forbidden |
