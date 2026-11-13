@@ -4,6 +4,54 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] — R1 集装单元层（G3，默认关闭）
+
+Each SKU now has a handling unit: pallet or tote, footprint, gross weight, load rating,
+units per load and an identification method. The layer is wired into the engine but
+`enabled=false`, so the v3 golden is still byte-identical — that equality is the gate.
+
+### Added
+
+- **`sku_master.json` carries `unit_load`** for all 240 SKUs (180 pallets / 60 totes),
+  derived deterministically from existing fields (no rng, no clock): the pallet standard
+  is the lightest one that **fits the cell and carries the weight**, then units are
+  derated for cell height. `unit_load_counts` summarises the mix.
+- **Engine (config-gated)**: `UNITLOAD_HANDOFF`, `ID_FIRST_READ`, `ID_RESCAN` per receipt,
+  and `UNITLOAD_OVERLOAD_REJECTED` when a unit exceeds its rating — the reject keeps the
+  stock untouched and leaves an event instead of silently dropping the goods.
+  First-read vs rescan is decided by integer arithmetic on `(sku, log seq)`, **not** by
+  `rng`, so enabling the layer cannot shift the demand stream.
+- **`scripts/check_compatibility.py`**: per-SKU load / envelope / identification check,
+  in `dc run --scope inventory` (6 → 7 steps). Self-test injects overload, oversized
+  envelope and a sub-threshold read rate; all three must fail.
+
+### Fixed (found while wiring it)
+
+- **Cell geometry was copied from the layout tool (1.1 × 1.1 m)** while the project's
+  declared design pallet is EUR 1200 × 800. A 1.2 m pallet does not fit a 1.1 m opening,
+  so the envelope check reported 220 violations. Two configs were each plausible and
+  jointly absurd: the cell had been sized for an imaginary 1100 × 1100 pallet.
+  Cells are now derived from the design pallet (`0.9 × 1.3 m`) in both `capacity_spec`
+  and `rack_spec`, with `level:"assumption"` recorded in `meta.sources`.
+- **Carrier selection ignored geometry.** The first generator assigned pallets by
+  `idx % 3`; 4 SKUs then exceeded their assigned pallet's rack rating and 220 violated
+  the envelope. Selection now filters by "fits the cell (90° rotation allowed)" first,
+  then by capacity, and derates units when nothing fits.
+- **Envelope check assumed one orientation.** A pallet can be placed long-side into the
+  depth or across the beam; judging only `l → width` marked every EUR pallet oversized.
+- **Vertical clearance was double-counted**: the stack was capped at `clearH`, then the
+  "protrusion" allowance was added, so tall pallets always failed by 1 mm.
+
+### Verified
+
+| Gate | Evidence |
+|---|---|
+| UNITLOAD_OK | 240 SKUs: 0 overload, 0 envelope violations, max load utilisation 99.3% |
+| OVERLOAD_NEG | injected 1500 kg vs 1000 kg rating → rejected, stock unchanged, event emitted |
+| ID_READ_OK | enabled run: first-read share ≥ 0.90 of ~4% configured miss rate; counters in `sim_state` |
+| DEFAULT_OFF | `unit_load_spec.enabled=false` → event stream byte-identical to the v3 golden |
+| DETERMINISM | same seed → identical `UNITLOAD_*` / `ID_*` stream |
+
 ## [Unreleased] — R0 资料驱动重构：口径护栏（不改行为）
 
 Phase R0 of the material-driven refactor (plan v1.2 §11). Nothing is wired into the

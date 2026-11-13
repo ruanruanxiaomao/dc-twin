@@ -94,6 +94,7 @@ GAME_CHAIN = [
 #: 库存层的门（P6a §9）。与 game/full 都分开：它跑的是**实验**（压库存、调补货点），
 #: 不是产线；混进 full 会让"交付链"带上实验参数，反而说不清产物是哪一套。
 INVENTORY_CHAIN = [
+    ("scripts/check_compatibility.py", ("--quiet",), "python"),  # R1 门 UNITLOAD_OK（承载/外廓/标识）
     ("scripts/check_inventory.py", ("--quiet",), "python"),   # 门 1 STOCK_OK（含报废）
     ("scripts/check_reorder.py", (), "python"),               # 门 2 REORDER_OK（双向）
     ("scripts/check_pickface.py", ("--quiet",), "python"),    # 门 4 PICKFACE_OK

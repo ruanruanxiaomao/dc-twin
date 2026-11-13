@@ -141,7 +141,11 @@ def build_manifest() -> dict:
         if not p.is_file() or p.name == "manifest.json" or p.name.endswith(".meta.json"):
             continue
         rel_parts = p.relative_to(OUT).parts
-        if ("frames" in rel_parts or p.suffix in (".blend1", ".blend2")
+        # out/exp/ 是**压力实验**产物（check_reorder 缩库存/加压需求跑出来的），
+        # 数字是故意失真的。把它算进交付清单，等于让"实验数据"混进"交付数据"，
+        # 审阅时根本分不清哪份是产线跑的。与 .gitignore 的 out/exp/ 同口径。
+        if ("exp" in rel_parts
+                or "frames" in rel_parts or p.suffix in (".blend1", ".blend2")
                 or p.name in ("manifest_check.json", "junit.xml",
                               "validate_data_check_report.json")):
             continue    # intermediate frames / backups / verifier's own output

@@ -48,7 +48,8 @@ def art_count():
         if not p.is_file() or p.name == 'manifest.json' or p.name.endswith('.meta.json'):
             continue
         parts = p.relative_to(root).parts
-        if ('frames' in parts or p.suffix in ('.blend1', '.blend2')
+        # 与 manifest 同口径：实验产物（out/exp/）不进交付清单
+        if ('exp' in parts or 'frames' in parts or p.suffix in ('.blend1', '.blend2')
                 or p.name in ('manifest_check.json', 'junit.xml',
                               'validate_data_check_report.json')):
             continue
@@ -63,12 +64,25 @@ def refactor_facts():
     进了状态表就会被当成已完成（这个项目已经因此吃过亏）。
     """
     out = {"rack_types": 0, "equipment_types": 0, "specs": 0, "schemas": 0,
-           "gate_ok": None, "stage": "R0"}
+           "gate_ok": None, "stage": "R1", "ul_pallet": 0, "ul_tote": 0,
+           "ul_skus": 0, "ul_max_util": None}
     try:
         rack = json.load(open(os.path.join(CONFIG, 'rack_spec.json'), encoding='utf-8'))
         out["rack_types"] = len(rack.get('types') or {})
         eq = json.load(open(os.path.join(CONFIG, 'equipment_spec.json'), encoding='utf-8'))
         out["equipment_types"] = len(eq.get('types') or {})
+    except Exception:                       # noqa: BLE001
+        pass
+    try:
+        m = json.load(open(os.path.join(DATA, 'sku_master.json'), encoding='utf-8'))
+        c = m.get('unit_load_counts') or {}
+        out["ul_pallet"] = c.get('pallet', 0)
+        out["ul_tote"] = c.get('tote', 0)
+        out["ul_skus"] = sum(1 for x in m.get('skus', []) if x.get('unit_load'))
+        utils = [x['unit_load']['gross_weight_kg'] / x['unit_load']['rating_kg']
+                 for x in m.get('skus', [])
+                 if x.get('unit_load') and x['unit_load'].get('rating_kg')]
+        out["ul_max_util"] = round(max(utils), 4) if utils else None
     except Exception:                       # noqa: BLE001
         pass
     for name in ("unit_load_spec", "rack_spec", "equipment_spec", "capacity_spec"):
@@ -381,11 +395,14 @@ def main():
             inv.get('stockout', 'n/a'), inv.get('expired_units', 'n/a'),
             inv.get('expired_value', 'n/a'), inv.get('open_lots', 'n/a'),
             inv.get('fefo_violations', 'n/a'))),
-        ('重构层（R0）', '四份新 spec（%s/4）+ schema（%s/4）：货架 %s 类（按存取机理）、设备 %s 类；'
-                       '解析库容层 `capacity_model.py` 已落地但**未接主链**；'
-                       '资料 5 处口径 bug（B1–B5）修正并以 LEGACY 双版做负对照，'
-                       '门 `scripts/check_capacity_spec.py`（已进验收链）'
-         % (ref['specs'], ref['schemas'], ref['rack_types'], ref['equipment_types'])),
+        ('重构层（R0–R1）', '四份 spec（%s/4）+ schema（%s/4）：货架 %s 类（按存取机理）、设备 %s 类；'
+                          '集装单元 %s 个 SKU（托盘 %s / 料箱 %s，最高载荷利用率 %s%%）；'
+                          '`capacity_model.py` 与单元层均已落地但**默认关闭**（引擎未接主链），'
+                          '资料 5 处口径 bug（B1–B5）修正并以 LEGACY 双版做负对照；'
+                          '门：`check_capacity_spec.py`（R0）+ `check_compatibility.py`（R1，均在验收/库存链）'
+         % (ref['specs'], ref['schemas'], ref['rack_types'], ref['equipment_types'],
+            ref['ul_skus'], ref['ul_pallet'], ref['ul_tote'],
+            round((ref['ul_max_util'] or 0) * 100, 1))),
         ('分档验收', 'data tier %s/%s PASS；pytest -m "not blender" 与 CI 矩阵见 '
                      '`.github/workflows/ci.yml`'
          % (vdata.get('passed'), vdata.get('total'))),
@@ -435,10 +452,10 @@ def main():
         '批次策略（FEFO↔FIFO）实测只影响 3–5 件报废：完成单量被车队运力压在约 40 单/小时，'
         '而库位有 392 个，订单很少重复打到同一个多批次库位——这是需求模型的性质，不是实现问题。'
         '`cargo_state.json` 依旧是订单级货物状态，不是库存账，两者不可混用。',
-        '- **库容/货架/设备仍是「配置就绪、引擎未接」**：`rack_spec`（9 类）/`equipment_spec`（10 类）/'
-        '`unit_load_spec`/`capacity_spec` 四份 spec 与 `capacity_model.py` 已就位，但'
-        '`spec_layout` 仍只展开一种几何同构货架，`Robot` 仍只读 `fleet_spec.models[0]`，'
-        '解析库容层也**没有**进 tick 循环或关卡判定——这些是 R1–R4 的事，现在还没有。',
+        '- **货架/设备仍「配置就绪、引擎未接」**：`spec_layout` 仍只展开一种几何同构货架，'
+        '`Robot` 仍只读 `fleet_spec.models[0]`，解析库容层**没有**进 tick 循环或关卡判定；'
+        '集装单元层已接引擎但 `enabled=false`，关闭态与 v3 基准逐字节一致——'
+        '货架/设备/库容的接线是 R2–R4，现在还没有。',
         '- **订单仍是合成**：SKU 周转率为 Zipf 合成，`orders_per_hour=45` 仍是 placeholder，'
         '不是真实订单分布。',
         '- **多单已支持、多腿未支持**：tick 层一车可背多单（实测 `max_orders_per_robot=%s`），'

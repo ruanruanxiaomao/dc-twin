@@ -5,12 +5,12 @@
 
 | 指标 | 当前值 |
 |---|---|
-| 生成时间 | 2026-11-13 13:45:08 |
+| 生成时间 | 2026-11-13 15:05:50 |
 | Blender | 5.2.3 LTS |
 | 布局来源 | config/layout_spec.json → spec_layout.py（L1–L13 PASS，issues=0 warnings=148；38 扇门） |
 | AP 互斥 | 148 对（WARN，两 AP <2R 不能同时占用）；预约表复核同时占用 0 次；加宽变体互斥 29 对 |
 | 四层配置 | layout_spec / fleet_spec / demand_spec / 8 个 scenarios + 13 份 schema；4 个布局 spec（当前 / areas / f4 / wide）；本次审计 4 个变体，均 PASS |
-| 场景/KPI | 8 个冻结场景（config/scenarios）× 307 次运行；解析层 25 项 KPI + tick 层 62 项 KPI（去重 77 项），每项带 definition/formula/source |
+| 场景/KPI | 8 个冻结场景（config/scenarios）× 316 次运行；解析层 25 项 KPI + tick 层 62 项 KPI（去重 77 项），每项带 definition/formula/source |
 | 布局 | 4 仓 / 196 货架 / 441 库位（392 SHELF + 21 HOME）/ 10 月台 / 6 站 / 21 AGV |
 | 布局审计 | issues=0 warnings=0 verdict=PASS |
 | 功能区 | 21 个（物理 3 / 逻辑 18）；种类 BATTERY×1/EMPTY_CONTAINER×1/PACKING×2/PICK_FACE×4/QA×1/RECEIVING×1/REPLENISH×1/RETURNS×1/SORTING×1/STAGING_IN×4/STAGING_OUT×4；见 data/areas.json |
@@ -32,10 +32,10 @@
 | 车队/交通复核 | 状态迁移 147 次/非法 0；最低电量 53.986%；预约表顶点 0 / 边交换 0 |
 | 数据适配/复现 | CSV 24 行 schema=PASS；全新空目录复现 10/10 步、11 份 JSON 逐字节一致 |
 | 验收 | 40/40 PASS（A1–A40）；负测试 17/17（3 个测试文件） |
-| 开源交付层 | dc CLI 7 命令 / 47 步链（data 14 · scenarios 24 · full 47；game 3 步＝逐字节基准 + 游戏测试 + 浏览器点击流）；输出契约 sidecar 44 份 / manifest 97 个产物；静态 Demo 8 个场景 · 21 台车 |
+| 开源交付层 | dc CLI 7 命令 / 47 步链（data 14 · scenarios 24 · full 47；game 3 步＝逐字节基准 + 游戏测试 + 浏览器点击流）；输出契约 sidecar 44 份 / manifest 86 个产物；静态 Demo 8 个场景 · 21 台车 |
 | 游戏层 | 关卡 5 个 / 目标 15 条 / 8 类玩家命令（已实现 8，占位 BUILD_STATION、MANUAL_ASSIGN）/ 存档槽 1 个 / ADR 10 篇；批跑产物逐字节不变见 `scripts/step_baseline.py` |
 | 库存层 | SKU 240 / 库位 392（拣选面 24）/ 期初 10512 件（占用 ¥92696.06）/ 期初批次 796；最近一次 baseline：补货触发 0 次、缺货 0 次、过期报废 1657.0 件（¥14655.28）、期末未结批次 689、FEFO 违规 0；守恒/补货/批次/效期四门见 `python -m dc_twin run --scope inventory` |
-| 重构层（R0） | 四份新 spec（4/4）+ schema（4/4）：货架 9 类（按存取机理）、设备 10 类；解析库容层 `capacity_model.py` 已落地但**未接主链**；资料 5 处口径 bug（B1–B5）修正并以 LEGACY 双版做负对照，门 `scripts/check_capacity_spec.py`（已进验收链） |
+| 重构层（R0–R1） | 四份 spec（4/4）+ schema（4/4）：货架 9 类（按存取机理）、设备 10 类；集装单元 240 个 SKU（托盘 180 / 料箱 60，最高载荷利用率 99.3%）；`capacity_model.py` 与单元层均已落地但**默认关闭**（引擎未接主链），资料 5 处口径 bug（B1–B5）修正并以 LEGACY 双版做负对照；门：`check_capacity_spec.py`（R0）+ `check_compatibility.py`（R1，均在验收/库存链） |
 | 分档验收 | data tier 12/12 PASS；pytest -m "not blender" 与 CI 矩阵见 `.github/workflows/ci.yml` |
 
 ## 仍保留的边界（如实声明）
@@ -46,7 +46,7 @@
 - **功能区三层已打通**：21 个功能区（物理 3 / 逻辑 18）见 `data/areas.json`；tick 层把 PICK_FACE 当拣选池、把 process_spec 工位当服务台（服务时长采样 + 并行位 + FIFO）；3D 层已按 `areas.json` 画地面色块与中文名称牌（物理区 3 块真实占位，逻辑区 18 个挂靠标牌）。仍未做：功能区不参与导航栅格（它不该改变可通行性），也没有按功能区做人员排班。
 - **瓶颈在巷道通行，不在工位**：实测工位利用率 约 18%，把并行位从 4 收到 1 会出现排队（等待 70.7 s）但吞吐反而从 40 升到 62/h —— 因为放开容量后同时上路的车更多、巷道更堵（累计受阻 36004 s → 26674 s）。见 `scripts/check_station.py`。
 - **库存层做到 P6b**：已有 (SKU × 库位) 账、安全库存/补货点、缺货与持有成本，以及批次 / 效期 / FEFO 与到期报废；**仍缺多仓调拨与真实 WMS 对接**。批次策略（FEFO↔FIFO）实测只影响 3–5 件报废：完成单量被车队运力压在约 40 单/小时，而库位有 392 个，订单很少重复打到同一个多批次库位——这是需求模型的性质，不是实现问题。`cargo_state.json` 依旧是订单级货物状态，不是库存账，两者不可混用。
-- **库容/货架/设备仍是「配置就绪、引擎未接」**：`rack_spec`（9 类）/`equipment_spec`（10 类）/`unit_load_spec`/`capacity_spec` 四份 spec 与 `capacity_model.py` 已就位，但`spec_layout` 仍只展开一种几何同构货架，`Robot` 仍只读 `fleet_spec.models[0]`，解析库容层也**没有**进 tick 循环或关卡判定——这些是 R1–R4 的事，现在还没有。
+- **货架/设备仍「配置就绪、引擎未接」**：`spec_layout` 仍只展开一种几何同构货架，`Robot` 仍只读 `fleet_spec.models[0]`，解析库容层**没有**进 tick 循环或关卡判定；集装单元层已接引擎但 `enabled=false`，关闭态与 v3 基准逐字节一致——货架/设备/库容的接线是 R2–R4，现在还没有。
 - **订单仍是合成**：SKU 周转率为 Zipf 合成，`orders_per_hour=45` 仍是 placeholder，不是真实订单分布。
 - **多单已支持、多腿未支持**：tick 层一车可背多单（实测 `max_orders_per_robot=5`），但订单仍是单行单腿，没有订单头/行拆分与合单。
 - **货物为订单级箱体**：一件货 = 一张单，未模拟拆箱/托盘层级/批次/叉臂升降。

@@ -50,6 +50,8 @@ EVENT_TYPES = (
     # P6a 库存层（ADR-GAME-09）：库位级 SKU 账。这些事件必须真写进
     # sim_events.jsonl，否则 refreeze 的 `--check=v1` 不会变红，归因就无从谈起。
     "STOCK_DECREMENT", "STOCK_RECEIPT", "STOCK_REPLENISH_ARRIVED", "STOCKOUT",
+    # R1 集装单元层（默认关闭；只有 unit_load_spec.enabled 时才可能出现）
+    "UNITLOAD_HANDOFF", "UNITLOAD_OVERLOAD_REJECTED", "ID_FIRST_READ", "ID_RESCAN",
     "REORDER_TRIGGERED", "PICKFACE_REFILL", "HOLDING_ACCRUED",
     "RUN_SETTLED",
 )
@@ -509,6 +511,9 @@ class Simulation:
     #: 验证"效期开关"用：覆写 inventory_spec（只给测试/实验，产线走 config 文件）。
     #: 和 station_slots_override 同一套路——可证伪必须能构造反例，否则只能读代码相信。
     inventory_spec_override = None
+    #: 验证集装单元层开关用（R1）。与 inventory_spec_override 同套路：
+    #: 只有能构造"开/关"两种局面，才谈得上证明关闭态字节不变。
+    unit_load_override = None
     dock_slots_override = None          # 同上，但只改月台门（工位不动）
     # 验证"跳 tick 分支真的在起作用"用：置 False 时关闭空闲跳 tick。
     # 这不是给人用的开关，是给 tests/test_step_gate.py 证明 STEP_OK 门会失败用的
@@ -681,6 +686,14 @@ class Simulation:
         self.lot_expired_units = 0.0
         self.lot_expired_value = 0.0
         self.fefo_violations = 0
+        # ---- R1 集装单元层（默认关闭）。关闭时这些字段恒为 0，且不进事件流/状态。
+        self.ul_enabled = False
+        self.ul_by_sku = {}
+        self.ul_read_min = 1.0
+        self.ul_handoff_n = 0
+        self.ul_overload_n = 0
+        self.ul_first_read_n = 0
+        self.ul_rescan_n = 0
 
         sp = CONFIG / "inventory_spec.json"
         spec_override = Simulation.inventory_spec_override
@@ -704,6 +717,19 @@ class Simulation:
                         for s, v in slotting["by_sku"].items()}
         self.inv_cost = {s["id"]: float(s["unit_cost"]) for s in master["skus"]}
         self.inv_shelf_life = {s["id"]: float(s.get("shelf_life_s") or 0.0) for s in master["skus"]}
+
+        # ---- R1 集装单元层（G3）。enabled=false 或缺文件 → 完全跳过，
+        # 连一个事件都不发，这是"默认字节不变"的实现方式（不是注释掉代码）。
+        ul_override = Simulation.unit_load_override
+        ul_path = CONFIG / "unit_load_spec.json"
+        ul_spec = ul_override if ul_override is not None else (
+            jload(ul_path) if ul_path.exists() else None)
+        self.ul_enabled = bool(ul_spec and ul_spec.get("enabled"))
+        if self.ul_enabled:
+            self.ul_read_min = float(ul_spec["identification"]["gate_read_rate_min"])
+            for m in master["skus"]:
+                if m.get("unit_load"):
+                    self.ul_by_sku[m["id"]] = m["unit_load"]
         vel = {s["id"]: float(s.get("velocity") or 0.0) for s in master["skus"]}
         for sku, rows in initial["stock"].items():
             self.inv[sku] = {loc: float(q) for loc, q in rows.items()}
@@ -980,12 +1006,56 @@ class Simulation:
                 raise ValueError("订单 %s 的交货位 %r 没有库存映射（未知即抛错）"
                                  % (order.get("order_id"), dst))
             sku_dst = info2["sku"]
+            # R1：超载的单元**不许上架**。B4 说的就是"承载字段存而不用"，
+            # 这里是真的用它拦一次——拒收要留事件，不许静默丢货。
+            if self.ul_enabled:
+                ul = self.ul_by_sku.get(sku_dst)
+                if ul and ul.get("overload"):
+                    self.ul_overload_n += 1
+                    self.log.emit(self.t, "UNITLOAD_OVERLOAD_REJECTED", sku=sku_dst,
+                                  location=dst, order_id=order.get("order_id"),
+                                  gross_kg=ul.get("gross_weight_kg"),
+                                  limit_kg=ul.get("rating_kg"),
+                                  load=ul.get("load"))
+                    return 0.0, False
             etype = "STOCK_REPLENISH_ARRIVED" if typ == "REPLENISH" else "STOCK_RECEIPT"
             self._inv_inc(sku_dst, dst, delivered, order.get("order_id"),
                           typ.lower(), etype)
+            if self.ul_enabled:
+                self._ul_after_receipt(sku_dst, dst, delivered,
+                                       order.get("order_id"))
         if dec and sku_src:
             self._inv_reorder_check(sku_src, order["pick_loc"])
         return delivered, True
+
+    def _ul_after_receipt(self, sku, loc, qty, order_id):
+        """收货后按【整托】计数并过识别门（R1，默认关闭）。
+
+        批次数按 `units_per_load` 向上取整：半托也算一托（真实作业不会拆到半托还
+        重新贴标）。首读/复扫**用确定性算术决定，不消耗 rng**——多抽一次随机数
+        就会改掉后续需求流，那样"开/关单元层"的差异就不再可归因。
+        """
+        ul = self.ul_by_sku.get(sku) or {}
+        units = max(1, int(ul.get("units_per_load") or 1))
+        loads = max(0, int(math.ceil(float(qty) / units)))
+        if loads <= 0:
+            return
+        self.ul_handoff_n += loads
+        self.log.emit(self.t, "UNITLOAD_HANDOFF", sku=sku, location=loc,
+                      order_id=order_id, loads=loads, units_per_load=units,
+                      load=ul.get("load"), gross_kg=ul.get("gross_weight_kg"))
+        rate_miss = int(round((1.0 - self.ul_read_min) * 1000))
+        sku_no = int(str(sku).split("-")[-1])
+        for k in range(loads):
+            h = (sku_no * 131 + self.log.seq * 17 + k * 7) % 1000
+            if h < rate_miss:
+                self.ul_rescan_n += 1
+                self.log.emit(self.t, "ID_RESCAN", sku=sku, location=loc,
+                              load_index=k, order_id=order_id)
+            else:
+                self.ul_first_read_n += 1
+                self.log.emit(self.t, "ID_FIRST_READ", sku=sku, location=loc,
+                              load_index=k, order_id=order_id)
 
     def _inv_make_order(self, oid, src, dst, qty, typ="TRANSFER", internal=True):
         """造一张内部补货单。**不碰 rng**：多抽一次随机数会打乱后续需求流。"""
@@ -2529,6 +2599,23 @@ class Simulation:
                 "note": "measured from sim_events.jsonl; analytic M/M/c KPIs are separate"}
 
     def _state(self):
+        d = self._state_payload()
+        # R1：集装单元统计只在启用时出现。加一个恒为 0 的键也会改 sim_state 字节，
+        # "默认字节不变"就会被一个装饰性字段破掉。
+        if self.ul_enabled:
+            d["unit_load"] = {
+                "enabled": True,
+                "handoffs": self.ul_handoff_n,
+                "overload_rejected": self.ul_overload_n,
+                "id_first_read": self.ul_first_read_n,
+                "id_rescan": self.ul_rescan_n,
+                "read_rate_observed": (round(self.ul_first_read_n /
+                                             (self.ul_first_read_n + self.ul_rescan_n), 6)
+                                       if (self.ul_first_read_n + self.ul_rescan_n) else None),
+            }
+        return d
+
+    def _state_payload(self):
         return {"schema_version": "1.0", "kind": "sim_state", "scenario": self.sc["id"],
                 # horizon 进状态：check_expiry 要判"到期时刻是否落在窗口内"，
                 # 不能靠读配置猜——场景可以覆盖 horizon，读配置会判错一整批。
@@ -2606,6 +2693,11 @@ class Simulation:
                          "units_req": self.inv_units_req},
             "reorder_factor": self.reorder_factor,
             "reorder_factor_by_sku": dict(self.reorder_factor_by_sku),
+            **({"unit_load": {"handoffs": self.ul_handoff_n,
+                              "overload_rejected": self.ul_overload_n,
+                              "id_first_read": self.ul_first_read_n,
+                              "id_rescan": self.ul_rescan_n}}
+               if self.ul_enabled else {}),
         }
 
     def snapshot(self):
@@ -2813,6 +2905,11 @@ class Simulation:
         self.inv_units_req = float(c.get("units_req", 0.0))
         self.reorder_factor = float(inv.get("reorder_factor", 1.0))
         self.reorder_factor_by_sku = dict(inv.get("reorder_factor_by_sku") or {})
+        ulc = inv.get("unit_load") or {}
+        self.ul_handoff_n = int(ulc.get("handoffs", 0))
+        self.ul_overload_n = int(ulc.get("overload_rejected", 0))
+        self.ul_first_read_n = int(ulc.get("id_first_read", 0))
+        self.ul_rescan_n = int(ulc.get("id_rescan", 0))
         if self.inv_enabled:
             self._inv_reconcile()
 

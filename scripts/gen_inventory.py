@@ -32,6 +32,8 @@ ROOT = Path(__file__).resolve().parent.parent
 CONFIG, DATA, OUT = ROOT / "config", ROOT / "data", ROOT / "out"
 
 SEED = 20261106          # 与 data/config.json 同源，标明这些数不是随手编的
+#: 载具塞进货格要留的操作余量（mm）。与 check_compatibility 的异常突出余量同量级。
+FIT_MARGIN_MM = 50
 SCHEMA_VERSION = "1.0"
 
 
@@ -61,6 +63,112 @@ def pack_size(abc):
     return {"A": 12, "B": 6, "C": 1}.get(abc, 1)
 
 
+def unit_load_of(sku, ul_spec, clear_h_mm, clear_cell_mm=None):
+    """给一个 SKU 派生它的集装单元（R1 / G3）。
+
+    **全部由既有字段确定性推出，不消耗随机流、不读时钟。**
+
+    选载具的顺序是有讲究的：先按**载重**挑（而不是按序号轮流），
+    再按**货格净高**减载。第一版按 `idx % 3` 轮流派托盘，结果 4 个 SKU
+    的毛重超过了所派托盘的货架载——那不是"数据不干净"，是选型逻辑错了：
+    真实规划里载具是按载荷需求挑的，不是轮流发的。
+
+    所以：
+      1. 按 pack_size 算毛重，从**能承受**的标准里挑最轻的那个（载重够用即可，
+         不必一律上最重的托盘）；
+      2. 都不够 → 用最强的那个并减载，记 `derated_for_weight`；
+      3. 再按货格净高减载，记 `stack_limited`；
+      4. 减到 1 件仍然超重 → `overload=true`，交给引擎拒绝（不静默放行）。
+
+    外廓（h_mm）是**由体积/底面积估算**的，不是实测尺寸，字段带 level 标 assumption。
+    """
+    clear_cell_mm = clear_cell_mm or {"w": 900, "d": 1300}
+    idx = int(str(sku["sku"]).split("-")[-1])
+    abc = sku.get("abc", "C")
+    kind = "pallet" if abc in ("A", "B") else "tote"
+    pack = pack_size(abc)
+    piece_w = float(sku.get("weight_kg") or 0.0)
+    piece_v = float(sku.get("cube_m3") or 0.0)
+    need = piece_w * pack
+
+    # 货格净尺寸（mm）：载具**装得进去**是硬前提，载荷够用只是其次。
+    # 第一版只按载荷挑，结果 1200 长的 EUR 托盘塞进 1100 的格口——外廓校验当场报 220 处，
+    # 那不是数据不干净，是选型没考虑几何。允许 90° 旋转（托盘可以横放）。
+    cell_w = float(clear_cell_mm.get("w", 900)) - FIT_MARGIN_MM
+    cell_d = float(clear_cell_mm.get("d", 1300)) - FIT_MARGIN_MM
+
+    def fits(l, w):
+        return ((l <= cell_w and w <= cell_d) or (w <= cell_w and l <= cell_d))
+
+    if kind == "pallet":
+        # 先过滤"装得进"，再按载重从低到高（够用即停，不必全上最重的托盘）
+        pool = [(n, p) for n, p in ul_spec["pallet_standards"].items()
+                if fits(float(p["l"]), float(p["w"]))]
+        cands = sorted(pool or ul_spec["pallet_standards"].items(),
+                       key=lambda kv: (float(kv[1]["rack_kg"]), kv[0]))
+        pick = None
+        for name, p in cands:
+            if need + float(p["tare_kg"]) <= float(p["rack_kg"]):
+                pick = (name, p)
+                break
+        if pick is None:
+            pick = cands[-1]
+    else:
+        pool = [(n, t) for n, t in ul_spec["tote_classes"].items()
+                if fits(float(t["l"]), float(t["w"]))]
+        cands = sorted(pool or ul_spec["tote_classes"].items(),
+                       key=lambda kv: (float(kv[1]["dynamic_kg"]), kv[0]))
+        pick = None
+        for name, t in cands:
+            if need + float(t["tare_kg"]) <= float(t["dynamic_kg"]):
+                pick = (name, t)
+                break
+        if pick is None:
+            pick = cands[-1]
+
+    load_name, spec_row = pick
+    l, w = int(spec_row["l"]), int(spec_row["w"])
+    base_h = int(spec_row.get("h", 0))
+    tare = float(spec_row["tare_kg"])
+    rating = float(spec_row["rack_kg"] if kind == "pallet" else spec_row["dynamic_kg"])
+
+    # 1) 载重减载
+    units = pack
+    derated_w = False
+    while units > 1 and piece_w * units + tare > rating:
+        units -= 1
+        derated_w = True
+    overload = piece_w * units + tare > rating + 1e-9
+
+    # 2) 净高减载
+    # 净高要留同样的操作余量，否则堆高正好顶到 clearH，再算"异常突出"就永远超 1mm
+    usable_mm = max(50.0, float(clear_h_mm) - base_h - FIT_MARGIN_MM)
+    footprint_mm2 = max(1.0, float((l - 100) * (w - 100)))
+    height = (piece_v * units) * 1e9 / footprint_mm2 if piece_v else 0.0
+    limited = False
+    while units > 1 and height > usable_mm:
+        units -= 1
+        limited = True
+        height = (piece_v * units) * 1e9 / footprint_mm2 if piece_v else 0.0
+    height = min(height, usable_mm)
+
+    return {
+        "kind": kind,
+        "load": load_name,
+        "l_mm": l, "w_mm": w,
+        "h_mm": int(round(base_h + height)),
+        "units_per_load": units,
+        "gross_weight_kg": round(piece_w * units + tare, 2),
+        "rating_kg": rating,
+        "stack_limited": limited,
+        "derated_for_weight": derated_w,
+        "overload": overload,
+        "id_method": "rfid" if idx % 5 == 0 else "barcode",
+        "sscc": "0%017d" % idx,
+        "level": "assumption",
+    }
+
+
 def lot_split(qty, n_lots):
     """把 qty 拆成 n_lots 份，余数给前几份。**整数除法 + 固定顺序**，保证确定性。"""
     base, rem = divmod(int(qty), int(n_lots))
@@ -84,6 +192,18 @@ def build():
     skus = jload(DATA / "skus.json")
     slotting = jload(DATA / "slotting.json")
     spec = jload(CONFIG / "inventory_spec.json")
+    # R1：集装单元层。缺文件就退回"只有数量没有载具"的旧形态（R0 之前的行为），
+    # 这样 R1 的产物可以独立于 R2/R3 落地，也不会让老仓库跑不起来。
+    ul_path = CONFIG / "unit_load_spec.json"
+    rack_path = CONFIG / "rack_spec.json"
+    ul_spec = jload(ul_path) if ul_path.exists() else None
+    rack_spec = jload(rack_path) if rack_path.exists() else None
+    clear_h_mm, clear_cell_mm = 1300, {"w": 900, "d": 1300}
+    if rack_spec:
+        g = rack_spec["defaults"]["geometry"]
+        clear_h_mm = int(round(float(g["clearH"]) * 1000))
+        clear_cell_mm = {"w": int(round(float(g["clearW"]) * 1000)),
+                         "d": int(round(float(g["clearD"]) * 1000))}
     # 刻意不读 data/areas.json：拣选面锚点用 layout 里的 OUTBOUND 月台即可，
     # 而 areas.json 由 spec_areas.py 生成、不在洁净室数据链里。读一个用不到的
     # 上游产物，会让"全新空目录复现"在第 5 步就挂（第一版就是这么挂的）。
@@ -262,8 +382,20 @@ def build():
             "pack_size": pack_size(sku_by_id[s].get("abc", "C")),
             "storage": "SHELF",
             "shelf_life_s": shelf_by_class.get(sku_by_id[s].get("abc", "C"), 0.0),
+            # R1：集装单元。ul_spec 缺失时给 None（引擎据此判断"这局没有单元层"）
+            **({"unit_load": unit_load_of(sku_by_id[s], ul_spec, clear_h_mm)}
+               if ul_spec else {}),
         } for s in order_skus],
     }
+    if ul_spec:
+        kinds = [m["unit_load"]["kind"] for m in master["skus"]]
+        master["unit_load_counts"] = {
+            "pallet": kinds.count("pallet"), "tote": kinds.count("tote"),
+            "stack_limited": sum(1 for m in master["skus"]
+                                 if m["unit_load"]["stack_limited"]),
+            "rfid": sum(1 for m in master["skus"]
+                        if m["unit_load"]["id_method"] == "rfid"),
+        }
 
     # ---- 产出 2：库位 → SKU + 角色（**每个 SHELF 库位都必须有 SKU**）
     slot_rows = []

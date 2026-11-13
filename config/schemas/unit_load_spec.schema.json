@@ -2,12 +2,13 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "unit_load_spec (G3)",
   "type": "object",
-  "required": ["schema_version", "kind", "module_mm", "pallet_standards", "tote_classes",
-               "load_rating_order", "identification"],
+  "required": ["schema_version", "kind", "enabled", "module_mm", "pallet_standards",
+               "tote_classes", "load_rating_order", "identification"],
   "additionalProperties": false,
   "properties": {
     "schema_version": {"const": "1.0"},
     "kind": {"const": "unit_load_spec"},
+    "enabled": {"type": "boolean", "description": "默认关闭：关闭时不进事件流，金标准字节不变"},
     "note": {"type": "string"},
     "meta": {"type": "object"},
     "module_mm": {
