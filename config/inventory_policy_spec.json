@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "kind": "inventory_policy_spec",
+  "note": "R5 库存策略参数。enabled=false（默认）时仿真完全不受影响；开启需同时把 inventory_spec.reorder.policy 改成 rop_ss，缺一报错。数值为演示值，与 inventory_spec 的 placeholder 同口径。",
+  "enabled": false,
+  "eoq": {
+    "annual_demand": 12500,
+    "order_cost": 180,
+    "holding_cost_per_unit_year": 2.16
+  },
+  "rop": {
+    "demand_per_hour": 12.5,
+    "lead_time_h": 0.5,
+    "service_level": 0.95,
+    "demand_cv": 0.3
+  },
+  "newsvendor": {
+    "cost": 8.0,
+    "price": 18.0,
+    "salvage": 2.0,
+    "dist": {
+      "kind": "normal",
+      "mu": 100,
+      "sigma": 25
+    }
+  },
+  "gmroi": {
+    "gross_margin": 42.0,
+    "avg_inventory_cost": 30.0
+  }
+}

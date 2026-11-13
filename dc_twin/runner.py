@@ -118,6 +118,7 @@ REFACTOR_CHAIN = [
     ("scripts/check_assembly.py", ("--quiet",), "python"),           # R8.9 草稿→校验→显式提交（D12）
     ("scripts/check_solid_registry.py", ("--quiet",), "python"),      # R8.11 实体登记册覆盖（防"加一条轴漏一类实体"）
     ("scripts/check_typed_variant.py", ("--quiet",), "python"),       # D11-A 分型进关卡场景、出厂冻结
+    ("scripts/check_inventory_policy.py", ("--quiet",), "python"),    # R5 库存策略闭式对账（EOQ/ROP+SS/报童/GMROI）
 ]
 
 SCOPES = {

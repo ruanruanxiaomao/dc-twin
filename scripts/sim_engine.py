@@ -800,11 +800,27 @@ class Simulation:
                         if k in ("OUTBOUND", "PICK", "TRANSFER", "REPLENISH"))
         total_w = sum(mix.values()) or 1.0
         out_share = dec_share / total_w
+        # R5（默认关）：`reorder.policy = "rop_ss"` 时改用 ROP+SS 闭式解。
+        # 开关有两个，缺一即报错——**不静默降级**：声明了 rop_ss 却忘了 enabled，
+        # 结果跑出的是旧阈值，这种"看起来生效"比报错危险得多。
+        policy = str(spec["reorder"].get("policy", "reorder_point"))
         safety_f = float(spec["reorder"]["safety_stock_factor"])
         rp_f = float(spec["reorder"]["reorder_point_factor"])
-        for sku in sorted(self.inv):
-            exp_h = self.per_hour * out_share * vel.get(sku, 0.0)
-            self.inv_reorder[sku] = max(1.0, safety_f * exp_h + rp_f * exp_h)
+        if policy == "rop_ss":
+            import inventory_policy as ipol
+            ppath = CONFIG / "inventory_policy_spec.json"
+            pspec = json.loads(ppath.read_text(encoding="utf-8")) if ppath.exists() else {}
+            rp_conf = ipol.rop_settings(spec["reorder"], pspec)
+            for sku in sorted(self.inv):
+                exp_h = self.per_hour * out_share * vel.get(sku, 0.0)
+                self.inv_reorder[sku] = ipol.rop_from_policy(
+                    exp_h, rp_conf.get("lead_time_h"), rp_conf.get("service_level"),
+                    sigma_per_hour=rp_conf.get("sigma_per_hour"),
+                    demand_cv=rp_conf.get("demand_cv"))["rop"]
+        else:
+            for sku in sorted(self.inv):
+                exp_h = self.per_hour * out_share * vel.get(sku, 0.0)
+                self.inv_reorder[sku] = max(1.0, safety_f * exp_h + rp_f * exp_h)
         self.inv_enabled = True
         return True
 

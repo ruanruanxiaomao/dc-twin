@@ -87,6 +87,8 @@ def refactor_facts():
            "reg_l2l3": 0, "reg_nav": 0, "reg_phys": 0, "reg_logic": 0,
            "typed_gate": None, "typed_types": 0, "typed_styles": 0,
            "typed_loc": 0, "typed_glb": 0, "typed_groups": 0,
+           "pol_gate": None, "pol_eoq": 0, "pol_rop": 0, "pol_ss": 0,
+           "pol_q": 0, "pol_gmroi": 0,
            "asm_gate": None, "asm_token": None, "asm_areas": 0}
     try:
         rack = json.load(open(os.path.join(CONFIG, 'rack_spec.json'), encoding='utf-8'))
@@ -247,6 +249,19 @@ def refactor_facts():
         out["typed_groups"] = sg.get('groups') or 0
         fd = (g.get('PROBE_DISTINCT_OK', {}) or {}).get('detail') or {}
         out["typed_glb"] = 0
+    except Exception:                       # noqa: BLE001
+        pass
+    try:
+        pl = json.load(open(os.path.join(OUT, 'inventory_policy_report.json'), encoding='utf-8'))
+        out["pol_gate"] = pl.get('verdict')
+        plan = (((pl.get('gates', {}).get('POLICY_SPEC_OK', {}) or {}).get('detail') or {})
+                .get('plan') or {})
+        out["pol_eoq"] = plan.get('eoq') or 0
+        rop = plan.get('rop') or {}
+        out["pol_rop"] = rop.get('rop') or 0
+        out["pol_ss"] = rop.get('ss') or 0
+        out["pol_q"] = (plan.get('newsvendor') or {}).get('qty') or 0
+        out["pol_gmroi"] = plan.get('gmroi') or 0
     except Exception:                       # noqa: BLE001
         pass
     try:
@@ -592,7 +607,7 @@ def main():
                           'R8.3 带机理整场：%s 类机理入场景 / fallback=%s / 锚点=counts+GLB 结构指纹'
                           '（GLB 字节不可复现，ADR-12）；'
                           '门：`dc run --scope refactor`（R0 口径 + R1 单元 + R2 货架 + R3 设备 '
-                          '+ R4 库容 + R5 密度 + R8.1 资产目录 + R8.2 派发 + R8.9 提交事务 + R8.11 登记册，11 步）'
+                          '+ R4 库容 + R5 密度 + R8.1 资产目录 + R8.2 派发 + R8.9 提交事务 + R8.11 登记册 + D11-A 分型 + R5 库存策略，13 步）'
          % (ref['specs'], ref['schemas'], ref['rack_types'], ref['equipment_types'],
             ref['models'], "、".join(ref['deployed']) or "n/a", ref['ul_skus'],
             ref['ul_pallet'], ref['ul_tote'],
@@ -658,6 +673,14 @@ def main():
                           'spec 必须脚本生成、9 类/4 型真的用上、出厂 layout 逐字节不变且无分型键、'
                           '指纹复用 R8.2 探针（9/4/7 两两不同）；B 方案（出厂 typed）属 v1 后签署重冻'
          % (ref['typed_groups'], ref['typed_types'], ref['typed_loc'])),
+        ('库存策略（R5）', 'EOQ / ROP+SS / 报童 / GMROI 四式**闭式**（无搜索、无 rng）：'
+                          'EOQ=%.2f（D=12500, S=180, H=2.16）、ROP=%.2f（z=1.6449 / μ_L=6.25 / '
+                          'SS=%.2f，σ_L 按 √L 放大）、报童 Q=%.2f（fractile=0.625）、GMROI=%.2f；'
+                          '定义域即断言（H≤0 / σ<0 / SL 端点 / v≥p 全抛错，p≤c 返回 0）；'
+                          '两处开关联锁，半开抛错不静默降级；verdict=%s；默认关（出厂 policy 仍 '
+                          'reorder_point、enabled=false），check_reorder 与 check_inventory 数字不变'
+         % (ref['pol_eoq'], ref['pol_rop'], ref['pol_ss'], ref['pol_q'],
+            ref['pol_gmroi'], ref['pol_gate'] or 'n/a')),
         ('分档验收', 'data tier %s/%s PASS；pytest -m "not blender" 与 CI 矩阵见 '
                      '`.github/workflows/ci.yml`'
          % (vdata.get('passed'), vdata.get('total'))),

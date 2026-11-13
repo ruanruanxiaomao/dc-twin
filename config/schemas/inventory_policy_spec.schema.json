@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dc-twin.local/schemas/inventory_policy_spec.schema.json",
+  "title": "库存策略参数（R5：EOQ / ROP+SS / 报童 / GMROI）",
+  "type": "object",
+  "required": ["schema_version", "kind", "enabled", "eoq", "rop", "newsvendor", "gmroi"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "kind": {"const": "inventory_policy_spec"},
+    "note": {"type": "string"},
+    "enabled": {
+      "type": "boolean",
+      "description": "默认 false。只有 true 且 inventory_spec.reorder.policy=rop_ss 时仿真才走本文件；缺一即报错，不静默降级。"
+    },
+    "eoq": {
+      "type": "object",
+      "required": ["annual_demand", "order_cost", "holding_cost_per_unit_year"],
+      "additionalProperties": false,
+      "properties": {
+        "annual_demand": {"type": "number", "minimum": 0},
+        "order_cost": {"type": "number", "minimum": 0},
+        "holding_cost_per_unit_year": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "rop": {
+      "type": "object",
+      "required": ["demand_per_hour", "lead_time_h", "service_level"],
+      "additionalProperties": false,
+      "properties": {
+        "demand_per_hour": {"type": "number", "minimum": 0},
+        "lead_time_h": {"type": "number", "minimum": 0},
+        "service_level": {"type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1},
+        "demand_cv": {"type": "number", "minimum": 0},
+        "sigma_per_hour": {"type": "number", "minimum": 0}
+      }
+    },
+    "newsvendor": {
+      "type": "object",
+      "required": ["cost", "price", "salvage", "dist"],
+      "additionalProperties": false,
+      "properties": {
+        "cost": {"type": "number", "minimum": 0},
+        "price": {"type": "number", "minimum": 0},
+        "salvage": {"type": "number", "minimum": 0},
+        "dist": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["kind", "mu", "sigma"],
+              "additionalProperties": false,
+              "properties": {
+                "kind": {"const": "normal"},
+                "mu": {"type": "number"},
+                "sigma": {"type": "number", "minimum": 0}
+              }
+            },
+            {
+              "type": "object",
+              "required": ["kind", "lo", "hi"],
+              "additionalProperties": false,
+              "properties": {
+                "kind": {"const": "uniform"},
+                "lo": {"type": "number"},
+                "hi": {"type": "number"}
+              }
+            }
+          ]
+        }
+      }
+    },
+    "gmroi": {
+      "type": "object",
+      "required": ["gross_margin", "avg_inventory_cost"],
+      "additionalProperties": false,
+      "properties": {
+        "gross_margin": {"type": "number"},
+        "avg_inventory_cost": {"type": "number", "exclusiveMinimum": 0}
+      }
+    }
+  }
+}

@@ -3,97 +3,251 @@
   "$id": "https://dc-twin.local/schemas/inventory_spec.schema.json",
   "title": "库存层行为与费率（P6a）",
   "type": "object",
-  "required": ["schema_version", "kind", "reorder", "holding", "stockout", "pick_face", "expiry"],
+  "required": [
+    "schema_version",
+    "kind",
+    "reorder",
+    "holding",
+    "stockout",
+    "pick_face",
+    "expiry"
+  ],
   "additionalProperties": false,
   "properties": {
-    "schema_version": {"const": "1.0"},
-    "kind": {"const": "inventory_spec"},
-    "note": {"type": "string"},
+    "schema_version": {
+      "const": "1.0"
+    },
+    "kind": {
+      "const": "inventory_spec"
+    },
+    "note": {
+      "type": "string"
+    },
     "reorder": {
       "type": "object",
-      "required": ["policy", "safety_stock_factor", "reorder_point_factor", "replenish_qty", "reorder_check"],
+      "required": [
+        "policy",
+        "safety_stock_factor",
+        "reorder_point_factor",
+        "replenish_qty",
+        "reorder_check"
+      ],
       "additionalProperties": false,
       "properties": {
-        "policy": {"enum": ["reorder_point"]},
-        "safety_stock_factor": {"type": "number", "minimum": 0, "maximum": 10},
-        "reorder_point_factor": {"type": "number", "minimum": 0, "maximum": 20},
-        "replenish_qty": {"enum": ["to_max", "fixed"]},
-        "reorder_check": {"enum": ["on_stock_change", "periodic"]},
-        "period_s": {"type": "number", "exclusiveMinimum": 0}
+        "policy": {
+          "enum": [
+            "reorder_point",
+            "rop_ss"
+          ]
+        },
+        "safety_stock_factor": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "reorder_point_factor": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "replenish_qty": {
+          "enum": [
+            "to_max",
+            "fixed"
+          ]
+        },
+        "reorder_check": {
+          "enum": [
+            "on_stock_change",
+            "periodic"
+          ]
+        },
+        "period_s": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
       }
     },
     "holding": {
       "type": "object",
-      "required": ["holding_rate_per_year", "accrual"],
+      "required": [
+        "holding_rate_per_year",
+        "accrual"
+      ],
       "additionalProperties": false,
       "properties": {
-        "holding_rate_per_year": {"type": "number", "minimum": 0, "maximum": 2},
-        "accrual": {"enum": ["sim_hour"]}
+        "holding_rate_per_year": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "accrual": {
+          "enum": [
+            "sim_hour"
+          ]
+        }
       }
     },
     "stockout": {
       "type": "object",
-      "required": ["penalty_per_unit", "policy", "partial_fill"],
+      "required": [
+        "penalty_per_unit",
+        "policy",
+        "partial_fill"
+      ],
       "additionalProperties": false,
       "properties": {
-        "penalty_per_unit": {"type": "number", "minimum": 0, "maximum": 1000},
-        "policy": {"enum": ["fail_order", "backorder"]},
-        "partial_fill": {"type": "boolean"}
+        "penalty_per_unit": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "policy": {
+          "enum": [
+            "fail_order",
+            "backorder"
+          ]
+        },
+        "partial_fill": {
+          "type": "boolean"
+        }
       }
     },
     "shrink": {
       "type": "object",
-      "required": ["rate"],
+      "required": [
+        "rate"
+      ],
       "additionalProperties": false,
-      "properties": {"rate": {"type": "number", "minimum": 0, "maximum": 0.1}}
+      "properties": {
+        "rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.1
+        }
+      }
     },
     "pick_face": {
       "type": "object",
-      "required": ["enabled", "min_fill_ratio", "refill_from"],
+      "required": [
+        "enabled",
+        "min_fill_ratio",
+        "refill_from"
+      ],
       "additionalProperties": false,
       "properties": {
-        "enabled": {"type": "boolean"},
-        "min_fill_ratio": {"type": "number", "minimum": 0, "maximum": 1},
-        "refill_from": {"enum": ["reserve"]},
-        "max_per_warehouse": {"type": "integer", "minimum": 0, "maximum": 64},
-        "fill_ratio_of_reserve": {"type": "number", "minimum": 0, "maximum": 1}
+        "enabled": {
+          "type": "boolean"
+        },
+        "min_fill_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "refill_from": {
+          "enum": [
+            "reserve"
+          ]
+        },
+        "max_per_warehouse": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 64
+        },
+        "fill_ratio_of_reserve": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
       }
     },
     "stock_policy": {
       "type": "object",
-      "required": ["base_qty", "overflow_multiplier"],
+      "required": [
+        "base_qty",
+        "overflow_multiplier"
+      ],
       "additionalProperties": false,
       "properties": {
         "base_qty": {
           "type": "object",
-          "required": ["A", "B", "C"],
+          "required": [
+            "A",
+            "B",
+            "C"
+          ],
           "additionalProperties": false,
           "properties": {
-            "A": {"type": "integer", "minimum": 1, "maximum": 10000},
-            "B": {"type": "integer", "minimum": 1, "maximum": 10000},
-            "C": {"type": "integer", "minimum": 1, "maximum": 10000}
+            "A": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "B": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "C": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            }
           }
         },
-        "overflow_multiplier": {"type": "number", "minimum": 0, "maximum": 10},
-        "qty_is_integer": {"type": "boolean"}
+        "overflow_multiplier": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "qty_is_integer": {
+          "type": "boolean"
+        }
       }
     },
     "expiry": {
       "type": "object",
-      "required": ["enabled", "policy", "shelf_life_s_by_class", "initial_lot_life_fraction",
-                   "aging_every_n_locations", "max_lots_per_location", "waste_posting"],
+      "required": [
+        "enabled",
+        "policy",
+        "shelf_life_s_by_class",
+        "initial_lot_life_fraction",
+        "aging_every_n_locations",
+        "max_lots_per_location",
+        "waste_posting"
+      ],
       "additionalProperties": false,
       "properties": {
-        "enabled": {"type": "boolean"},
-        "policy": {"enum": ["FEFO", "FIFO"]},
+        "enabled": {
+          "type": "boolean"
+        },
+        "policy": {
+          "enum": [
+            "FEFO",
+            "FIFO"
+          ]
+        },
         "shelf_life_s_by_class": {
           "type": "object",
-          "required": ["A", "B", "C"],
+          "required": [
+            "A",
+            "B",
+            "C"
+          ],
           "additionalProperties": false,
           "properties": {
-            "A": {"type": "number", "exclusiveMinimum": 0},
-            "B": {"type": "number", "exclusiveMinimum": 0},
-            "C": {"type": "number", "exclusiveMinimum": 0}
+            "A": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "B": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "C": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
           }
         },
         "initial_lot_life_fraction": {
@@ -103,13 +257,32 @@
             "type": "array",
             "minItems": 2,
             "maxItems": 2,
-            "items": {"type": "number", "minimum": 0, "maximum": 1}
+            "items": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
           }
         },
-        "aging_every_n_locations": {"type": "integer", "minimum": 1, "maximum": 1000},
-        "max_lots_per_location": {"type": "integer", "minimum": 1, "maximum": 50},
-        "waste_posting": {"enum": ["none", "cash"]},
-        "note": {"type": "string"}
+        "aging_every_n_locations": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "max_lots_per_location": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "waste_posting": {
+          "enum": [
+            "none",
+            "cash"
+          ]
+        },
+        "note": {
+          "type": "string"
+        }
       }
     }
   }
