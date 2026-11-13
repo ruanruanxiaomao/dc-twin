@@ -253,6 +253,14 @@ class GameSession:
                 "robots": robots,
                 "counts": dict(sim.log.counts),
             }
+            # 车型库：前端要能"选哪个车型再买"，否则 BUY_EQUIPMENT 只有 API 能用，
+            # 玩家点到的永远是默认车型（功能存在但不可达）。
+            models = list(getattr(sim, "models_by_id", {}).values())
+            out["models"] = [{"id": m.get("id"),
+                              "capex_cny": float(m.get("capex_cny") or 0.0),
+                              "payload_kg": float(m.get("payload_kg") or 0.0),
+                              "speed_mps": float(m.get("speed_mps") or 0.0)}
+                             for m in models]
             # 效期/批次是**独立一块**而不是塞进 economy：报废不进 P&L
             # （ADR-GAME-10 决策三），把它放经济体里会诱导前端当成成本去加总。
             out["expiry"] = {

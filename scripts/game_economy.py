@@ -113,6 +113,15 @@ class Economy:
             elif typ == "CMD_BUY_AGV":
                 unit = self.cost["fixed_costs_per_day"]["robot_depreciation"]["capex_per_unit"]
                 self._post(seq, "Capex:Robot", float(unit), "debit")
+            elif typ == "CMD_BUY_EQUIPMENT":
+                # 金额随事件走：不同车型不同价，引擎不知道会计口径，经济层也不该
+                # 去猜车型单价（那会变成两处维护同一张价目表）。缺金额即 0 元买入
+                # 是不可接受的，所以宁可当作配置错误让守恒式暴露。
+                amount = float(e.get("capex_cny") or 0.0)
+                if amount <= 0:
+                    raise ValueError("CMD_BUY_EQUIPMENT 缺 capex_cny（订单 %s）"
+                                     % e.get("agent"))
+                self._post(seq, "Capex:Equipment", amount, "debit")
             elif typ == "CMD_SELL_AGV":
                 unit = self.cost["fixed_costs_per_day"]["robot_depreciation"]["capex_per_unit"]
                 refund = float(unit) * float(e.get("refund_pct") or 0.0)
@@ -177,7 +186,10 @@ class Economy:
                 self.salvage += amount
         else:
             self.cash -= amount
-            if account == "Capex:Robot":
+            # 所有 Capex: 科目都计入资本支出汇总（Robot / Equipment / 将来其它）。
+            # 只认 "Capex:Robot" 会让新科目的钱扣了现金、却不进 capex 汇总——
+            # 现金对得上、报表对不上，是最难查的一类偏差（本轮真踩了一次）。
+            if account.startswith("Capex:"):
                 self.capex += amount
             elif account.startswith("Cost:Variable:"):
                 self.variable += amount

@@ -44,9 +44,12 @@ BUILD_DIR = ROOT / "build" / "pyinstaller"
 
 # ---------------------------------------------------------------- 数据清单
 
-#: 单文件（相对 ROOT）
+#: 单文件里**必须存在**的项。历史上 `docs/DC_MASTER_PLAN.md` 被删之后，这里静默跳过，
+#: 打包件里一份文档都没有，而自检只报"0 KB"——所以清单里的文件缺失必须当场失败。
+REQUIRED = {"docs/PROJECT_REPORT.md", "LICENSE", "NOTICE", "README.md"}
+
 FILES = [
-    "docs/DC_MASTER_PLAN.md",
+    "docs/PROJECT_REPORT.md",
     "requirements.lock",
     "LICENSE",
     "NOTICE",
@@ -62,6 +65,9 @@ DIRS = [
     "dc_twin",
     "scripts",
     "tests",
+    # ADR 与施工协议：设计与决策的理由要和可执行文件放在一起，
+    # 否则"为什么这么做"只存在于仓库历史里，拿到 exe 的人永远看不到。
+    "docs/design",
 ]
 
 #: out/ 里要带走的文件（其余是中间产物/临时截图）
@@ -157,6 +163,12 @@ def latest_runs(dst: Path) -> tuple[int, int]:
 def stage_payload(app_dir: Path) -> dict:
     """把界面/数据/源码铺到 exe 同级。"""
     files = 0
+    missing_required = [rel for rel in REQUIRED if not (ROOT / rel).exists()]
+    if missing_required:
+        # 直接抛：这个函数的返回值是"文件统计"，返回一个数字会被下游当 dict 用，
+        # 结果变成 TypeError —— 那会让人以为是打包脚本坏了，而不是"文件没了"。
+        raise SystemExit("打包清单里的必需文件不存在：%s"
+                         % ", ".join(sorted(missing_required)))
     for rel in FILES:
         src = ROOT / rel
         if not src.exists():

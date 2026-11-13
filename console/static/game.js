@@ -111,6 +111,7 @@
       return;
     }
     const s = G.state;
+    fillBuyModels(s);
     const e = s.economy || {};
     const c = s.counts || {};
     const done = (c.TASK_COMPLETED || 0);
@@ -268,7 +269,9 @@
       '  <label>买车到 <select id="gBuyWid">',
       '    <option value="W">区域仓 W</option><option value="F1">F1</option>',
       '    <option value="F2">F2</option><option value="F3">F3</option>',
-      '  </select></label><button id="gBuy">买一台（capex 12 万）</button>',
+      '  </select></label>',
+      '  <label>车型 <select id="gBuyModel"></select></label>',
+      '  <button id="gBuy">买一台</button>',
       '  <label>OUTBOUND 单价 <input id="gPrice" type="number" step="1" value="30"></label>',
       '  <button id="gApplyPrice">改价</button>',
       '  <button id="gFault">注入故障（60s）</button>',
@@ -309,7 +312,13 @@
     };
     $('gApplyPolicy').onclick = () =>
       cmd('SET_POLICY', { 'dispatch.policy': $('gPolicy').value });
-    $('gBuy').onclick = () => cmd('BUY_AGV', { wid: $('gBuyWid').value });
+    $('gBuy').onclick = () => {
+      const model = $('gBuyModel').value;
+      const wid = $('gBuyWid').value;
+      // 有车型可选就走 BUY_EQUIPMENT（价格随车型）；空列表时退回旧别名，
+      // 免得车型库没加载出来时按钮变成一个死键。
+      return model ? cmd('BUY_EQUIPMENT', { wid, model }) : cmd('BUY_AGV', { wid });
+    };
     $('gApplyPrice').onclick = () =>
       cmd('SET_PRICE', { order_type: 'OUTBOUND', price: Number($('gPrice').value) });
     $('gFault').onclick = () =>
@@ -318,6 +327,23 @@
     renderLevels();
     // 打开页面就应该看到"现在这一局"的样子：不主动拉一次，deep-link 进来会是一片空 HUD
     ensurePoll();
+  }
+
+  // 车型下拉：只在车型表**变了**才重建，否则每秒一次的轮询会把玩家刚选中的项冲回第一项。
+  function fillBuyModels(s) {
+    const sel = $('gBuyModel');
+    if (!sel || !s || !Array.isArray(s.models) || !s.models.length) return;
+    const sig = s.models.map((m) => m.id + ':' + m.capex_cny).join(',');
+    if (sel.dataset.sig === sig) return;
+    const cur = sel.value;
+    sel.innerHTML = '';
+    for (const m of s.models) {
+      const o = el('option', '', m.id + ' · ¥' + (m.capex_cny / 10000).toFixed(1) + ' 万');
+      o.value = m.id;
+      sel.appendChild(o);
+    }
+    if (cur) sel.value = cur;
+    sel.dataset.sig = sig;
   }
 
   async function renderLevels() {

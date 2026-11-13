@@ -48,9 +48,10 @@
   "aisle_width_rule": {
     "formula": "aisle_width = max(layout_min_aisle, ast_mm/1000 + clearance)",
     "clearance": 0.2,
-    "note": "默认 false（D5）。**别把这个键当'功能开关'直接读**：R3 若照着它 true 就启用耦合，会重算导航 grid、改变全部既有路径、直接破金标准。启用必须由 level/scenario 显式声明，并在那一次做独立重冻（v4）。当前 spec_layout 只读 group/defaults.aisle_width，不读 AST。",
+    "note": "默认 false（D5）：默认布局不读 AST，改动不会波及金标准。启用由 level/scenario 的 options.ast_drives_aisle_width 显式声明，并且**只对该区域的货架组生效**——组里必须声明 equipment_type。推出宽度低于通道下限会被夹紧并记 clamped=true；若全局没有任何组声明 equipment_type，spec_layout 直接报错（否则开关开了也无效）。见 ADR-REFACTOR-07。",
     "level": "assumption",
-    "enabled_by": "level_or_scenario_only"
+    "enabled_by": "level_or_scenario_only",
+    "applies_to": "rack_groups_with_equipment_type"
   },
   "types": {
     "forklift_counterbalance": {

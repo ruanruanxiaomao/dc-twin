@@ -83,6 +83,8 @@ def test_robot_snapshot_covers_every_mutable_field(tmp_path):
         "distance_m", "energy_out", "energy_in", "move_events", "leg_m",
         # 附录 A.3 漏了 charger_id（充电去哪台桩由它决定），实现里已补
         "charger_id",
+        # R3：混编车队必须逐车存车型，否则续玩后全车队退回默认车型
+        "model_id",
     }
     assert set(se.Robot.SNAPSHOT_FIELDS) == expected
     # 模型常量不该出现在快照里（由 model 重建）

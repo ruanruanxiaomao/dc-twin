@@ -292,8 +292,11 @@ def build(out: Path) -> dict:
     # 计划书：Markdown → HTML，供面板里的 iframe 直接引用（两种模式同一路径）
     sys.path.insert(0, str(ROOT / "scripts"))
     import md2html
-    plan_src = ROOT / "docs" / "DC_MASTER_PLAN.md"
-    if plan_src.exists():
+    # 与 console/server.py 的 PLAN_SOURCES 保持一致：静态页与实时页必须同一份文档
+    plan_src = next((ROOT / rel for rel in ("docs/DC_MASTER_PLAN.md",
+                                            "docs/PROJECT_REPORT.md")
+                     if (ROOT / rel).exists()), None)
+    if plan_src is not None:
         (out / "api").mkdir(parents=True, exist_ok=True)
         write_text_lf(out / "api" / "plan.html",
                       md2html.convert(plan_src.read_text(encoding="utf-8")))

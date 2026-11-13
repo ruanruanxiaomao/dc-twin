@@ -18,14 +18,57 @@
       "safety_margin_m": 0.05,
       "sensor_detection_m": 2.0,
       "source": "cargoTwin asset_amr bbox (measured) + MiR250-class assumptions",
-      "confidence": "medium"
+      "confidence": "medium",
+      "equipment_type": "agv_latent_rmfs",
+      "capex_cny": 120000
+    },
+    {
+      "id": "AMR-500",
+      "equipment_type": "agv_latent_rmfs",
+      "length": 1.35,
+      "width": 0.95,
+      "height": 0.5,
+      "payload_kg": 500,
+      "speed_mps": 1.2,
+      "accel_mps2": 0.25,
+      "decel_mps2": 0.45,
+      "omega_rad_s": 1.1,
+      "battery_kwh": 3.2,
+      "consumption_kwh_per_m": 0.0011,
+      "idle_kw": 0.07,
+      "charge_kw": 4.5,
+      "safety_margin_m": 0.05,
+      "sensor_detection_m": 2.5,
+      "capex_cny": 168000,
+      "source": "R3 假设车型：更大载荷/更慢，仅用于多车型与采购门，默认不部署",
+      "confidence": "assumption"
     }
   ],
   "deployment": [
-    {"warehouse": "W", "model": "AMR-250", "count": 12, "home_policy": "fixed"},
-    {"warehouse": "F1", "model": "AMR-250", "count": 3, "home_policy": "fixed"},
-    {"warehouse": "F2", "model": "AMR-250", "count": 3, "home_policy": "fixed"},
-    {"warehouse": "F3", "model": "AMR-250", "count": 3, "home_policy": "fixed"}
+    {
+      "warehouse": "W",
+      "model": "AMR-250",
+      "count": 12,
+      "home_policy": "fixed"
+    },
+    {
+      "warehouse": "F1",
+      "model": "AMR-250",
+      "count": 3,
+      "home_policy": "fixed"
+    },
+    {
+      "warehouse": "F2",
+      "model": "AMR-250",
+      "count": 3,
+      "home_policy": "fixed"
+    },
+    {
+      "warehouse": "F3",
+      "model": "AMR-250",
+      "count": 3,
+      "home_policy": "fixed"
+    }
   ],
   "battery": {
     "warning_pct": 20,
@@ -44,19 +87,33 @@
   "failure": {
     "mtbf_h": 200,
     "mttr_min": 15,
-    "failure_types": ["drive", "sensor", "battery", "network"]
+    "failure_types": [
+      "drive",
+      "sensor",
+      "battery",
+      "network"
+    ]
   },
   "charging": {
     "strategy": "opportunity",
     "reserve_for_task_pct": 15,
     "queue_max": 3
   },
-  "dock_service": {"service_time_s": 180, "dwell_agv_s": 2.0},
-  "station_service": {"service_time_s": 45, "capacity": 1},
+  "dock_service": {
+    "service_time_s": 180,
+    "dwell_agv_s": 2.0
+  },
+  "station_service": {
+    "service_time_s": 45,
+    "capacity": 1
+  },
   "safety_zones": [],
   "speed_limits": [],
   "meta": {
-    "note": "deployment.count 之和=21，与 layout_spec 的 HOME 数一致。max_tasks_per_agent=3 是场景层目标值；当前主链 gen_tasks.py 仍为 1 单/车的 demo 模式，尚未接入本字段（见 README 边界声明）。",
-    "todo": ["按现场车型手册校准 accel/decel/battery", "按维修记录校准 MTBF/MTTR"]
+    "note": "deployment.count 之和=21，与 layout_spec 的 HOME 数一致。max_tasks_per_agent=3 是场景层目标值；当前主链 gen_tasks.py 仍为 1 单/车的 demo 模式，尚未接入本字段（见 README 边界声明）。 ｜ R3：models[] 是**车型库**，deployment 决定各仓实际部署；默认只部署 AMR-250，所以默认事件流与 v3 基准逐字节一致。capex_cny 是采购入账金额（成本口径仍以 cost_spec 为准，两者对 AMR-250 取值相同）。 ｜ 车型映射到 agv_latent_rmfs（顶升式）：现场是车驮货架、不是车驮料箱；amr_bin 只有 50kg 额定，250kg 的车挂上去会立刻被判超载。",
+    "todo": [
+      "按现场车型手册校准 accel/decel/battery",
+      "按维修记录校准 MTBF/MTTR"
+    ]
   }
 }

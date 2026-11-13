@@ -4,6 +4,77 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] — R3 设备类型层（车型 / AST 耦合 / 按车型采购）
+
+The engine had exactly one vehicle: `fleet["models"][0]` was read once and every robot
+shared it. So `equipment_spec` with its 10 device types was documentation, a second entry
+in `fleet.models` did nothing, and `BUY_AGV` could only buy the default model.
+
+### Added
+
+- **`scripts/equipment_ref.py`** — the vehicle→equipment lookup layer: `model_index`
+  (validates required fields, rejects duplicates), `deployment_models` (deterministic
+  slot ordering), `deployed_model_ids`, `effective_params`. Pure functions.
+- **Per-robot models**: `Robot.model_id`, per-robot battery/speed/consumption/charge and
+  per-robot `min_sep`; a pair's required separation is the larger of the two.
+  Battery percentages are converted with **each model's own** capacity — a 500 kg vehicle
+  is not filled with a 250 kg vehicle's kWh.
+- **`BUY_EQUIPMENT`** `{wid, model, home?}` → `CMD_BUY_EQUIPMENT` carrying `capex_cny`.
+  The money travels with the event: the engine does not read the cost table, and the
+  economy does not keep a second price list. `BUY_AGV` stays as an alias and keeps
+  emitting `CMD_BUY_AGV` (renaming it would silently rewrite existing event streams).
+- **AST coupling per rack group**: `aisle_width_for()` — when enabled *and* the group
+  declares `equipment_type`, the aisle comes from that device's AST; below the layout
+  minimum it is **clamped and reported** (`clamped: true`, `explicit_width` kept for
+  audit). Enabling it with no group declaring a type raises instead of doing nothing.
+- **`scripts/check_equipment.py`** + `dc run --scope refactor` (4 steps): EQUIP_TYPES_OK /
+  AST_COUPLING_OK / HEIGHT_NEG_OK / BUY_EQUIP_OK / DEFAULT_OFF_OK, plus a self-test.
+- **HUD**: model selector next to the buy button, fed by `state.models`.
+
+### Changed
+
+- **Snapshot 3.1 → 4.0** (`Robot.SNAPSHOT_FIELDS` gains `model_id`). Restoring a save whose
+  vehicle no longer exists in `fleet_spec` is rejected rather than quietly reverting the
+  whole fleet to the default model.
+- `equipment_spec.aisle_width_rule` now records `applies_to: rack_groups_with_equipment_type`
+  and its note no longer claims AST is unread (it is read, but only when enabled).
+
+### Fixed (found while wiring it)
+
+- **Explicit `aisle_width` silently disabled AST coupling.** Every shipped rack group
+  writes `aisle_width: 4.0`, and the first version let the explicit value win, so turning
+  the coupling on changed nothing at all while every gate stayed green. Declaring
+  `equipment_type` now means "this group may be driven"; the overridden value is recorded.
+- **`capex` summary only counted `Capex:Robot`.** `Capex:Equipment` debited cash but was
+  missing from `econ.capex` — cash right, report wrong. All `Capex:` accounts now count.
+- **`spec_layout` refused the whole layout when the *catalogue* had two models.** The C5/G4
+  guard read `fleet.models` (the price list) instead of `deployment` (the site), so adding
+  an unused alternative model broke data generation end to end — the cleanroom reproduction
+  caught it. The guard now checks what is actually deployed and names it.
+- **The packaged app shipped no documents at all.** `build_exe` copied
+  `docs/DC_MASTER_PLAN.md`, which had been deleted, and missing files were skipped
+  silently — so `/api/plan.html` was an empty stub and `check_exe` only said "0 KB".
+  The panel now serves the first existing document (`PROJECT_REPORT.md`) with its source
+  printed at the top, `docs/design` ships with the exe, and a missing required file fails
+  the build instead of being skipped.
+- `AMR-250` was first mapped to `amr_bin` (50 kg rating) although the site lifts shelves;
+  it maps to `agv_latent_rmfs` (1000 kg). A mapping that is merely plausible overloads the
+  device, which the gate would have caught later at runtime instead of at config time.
+
+### Verified
+
+| Gate | Evidence |
+|---|---|
+| EQUIP_TYPES_OK | 10 device types, 2 vehicle models, every model resolves to a type, every deployment references a real model |
+| AST_COUPLING_OK | VNA 2.0 m vs counterbalance 3.6 m; 600 mm AST clamped to 1.8 m and reported; off = 4.0 m |
+| HEIGHT_NEG_OK | 6 m stacker on a 9 m rack warns; the material's forklift-only version misses it |
+| BUY_EQUIP_OK | AMR-500 costs ¥168,000; capex 168000; conservation residual 0; operating profit unchanged by capex; BUY_AGV still emits its own event |
+| DEFAULT_OFF_OK | default fleet = single model → v3 golden byte-identical, 0 layout cells |
+| Snapshot 4.0 | mixed fleet survives save→restore with per-robot models; unknown model rejected; 3.1 rejected |
+
+**No v4 refreeze was needed**: the default deployment is single-model, AST is off and the
+layout carries no lane metadata, so `step_baseline --check` still matches v3 byte for byte.
+
 ## [Unreleased] — 收检回修：编码可移植性 / 快照计数器 / AST 默认值
 
 Three defects found by the independent acceptance inspection, all fixed with tests.

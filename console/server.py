@@ -598,17 +598,38 @@ def apply_areas(enabled):
 _PLAN_CACHE = {"mtime": 0.0, "html": ""}
 
 
+#: 面板里那篇长文档的来源，按顺序取第一个存在的。
+#:
+#: 历史方案（DC_MASTER_PLAN 等四份）已按用户指令硬删除，但面板与打包自检还指着它们：
+#: 结果"文档"页签变成一个空壳，而 `check_exe` 只报"0 KB"。与其让页签长期撒谎，
+#: 不如让它指向**现存**的那份项目文档，并把来源写在页首——读者一眼知道自己在看什么。
+PLAN_SOURCES = ("docs/DC_MASTER_PLAN.md", "docs/PROJECT_REPORT.md")
+
+
+def plan_source():
+    for rel in PLAN_SOURCES:
+        p = ROOT / rel
+        if p.exists():
+            return p
+    return None
+
+
 def build_plan_html():
-    """计划书 → HTML（按 mtime 缓存；转一次约 0.3 s）。"""
-    src = ROOT / "docs" / "DC_MASTER_PLAN.md"
-    if not src.exists():
-        return "<!doctype html><meta charset='utf-8'><p>计划书尚未生成</p>"
+    """长文档 → HTML（按 mtime 缓存；转一次约 0.3 s）。"""
+    src = plan_source()
+    if src is None:
+        return ("<!doctype html><meta charset='utf-8'>"
+                "<p>文档已移除（%s 均不存在）</p>" % "、".join(PLAN_SOURCES))
     mt = src.stat().st_mtime
-    if _PLAN_CACHE["mtime"] != mt:
+    if _PLAN_CACHE["mtime"] != mt or _PLAN_CACHE.get("src") != str(src):
         sys.path.insert(0, str(ROOT / "scripts"))
         import md2html
-        _PLAN_CACHE["html"] = md2html.convert(src.read_text(encoding="utf-8"))
+        body = md2html.convert(src.read_text(encoding="utf-8"))
+        banner = ("<p class='doc-src' style='opacity:.65;font-size:12px'>"
+                  "来源：%s</p>\n" % src.relative_to(ROOT).as_posix())
+        _PLAN_CACHE["html"] = banner + body
         _PLAN_CACHE["mtime"] = mt
+        _PLAN_CACHE["src"] = str(src)
     return _PLAN_CACHE["html"]
 
 

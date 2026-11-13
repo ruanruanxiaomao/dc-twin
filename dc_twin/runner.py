@@ -109,6 +109,7 @@ REFACTOR_CHAIN = [
     ("scripts/check_capacity_spec.py", ("--quiet",), "python"),   # R0 口径 + B1–B5 负对照
     ("scripts/check_compatibility.py", ("--quiet",), "python"),   # R1 集装单元
     ("scripts/check_rack_access.py", ("--quiet",), "python"),     # R2 货架机理
+    ("scripts/check_equipment.py", ("--quiet",), "python"),      # R3 设备类型/多车型/AST/采购
 ]
 
 SCOPES = {

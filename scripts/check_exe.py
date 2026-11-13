@@ -58,7 +58,7 @@ GETS = [
     ("/api/paths", "AGV 路径（3D 回放用）", "agents"),
     ("/api/kpi", "指标字典：tick 39 + 解析 25", "tick"),
     ("/api/areas", "21 个功能区", "areas"),
-    ("/api/plan.html", "计划书（全屏阅读层）", "plan"),
+    ("/api/plan.html", "项目文档（全屏阅读层）", "plan"),
     ("/api/schema", "配置表单 schema", None),
     ("/api/status", "产物状态（报告清单）", None),
     ("/api/scenarios", "场景清单", None),

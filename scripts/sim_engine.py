@@ -26,6 +26,11 @@ from pathlib import Path
 from dc_root import project_root  # noqa: E402
 ROOT = project_root(__file__)
 
+try:                                     # R3：车型 → 设备类型的取参通路
+    import equipment_ref as equipment_ref
+except ImportError:
+    equipment_ref = None
+
 try:                                     # R2：货架存取机理（纯函数，可单测）
     import rack_access as rack_access
 except ImportError:                      # 打包/独立运行时留个明确的降级，不静默
@@ -277,7 +282,10 @@ ORDER_TYPES = ("INBOUND", "OUTBOUND", "PICK", "REPLENISH", "TRANSFER")
 #: （两份表必然分叉，最后会出现"登记了但没有人接"的命令）。
 COMMANDS = ("BUY_AGV", "SELL_AGV", "SET_PRICE", "SET_POLICY",
             "SET_DEMAND", "INJECT_FAULT", "BUILD_STATION", "MANUAL_ASSIGN",
-            "SET_REORDER_POINT", "SET_LOT_POLICY")
+            "SET_REORDER_POINT", "SET_LOT_POLICY",
+            # R3：按车型采购。BUY_AGV 保留为别名（默认车型），事件类型也不换——
+            # 换了就等于把既有存档/事件流里的 CMD_BUY_AGV 静默改名。
+            "BUY_EQUIPMENT")
 #: 已登记但尚未实现：入队即抛，不静默空转（静默 = 玩家点了没反应还以为生效了）。
 NOT_IMPLEMENTED = ("BUILD_STATION", "MANUAL_ASSIGN")
 
@@ -291,11 +299,16 @@ class Robot:
         self.pos = home
         self.soc = soc                      # kWh
         self.soc_initial = soc              # kept for S2 conservation recompute
+        self.model_id = model.get("id")
         self.cap = model["battery_kwh"]
         self.speed = model["speed_mps"]
         self.cons = model["consumption_kwh_per_m"]
         self.idle_kw = model["idle_kw"]
         self.charge_kw = model["charge_kw"]
+        # 每台车的最小安全间隔由**自己的**外廓算：混编车队里用统一值会让大车
+        # 贴着走（按小车算的间隔），或让小车白留一大截（按大车算）。
+        self.min_sep = round(2 * (math.hypot(model["length"], model["width"]) / 2
+                                  + model["safety_margin_m"]), 4)
         self.state = "IDLE"
         self.order = None
         self.legs = []
@@ -341,6 +354,9 @@ class Robot:
         # 附录 A.3 漏了这一个：_make_robots 里给每台车配了充电桩，充电去哪台
         # 靠它决定。漏存的后果是续玩后全车队挤同一台桩。
         "charger_id",
+        # R3：车型必须逐车存。混编车队里丢了它，续玩会按 models[0] 重建所有车——
+        # 电量、速度、能耗、最小间隔全部退回小车，而"台数"看着一台不少。
+        "model_id",
     )
 
     def serialize(self):
@@ -364,11 +380,14 @@ class Robot:
         if missing:
             raise ValueError("robot 快照缺字段：%s" % ", ".join(missing))
         r = cls.__new__(cls)
+        r.model_id = d["model_id"]
         r.cap = model["battery_kwh"]
         r.speed = model["speed_mps"]
         r.cons = model["consumption_kwh_per_m"]
         r.idle_kw = model["idle_kw"]
         r.charge_kw = model["charge_kw"]
+        r.min_sep = round(2 * (math.hypot(model["length"], model["width"]) / 2
+                               + model["safety_margin_m"]), 4)
         r.id = d["id"]
         r.wid = d["wid"]
         r.home = tuple(d["home"])
@@ -540,7 +559,17 @@ class Simulation:
         # 服务时长采样用独立随机流：否则会打乱订单到达序列，
         # 让"只改了过程层"变成"整个需求分布都变了"，无法归因。
         self.svc_rng = Mulberry32((self.seed ^ 0x9E3779B9) & 0xFFFFFFFF)
-        self.model = fleet["models"][0]
+        # R3：车型库。`self.model` 保留为**默认车型**（models[0]），只为兼容既有
+        # 单车型路径；真正决定"这台车用哪份参数"的是每台车自己的 model_id。
+        if equipment_ref is None:
+            raise RuntimeError("缺少 equipment_ref 模块：R3 之后车队必须能按车型取参")
+        self.models_by_id = equipment_ref.model_index(fleet)
+        self.deployed_models = equipment_ref.deployed_model_ids(fleet)
+        #: 只有实际部署了多种车型时才逐车标车型——否则给 sim_state 加一个恒定字段
+        #: 就会改掉 v3 基准的字节，而那不是"功能"，是噪音。
+        self.multi_model = len(self.deployed_models) > 1
+        # 没有部署行时退回车型库第一项（单车型、零台车也能构造，便于单元测试）
+        self.model = self.models_by_id[(self.deployed_models or [fleet["models"][0]["id"]])[0]]
         self.reserve_pct = self.spec["dispatch"]["battery_reserve_pct"]
         self.critical_pct = self.spec["battery"]["critical_pct"]
         self.radius = self.spec["traffic"]["reserve_radius_cells"]
@@ -1507,12 +1536,21 @@ class Simulation:
         else:
             homes = homes[:self.n_robots]
         b = self.spec["battery"]
-        soc0 = b["initial_soc_pct"] / 100.0 * self.model["battery_kwh"]
-        low = b.get("low_soc_pct", 22) / 100.0 * self.model["battery_kwh"]
         every = b.get("low_soc_robot_every", 7)
+        # R3：车型由 deployment 决定，按仓内槽位顺序轮转（确定性，不依赖 dict 顺序）。
+        pool_by_wid = equipment_ref.deployment_models(self.fleet)
+        seen = {}
         robots = {}
         for i, (rid, wid, xy, _) in enumerate(homes):
-            r = Robot(rid, wid, xy, low if i % every == 0 else soc0, self.model)
+            pool = pool_by_wid.get(wid) or [self.model]
+            k = seen.get(wid, 0)
+            seen[wid] = k + 1
+            model = pool[k % len(pool)]
+            # 电量百分比按**该车型自己的**电池容量折算：否则给大电池车按小电池的
+            # 绝对电量开车，一上路就低电量返航（多车型最典型的错法）。
+            soc0 = b["initial_soc_pct"] / 100.0 * model["battery_kwh"]
+            low = b.get("low_soc_pct", 22) / 100.0 * model["battery_kwh"]
+            r = Robot(rid, wid, xy, low if i % every == 0 else soc0, model)
             r.charger_id = "%s-CHG-%02d" % (wid, (i % 6) + 1)
             robots[rid] = r
         return robots
@@ -1884,6 +1922,20 @@ class Simulation:
                 if (not isinstance(home, (list, tuple)) or len(home) != 2
                         or any(isinstance(x, bool) or not isinstance(x, (int, float)) for x in home)):
                     raise ValueError("home 必须是 [x, y] 两个数字")
+        elif typ == "BUY_EQUIPMENT":
+            wid = p.get("wid")
+            if wid not in self.world.warehouses:
+                raise ValueError("没有这个仓：%r" % (wid,))
+            mid = p.get("model")
+            if not isinstance(mid, str) or mid not in self.models_by_id:
+                raise ValueError("没有这个车型：%r（可选：%s）"
+                                 % (mid, ", ".join(sorted(self.models_by_id))))
+            home = p.get("home")
+            if home is not None:
+                if (not isinstance(home, (list, tuple)) or len(home) != 2
+                        or any(isinstance(x, bool) or not isinstance(x, (int, float))
+                               for x in home)):
+                    raise ValueError("home 必须是 [x, y] 两个数字")
         elif typ == "SELL_AGV":
             rid = p.get("agent")
             if not isinstance(rid, str) or rid not in self.robots:
@@ -2036,6 +2088,39 @@ class Simulation:
             if rid not in self.robots:
                 return rid
             n += 1
+
+    def _spawn_home(self, wid, req_home):
+        """玩家给的落点吸附到最近可走格中心（车不能生成在货架里）。"""
+        if req_home is not None:
+            cell = self.world.nearest_walkable((float(req_home[0]), float(req_home[1])))
+            return self.world.center(cell)
+        spawns = [(s["position"][0], s["position"][2])
+                  for s in self.world.warehouses[wid]["spawn"]["robots"]]
+        base = spawns[0] if spawns else (10.0, 10.0)
+        k = sum(1 for r in self.robots.values() if r.wid == wid)
+        home = (base[0] + 2.0 * k, base[1] + 1.6 * k)
+        return self.world.center(self.world.nearest_walkable(home))
+
+    def _cmd_buy_equipment(self, cmd):
+        """按指定车型采购一台设备（R3）。
+
+        **采购金额随事件走**（``capex_cny``），不由引擎读成本表——引擎不该知道
+        会计口径；经济层照事件入账即可，于是"买不同车型花不同的钱"这件事
+        在事件流里是可审计的，而不是隐含在某个全局单价里。
+        """
+        p = cmd["payload"]
+        wid, mid = p["wid"], p["model"]
+        model = self.models_by_id[mid]
+        pos = self._spawn_home(wid, p.get("home"))
+        b = self.spec["battery"]
+        soc = b["initial_soc_pct"] / 100.0 * model["battery_kwh"]
+        rid = self._next_robot_id(wid)
+        r = Robot(rid, wid, pos, soc, model)
+        r.charger_id = "%s-CHG-01" % wid
+        self.robots[rid] = r
+        self.n_robots = len(self.robots)
+        self.log.emit(self.t, "CMD_BUY_EQUIPMENT", agent=rid, wid=wid, model=mid,
+                      capex_cny=float(model.get("capex_cny") or 0.0), home=list(pos))
 
     def _cmd_buy_agv(self, cmd):
         p = cmd["payload"]
@@ -2212,7 +2297,11 @@ class Simulation:
                     d = math.dist(pos[i][1], pos[j][1])
                     if d < self.min_pair_m:
                         self.min_pair_m = d
-                    if d < self.min_sep - 1e-6:
+                    # 一对车之间的最小间隔取两者较大值：只要有一台是大车，
+                    # 就必须按大车的外廓留距离。
+                    need = max(getattr(self.robots[pos[i][0]], "min_sep", self.min_sep),
+                               getattr(self.robots[pos[j][0]], "min_sep", self.min_sep))
+                    if d < need - 1e-6:
                         self.sep_violations += 1
 
         # 5) energy accounting + KPI sampling (window deltas, one aggregate
@@ -2385,7 +2474,9 @@ class Simulation:
                 return
         before = r.yields
         before_d = r.detours
-        r.advance(dt, t, self.log, self.world, positions, self.min_sep)
+        # 用这台车自己的最小安全间隔：单车型时它与全局值逐位相等（同一公式），
+        # 混编时才真正区分大小车。
+        r.advance(dt, t, self.log, self.world, positions, r.min_sep)
         if r.yields != before:
             self.yield_n += r.yields - before
         if r.blocked_s >= JAM_CLEAR_AFTER_S:
@@ -2733,6 +2824,9 @@ class Simulation:
                 # 不能靠读配置猜——场景可以覆盖 horizon，读配置会判错一整批。
                 "horizon_s": self.horizon,
                 "robots": {r.id: {"state": r.state, "pos": [round(v, 3) for v in r.pos],
+                                  # 只有混编车队才输出：单车型时这个键恒等于同一值，
+                                  # 加进状态只会改字节，不会增加信息。
+                                  **({"model": r.model_id} if self.multi_model else {}),
                                   "soc_initial_kwh": round(r.soc_initial, 6),
                                   "soc_final_kwh": round(r.soc, 6),
                                   "soc_pct": round(r.soc_pct, 3), "completed": r.completed,
@@ -2765,7 +2859,7 @@ class Simulation:
     # `_state()` 是给 KPI 对账用的**终态摘要**，故意保持原样不动（A 系列验收依赖它）。
     # 下面是另一个东西：可恢复的全量状态。字段必须穷举——少一块，续跑要几十个 tick
     # 之后才会"莫名偏了"，那时候已经查不出是哪块缺了。
-    SNAPSHOT_SCHEMA = "3.1"
+    SNAPSHOT_SCHEMA = "4.0"
 
     def _lots_by_sku_loc(self):
         out = {}
@@ -2929,7 +3023,19 @@ class Simulation:
         sim._started = True          # 已经在中途：别再 init 一次（会把 t 归零）
         sim.rng = Mulberry32.from_state(snap["rng_s"])
         sim.svc_rng = Mulberry32.from_state(snap["svc_rng_s"])
-        sim.robots = {rid: Robot.deserialize(d, sim.model)
+        # R3：逐车按快照里的 model_id 重建。车型在车队配置里找不到就**拒绝读档**，
+        # 不许退回默认车型——那会让一台 500kg 的车续玩后变成 250kg 的车，
+        # 而台数、状态、轨迹全都"看着正常"。
+        def _robot_from_snapshot(rid, d):
+            mid = d.get("model_id")
+            if not mid:
+                raise ValueError("机器人 %s 的快照缺少 model_id（4.0 之前的存档请重开）" % rid)
+            model = sim.models_by_id.get(mid)
+            if model is None:
+                raise ValueError("快照里的车型 %r 不在当前车队配置中（机器人 %s）" % (mid, rid))
+            return Robot.deserialize(d, model)
+
+        sim.robots = {rid: _robot_from_snapshot(rid, d)
                       for rid, d in snap["robots"].items()}
         sim.n_robots = len(sim.robots)
         sim.queue = list(snap["queue"])

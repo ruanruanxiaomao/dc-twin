@@ -109,6 +109,72 @@ def check_schema(spec):
 
 
 # ---------------------------------------------------------------- 展开
+def _equipment_types():
+    """读 config/equipment_spec.json 的 types；缺文件返回 {}（AST 耦合就无从算起）。"""
+    path = os.path.join(CONFIG, "equipment_spec.json")
+    if not os.path.exists(path):
+        return {}
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f).get("types") or {}
+    except Exception:                      # noqa: BLE001
+        return {}
+
+
+def aisle_width_for(group, defaults, ast_enabled=False, ast_mm=None, clearance=0.2):
+    """算一个货架组的工作巷道宽（R3 / D5）。
+
+    优先级（高 → 低）：
+
+    1. **AST 驱动**（`ast_enabled` **且**该组声明了 `equipment_type`）——
+       `宽 = AST/1000 + 净空`。声明了"这一区由哪种设备服务"却不用它的转弯半径，
+       那这个声明就是装饰；
+    2. 组内显式 `aisle_width` —— 没声明设备类型时，人手写的值就是最终值；
+    3. 默认横通道宽。
+
+    **第一版把显式宽度放在 AST 之上，结果出厂布局每组都写着 `aisle_width: 4.0`，
+    AST 开了也一点不生效**——开关看着是开的，行为没变，正是最难发现的那种"功能存在
+    但无效"。现在的语义是：声明了 `equipment_type` = 允许该组被设备驱动。
+
+    AST 推出低于 `defaults.aisle.one_way_min` 时必须**夹紧到下限并留痕**
+    （`clamped=True`）：窄于下限的巷道车根本过不去，静默采用等于生成一条
+    仿真里能走、现实里撞墙的通道。夹紧不是错误，**不报告**才是错误。
+
+    返回 dict：width / raw / clamped / source / min_aisle / ast_mm / equipment_type。
+    """
+    d_aisle = (defaults or {}).get("aisle") or {}
+    min_aisle = float(d_aisle.get("one_way_min", 1.8))
+    explicit = group.get("aisle_width")
+    et_name = (group.get("rack") or {}).get("equipment_type") or group.get("equipment_type")
+
+    # 没开耦合、或这一组没声明设备类型 → 维持历史行为（显式值 > 默认值）
+    if not (ast_enabled and et_name):
+        if explicit is not None:
+            return {"width": float(explicit), "raw": float(explicit), "clamped": False,
+                    "source": "explicit", "min_aisle": min_aisle,
+                    "ast_mm": None, "equipment_type": et_name}
+        return {"width": float(d_aisle.get("cross", 4.0)),
+                "raw": float(d_aisle.get("cross", 4.0)), "clamped": False,
+                "source": "default", "min_aisle": min_aisle,
+                "ast_mm": None, "equipment_type": et_name}
+
+    table = _equipment_types()
+    row = table.get(et_name)
+    if row is None:
+        raise ValueError("AST 耦合引用了不存在的设备类型：%r" % (et_name,))
+    ast = float((ast_mm or {}).get(et_name, row.get("ast_mm") or 0.0))
+    if ast <= 0:
+        raise ValueError("设备类型 %r 没有 ast_mm，无法驱动巷道宽" % (et_name,))
+    raw = ast / 1000.0 + float(clearance)
+    width = max(min_aisle, raw)
+    return {"width": round(width, 4), "raw": round(raw, 4),
+            "clamped": raw < min_aisle - 1e-9, "source": "ast",
+            # 把被覆盖的显式值一并带出来：审阅时"为什么这条巷道是 2.0 不是 4.0"
+            # 必须能一眼看到依据，否则等于静默改几何。
+            "explicit_width": (float(explicit) if explicit is not None else None),
+            "min_aisle": min_aisle, "ast_mm": ast, "equipment_type": et_name}
+
+
 def _rack_types():
     """读 config/rack_spec.json 的 types；缺文件返回 {}（退回"只有一种货架"的现状）。"""
     path = os.path.join(CONFIG, "rack_spec.json")
@@ -132,6 +198,17 @@ def expand(spec, fleet_counts=None):
     """
     #: R2：货架类型库（缺文件 → {}，退回"只有一种货架"）
     rack_spec_types = _rack_types()
+
+    # R3：打开了 AST 耦合，却没有任何货架组声明 equipment_type → 耦合**不可能**
+    # 生效。这时必须报错：否则玩家/关卡以为自己开了窄巷道，实际拿到的是出厂
+    # 4.0 m 横通道，而且所有门都是绿的。单个组不声明是合法的（= 该组豁免），
+    # 全局一个都没有才是配置错误。
+    if (spec.get('options') or {}).get('ast_drives_aisle_width'):
+        declared = [(g.get('rack') or {}).get('equipment_type') or g.get('equipment_type')
+                    for w in spec.get('warehouses', []) for g in w.get('racks', [])]
+        if not any(declared):
+            raise ValueError("已开启 ast_drives_aisle_width，但没有任何货架组声明 "
+                             "equipment_type：耦合不会生效")
     fleet_info = {'source': 'config/fleet_spec.json' if fleet_counts is not None else None,
                   'per_warehouse': {}, 'overflow': []}
     defaults = spec['defaults']
@@ -182,7 +259,11 @@ def expand(spec, fleet_counts=None):
                 gx, gz = group['origin']
                 mx, mz = group.get('margin', [2, 3])
                 rows, bays = group['rows'], group['bays']
-                aw = group.get('aisle_width', defaults['aisle']['cross'])
+                # R3：巷道宽统一走 aisle_width_for（默认 AST 关闭 → 与历史完全一致）
+                aw_info = aisle_width_for(
+                    group, defaults,
+                    ast_enabled=bool((spec.get('options') or {}).get('ast_drives_aisle_width')))
+                aw = aw_info['width']
                 gap = group.get('bay_gap', 0.6)
                 for ri in range(rows):
                     for bi in range(bays):
@@ -524,7 +605,13 @@ def validate(layout, spec):
             if group['id'] != w['id']:
                 continue
             for g in group['racks']:
-                aw = g.get('aisle_width', spec['defaults']['aisle']['cross'])
+                aw = aisle_width_for(
+                    g, spec['defaults'],
+                    ast_enabled=bool((spec.get('options') or {}).get('ast_drives_aisle_width'))
+                )['width']
+                if aw < spec['defaults']['aisle']['one_way_min'] - 1e-9:
+                    warnings.append(('L8', '%s 的 AST 巷道 %.2f 低于下限，已被夹紧'
+                                     % (w['id'], aw)))
                 if aw < one_way:
                     issues.append(('L8', '%s aisle %.2f < %.4f (one-way min)' %
                                    (w['id'], aw, one_way)))
@@ -583,9 +670,14 @@ def main():
     if args.fleet_spec:
         fp = args.fleet_spec if os.path.isabs(args.fleet_spec) else os.path.join(ROOT, args.fleet_spec)
         fl = json.load(open(fp, encoding='utf-8'))
-        models = {m.get('id', m.get('model')) for m in fl.get('models', [])}
-        if len(models) > 1:
-            print('SPEC_LAYOUT refuses mixed fleet models (C5 G4: single model only)')
+        # C5/G4：**部署**混编目前不支持（布局不给不同车型分别预留回场位与通行宽度）。
+        # 但"车型库里有多个车型"是合法的——库是价目表，部署才是现场。
+        # 第一版按库的大小判，于是加一个"备选车型"就整个布局生成失败，
+        # 而现场其实只跑一种车（洁净室复现立刻抓到了）。
+        deployed = {d.get('model') for d in fl.get('deployment', []) if d.get('model')}
+        if len(deployed) > 1:
+            print('SPEC_LAYOUT refuses mixed fleet models (C5 G4: single model only)，'
+                  '本次部署了 %s' % '、'.join(sorted(deployed)))
             sys.exit(1)
         fleet_counts = {d['warehouse']: d['count'] for d in fl.get('deployment', [])}
     spec = json.load(open(args.spec, encoding='utf-8'))

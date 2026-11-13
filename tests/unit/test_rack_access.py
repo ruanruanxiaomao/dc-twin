@@ -221,7 +221,8 @@ def test_snapshot_keeps_rack_counters(tmp_path):
     sim.rack_conflict_n = 2
     snap = sim.snapshot()
     sim.log.close()
-    assert snap["schema_version"] == "3.1", "加了计数器就该升版（D2：旧档显式拒绝）"
+    # 3.1（R2 计数器）→ 4.0（R3 逐车 model_id）；旧档一律显式拒绝（D2）
+    assert snap["schema_version"] == "4.0", "加了计数器就该升版（D2：旧档显式拒绝）"
     c = snap["counters"]
     assert (c["rack_blocked_n"], c["rack_reshuffle_n"], c["rack_conflict_n"]) == (7, 3, 2)
 
@@ -249,7 +250,8 @@ def test_snapshot_keeps_rack_counters(tmp_path):
     sim.rack_conflict_n = 2
     snap = sim.snapshot()
     sim.log.close()
-    assert snap["schema_version"] == "3.1", "加了计数器就该升版（D2：旧档显式拒绝）"
+    # 3.1（R2 计数器）→ 4.0（R3 逐车 model_id）；旧档一律显式拒绝（D2）
+    assert snap["schema_version"] == "4.0", "加了计数器就该升版（D2：旧档显式拒绝）"
     c = snap["counters"]
     assert (c["rack_blocked_n"], c["rack_reshuffle_n"], c["rack_conflict_n"]) == (7, 3, 2)
 
