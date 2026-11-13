@@ -33,7 +33,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import solid_registry as reg          # noqa: E402
 import spec_layout                    # noqa: E402
 
-DATA, OUT = ROOT / "data", ROOT / "out"
+DATA, CONFIG, OUT = ROOT / "data", ROOT / "config", ROOT / "out"
 
 #: L2/L3 的对象集**必须**是这几个。放宽（比如把 conveyor 塞进来）会让默认布局
 #: 出现新的 L3，等于悄悄改金标准；所以这里写死，改它必须改门、重跑金标准。
@@ -151,6 +151,46 @@ def check_areas(doc):
                           "in_registry": len(solids)}, problems
 
 
+def check_spec_view(whs):
+    """R8.11/WP1：深度轴的输入必须来自登记册，**且与册子逐项一致**。
+
+    期望值故意用"手写对照"（直接数 wh 的 areas/stations 有没有 rect）算，
+    而不是问登记册——否则把 `spec_solids` 打空，期望值和实际值会一起变空，
+    门就成了自证。
+    """
+    import layout_solver
+    problems, detail = [], {}
+    for wh in whs:
+        bad = reg.unregistered_spec_keys(wh)
+        if bad:
+            problems.append("%s(spec) 有未登记实体键：%s" % (wh.get("id"), bad))
+        depth = layout_solver.functional_band(wh)
+        band = reg.spec_band(wh)
+        if (band is None) != (depth is None):
+            problems.append("%s 深度轴与登记册的功能带不一致（一个有一个没有）"
+                            % wh.get("id"))
+        elif band is not None and band != depth:
+            problems.append("%s 深度轴的功能带 ≠ 登记册功能带（有人在绕过册子）"
+                            % wh.get("id"))
+        # 手写对照：areas/stations 里"真有 rect"的条数 + 充电位一行
+        expect = sum(1 for a in wh.get("areas") or [] if isinstance(a, dict) and a.get("rect"))
+        expect += sum(1 for s in wh.get("stations") or [] if isinstance(s, dict) and s.get("rect"))
+        ch = wh.get("chargers") or {}
+        if ch.get("mode") == "line" and ch.get("start"):
+            expect += 1
+        got = len((band or {}).get("rects") or [])
+        if band is not None and got != expect:
+            problems.append("%s 带的成员数 %d ≠ 手写对照 %d" % (wh.get("id"), got, expect))
+        ids = {sid for sid, _k, _r in reg.spec_solids(wh, ("area", "station"))}
+        for sid, kind in (band or {}).get("members") or []:
+            if kind == "charger":
+                continue
+            if sid not in ids:
+                problems.append("%s 的带成员 %s 不在登记册里" % (wh.get("id"), sid))
+        detail[wh.get("id")] = {"members": got, "expect": expect}
+    return not problems, detail, problems
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="R8.11 门：实体登记册覆盖")
     ap.add_argument("--quiet", action="store_true")
@@ -160,6 +200,7 @@ def main(argv=None):
     layout = jload(DATA / "layout.json")
     whs = layout["warehouses"]
     areas = jload(DATA / "areas.json") if (DATA / "areas.json").exists() else {}
+    spec = jload(CONFIG / "layout_spec.json")
 
     if a.self_test:
         # 1) 塞一个未登记实体键 → 覆盖门必须红
@@ -180,21 +221,30 @@ def main(argv=None):
         ok_scope, _, _ = check_scope(l2l3=list(reg.L2L3_KINDS) + ["conveyor"])
         # 5) 物理区缺 rect（占位却没法碰撞）→ 必须红
         ok_areas, _, _ = check_areas({"areas": [{"id": "X", "physical": True, "rect": None}]})
+        # 6) 深度轴绕过登记册（册子被打空，深度轴却还能拼出带）→ 必须红
+        saved = reg.spec_solids
+        reg.spec_solids = lambda *a, **k: []          # noqa: ARG005
+        try:
+            ok_spec, _, _ = check_spec_view(spec["warehouses"])
+        finally:
+            reg.spec_solids = saved
         good = ((not ok_unknown) and (not ok_orphan) and (not ok_typo)
-                and (not ok_scope) and (not ok_areas))
+                and (not ok_scope) and (not ok_areas) and (not ok_spec))
         print("REGISTRY_SELF_TEST %s" % ("PASS" if good else "FAIL"))
         print("  unknown_entity_key  %s" % ("ok" if not ok_unknown else "MISSED"))
         print("  orphan_kind         %s" % ("ok" if not ok_orphan else "MISSED"))
         print("  guard_typo          %s" % ("ok" if not ok_typo else "MISSED"))
         print("  scope_widened       %s" % ("ok" if not ok_scope else "MISSED"))
         print("  area_missing        %s" % ("ok" if not ok_areas else "MISSED"))
+        print("  depth_axis_bypassed %s" % ("ok" if not ok_spec else "MISSED"))
         return 0 if good else 1
 
     gates, failed = {}, []
     for name, fn in (("REGISTRY_COVERAGE_OK", lambda: check_coverage(whs)),
                      ("REGISTRY_RECT_PARITY_OK", lambda: check_rect_parity(whs)),
                      ("REGISTRY_SCOPE_OK", lambda: check_scope()),
-                     ("REGISTRY_AREAS_OK", lambda: check_areas(areas))):
+                     ("REGISTRY_AREAS_OK", lambda: check_areas(areas)),
+                     ("REGISTRY_SPEC_VIEW_OK", lambda: check_spec_view(spec["warehouses"]))):
         try:
             ok, detail, problems = fn()
         except Exception as e:                                    # noqa: BLE001

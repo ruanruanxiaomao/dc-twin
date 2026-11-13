@@ -82,9 +82,10 @@ R8.9 那个洞的结构性原因。所以登记册给 `area` 一个独立取数�
 
 ## 未做（诚实记账）
 
-- **深度轴未接登记册**：`functional_band` 在 spec 阶段工作（实体还没展开成 rect），
-  它自己从 `areas/stations/chargers` 拼带。宽度轴已改成从 `spawn_points()` 取。
-  要彻底统一，需要一个"spec 阶段"的登记视图（组 + 声明的 areas），属于下一轮。
+- ~~**深度轴未接登记册**~~：**已由 WP1 补齐**（同一天，随 D11-A 一起提交）。
+  `solid_registry.spec_solids / spec_band` 提供 spec 阶段视图（areas/stations/pillars/
+  chargers/conveyors/spawns），`layout_solver.functional_band` 改为直接调它，
+  并由 `REGISTRY_SPEC_VIEW_OK` 断言"深度轴的输入逐项来自册子"。
 - **室外装备不进 L2/L3**：它们在厂房外，放进 L2 footprint 会全红；只进导航与
   `check_area_param` 的残留归因。
 - **`locations` / `zones` 不在册**：前者是取货点（不是占位体），后者是渲染颜色块

@@ -99,6 +99,20 @@ KEY_TO_KIND = {
     "spawn": "spawn",
 }
 
+#: **spec 阶段**（尚未展开）的键 → kind。与展开后同名不同形：
+#: `pillars` 展开成 `obstacles`，`spawns` 展开成 `spawn.robots`，
+#: 货架组此时还没有 rect（只有 origin/rows/bays），所以 rack 不在这一层。
+SPEC_KEY_TO_KIND = {
+    "racks": "rack",       # 组声明：此时只有 origin/rows/bays，没有 rect
+    "docks": "dock",       # 月台 zone 声明：展开后才成 strip
+    "areas": "area",
+    "stations": "station",
+    "chargers": "charger",
+    "spawns": "spawn",
+    "pillars": "obstacle",
+    "conveyors": "conveyor",
+}
+
 #: 非实体的结构键。列全是为了让"多出一个键"能被发现，而不是被静默忽略。
 STRUCT_KEYS = {
     "id", "kind", "origin", "size", "grid", "zones", "locations",
@@ -194,6 +208,88 @@ def spawn_points(wh):
     pts = ((wh.get("spawns") or {}).get("points") or [])
     return [{"id": "spawn_%02d" % (i + 1), "x": float(p[0]), "z": float(p[1])}
             for i, p in enumerate(pts)]
+
+
+def spec_solids(wh, kinds=None):
+    """从**未展开**的 spec warehouse 取实体：返回 [(id, kind, rect)]。
+
+    这一层只有"声明了坐标"的实体：功能区（anchor-based 的没有 rect，跳过）、
+    站、柱、输送线、充电位（line 模式按 count/pitch 展开成盒）。
+    货架组此时还没有 rect，所以 rack 不在这一层——这也是为什么深度轴过去
+    只能自己拼带。
+    """
+    on = set(KINDS if kinds is None else kinds)
+    out = []
+    if "area" in on:
+        for a in wh.get("areas") or []:
+            r = a.get("rect")
+            if r:
+                out.append((a.get("id"), "area", list(r)))
+    if "station" in on:
+        for s in wh.get("stations") or []:
+            r = s.get("rect")
+            if r:
+                out.append((s.get("id"), "station", list(r)))
+    if "obstacle" in on:
+        for p in wh.get("pillars") or []:
+            r = p.get("rect")
+            if r:
+                out.append((p.get("id"), "obstacle", list(r)))
+    if "charger" in on:
+        ch = wh.get("chargers") or {}
+        if ch.get("mode") == "line" and ch.get("start"):
+            x0, z0 = float(ch["start"][0]), float(ch["start"][1])
+            for i in range(int(ch.get("count") or 0)):
+                x = x0 + i * float(ch.get("pitch") or 0.0)
+                out.append(("%s-CHG-%02d" % (wh.get("id", "?"), i + 1), "charger",
+                            [x - 0.8, z0 - 0.4, x + 0.8, z0 + 0.4]))
+    if "conveyor" in on:
+        for cv in wh.get("conveyors") or []:
+            if cv.get("path"):
+                out += [(cv.get("id"), "conveyor", r) for r in conveyor_rects(cv)]
+    return out
+
+
+def spec_band(wh):
+    """功能带（spec 阶段）：深度轴的上限来源。
+
+    成员是 **areas + stations**（都要求有 rect），**加上充电位那一行**——
+    充电位的访问点在 start 往场内 ap_dz 处，漏了它，最后一排货架的 AP 会
+    既不可达（L6）又落在带里（L4）。月台故意不算：它锚南墙，不在可平移的带里。
+
+    返回结构与 `layout_solver.functional_band` 的历史口径完全一致
+    （z0/z1/height/rects），所以接线之后 `area_reflow` 的数字一个都不变。
+    """
+    rects, members = [], []
+    for sid, kind, r in spec_solids(wh, ("area", "station")):
+        rects.append(r)
+        members.append((sid, kind))
+    ch = wh.get("chargers") or {}
+    if ch.get("mode") == "line" and ch.get("start"):
+        cz = float(ch["start"][1])
+        ap_dz = float(ch.get("ap_dz", 0.0))
+        lo, hi = min(cz, cz + ap_dz), max(cz, cz + ap_dz)
+        rects.append([0.0, lo, 0.0, hi + 0.5])   # z 带；x 不参与进深判断
+        members.append(("charger-line", "charger"))
+    if not rects:
+        return None
+    z0 = min(float(r[1]) for r in rects)
+    z1 = max(float(r[3]) for r in rects)
+    return {"z0": z0, "z1": z1, "height": z1 - z0, "rects": rects,
+            "members": members}
+
+
+def unregistered_spec_keys(wh):
+    """spec 阶段出现却没人登记的实体键（同样是"加一类就漏"的防线）。"""
+    bad = []
+    for key, v in (wh or {}).items():
+        if key in SPEC_KEY_TO_KIND or key in STRUCT_KEYS:
+            continue
+        if isinstance(v, list) and v:
+            bad.append((key, len(v)))
+        elif isinstance(v, dict) and any(v.values()):
+            bad.append((key, len(v)))
+    return bad
 
 
 def entity_keys(w):

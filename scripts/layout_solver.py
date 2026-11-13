@@ -64,28 +64,14 @@ def functional_band(wh):
 
     只认 `areas` 与 `stations`。月台（`docks`）**故意不算**——它锚南墙，
     不属于可平移的带；把它算进来会让 shift 把卸货口一起推走。
+
+    R8.11（WP1）：取数走 `solid_registry.spec_band`，不再在这里就地拼。
+    这条函数曾经自己列表推导，于是"areas 归 spec_areas 管、充电位归深度轴管"
+    这类分工只存在于代码形态里；现在成员（`members`）带出处，门能验"深度轴
+    的输入真的来自登记册"。返回结构与历史口径一致，`area_reflow` 数字不变。
     """
-    rects = []
-    for a in wh.get("areas") or []:
-        if isinstance(a, dict) and a.get("rect"):
-            rects.append(a["rect"])
-    for s in wh.get("stations") or []:
-        if isinstance(s, dict) and s.get("rect"):
-            rects.append(s["rect"])
-    # 充电位也算功能带：它的访问点在 start 往场内 ap_dz 处，若货架排到它跟前，
-    # AP 会既不可达（L6）又落在带里（L4）。第一版漏了它，放大后正好剩 1 个
-    # `W-CHG-06 AP not walkable`——1022 → 4 里的那个 1。
-    ch = wh.get("chargers") or {}
-    if ch.get("mode") == "line" and ch.get("start"):
-        cz = float(ch["start"][1])
-        ap_dz = float(ch.get("ap_dz", 0.0))
-        lo, hi = min(cz, cz + ap_dz), max(cz, cz + ap_dz)
-        rects.append([0.0, lo, 0.0, hi + 0.5])   # z 带；x 不参与进深判断
-    if not rects:
-        return None
-    z0 = min(_rect_z0(r) for r in rects)
-    z1 = max(_rect_z1(r) for r in rects)
-    return {"z0": z0, "z1": z1, "height": z1 - z0, "rects": rects}
+    import solid_registry
+    return solid_registry.spec_band(wh)
 
 
 def _baseline_depth(wh):

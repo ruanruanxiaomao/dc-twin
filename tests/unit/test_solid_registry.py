@@ -98,3 +98,33 @@ def test_spawn_points_are_registry_backed():
     assert len(pts) == 12
     assert pts[0]["id"] == "spawn_01"
     assert max(p["x"] for p in pts) == pytest.approx(98.25)
+
+
+# ---------------- WP1：spec 阶段登记视图 ----------------
+
+def _spec():
+    return json.loads((ROOT / "config" / "layout_spec.json").read_text(encoding="utf-8"))
+
+
+def test_depth_axis_reads_registry():
+    """深度轴的功能带必须就是登记册的带（同一对象、同一条路径）。"""
+    import layout_solver
+    wh = _spec()["warehouses"][0]
+    assert layout_solver.functional_band(wh) == reg.spec_band(wh)
+    band = reg.spec_band(wh)
+    assert band["members"], "带成员必须带出处，否则门没法验它从哪来"
+
+
+def test_depth_axis_bypass_is_caught(monkeypatch):
+    """把登记册打空、深度轴却还能拼出带 → 门必须红（防"绕过册子"）。"""
+    monkeypatch.setattr(reg, "spec_solids", lambda *a, **k: [])
+    ok, _detail, problems = csr.check_spec_view(_spec()["warehouses"])
+    assert not ok and problems
+
+
+def test_spec_unregistered_key_is_caught():
+    """spec 阶段塞一个未登记实体键（elevators）→ 必须红。"""
+    whs = copy.deepcopy(_spec()["warehouses"])
+    whs[0]["elevators"] = [{"id": "E1", "rect": [0, 0, 2, 2]}]
+    ok, _detail, problems = csr.check_spec_view(whs)
+    assert not ok and any("elevators" in p for p in problems)
