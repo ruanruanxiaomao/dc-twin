@@ -2,7 +2,7 @@
 
 Blender 5.2.3 LTS 的配送中心场景与任务驱动 AGV 仿真。**主交付是 `.blend` 工程 + 可复现的数据/脚本链**，图/视频/GLB 为辅。
 
-> 本版本已完成两轮独立审计与参数化/场景化设计（整改要点见 [项目报告](docs/PROJECT_REPORT.md)、[开源补齐方案](docs/OPEN_SOURCE_PLAN.md)）：
+> 本版本已完成两轮独立审计与参数化/场景化设计（整改要点见 [项目报告](docs/PROJECT_REPORT.md)）：
 > 闭环作业（HOME → 取货 → 交付 → 回 HOME、全程在场、货物随车）、
 > **四层配置**（布局/设备/需求/场景，改 JSON 不改 Python）、
 > 8 个可断言场景、25 个带公式 KPI、车队状态机与预约表复核。
@@ -27,13 +27,13 @@ Blender 不在 PATH 时设置 `BLENDER_EXE` 环境变量；`dc doctor` 会给出
 pip install -e .
 dc doctor             # 环境诊断（17 项）
 dc demo               # 纯数据层 + 8 个场景 + 启动控制台，无需 Blender
-dc run --scope full   # 完整链路（需要 Blender 5.2），共 46 步（data 14 / scenarios 24 / full 46）
+dc run --scope full   # 完整链路（需要 Blender 5.2），共 47 步（data 14 / scenarios 24 / full 47）
 dc export --target demo     # 无后端静态演示站
 dc export --target release  # 发布包 + SHA256 校验
 ```
 
 Windows 也可用 `.\run_all.ps1`，POSIX 用 `bash run.sh --scope full`；两者都是 `run.py` 的薄包装。
-任一步退出码非 0 即中止。`dc run` 内部按固定顺序执行 **46 步**（data 14 / scenarios 24 / full 46）（见 `dc_twin/runner.py`），顺序**不可颠倒**：
+任一步退出码非 0 即中止。`dc run` 内部按固定顺序执行 **47 步**（data 14 / scenarios 24 / full 47）（见 `dc_twin/runner.py`），顺序**不可颠倒**：
 
 ```
 spec_layout → gen_data → layout_audit → nav_grid → optimize_slotting
@@ -234,7 +234,7 @@ python console\server.py        # 默认 http://127.0.0.1:8765/
 |---|---|---|
 | 数据层重跑 | 13 步纯 Python | 布局 → 栅格 → 派单 → 路径 → 校验 → 路线图，约 10 s |
 | 仅复验 | 3 步 | 负测试 + A1–A40 + 状态表，不重算数据 |
-| 全链路重跑 | 46 步 | 追加 Blender 建模、动画、渲染 942 帧，最慢 |
+| 全链路重跑 | 47 步 | 追加 Blender 建模、动画、渲染 942 帧，最慢 |
 
 深链接便于复现某个画面：`http://127.0.0.1:8765/?t=40&sel=W-R03&view=3d&cam=iso&tab=audit&play=1`
 （`t` 秒、`sel` 车辆、`view` 2d/3d、`cam` iso/top/close、`tab` 面板、`play=1` 自动播放）。
@@ -255,5 +255,5 @@ python console\server.py        # 默认 http://127.0.0.1:8765/
 | 计划书 | 内置 Markdown 阅读器（目录、搜索、字号） | `Ctrl+6` |
 | 工具箱 | 数据链/场景链/测试、控制台、Blender、GLB、实时日志 | `Ctrl+7` |
 
-完整的 v3.5 计划书（现状审计 + 自审核对表 + 字段字典 + 参数总表 + 功能区方案 + 完整性核查 + 风险登记册）见 [`docs/DC_MASTER_PLAN.md`](docs/DC_MASTER_PLAN.md)。
+完整的计划书（现状审计 + 字段字典 + 参数总表 + 功能区方案 + 风险登记册）已并入工作区根目录《模拟运营游戏_资料驱动重构方案书_生产实际与用户自由度.md》（不在本仓库）。
 

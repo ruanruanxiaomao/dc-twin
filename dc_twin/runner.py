@@ -75,6 +75,7 @@ ACCEPT_CHAIN = [
     ("scripts/check_station.py", ("--quiet",), "python"),  # 工位排队可证伪（并行位 4→1）
     ("scripts/check_deadlock.py", ("--quiet",), "python"),  # 死锁退让可证伪（关闭退让必须更差）
     ("scripts/check_webapp.py", ("--quiet",), "python"),  # 静态 3D 网页快照断链/哈希
+    ("scripts/check_capacity_spec.py", ("--quiet",), "python"),  # R0：新 spec schema + B1–B5 负对照
     ("scripts/report_status.py", (), "python"),      # 先重生成状态，再做口径比对
     ("scripts/check_doc_drift.py", (), "python"),    # 文档口径守卫
     ("scripts/export_demo.py", (), "python"),

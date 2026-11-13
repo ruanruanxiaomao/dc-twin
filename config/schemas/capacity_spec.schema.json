@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "capacity_spec (G4)",
+  "type": "object",
+  "required": ["schema_version", "kind", "cell_geometry", "demand_plan", "demand",
+               "load_rate_divisor", "distance_factor_power", "availability_factor",
+               "alerts", "cross_validation"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "kind": {"const": "capacity_spec"},
+    "note": {"type": "string"},
+    "meta": {"type": "object"},
+    "cell_geometry": {
+      "type": "object",
+      "required": ["clearW", "clearD", "clearH", "structW", "structD", "structH",
+                   "gap", "nParallel", "nDepth"],
+      "additionalProperties": false,
+      "properties": {
+        "clearW": {"type": "number", "exclusiveMinimum": 0.1},
+        "clearD": {"type": "number", "exclusiveMinimum": 0.1},
+        "clearH": {"type": "number", "exclusiveMinimum": 0.1},
+        "structW": {"type": "number", "minimum": 0},
+        "structD": {"type": "number", "minimum": 0},
+        "structH": {"type": "number", "minimum": 0},
+        "gap": {"type": "number", "minimum": 0},
+        "nParallel": {"type": "integer", "minimum": 1, "maximum": 50},
+        "nDepth": {"type": "integer", "minimum": 1, "maximum": 100,
+          "description": "B5：写死 1 就无法表达双深/驶入；这里放开"},
+        "loadCap_kg": {"type": "number", "exclusiveMinimum": 0},
+        "levels_left": {"type": "integer", "minimum": 0},
+        "levels_right": {"type": "integer", "minimum": 0}
+      }
+    },
+    "demand_plan": {
+      "type": "object",
+      "required": ["units", "occupancy"],
+      "properties": {
+        "units": {"type": "number", "minimum": 0},
+        "occupancy": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+        "targetSlots": {"type": "number", "minimum": 0}
+      }
+    },
+    "demand": {
+      "type": "object",
+      "required": ["inPerHr", "outPerHr"],
+      "properties": {
+        "inPerHr": {"type": "number", "minimum": 0},
+        "outPerHr": {"type": "number", "minimum": 0},
+        "dist": {"enum": ["uniform", "per_aisle"]},
+        "distFactor": {"type": "number", "minimum": 0},
+        "timeFactor": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "load_rate_divisor": {"enum": [1, 2],
+      "description": "B1：2=修正版；1=资料原式（ρ 高估约一倍）"},
+    "distance_factor_power": {"type": "integer", "minimum": 1, "maximum": 2,
+      "description": "B2：1=修正版；2=资料原式（叉车行走时间实际 d_f²）"},
+    "availability_factor": {"type": "number", "minimum": 0.1, "maximum": 1.0},
+    "aisle_count_margin": {"type": "number", "minimum": 1.0},
+    "equipment_capacity_margin": {"type": "number", "minimum": 1.0},
+    "effective_capacity": {
+      "type": "object",
+      "properties": {
+        "tail_loss": {"type": "number", "minimum": 0, "maximum": 1},
+        "batch_mix_factor": {"type": "number", "minimum": 0, "maximum": 1},
+        "frozen": {"type": "number", "minimum": 0},
+        "maintenance": {"type": "number", "minimum": 0},
+        "disabled": {"type": "number", "minimum": 0},
+        "level": {"enum": ["standard", "typical", "assumption", "placeholder", "gap"]}
+      }
+    },
+    "alerts": {
+      "type": "object",
+      "additionalProperties": {"type": "boolean"}
+    },
+    "cross_validation": {
+      "type": "object",
+      "required": ["sim_vs_analytical_tolerance_pct"],
+      "properties": {
+        "sim_vs_analytical_tolerance_pct": {"type": "number", "exclusiveMinimum": 0, "maximum": 100}
+      }
+    }
+  }
+}

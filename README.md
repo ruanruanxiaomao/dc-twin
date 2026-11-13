@@ -348,9 +348,7 @@ Every arrow is a real file on disk; see [data contracts](docs/data-contracts.md)
 | [Parameter guide](docs/PARAMETER_GUIDE.md) | Every knob in the four-layer config |
 | [Scenarios & enterprise setup](docs/ENTERPRISE_SETUP.md) | Running what-if scenarios, deployment notes |
 | [Real data sources](docs/REAL_DATA_SOURCES.md) | CSV / UCI Retail / WMS adapters and licensing |
-| [Open-source plan](docs/OPEN_SOURCE_PLAN.md) | The assessment that produced this release |
-| [DC expansion plan](docs/DC_EXPANSION_PLAN.md) | Area taxonomy, GitHub reference audit, gap analysis, tunables, user customization and phased roadmap (Chinese) |
-| [Master plan v2.0](docs/DC_MASTER_PLAN.md) | Full plan: domain model, field-level data dictionary, parameter tables, 57-day backlog, A41–A60 acceptance, risk register (Chinese) |
+| Plans (consolidated) | Prior open-source / expansion / master plan docs were consolidated into a single workspace-level plan (`模拟运营游戏_资料驱动重构方案书_生产实际与用户自由度.md`, outside this repo) and retired. See `CHANGELOG.md` for the historical record. |
 | [Full project report](docs/PROJECT_REPORT.md) | Historical stage-by-stage record (Chinese, from the course project) |
 | [Third-party notices](THIRD_PARTY_NOTICES.md) | cargoTwin MIT assets, Three.js, UCI CC BY 4.0 |
 

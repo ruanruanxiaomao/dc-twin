@@ -7,7 +7,7 @@ Install with `pip install -e .`. Every command is also available as
 |---|---|
 | `dc doctor [--json]` | 17 environment checks; `--json` for issue reports |
 | `dc demo [--port N] [--no-serve]` | Data chain + 8 scenarios + local console. No Blender |
-| `dc run --scope data\|scenarios\|full` | 14 / 24 / 46 steps respectively |
+| `dc run --scope data\|scenarios\|full` | 14 / 24 / 47 steps respectively |
 | `dc validate --tier data\|render\|full [--json] [--junit PATH] [--check]` | Acceptance subset, machine output, manifest drift |
 | `dc serve [--port N] [--host H]` | Start the console without regenerating data |
 | `dc export --target demo\|release [--out DIR]` | Static GitHub Pages demo or checksum-verified release bundle |

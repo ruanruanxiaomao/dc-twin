@@ -56,6 +56,29 @@ def art_count():
     return n
 
 
+def refactor_facts():
+    """资料驱动重构（R0–R8）的可核查事实：从 config 现算，不手抄。
+
+    只报"文件里到底有多少条"，不报"计划做多少条"——后者写进方案书，
+    进了状态表就会被当成已完成（这个项目已经因此吃过亏）。
+    """
+    out = {"rack_types": 0, "equipment_types": 0, "specs": 0, "schemas": 0,
+           "gate_ok": None, "stage": "R0"}
+    try:
+        rack = json.load(open(os.path.join(CONFIG, 'rack_spec.json'), encoding='utf-8'))
+        out["rack_types"] = len(rack.get('types') or {})
+        eq = json.load(open(os.path.join(CONFIG, 'equipment_spec.json'), encoding='utf-8'))
+        out["equipment_types"] = len(eq.get('types') or {})
+    except Exception:                       # noqa: BLE001
+        pass
+    for name in ("unit_load_spec", "rack_spec", "equipment_spec", "capacity_spec"):
+        if os.path.exists(os.path.join(CONFIG, name + '.json')):
+            out["specs"] += 1
+        if os.path.exists(os.path.join(CONFIG, 'schemas', name + '.schema.json')):
+            out["schemas"] += 1
+    return out
+
+
 def inventory_facts():
     """库存层可核查事实：SKU / 库位 / 拣选面 / 期初总量 / 补货触发（从产物现算）。"""
     out = {"skus": 0, "locations": 0, "pick_face": 0, "units": 0, "value": 0.0,
@@ -135,6 +158,7 @@ def main():
     steps, steps_err = chain_steps()
     gfacts = game_facts()
     inv = inventory_facts()
+    ref = refactor_facts()
     br = j(OUT, 'build_report.json')
     ba = j(OUT, 'blend_audit.json')
     ar = j(OUT, 'artifact_report.json')
@@ -357,6 +381,11 @@ def main():
             inv.get('stockout', 'n/a'), inv.get('expired_units', 'n/a'),
             inv.get('expired_value', 'n/a'), inv.get('open_lots', 'n/a'),
             inv.get('fefo_violations', 'n/a'))),
+        ('重构层（R0）', '四份新 spec（%s/4）+ schema（%s/4）：货架 %s 类（按存取机理）、设备 %s 类；'
+                       '解析库容层 `capacity_model.py` 已落地但**未接主链**；'
+                       '资料 5 处口径 bug（B1–B5）修正并以 LEGACY 双版做负对照，'
+                       '门 `scripts/check_capacity_spec.py`（已进验收链）'
+         % (ref['specs'], ref['schemas'], ref['rack_types'], ref['equipment_types'])),
         ('分档验收', 'data tier %s/%s PASS；pytest -m "not blender" 与 CI 矩阵见 '
                      '`.github/workflows/ci.yml`'
          % (vdata.get('passed'), vdata.get('total'))),
@@ -406,6 +435,10 @@ def main():
         '批次策略（FEFO↔FIFO）实测只影响 3–5 件报废：完成单量被车队运力压在约 40 单/小时，'
         '而库位有 392 个，订单很少重复打到同一个多批次库位——这是需求模型的性质，不是实现问题。'
         '`cargo_state.json` 依旧是订单级货物状态，不是库存账，两者不可混用。',
+        '- **库容/货架/设备仍是「配置就绪、引擎未接」**：`rack_spec`（9 类）/`equipment_spec`（10 类）/'
+        '`unit_load_spec`/`capacity_spec` 四份 spec 与 `capacity_model.py` 已就位，但'
+        '`spec_layout` 仍只展开一种几何同构货架，`Robot` 仍只读 `fleet_spec.models[0]`，'
+        '解析库容层也**没有**进 tick 循环或关卡判定——这些是 R1–R4 的事，现在还没有。',
         '- **订单仍是合成**：SKU 周转率为 Zipf 合成，`orders_per_hour=45` 仍是 placeholder，'
         '不是真实订单分布。',
         '- **多单已支持、多腿未支持**：tick 层一车可背多单（实测 `max_orders_per_robot=%s`），'

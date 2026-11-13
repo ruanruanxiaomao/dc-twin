@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0",
+  "kind": "unit_load_spec",
+  "note": "集装单元层（G3）：SKU → 载具 → 尺寸/重量/三载 → 标识。三载（动载 dynamic / 静载 static / 货架载 rack）必须分开，上架一律先验货架载（最严苛）。R0 只落数据与口径，接引擎在 R1。",
+  "meta": {
+    "sources": [
+      {"param": "pallet 三载", "value": "CN1210 1500/6000/1000", "source": "物流单元器具参考 F1:205-224", "level": "typical"},
+      {"param": "EUR 托盘", "value": "1200x800x144, 1500/4000/800", "source": "EN 13698-1 / layout_spec:92-99", "level": "standard"},
+      {"param": "gate_read_rate_min", "value": 0.995, "source": "标识与识别参考 F2:455（通道门识读率验收）", "level": "typical"},
+      {"param": "barcode_X_mm", "value": 0.495, "source": "F2:400-403", "level": "standard"}
+    ]
+  },
+  "module_mm": [600, 400],
+  "pallet_standards": {
+    "CN1210": {"l": 1200, "w": 1000, "h": 150, "dynamic_kg": 1500, "static_kg": 6000,
+               "rack_kg": 1000, "tare_kg": 25, "source": "F1:205-224", "level": "typical"},
+    "EUR": {"l": 1200, "w": 800, "h": 144, "dynamic_kg": 1500, "static_kg": 4000,
+            "rack_kg": 800, "tare_kg": 22, "source": "EN13698-1", "level": "standard"},
+    "T11": {"l": 1100, "w": 1100, "h": 150, "dynamic_kg": 1500, "static_kg": 4000,
+            "rack_kg": 900, "tare_kg": 24, "source": "F1:205-210", "level": "typical"}
+  },
+  "tote_classes": {
+    "T600400": {"l": 600, "w": 400, "h": 280, "volume_l": 60, "dynamic_kg": 50,
+                "stack_kg": 250, "tare_kg": 1.8, "per_pallet_layer": 5,
+                "source": "F1:507-512", "level": "typical"},
+    "T400300": {"l": 400, "w": 300, "h": 148, "volume_l": 14, "dynamic_kg": 25,
+                "stack_kg": 100, "tare_kg": 0.9, "per_pallet_layer": 8,
+                "source": "F1:507-512", "level": "typical"}
+  },
+  "load_rating_order": ["rack", "dynamic", "static"],
+  "identification": {
+    "gate_read_rate_min": 0.995,
+    "barcode_X_mm": 0.495,
+    "barcode_X_dynamic_mm": 0.66,
+    "pcs_min": 0.75,
+    "red_invalid": true,
+    "rfid_bands": {
+      "LF": {"read_m": 0.1},
+      "HF": {"read_m": 1.0},
+      "UHF": {"read_m": [1, 10]},
+      "active24G": {"read_m": [10, 100]}
+    },
+    "sscc_digits": 18,
+    "container_iso6346_digits": 11,
+    "ai_fields": {"batch": "(10)", "expiry": "(17)", "serial": "(21)",
+                  "qty": "(310n)", "net_weight": "(330n)"},
+    "source": "F2:215-222,368-371,400-403,455",
+    "level": "typical"
+  },
+  "compatibility_rules": {
+    "rack_rating_is_strictest": true,
+    "check_outer_envelope": true,
+    "envelope_note": "外廓按【实测最大值 + 异常突出】算，不是名义托盘尺寸（货架参考:8）",
+    "equipment_payload_margin": 1.0,
+    "level": "typical"
+  }
+}

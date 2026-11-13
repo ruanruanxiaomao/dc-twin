@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "equipment_spec (G2)",
+  "type": "object",
+  "required": ["schema_version", "kind", "time_model", "types"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "kind": {"const": "equipment_spec"},
+    "note": {"type": "string"},
+    "meta": {"type": "object"},
+    "defaults": {
+      "type": "object",
+      "properties": {
+        "time_factor": {"type": "number", "exclusiveMinimum": 0},
+        "pick_place_s": {"type": "number", "minimum": 0},
+        "availability_factor": {"type": "number", "minimum": 0.1, "maximum": 1.0},
+        "level": {"enum": ["standard", "typical", "assumption", "placeholder", "gap"]}
+      }
+    },
+    "time_model": {
+      "type": "object",
+      "required": ["stacker", "forklift", "height_check", "load_rate_divisor"],
+      "properties": {
+        "stacker": {"type": "object"},
+        "forklift": {"type": "object"},
+        "height_check": {"enum": ["all_types", "forklift_only"]},
+        "load_rate_divisor": {"enum": [1, 2],
+          "description": "B1：2=修正版（1 复合=1 存+1 取）；1=资料原式（高估约一倍）"},
+        "distance_factor_power": {"type": "integer", "minimum": 1, "maximum": 2,
+          "description": "B2：1=修正版（D̄ 已含 d_f）；2=资料原式（实际 d_f²）"},
+        "note": {"type": "string"}
+      }
+    },
+    "ast_drives_aisle_width": {"type": "boolean"},
+    "aisle_width_rule": {
+      "type": "object",
+      "properties": {
+        "formula": {"type": "string"},
+        "clearance": {"type": "number", "minimum": 0},
+        "note": {"type": "string"},
+        "level": {"enum": ["standard", "typical", "assumption", "placeholder", "gap"]}
+      }
+    },
+    "types": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["class", "source", "level"],
+        "properties": {
+          "name": {"type": "string"},
+          "class": {"enum": ["forklift", "stacker", "shuttle", "agv_amr", "lift",
+                             "conveyor", "sorter", "robot_arm", "manual"]},
+          "payload_kg": {"type": "number", "exclusiveMinimum": 0},
+          "max_height_m": {"type": "number", "exclusiveMinimum": 0},
+          "ast_mm": {"type": "number", "exclusiveMinimum": 0},
+          "aisle_width_mm": {"type": "number", "exclusiveMinimum": 0},
+          "speed_mps": {"type": "number", "exclusiveMinimum": 0},
+          "hoist_mps": {"type": "number", "exclusiveMinimum": 0},
+          "travel_mpm": {"type": "number", "exclusiveMinimum": 0},
+          "hoist_mpm": {"type": "number", "exclusiveMinimum": 0},
+          "single_cycle_s": {"type": "number", "exclusiveMinimum": 0},
+          "double_cycle_s": {"type": "number", "exclusiveMinimum": 0},
+          "pcs_per_h": {"type": "number", "exclusiveMinimum": 0},
+          "pallets_per_h": {"type": "number", "exclusiveMinimum": 0},
+          "boxes_per_h": {"type": "number", "exclusiveMinimum": 0},
+          "cycles_per_h": {"type": "number", "exclusiveMinimum": 0},
+          "source": {"type": "string"},
+          "level": {"enum": ["standard", "typical", "assumption", "placeholder", "gap"]},
+          "gap_fields": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    }
+  }
+}

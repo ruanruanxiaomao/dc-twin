@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "kind": "equipment_spec",
+  "note": "设备类型库（G2）。现状 fleet_spec 只有一个 AMR-250 且 sim_engine 硬编码 models[0]；R3 才接引擎。这里先把【类型 + 时间模型 + AST → 巷道宽】的口径固定下来，数值带 source/level；资料未覆盖的标 gap。",
+  "meta": {
+    "sources": [
+      {"param": "叉车 AST/速度/载荷", "value": "3400mm / 5.0m/s / 2000kg", "source": "M4:333-340,218", "level": "typical"},
+      {"param": "堆垛机单/复合作业", "value": "65s / 120s / 150托每小时", "source": "F3:240-250", "level": "typical"},
+      {"param": "巷道数余量 / 设备能力余量", "value": 1.2, "source": "起升设备参考:501；输送分拣参考:422,517", "level": "typical"}
+    ]
+  },
+  "defaults": {
+    "time_factor": 1.0,
+    "pick_place_s": 12.0,
+    "availability_factor": 0.85,
+    "level": "assumption"
+  },
+  "time_model": {
+    "stacker": {"single": "D/v + H/vv + tp*tf", "composite": "0.6*(D/v + H/vv) + 2*tp*tf"},
+    "forklift": {"single": "2*(D/v) + tp*tf", "composite": "1.5*(D/v) + 2*tp*tf"},
+    "height_check": "all_types",
+    "load_rate_divisor": 2,
+    "distance_factor_power": 1,
+    "note": "B1/B2/B3 的修正写在这里：负荷率分母 ×2（1 复合 = 1 存 + 1 取）；叉车行走时间不再二次乘距离系数（资料原式 (D̄/v)·d_f 且 D̄ 已含 d_f，实际成了 d_f²）；高度检查对所有设备类型生效（资料只在叉车分支查，堆垛机漏检）。"
+  },
+  "ast_drives_aisle_width": true,
+  "aisle_width_rule": {
+    "formula": "aisle_width = max(layout_min_aisle, ast_mm/1000 + clearance)",
+    "clearance": 0.2,
+    "note": "「省 1m ≈ 多一排货架」：AST 直接决定巷道宽，进而决定库容密度。默认关闭，由关卡显式启用（D5）。",
+    "level": "assumption"
+  },
+  "types": {
+    "forklift_counterbalance": {
+      "name": "平衡重式叉车", "class": "forklift", "payload_kg": 2000,
+      "load_center_mm": 500, "lift_mm": 3000, "ast_mm": 3400,
+      "speed_mps": 5.0, "hoist_mps": 0.4, "navigation": "manual",
+      "derating": [{"load_center_mm": 800, "payload_kg": 1350}],
+      "source": "M4:333-340,218", "level": "typical"
+    },
+    "forklift_reach": {
+      "name": "前移式叉车", "class": "forklift", "payload_kg": 1600,
+      "lift_mm": 13000, "ast_mm": 2900, "speed_mps": 4.0, "hoist_mps": 0.35,
+      "navigation": "manual", "source": "M4:341-352", "level": "typical"
+    },
+    "forklift_vna": {
+      "name": "窄巷道叉车（VNA）", "class": "forklift", "payload_kg": 1200,
+      "lift_mm": 18000, "ast_mm": 1800, "speed_mps": 3.0, "hoist_mps": 0.4,
+      "navigation": "rail_guided", "source": "M4:353-360", "level": "typical"
+    },
+    "stacker_unitload": {
+      "name": "托盘堆垛机", "class": "stacker", "payload_kg": 1000,
+      "travel_mpm": 160, "hoist_mpm": 30, "fork_mpm": 15,
+      "single_cycle_s": 65, "double_cycle_s": 120, "pallets_per_h": 150,
+      "aisle_width_mm": 1550, "ast_mm": 1550, "max_height_m": 30,
+      "source": "F3:240-250", "level": "typical"
+    },
+    "stacker_miniload": {
+      "name": "料箱堆垛机（Miniload）", "class": "stacker", "payload_kg": 50,
+      "single_cycle_s": 25, "boxes_per_h": 250, "max_height_m": 12,
+      "aisle_width_mm": 1200, "ast_mm": 1200, "source": "F3:339-349", "level": "typical"
+    },
+    "pallet_shuttle": {
+      "name": "托盘穿梭车", "class": "shuttle", "payload_kg": 1500,
+      "speed_mps": 1.0, "deep_positions": [5, 40],
+      "change_aisle_s": 30, "source": "M4:521-524", "level": "typical",
+      "gap_fields": ["change_aisle_s"]
+    },
+    "amr_bin": {
+      "name": "料箱 AMR", "class": "agv_amr", "payload_kg": 50,
+      "lift_m": 2.2, "speed_mps": 1.5, "nav_mm": 5, "path": "free_slam",
+      "battery_h": 8, "source": "M4:411-420", "level": "typical"
+    },
+    "agv_latent_rmfs": {
+      "name": "潜伏式 AGV（货到人）", "class": "agv_amr", "payload_kg": 1000,
+      "lift_mm": 100, "speed_mps": 1.5, "nav_mm": 15, "path": "fixed",
+      "battery_h": 8, "source": "M4:411-420", "level": "typical"
+    },
+    "conveyor_roller": {
+      "name": "辊道输送机", "class": "conveyor", "speed_mps": 0.6,
+      "accum_segment_rollers": 3, "source": "M5:168-175,124-125", "level": "typical"
+    },
+    "sorter_crossbelt": {
+      "name": "交叉带分拣机", "class": "sorter", "pcs_per_h": 25000,
+      "ring_speed_mps": 2.5, "utilization": 0.7, "chutes_factor": 1.3,
+      "induction_pcs_per_h": 1500, "source": "M5:435-443,508", "level": "typical"
+    }
+  }
+}

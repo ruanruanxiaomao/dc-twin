@@ -4,6 +4,63 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] — R0 资料驱动重构：口径护栏（不改行为）
+
+Phase R0 of the material-driven refactor (plan v1.2 §11). Nothing is wired into the
+engine yet: this round only puts the four new specs, their schemas, the analytic
+capacity formulas and the five calibre corrections on disk — with negative controls
+that prove the corrections are doing something.
+
+### Added
+
+- **Four specs + schemas**: `unit_load_spec` (pallets/totes/load ratings/identification),
+  `rack_spec` (9 types keyed by **access mechanism**, not automation), `equipment_spec`
+  (10 types + time model + AST→aisle-width rule), `capacity_spec` (cell geometry, demand,
+  factors, alerts, cross-validation tolerance). Every number carries `source` and
+  `level`; values the material does not give are marked `level:"gap"` instead of invented.
+- **`scripts/capacity_model.py`** — pure analytic layer (no rng, no clock, writes
+  nothing): cell geometry → unit → aisle → device cycles → capacity / load / warnings.
+  Ships **both** the corrected and the material's original formulas (`FIX` / `LEGACY`),
+  because a fix nobody can switch off is a fix nobody can test.
+- **`scripts/check_capacity_spec.py`** — R0 gate: 4 schemas validate, specs are
+  semantically consistent (drive-in must be single-end LIFO, push-back ≠ pallet
+  gravity, every rack's equipment exists in the type library, the B1/B2/B3 switches
+  are still the corrected values), and `capacity_model --self-test` passes.
+  Wired into `ACCEPT_CHAIN` (46 → 47 steps).
+- **`tests/unit/test_capacity_model.py`** — 25 tests: appendix C formulas by hand,
+  the five negative controls, and the config semantics that R2/R3 will depend on.
+- **ADR-REFACTOR-01..05** + `REFACTOR_PROTOCOL.md` (gate-before-code, default-off,
+  generational refreeze, snapshot upgrade rules).
+
+### Fixed (calibre, per §5.1)
+
+- **B1** load rate divisor: `(in+out)/(2·C)`. The material divides single-command
+  counts by composite capacity, over-stating load by ~2×.
+- **B2** forklift travel: `D̄=(L_a/2)·d_f` already contains `d_f`, so `t=D̄/v` — the
+  material multiplies again and gets `d_f²`, inconsistent with its own stacker branch.
+- **B3** height check applies to **all** equipment types; the material only checks
+  forklifts, so a stacker serving a 9 m rack raises no warning.
+- **B4** the load fields are actually used: gross pallet weight ≤ min(rack rating,
+  cell rating, equipment payload).
+- **B5** `n_depth` unlocked (double-deep capacity can double, rear blocked by front);
+  the material hard-codes it to 1.
+
+### Verified
+
+| Gate | Evidence |
+|---|---|
+| R0_SCHEMA_OK | 4/4 specs validate against their schemas |
+| R0_SEMANTIC_OK | rack/equipment/unit/capacity specs agree with each other |
+| R0_BUGFIX_NEG_OK | each of B1–B5 gives a **different** result under `LEGACY`, in the expected direction |
+| STEP_BASELINE_OK | v3 golden still byte-identical (8 scenarios / 24 artefacts) |
+| KPI_BASELINE_OK | 336 frozen values unchanged |
+| pytest | 223 passed |
+
+**Deliberate deviation from the plan, recorded in ADR-REFACTOR-04:** §12.1's B1 example
+says `in=out=C_a ⇒ ρ=0.5`, but C.7 defines `C_a` as *composite* capacity, under which
+`in=out=C_a` is saturated (ρ=1.0). The project pins the composite definition and asserts
+both points, so the guarded property (denominator ×2) is unchanged either way.
+
 ## [Unreleased] — P6b 批次 / 效期 / FEFO
 
 P6a gave the engine a (SKU × location) ledger, but not **lots**: the same SKU's stock

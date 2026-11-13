@@ -4,15 +4,14 @@ The project was shaped by three external review documents produced during the
 course project (two strict audits and one parameterisation design report).
 They are **not distributed with this repository**: they were inputs to the
 work, not deliverables, and their conclusions are already incorporated in
-[the full project report](../PROJECT_REPORT.md) (sections 12–16) and in
-[the open-source plan](../OPEN_SOURCE_PLAN.md).
+[the full project report](../PROJECT_REPORT.md) (sections 12–16).
 
 | Document | What it changed | Where the outcome lives |
 |---|---|---|
 | Audit round 1 (engineering / geometry, 8×P0) | Layout collisions, physical time model, independent validators, negative tests, compliance files | `docs/PROJECT_REPORT.md` §12 |
 | Audit round 2 (operations / route-map semantics) | Priority scheduling, coverage KPIs, time–space diagram, honest "conditional pass" labels | `docs/PROJECT_REPORT.md` §14 |
 | Design plan (four-layer config, 10 steps, A22–A40) | `layout_spec.json`, `spec_layout.py`, 8 scenarios, 25 KPIs, fleet/reservation replay | `docs/PROJECT_REPORT.md` §16 |
-| Open-source plan (this release) | Repo hygiene, cross-platform CLI, hero README, CI, output contracts, static demo | `docs/OPEN_SOURCE_PLAN.md`, `README.md`, `CHANGELOG.md` |
+| Open-source plan (this release) | Repo hygiene, cross-platform CLI, hero README, CI, output contracts, static demo | `README.md`, `CHANGELOG.md` |
 
 Historical numbers in the project report are **snapshots**. Current measured
 values are generated from JSON into [`out/CURRENT_STATUS.md`](../../out/CURRENT_STATUS.md).
@@ -35,3 +34,16 @@ contradict the engine. They are recorded here because the *reasons* outlive the 
 | [GAME-08](ADR-GAME-08.md) | Override whitelist derives from the engine | never keep a second copy of policy names |
 | [GAME-09](ADR-GAME-09.md) | Inventory: procurement stays out of P&L; snapshot 2.0; one v2 refreeze | COGS needs its own ADR + retariff + refreeze; SKU is derived from location, never sampled |
 | [GAME-10](ADR-GAME-10.md) | Lots/expiry/FEFO: demo-time shelf life, waste is not a P&L line, expiry times join the scheduler | Waste costing needs the COGS ADR; batch policy is a weak lever under ~40 picks/h, so no level_06 |
+
+## 资料驱动重构（R0–R8，方案书 v1.2）
+
+主方案见工作区根目录 `模拟运营游戏_资料驱动重构方案书_生产实际与用户自由度.md`（§0–§16 + 附录 A–G）。
+施工协议见 [REFACTOR_PROTOCOL](REFACTOR_PROTOCOL.md)（先立门、默认关闭、分代重冻、快照升版）。
+
+| ADR | Decision | Consequence |
+|---|---|---|
+| [REFACTOR-01](ADR-REFACTOR-01.md) | Racks typed by **access mechanism**, not automation; `n_depth` unlocked; effective ≠ nominal slots | 9 types first; several parameters are `typical`/`gap`, not measured |
+| [REFACTOR-02](ADR-REFACTOR-02.md) | Equipment type library; AST drives aisle width (**default off**) | Turning it on recomputes the nav grid, so it stays off until a level enables it |
+| [REFACTOR-03](ADR-REFACTOR-03.md) | Analytic capacity layer **does not replace** the DES; they cross-validate at 15% | Assumption-level factors can never be quoted as findings |
+| [REFACTOR-04](ADR-REFACTOR-04.md) | The material's five calibre bugs are fixed **and** kept as `LEGACY` for negative controls | B1 capacity unit is pinned: `C_a` is composite cycles/h, so `in=out=C_a ⇒ ρ=1.0` |
+| [REFACTOR-05](ADR-REFACTOR-05.md) | Every new mechanism is config-gated off by default; one behaviour change = one refreeze | Racks (v4) and equipment (v5) must refreeze separately, never together |
