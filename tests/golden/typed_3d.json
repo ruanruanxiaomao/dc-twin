@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "kind": "typed_3d_golden",
-  "note": "带 rack_type 的整场：counts + GLB 结构指纹双锚（字节哈希不可复现，见 ADR-12）。默认构建的锚点不在这里。",
+  "note": "带 rack_type 的整场：counts + layout_sha + GLB 字节哈希（已规整，见 ADR-13）+ 结构指纹，四锚并列。ADR-12 是历史：R8.3 时字节不可复现，曾只用结构指纹；R8.4 规整后字节锚恢复，结构指纹留作第二道。默认构建的锚点不在这里。",
   "anchors": {
     "dispatch": {
       "double_deep": 40,

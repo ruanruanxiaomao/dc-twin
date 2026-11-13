@@ -259,6 +259,9 @@ TYPED_TYPES = ("double_deep", "drive_in", "drive_through", "pallet_shuttle",
                "mobile", "carton_flow", "pallet_gravity")
 TYPED_DIR = OUT / "exp" / "typed"
 TYPED_GOLDEN = ROOT / "tests" / "golden" / "typed_3d.json"
+#: golden 的说明文字。唯一真相源：冻结时写入、门里比对，避免"锚点改了、注释没改"这种漂移。
+TYPED_GOLDEN_NOTE = (
+    "带 rack_type 的整场：counts + layout_sha + GLB 字节哈希（已规整，见 ADR-13）+ 结构指纹，四锚并列。ADR-12 是历史：R8.3 时字节不可复现，曾只用结构指纹；R8.4 规整后字节锚恢复，结构指纹留作第二道。默认构建的锚点不在这里。")
 
 
 def make_typed_spec(base=None):
@@ -391,6 +394,24 @@ def check_masters(summ):
     if "asset_gantry_crane" not in unplaced:
         problems.append("龙门吊没有落脚点（这套布局无堆场），应显式记为未摆放而不是随便摆")
     return not problems, {"placed": placed, "unplaced": sorted(unplaced)}, problems
+
+
+def check_golden_note(golden_path=None):
+    """golden 自己写的说明必须与实际锚点同义。
+
+    R8.3 冻结时 note 写的是"字节哈希不可复现"，R8.4 把字节锚加回来却没改说明——
+    golden 里长期躺着一句假话。锚点对、说明错，是最难被发现的那种漂移：没人会去读
+    note，读到的人也以为现状就是不可复现。所以把 note 升级为被校验的字段。
+    """
+    p = Path(golden_path or TYPED_GOLDEN)
+    if not p.exists():
+        return True, {"present": False}, []
+    got = (jload(p) or {}).get("note")
+    if got != TYPED_GOLDEN_NOTE:
+        return False, {"present": True}, [
+            "golden 的 note 与锚点语义不同步（锚点已含 glb_sha256，说明仍写旧结论）"
+        ]
+    return True, {"present": True, "anchors": len((jload(p) or {}).get("anchors") or {})}, []
 
 
 def compare_anchor(summ, golden):
@@ -543,6 +564,15 @@ def self_test():
     stale = copy.deepcopy(fake_rep); stale["source_sha"] = "0" * 64
     cases.append(("variant_probe_stale", not check_variants(stale)[0]))
 
+    # 4e golden 说明漂移必须被抓（R8.3 的真实事故）
+    import tempfile
+    with tempfile.TemporaryDirectory() as td:
+        stale = Path(td) / "g.json"
+        stale.write_text(json.dumps({"note": "字节哈希不可复现", "anchors": {}}), encoding="utf-8")
+        cases.append(("golden_note_stale", not check_golden_note(stale)[0]))
+        if TYPED_GOLDEN.exists():
+            cases.append(("golden_note_current", check_golden_note()[0]))
+
     # 5 设备开关被打开
     s = copy.deepcopy(spec)
     s.setdefault("activate", {})["equipment_dispatch"] = True
@@ -624,7 +654,7 @@ def main(argv=None):
                 TYPED_GOLDEN.parent.mkdir(parents=True, exist_ok=True)
                 TYPED_GOLDEN.write_text(json.dumps(
                     {"schema_version": "1.0", "kind": "typed_3d_golden",
-                     "note": "带 rack_type 的整场：counts + GLB 结构指纹双锚（字节哈希不可复现，见 ADR-12）。默认构建的锚点不在这里。",
+                     "note": TYPED_GOLDEN_NOTE,
                      "anchors": anchors}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
                 ok, detail, problems = True, {"frozen": str(TYPED_GOLDEN.relative_to(ROOT))}, []
             elif TYPED_GOLDEN.exists():
@@ -633,6 +663,12 @@ def main(argv=None):
                 ok, detail, problems = False, {}, [
                     "没有 tests/golden/typed_3d.json（确认结果符合预期后加 --freeze 冻结一次）"]
             gates["TYPED_BUILD_OK"] = {"ok": ok, "detail": detail, "problems": problems}
+            nok, ndetail, nproblems = check_golden_note()
+            gates["GOLDEN_NOTE_OK"] = {"ok": nok, "detail": ndetail, "problems": nproblems}
+            if not nok:
+                failed.append("GOLDEN_NOTE_OK")
+            if not a.quiet and not nok:
+                print("%-26s FAIL  -> %s" % ("GOLDEN_NOTE_OK", "; ".join(nproblems[:1])))
             mok, mdetail, mproblems = check_masters(summ)
             gates["IDLE_MASTER_WIRED_OK"] = {"ok": mok, "detail": mdetail,
                                              "problems": mproblems}

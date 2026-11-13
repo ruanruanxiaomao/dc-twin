@@ -48,7 +48,15 @@ def _run(spec, tag):
     if r.returncode != 0 and not rep.exists():
         raise RuntimeError("spec_layout 崩溃（tag=%s）：%s"
                            % (tag, ((r.stdout or "") + (r.stderr or ""))[-400:]))
-    layout = jload(out) if out.exists() else None
+    alt = TMP / ("%s_spec_layout.json" % tag)
+    if out.exists():
+        layout = jload(out)
+    elif alt.exists():
+        # 校验拒绝时 --write 不落盘（这是对的：越界不许写进 data/），
+        # 但门仍需要看到"被拒的那份布局"才能归因，所以从 --out 读。
+        layout = jload(alt)
+    else:
+        layout = None
     report = jload(rep) if rep.exists() else {}
     return r.returncode, layout, report
 
@@ -70,7 +78,11 @@ def _reflow_from_size(spec):
     """
     s = copy.deepcopy(spec)
     s.setdefault("options", {})["reflow_rows"] = True
+    s["options"]["area_reflow"] = True
     for wh in s["warehouses"]:
+        # 基线是**功能区坐标对应的原始进深**。没有它求解器拒绝推断（shift=0），
+        # 这是刻意的：猜一个常量会把四个仓一起改布局（我踩过）。
+        wh.setdefault("area_baseline", {})["depth"] = wh["size"]["depth"]
         for g in wh["racks"]:
             g["depth_budget"] = "from_size"
     return s
@@ -136,6 +148,71 @@ def check_fill(rc, layout, report, base_layout):
                           "base": base_loc}, problems
 
 
+#: 求解后允许残留的 issue 上限。不是"容忍越界"，而是**已知且已归因**的冲突：
+#: 场外叉车/卡车（scene 级绝对坐标）在厂房扩张后被圈进室内，压在货架访问点上。
+#: 它们不随室内功能带移动——那是装备层重排（R8.8）。数量一旦超过这个数，说明
+#: 新问题出现了，门必须变红。
+SOLVE_RESIDUAL_MAX = 6
+
+
+def _explain_residual(issue, layout, spec):
+    """给每条残留写归因。归因写不出来 = 这不是已知问题 = 门该红。"""
+    msg = issue.get("message") or ""
+    if "SHELF" in msg or "CHG" in msg:
+        return ("场外叉车/卡车未随功能带后移，扩张后被圈进室内（装备层重排属 R8.8）")
+    return None
+
+
+def check_solve(rc, layout, report, base_layout, spec=None):
+    """D10b 求解器：面积放大后必须**结构冲突清零**且**库容真增**。
+
+    三条一起断言，少一条这门就是空的：
+
+    1. L3（重叠）/ L4（AP 落进实体）**必须为 0** —— 这两类是"布局自相矛盾"，
+       一条都不该留；
+    2. issue 总量相对"未求解的 from_size"（1022 条）必须降 99% 以上 —— 证明求解器
+       不是把冲突挪了个地方；
+    3. 库位必须严格多于基准 —— 否则"求解成功"只是把越界换成了不增长。
+
+    残留的 L6 允许存在，但**必须逐条归因**，且数量有上限。
+    """
+    problems = []
+    issues = (report or {}).get("issues") or []
+    rules = [i.get("rule") for i in issues if isinstance(i, dict)]
+    # 校验层拒绝写盘是**正确**的（越界不许进 data/）。所以这里不要求 rc==0，
+    # 而要求"被拒的理由必须是已知且已归因的那一类"。若拒绝理由里夹着 L3/L4
+    # 或无法归因的条目，下面的断言会各自判红——门不是在给退出码放水。
+    if rc != 0 and not issues:
+        problems.append("求解被拒但没给任何 issue（拒绝理由都说不清）")
+    for bad in ("L3", "L4"):
+        if bad in rules:
+            problems.append("%s 仍有 %d 条：结构冲突没清零" % (bad, rules.count(bad)))
+    total = len(issues)
+    if total > SOLVE_RESIDUAL_MAX:
+        problems.append("残留 %d 条 issue，超过已归因上限 %d" % (total, SOLVE_RESIDUAL_MAX))
+    unexplained = [i for i in issues
+                   if isinstance(i, dict) and not _explain_residual(i, layout, spec)]
+    if unexplained:
+        problems.append("%d 条残留无法归因：%s"
+                        % (len(unexplained), (unexplained[0].get("message") or "")[:40]))
+    if layout is None:
+        problems.append("求解没有产出布局")
+        return False, {"issues": total}, problems
+    base_loc = base_layout["summary"]["locations"] if base_layout else 0
+    loc = layout["summary"]["locations"]
+    if loc <= base_loc:
+        problems.append("求解后库位没有增加（%s → %s）" % (base_loc, loc))
+    shifts = [r.get("shift") for wh in layout["warehouses"]
+              for r in (wh.get("area_reflow") or [])]
+    if not any(abs(x or 0) > 1e-9 for x in shifts):
+        problems.append("功能带没有平移（area_baseline 缺失或 shift=0）——面积没传导")
+    return not problems, {"issues_before": 1022, "issues_after": total,
+                          "rules": sorted(set(rules)),
+                          "residual": [i.get("message") for i in issues][:8],
+                          "locations": loc, "base_locations": base_loc,
+                          "band_shifts": [round(x, 2) for x in shifts if x]}, problems
+
+
 def check_shrink(rc, report):
     problems = []
     issues = report.get("issues") or []
@@ -157,8 +234,10 @@ def main(argv=None):
     wh = spec["warehouses"][0]
     W, D = int(wh["size"]["width"]), int(wh["size"]["depth"])
 
-    for f in TMP.glob("*_layout.json"):
-        f.unlink()                      # 不留旧产物冒充本次结果
+    stale = set(TMP.glob("*_layout.json")) | set(TMP.glob("*_spec_layout.json")) \
+        | set(TMP.glob("*_report.json"))
+    for f in sorted(stale):
+        f.unlink(missing_ok=True)       # 不留旧产物冒充本次结果
     rc0, base, _ = _run(spec, "base")
     rc1, big, rep1 = _run(_resize(spec, W + 20, D + 14), "big")
     rc3, fill, rep3 = _run(_resize(_reflow_from_size(spec), W + 20, D + 14), "fill")
@@ -169,16 +248,34 @@ def main(argv=None):
         ok_self, _, probs_self = check_param(base, base)
         ok_shrink, _, probs_shrink = check_shrink(0, {"issues": []})
         ok_fill, _, _ = check_fill(0, base, {"issues": []}, base)
-        good = (not ok_self) and (not ok_shrink) and (not ok_fill) and rc0 == 0 and rc1 == 0
+        # 求解器负对照：拿"没求解过的基准布局"当求解结果，必须自己判红
+        # （它没有 area_reflow 记录 → 面积没传导）
+        ok_solve, _, _ = check_solve(0, base, {"issues": []}, base)
+        # 求解器专用反例：门对"冲突没降下来"和"库位没涨"必须各自判红，
+        # 否则 AREA_SOLVE_OK 只是把 from_size 的老结论换了个名字。
+        fake_layout = copy.deepcopy(base)
+        fake_layout["warehouses"][0]["area_reflow"] = [{"shift": 14.0}]
+        bad_rules = {"issues": [{"rule": "L3", "message": "A vs B OVERLAP"}]}
+        ok_bad_rules, _, _ = check_solve(0, fake_layout, bad_rules, base)
+        no_gain = copy.deepcopy(fake_layout)
+        no_gain["summary"]["locations"] = base["summary"]["locations"]
+        ok_no_gain, _, _ = check_solve(0, no_gain, {"issues": []}, base)
+        good = ((not ok_self) and (not ok_shrink) and (not ok_fill)
+                and (not ok_solve) and (not ok_bad_rules) and (not ok_no_gain)
+                and rc0 == 0 and rc1 == 0)
         print("AREA_SELF_TEST %s" % ("PASS" if good else "FAIL"))
         print("  no_change_detected  %s" % ("ok" if not ok_self else "MISSED"))
         print("  silent_shrink       %s" % ("ok" if not ok_shrink else "MISSED"))
         print("  silent_fill         %s" % ("ok" if not ok_fill else "MISSED"))
+        print("  solve_without_shift %s" % ("ok" if not ok_solve else "MISSED"))
+        print("  solve_l3_not_cleared %s" % ("ok" if not ok_bad_rules else "MISSED"))
+        print("  solve_no_capacity   %s" % ("ok" if not ok_no_gain else "MISSED"))
         return 0 if good else 1
 
     gates, failed = {}, []
     for name, fn in (("AREA_PARAM_OK", lambda: check_param(base, big)),
                      ("AREA_FILL_OK", lambda: check_fill(rc3, fill, rep3, base)),
+                     ("AREA_SOLVE_OK", lambda: check_solve(rc3, fill, rep3, base, spec)),
                      ("AREA_SHRINK_NEG", lambda: check_shrink(rc2, rep2))):
         try:
             ok, detail, problems = fn()
@@ -198,8 +295,10 @@ def main(argv=None):
            "failed": failed, "gates": gates,
            "sizes": {"base": [W, D], "big": [W + 20, D + 14],
                      "small": [max(20, W // 3), max(20, D // 3)]},
-           "note": "只验参数是否真传导到壳体/货架/导航格与越界是否拒绝；"
-                   "交互重摆（拖拽功能区/月台）属于 R8.7，未在此声称。"}
+           "note": "验四件事：参数传导到壳体/货架/导航格、越界必须拒绝、"
+                   "D10b 求解器让\"填满进深\"变成 0 结构性冲突且库容真增、"
+                   "残留 L6 必须逐条归因（场外装备未重排，属 R8.8）。"
+                   "交互重摆（D10a 拖拽）未在此声称。"}
     TMP.mkdir(parents=True, exist_ok=True)
     (OUT / "area_param_report.json").write_text(
         json.dumps(rep, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

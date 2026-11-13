@@ -18,6 +18,7 @@ import argparse
 import copy
 import hashlib
 import json
+import layout_solver
 import math
 import os
 import random
@@ -248,6 +249,12 @@ def expand(spec, fleet_counts=None):
 
     for wh in spec['warehouses']:
         ox, oz = wh['origin']
+        # R8.7 / D10b：面积变了，先把**功能带**贴到新的后墙，月台不动。
+        # 默认 size（70）下这个 shift 恒为 0，所以默认布局逐字节不变；放大到 84 时
+        # shift=+14，PACK/SORT/充电位一起后移，货架区才吃得下新增的进深。
+        if (spec.get('options') or {}).get('area_reflow'):
+            wh, area_rec = layout_solver.shift_band(wh, float(wh['size']['depth']))
+
         W, D, H = (wh['size']['width'], wh['size']['depth'], wh['size']['height'])
         zones = []
         for z in wh.get('zones', [{'id': 'Z1', 'name': 'Zone Z1',
@@ -261,6 +268,8 @@ def expand(spec, fleet_counts=None):
             })
         w = {
             'id': wh['id'], 'kind': wh.get('kind', 'REGIONAL'),
+            # 功能带重排的取证：平移了多少、带从哪儿挪到哪儿。默认布局没有这个键。
+            **({'area_reflow': wh['area_reflow']} if wh.get('area_reflow') else {}),
             'origin': [r2(ox), r2(oz)], 'size': dict(wh['size']),
             'grid': {'cell_size': defaults['grid']['cell_size'],
                      'cols': int(W / defaults['grid']['cell_size']),
@@ -298,14 +307,16 @@ def expand(spec, fleet_counts=None):
                 if (spec.get('options') or {}).get('reflow_rows'):
                     budget = group.get('depth_budget')
                     if budget == 'from_size':
-                        # R8.6：预算从**厂房进深**推。改 wh.size 才会真的改变行数——
-                        # 这就是"自定义面积不只是换个壳"的落点（§16.8）。留 1 m 施工余量。
-                        budget = float(wh['size']['depth']) - float(oz) - float(gz) - float(mz) - 1.0
-                        if budget <= 0:
-                            # 进深连一行都放不下：不在这里造 issue（expand 阶段还没有
-                            # issues 列表），退回"一行"让 L2/L3 去报越界——越界必须由
-                            # 校验层拒绝，不能靠生成器私下兜住。
-                            budget = RD + aw
+                        # R8.6 的做法是"算到后墙"，于是多出来的行直接压进 PACK/SORT，
+                        # 1022 处 L3/L4/L6 全部由此而来。R8.7 改成问求解器：
+                        # **功能带前沿**与**同列下一组**才是真上限（layout_solver）。
+                        info = layout_solver.free_depth_for_group(
+                            wh, group, RD, aw, siblings=wh['racks'], rl=RL, gap=gap)
+                        budget = info['budget']
+                        w.setdefault('area_solve', []).append({
+                            'zone': group.get('zone'), 'budget': budget,
+                            'start_z': info['start_z'], 'limit_z': info['limit_z'],
+                            'blocked_by': info['blocked_by']})
                     if budget is None:
                         # 没给预算就按当前声明行数实际占用的进深，重排结果与原来一致
                         budget = rows * (RD + aw) - aw
