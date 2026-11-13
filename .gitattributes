@@ -1,3 +1,8 @@
 # 静态 3D 快照按字节原样提交：manifest 里存的是 sha256，
 # 任何换行转换都会让 W1 在别人机器上失败（Windows autocrlf 尤其危险）。
 docs/app/** -text
+
+# 布局文件被 milestone 锚按 sha256 钉住：禁止任何换行转换。
+# 之前只有 docs/app/** 设了 -text，data/layout.json 漏了 —— Windows 工作区 CRLF、
+# Linux CI LF，锚钉的又是 CRLF 版本，于是 CI 上 MILESTONE_ANCHORS 必红。
+data/layout.json -text

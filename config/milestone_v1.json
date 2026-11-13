@@ -4,9 +4,9 @@
   "note": "v1.0 冻结锚。默认产物、金标准计数与验收口径都锁在这里；任何一项变动都必须显式重冻并写 ADR，否则门与 pytest 同时红。",
   "anchors": {
     "data/layout.json": {
-      "sha256_prefix": "9dcaf196",
-      "bytes": 264148,
-      "note": "默认布局（未启用面积/分型/宽度轴）"
+      "sha256_prefix": "be1722c8",
+      "bytes": 251877,
+      "note": "默认布局（未启用面积/分型/宽度轴）。**LF 字节**：此前钉的 9dcaf196/264148 是 Windows 工作区 CRLF 版本，git 里存的是 LF，Linux CI 必然对不上；已加 .gitattributes `data/layout.json -text` 并由 spec_layout 固定写 LF。"
     },
     "out/build_report.json": {
       "sha256_prefix": "f86ae7a2",

@@ -7,7 +7,7 @@
 
 | 产物 | sha256（前 8 位） | 字节 |
 |---|---|---|
-| `data/layout.json`（默认布局） | `9dcaf196` | 264,148 |
+| `data/layout.json`（默认布局，LF 字节） | `be1722c8` | 251,877 |
 | `out/build_report.json`（默认构建报告） | `f86ae7a2` | 3,613 |
 | `out/dc_preview.glb`（默认 GLB） | `a5e90872` | 929,260 |
 
@@ -87,6 +87,28 @@ tests/contract/test_report_contracts.py::test_manifest_artifact_hashes_match_dis
   删 `out/areas_report.json` → 立即红。
 - 顺带修掉 `report_status.py` / `check_doc_drift.py` 对 `runs/` 目录存在的硬假设
   （清理后 `os.listdir` 抛 WinError 3，状态与口径门直接崩，而不是给出判定）。
+
+### 6.2 布局锚从 CRLF 改为 LF 字节（重冻，2026-11-13）
+
+CI 上 `MILESTONE_ANCHORS` 一直红，查出来不是产物变了，而是**同一个文件有两种字节**：
+
+| 位置 | sha | 字节 |
+|---|---|---|
+| Windows 工作区（旧锚） | `9dcaf196` | 264,148 |
+| git blob / Linux CI checkout | `be1722c8` | 251,877 |
+
+差 12,271 字节 = 行数，即每行一个 `\r`。`core.autocrlf=true` 让 checkout 出 CRLF，
+而 git 存的是 LF；锚钉的是工作区字节，于是 Linux runner 必然对不上。
+
+修法（三处一起，缺一不可）：
+1. `.gitattributes` 加 `data/layout.json -text`（此前只有 `docs/app/**` 设了，
+   而布局同样被 sha 钉住，漏了）；
+2. `spec_layout.py` 写布局固定 `newline='\n'`（Windows 上 `open(..., 'w')` 默认转 CRLF）；
+3. 锚重冻为 `be1722c8` / 251,877——**内容未变**，只是换行归一。
+
+重算后工作区字节与 git blob 逐字节相同（本地验证两处 sha 均为 `be1722c8`）。
+`report_status.py` 里硬编码的那一份锚也改成直接读 `config/milestone_v1.json`，
+避免"重冻要改两处、漏一处就文档与冻结件打架"。
 
 ## 七、怎么复核这份冻结
 

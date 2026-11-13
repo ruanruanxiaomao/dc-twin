@@ -35,6 +35,19 @@ def chain_steps():
 from pathlib import Path  # noqa: E402  (art_count 需要 Path)
 
 
+def _anchor(field, key):
+    """从冻结件读锚，**不在这里再抄一份**——过去把 sha 与字节数硬编码在状态模板里，
+    重冻时就得改两处，改漏一处就是"文档说 A、冻结件说 B"。"""
+    try:
+        d = json.load(open(os.path.join(CONFIG, "milestone_v1.json"), encoding="utf-8"))
+    except Exception:                                       # noqa: BLE001
+        return "?"
+    v = (d.get("anchors") or {}).get(key, {}).get(field)
+    if v is None:
+        return "?"
+    return "{:,}".format(int(v)) if field == "bytes" else str(v)
+
+
 def art_count():
     """现算 manifest 会收录的产物数，**不读 manifest.json**。
 
@@ -690,7 +703,11 @@ def main():
                           'verdict=%s；v1.1 backlog %s 条显式记账（VNA/R2 上架半/conveyor-L3/'
                           '宽度缩边/逐 SKU 方差/离散报童/7 型同场/前端接 typed spec/分型常量真相源），'
                           '重冻须同提交改锚+写 ADR+跑 full 与 A1–A40'
-         % ('9dcaf196', '264,148', 'f86ae7a2', 'a5e90872', '929,260',
+         % (_anchor('sha256_prefix', 'data/layout.json'),
+            _anchor('bytes', 'data/layout.json'),
+            _anchor('sha256_prefix', 'out/build_report.json'),
+            _anchor('sha256_prefix', 'out/dc_preview.glb'),
+            _anchor('bytes', 'out/dc_preview.glb'),
             ref['mil_gate'] or 'n/a', ref['mil_backlog'])),
         ('分档验收', 'data tier %s/%s PASS；pytest -m "not blender" 与 CI 矩阵见 '
                      '`.github/workflows/ci.yml`'

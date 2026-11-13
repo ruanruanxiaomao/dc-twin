@@ -879,7 +879,7 @@ def main():
                 'occupied simultaneously; the dispatcher must hold a mutex lock. '
                 'To reach 0 mutex, widen aisle to >= 2*ap_offset + 2R + 0.2.',
     }
-    with open(args.out, 'w', encoding='utf-8') as f:
+    with open(args.out, 'w', encoding='utf-8', newline='\n') as f:
         f.write(payload)
     with open(args.report, 'w', encoding='utf-8') as f:
         json.dump(report, f, ensure_ascii=False, indent=2)
@@ -891,7 +891,7 @@ def main():
         dst = args.write if os.path.isabs(args.write) else os.path.join(ROOT, args.write)
         if os.path.exists(dst):
             shutil.copy2(dst, dst + '.bak')
-        with open(dst, 'w', encoding='utf-8') as f:
+        with open(dst, 'w', encoding='utf-8', newline='\n') as f:
             f.write(payload)
 
     s = report['summary']
