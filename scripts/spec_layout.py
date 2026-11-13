@@ -109,6 +109,34 @@ def check_schema(spec):
 
 
 # ---------------------------------------------------------------- 展开
+def reflow_rows(budget, rack_depth, aisle_width):
+    """在**给定进深预算**内能排几行货架。纯算术，不做搜索。
+
+    `budget` 是这一组货架允许占用的进深（由调用方给出：显式 `depth_budget`，
+    或默认取"当前声明行数实际占用的进深"）。于是：
+
+    * 预算不变、巷道变窄 → 行数变多 = **同地块多排货架**（设备层的密度权衡）；
+    * 预算写大了 → 行数变多、可能压到下一组或越出厂房，由 L2/L3 报错。
+
+    为什么按"预算"而不是"整个厂房进深"：厂房进深是多个货架组共享的，
+    拿它当预算会让 A 组一路排到 C 组头上——那不是优化，是重叠。
+    自动求解器故意不做：规则一复杂就会静默漂移，宁可让人先给预算。
+    """
+    rd = float(rack_depth)
+    aw = float(aisle_width)
+    if rd <= 0:
+        raise ValueError("货架进深必须 > 0")
+    if aw < 0:
+        raise ValueError("巷道宽不能为负")
+    budget = float(budget)
+    if budget < rd:
+        raise ValueError("进深预算 %.3f 连一行货架（%.3f）都放不下" % (budget, rd))
+    pitch = rd + aw
+    rows = max(1, int(math.floor((budget + aw) / pitch + 1e-9)))
+    used = rows * rd + (rows - 1) * aw
+    return rows, round(used, 6)
+
+
 def _equipment_types():
     """读 config/equipment_spec.json 的 types；缺文件返回 {}（AST 耦合就无从算起）。"""
     path = os.path.join(CONFIG, "equipment_spec.json")
@@ -265,6 +293,20 @@ def expand(spec, fleet_counts=None):
                     ast_enabled=bool((spec.get('options') or {}).get('ast_drives_aisle_width')))
                 aw = aw_info['width']
                 gap = group.get('bay_gap', 0.6)
+                # R5（默认关闭）：按进深预算重排行数。巷道变窄 → 同样预算能多排几行，
+                # 这才是设备层"窄巷道换库容"的兑现方式。默认 false 时**一个数都不动**。
+                if (spec.get('options') or {}).get('reflow_rows'):
+                    budget = group.get('depth_budget')
+                    if budget is None:
+                        # 没给预算就按当前声明行数实际占用的进深，重排结果与原来一致
+                        budget = rows * (RD + aw) - aw
+                    new_rows, used = reflow_rows(budget, RD, aw)
+                    w.setdefault('reflow', []).append({
+                        'zone': group.get('zone'), 'aisle_width': round(aw, 4),
+                        'budget': round(float(budget), 4), 'rows_declared': int(rows),
+                        'rows_derived': int(new_rows), 'depth_used': used,
+                    })
+                    rows = new_rows
                 for ri in range(rows):
                     for bi in range(bays):
                         if group.get('orientation', 'x') == 'x':
@@ -277,6 +319,16 @@ def expand(spec, fleet_counts=None):
                             size = [RD, top, RL]
                         rid = 'RACK-%s%s%d%02d' % (wh['id'], group['zone'], ri + 1, bi + 1)
                         items.append(([x, 0, z], size, levels, rid))
+                # 访问点偏移不能是固定 1.5 m：巷道收窄到 2.0 m 时，距货架面 1.5 m 的点
+                # 已经在对面货架的 AGV 膨胀圈里（R≈0.73），车根本站不进去。
+                # 取 min(声明值, 巷道中线)，并在被夹紧时留痕——静默调整几何比报错更糟。
+                if aw < 2 * ap_off:
+                    clamped = max(0.5, aw / 2.0)
+                    if clamped != ap_off:
+                        w.setdefault('ap_clamped', []).append(
+                            {'zone': group.get('zone'), 'declared': ap_off,
+                             'used': round(clamped, 4), 'aisle_width': round(aw, 4)})
+                        ap_off = clamped
             # R2（可选）：货架存取机理。**只有 group 显式声明 rack_type 才会展开深位**，
             # 默认布局里没有这个键 → data/layout.json 与历史逐字节一致（D4）。
             rt = (group.get("rack") or {}).get("rack_type") or group.get("rack_type")

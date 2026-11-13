@@ -67,7 +67,8 @@ def refactor_facts():
            "gate_ok": None, "stage": "R1", "ul_pallet": 0, "ul_tote": 0,
            "ul_skus": 0, "ul_max_util": None, "rack_cells": 0,
            "models": 0, "deployed": [], "ast": None,
-           "cap_aisles": 0, "cap_per_h": 0, "cap_load": 0, "cap_dev": None}
+           "cap_aisles": 0, "cap_per_h": 0, "cap_load": 0, "cap_dev": None,
+           "reflow_rows": None, "reflow_shelf": None, "reflow_rows_ref": None}
     try:
         rack = json.load(open(os.path.join(CONFIG, 'rack_spec.json'), encoding='utf-8'))
         out["rack_types"] = len(rack.get('types') or {})
@@ -110,6 +111,14 @@ def refactor_facts():
         out["cap_load"] = round(float(cr.get('totalLoad') or 0), 3)
         cx = json.load(open(os.path.join(OUT, 'capacity_cross_report.json'), encoding='utf-8'))
         out["cap_dev"] = cx.get('detail', {}).get('deviation_pct')
+    except Exception:                       # noqa: BLE001
+        pass
+    try:
+        rf = json.load(open(os.path.join(OUT, 'reflow_report.json'), encoding='utf-8'))
+        dens = rf.get('gates', {}).get('REFLOW_DENSITY_OK', {}).get('detail') or {}
+        out["reflow_rows"] = (dens.get('reach') or {}).get('rows')
+        out["reflow_shelf"] = (dens.get('reach') or {}).get('shelf')
+        out["reflow_rows_ref"] = (dens.get('counterbalance') or {}).get('rows')
     except Exception:                       # noqa: BLE001
         pass
     for name in ("unit_load_spec", "rack_spec", "equipment_spec", "capacity_spec"):
@@ -422,23 +431,25 @@ def main():
             inv.get('stockout', 'n/a'), inv.get('expired_units', 'n/a'),
             inv.get('expired_value', 'n/a'), inv.get('open_lots', 'n/a'),
             inv.get('fefo_violations', 'n/a'))),
-        ('重构层（R0–R4）', '四份 spec（%s/4）+ schema（%s/4）：货架 %s 类（按存取机理）、设备 %s 类；'
+        ('重构层（R0–R5）', '四份 spec（%s/4）+ schema（%s/4）：货架 %s 类（按存取机理）、设备 %s 类；'
                           '车型库 %s 个（默认部署 %s）；集装单元 %s 个 SKU（托盘 %s / 料箱 %s，'
                           '最高载荷利用率 %s%%）；当前布局货道 %s 个（默认 0 = 未启用深位）；'
                           'AST 耦合开关 %s（默认关）；`capacity_model.py` / 单元层 / 货架机理 / '
                           '多车型与按车型采购均已落地，**默认全部不改变行为**；'
                           '资料 5 处口径 bug（B1–B5）修正并以 LEGACY 双版做负对照；'
                           '解析库容已接主链：%s 条巷道 / 能力 %s 单/h / 负荷 %s / '
-                          '与仿真偏差 %s%%；'
+                          '与仿真偏差 %s%%；密度重排（默认关）同预算下平衡重 %s 行 → '
+                          '曲臂 %s 行（%s 货位），两边 0 违规；'
                           '门：`dc run --scope refactor`（R0 口径 + R1 单元 + R2 货架 + R3 设备 '
-                          '+ R4 库容，5 步）'
+                          '+ R4 库容 + R5 密度，6 步）'
          % (ref['specs'], ref['schemas'], ref['rack_types'], ref['equipment_types'],
             ref['models'], "、".join(ref['deployed']) or "n/a", ref['ul_skus'],
             ref['ul_pallet'], ref['ul_tote'],
             round((ref['ul_max_util'] or 0) * 100, 1), ref['rack_cells'],
             "开" if ref['ast'] else "关",
             ref['cap_aisles'], ref['cap_per_h'], ref['cap_load'],
-            round(ref['cap_dev'], 1) if ref['cap_dev'] is not None else 'n/a')),
+            round(ref['cap_dev'], 1) if ref['cap_dev'] is not None else 'n/a',
+            ref['reflow_rows_ref'], ref['reflow_rows'], ref['reflow_shelf'])),
         ('分档验收', 'data tier %s/%s PASS；pytest -m "not blender" 与 CI 矩阵见 '
                      '`.github/workflows/ci.yml`'
          % (vdata.get('passed'), vdata.get('total'))),
@@ -492,8 +503,10 @@ def main():
         '可按车型采购，但**设备时间模型没有进 tick**（服务时长仍由 sim_spec 给定），'
         '**多车型会车/让行没有差异化**，窄巷道只影响几何（AST，默认关）。'
         '解析库容层已接报告与门（R4），但**不进 tick**；'
-        '而且 **AST 耦合是密度中性的**：窄巷道只改节距、不改货架行数，'
-        '所以买 VNA 买到的是通道宽度，不是库容——密度/面积重排是 R5，会破金标准、需独立重冻。'
+        '库容密度重排（R5）已可算且合规（同预算下曲臂 5 行 vs 平衡重 4 行，两边 0 违规），'
+        '但**默认关闭**：打开的关卡会改货位分布，需独立重冻。'
+        '另外 **2.0 m 巷道在本机 AGV（R≈0.73 m）下不可行**，VNA 方案被 L6 拒绝——'
+        '窄巷道货架要配窄巷道车，不是调小半径就能过。'
         '集装单元层 `enabled=false`、货架只接取货半边，默认态与 v3 基准逐字节一致。',
         '- **订单仍是合成**：SKU 周转率为 Zipf 合成，`orders_per_hour=45` 仍是 placeholder，'
         '不是真实订单分布。',

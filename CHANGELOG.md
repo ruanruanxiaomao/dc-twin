@@ -4,6 +4,106 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] — R5 库容密度重排（默认关闭）
+
+R3 wired AST to aisle width, but the number of rack **rows** stayed a fixed integer in the
+layout spec, so `on_locations == off_locations == 392`: a narrower aisle bought no slots.
+R5 makes "same footprint, narrower aisle, more rows" computable, checkable and bounded.
+
+### Added
+
+- **`spec_layout.reflow_rows(budget, rack_depth, aisle)`** — pure arithmetic, no search:
+  `rows = floor((budget + aisle) / (rack_depth + aisle))`. `budget` is an explicit
+  `depth_budget` per rack group, defaulting to what the declared rows already occupy
+  (so turning the option on does not silently move anything).
+- **`options.reflow_rows`** (default false) applies it and records every group decision in
+  `layout.warehouses[].reflow` (`rows_declared`, `rows_derived`, `depth_used`, `budget`).
+- **`scripts/check_reflow.py`** (`REFLOW_OK`, `dc run --scope refactor` 5 -> 6 steps):
+  OFF / DENSITY / BOUNDARY_NEG / BUDGET, plus a self-test that adds extra rows and requires
+  the boundary checks to fire.
+
+### Measured (same 20 m depth budget, W zone A)
+
+| Equipment | AST | Aisle | Rows | W slots | Violations |
+|---|---|---|---|---|---|
+| Counterbalance | 3400 | 3.6 m | 4 | 320 | **0** |
+| Reach truck | 2900 | 3.1 m | **5** | **340** | **0** |
+| VNA | 1800 | 2.0 m | 6 | 360 | **110 (L6)** |
+
+The reach truck buys **+6.25% slots** with zero violations — density obtained legally, not
+by squeezing past a boundary.
+
+### Fixed
+
+- **Access-point offset was a constant 1.5 m regardless of aisle width.** At a 2.0 m aisle
+  that point sits past the centre line, inside the opposite rack's AGV inflation, so the
+  vehicle cannot stand there. It is now `min(ap_off, aisle/2)` and every clamp is recorded
+  in `layout.ap_clamped` — geometry adjustments must leave a trace.
+
+### Recorded, not tuned away
+
+VNA's 1.8 m AST gives a 2.0 m aisle, which is **infeasible for this fleet** (AGV radius
+0.73 m: only 0.54 m of free band in a 0.5 m grid). L6 reports 110 violations and the gate
+requires that. Narrow-aisle racking needs a narrow-aisle truck; shrinking the radius or
+relaxing L6 would turn "narrow aisle" into a story that only exists in a report.
+
+### Scope
+
+Default off, so `data/layout.json` is byte-identical (cleanroom 10/10 steps, 11/11 files)
+and the v3 golden still matches. Interactive re-layout (drag rows) and customised
+warehouse footprint are **not** in this round: dragging only supplies `depth_budget` and
+`origin`, and changing the footprint also moves the nav grid, docks and standby lanes.
+
+## [Unreleased] — R5 库容密度重排（默认关闭）
+
+R3 wired AST to aisle width, but the number of rack **rows** stayed a fixed integer in the
+layout spec, so `on_locations == off_locations == 392`: a narrower aisle bought no slots.
+R5 makes "same footprint, narrower aisle, more rows" computable, checkable and bounded.
+
+### Added
+
+- **`spec_layout.reflow_rows(budget, rack_depth, aisle)`** — pure arithmetic, no search:
+  `rows = floor((budget + aisle) / (rack_depth + aisle))`. `budget` is an explicit
+  `depth_budget` per rack group, defaulting to what the declared rows already occupy
+  (so turning the option on does not silently move anything).
+- **`options.reflow_rows`** (default false) applies it and records every group decision in
+  `layout.warehouses[].reflow` (`rows_declared`, `rows_derived`, `depth_used`, `budget`).
+- **`scripts/check_reflow.py`** (`REFLOW_OK`, `dc run --scope refactor` 5 -> 6 steps):
+  OFF / DENSITY / BOUNDARY_NEG / BUDGET, plus a self-test that adds extra rows and requires
+  the boundary checks to fire.
+
+### Measured (same 20 m depth budget, W zone A)
+
+| Equipment | AST | Aisle | Rows | W slots | Violations |
+|---|---|---|---|---|---|
+| Counterbalance | 3400 | 3.6 m | 4 | 320 | **0** |
+| Reach truck | 2900 | 3.1 m | **5** | **340** | **0** |
+| VNA | 1800 | 2.0 m | 6 | 360 | **110 (L6)** |
+
+The reach truck buys **+6.25% slots** with zero violations — density obtained legally, not
+by squeezing past a boundary.
+
+### Fixed
+
+- **Access-point offset was a constant 1.5 m regardless of aisle width.** At a 2.0 m aisle
+  that point sits past the centre line, inside the opposite rack's AGV inflation, so the
+  vehicle cannot stand there. It is now `min(ap_off, aisle/2)` and every clamp is recorded
+  in `layout.ap_clamped` — geometry adjustments must leave a trace.
+
+### Recorded, not tuned away
+
+VNA's 1.8 m AST gives a 2.0 m aisle, which is **infeasible for this fleet** (AGV radius
+0.73 m: only 0.54 m of free band in a 0.5 m grid). L6 reports 110 violations and the gate
+requires that. Narrow-aisle racking needs a narrow-aisle truck; shrinking the radius or
+relaxing L6 would turn "narrow aisle" into a story that only exists in a report.
+
+### Scope
+
+Default off, so `data/layout.json` is byte-identical (cleanroom 10/10 steps, 11/11 files)
+and the v3 golden still matches. Interactive re-layout (drag rows) and customised
+warehouse footprint are **not** in this round: dragging only supplies `depth_budget` and
+`origin`, and changing the footprint also moves the nav grid, docks and standby lanes.
+
 ## [Unreleased] — R4 解析库容接主链（含 AST 密度缺口的如实记录）
 
 The analytic capacity layer had never actually run on real data. It walked
