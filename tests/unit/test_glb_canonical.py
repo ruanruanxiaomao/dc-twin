@@ -5,7 +5,6 @@
 三角形顺序不同、accessor 多一份、多余数据没被引用。真场景的验证在
 `check_asset_dispatch.py --typed-build`（两份 GLB 的 sha256 必须相同）。
 """
-import json
 import struct
 import sys
 from pathlib import Path

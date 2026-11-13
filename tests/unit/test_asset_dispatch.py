@@ -21,7 +21,6 @@ sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(ROOT / "tests"))
 
 import rack_assets as ra           # noqa: E402
-import check_asset_dispatch as cad  # noqa: E402
 import _subproc                    # noqa: E402
 
 

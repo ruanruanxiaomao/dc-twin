@@ -46,7 +46,7 @@ def spec(equipment_type=None, budget=20.0, reflow=True, ast=True):
 
 def shelf_count(lay, wid="W"):
     w = next(x for x in lay["warehouses"] if x["id"] == wid)
-    return len([l for l in w["locations"] if l.get("kind") == "SHELF"])
+    return len([loc_ for loc_ in w["locations"] if loc_.get("kind") == "SHELF"])
 
 
 def rows_of(lay, wid="W"):
@@ -79,8 +79,8 @@ def test_default_layout_is_untouched():
     shipped = jload(DATA / "layout.json")["warehouses"][0]
     assert "reflow" not in w, "默认态不该出现重排记录"
     assert len(w["racks"]) == len(shipped["racks"])
-    assert len([l for l in w["locations"] if l.get("kind") == "SHELF"]) == \
-        len([l for l in shipped["locations"] if l.get("kind") == "SHELF"])
+    assert len([loc_ for loc_ in w["locations"] if loc_.get("kind") == "SHELF"]) == \
+        len([loc_ for loc_ in shipped["locations"] if loc_.get("kind") == "SHELF"])
 
 
 # ---------------------------------------------------------------- 密度

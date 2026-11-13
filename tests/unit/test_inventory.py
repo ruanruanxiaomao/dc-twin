@@ -160,7 +160,7 @@ def test_initial_covers_every_location(initial, slotting):
 def test_initial_qty_positive_integers(initial, spec):
     if not spec["stock_policy"].get("qty_is_integer", True):
         pytest.skip("配置允许小数库存")
-    bad = [(s, l, q) for s, m in initial["stock"].items() for l, q in m.items()
+    bad = [(s, loc_, q) for s, m in initial["stock"].items() for loc_, q in m.items()
            if not isinstance(q, int) or q <= 0]
     assert not bad, "非正整数库存：%s" % bad[:5]
 
@@ -181,8 +181,8 @@ def test_pick_face_stock_is_smaller_than_reserve(initial, slotting, spec):
     for sku, v in slotting["by_sku"].items():
         if not v["pick_face"]:
             continue
-        pf = max(initial["stock"].get(sku, {}).get(l, 0) for l in v["pick_face"])
-        rs = min(initial["stock"].get(sku, {}).get(l, 0) for l in v["reserve"])
+        pf = max(initial["stock"].get(sku, {}).get(loc_, 0) for loc_ in v["pick_face"])
+        rs = min(initial["stock"].get(sku, {}).get(loc_, 0) for loc_ in v["reserve"])
         if pf >= rs:
             bad.append((sku, pf, rs))
     assert not bad, "拣选面结存不小于储备位（ratio=%.2f）：%s" % (ratio, bad[:3])

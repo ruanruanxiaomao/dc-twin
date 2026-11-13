@@ -91,7 +91,7 @@ def test_every_location_lot_sum_matches_stock(tmp_path):
 def test_total_lot_units_equals_total_stock(tmp_path):
     sim = make_sim(tmp_path)
     a = sum(q for rows in sim.inv.values() for q in rows.values())
-    b = sum(l["qty"] for arr in sim.lots.values() for l in arr)
+    b = sum(loc_["qty"] for arr in sim.lots.values() for loc_ in arr)
     assert a == pytest.approx(b, abs=1e-9)
 
 
@@ -107,8 +107,8 @@ def test_fefo_consumes_earliest_expiry_first(tmp_path):
     sim.lot_policy = "FEFO"
     sim._inv_dec(sku, loc, 5.0, {"order_id": "T"}, "pick")
 
-    early = next(l for l in sim.lots[(sku, loc)] if l["lot_id"] == "LOT-EARLY")
-    late = next(l for l in sim.lots[(sku, loc)] if l["lot_id"] == "LOT-LATE")
+    early = next(loc_ for loc_ in sim.lots[(sku, loc)] if loc_["lot_id"] == "LOT-EARLY")
+    late = next(loc_ for loc_ in sim.lots[(sku, loc)] if loc_["lot_id"] == "LOT-LATE")
     assert early["qty"] == pytest.approx(5.0), "FEFO 没有先扣早到期的批次"
     assert late["qty"] == pytest.approx(10.0), "晚到期的批次被提前扣了"
     assert sim.fefo_violations == 0
@@ -130,12 +130,12 @@ def test_fifo_and_fefo_are_actually_different(tmp_path):
     plant(sim, sku, loc, lots)
     sim.lot_policy = "FIFO"
     sim._inv_dec(sku, loc, 4.0, {"order_id": "T-FIFO"}, "pick")
-    fifo_left = {l["lot_id"]: l["qty"] for l in sim.lots[(sku, loc)]}
+    fifo_left = {loc_["lot_id"]: loc_["qty"] for loc_ in sim.lots[(sku, loc)]}
 
     plant(sim, sku, loc, lots)
     sim.lot_policy = "FEFO"
     sim._inv_dec(sku, loc, 4.0, {"order_id": "T-FEFO"}, "pick")
-    fefo_left = {l["lot_id"]: l["qty"] for l in sim.lots[(sku, loc)]}
+    fefo_left = {loc_["lot_id"]: loc_["qty"] for loc_ in sim.lots[(sku, loc)]}
 
     assert fifo_left["LOT-A"] == pytest.approx(6.0), "FIFO 应扣最早入库的 LOT-A"
     assert fefo_left["LOT-B"] == pytest.approx(6.0), "FEFO 应扣最早到期的 LOT-B"
@@ -156,7 +156,7 @@ def test_fefo_violation_counter_catches_bad_order(tmp_path):
     ])
     sim.lot_policy = "FEFO"
     # 故意反转顺序（实例属性覆盖方法，不改源码）
-    sim._lot_order = lambda arr: sorted(arr, key=lambda l: (-l["expiry_t"], l["lot_id"]))
+    sim._lot_order = lambda arr: sorted(arr, key=lambda loc_: (-loc_["expiry_t"], loc_["lot_id"]))
     sim._inv_dec(sku, loc, 1.0, {"order_id": "T-BAD"}, "pick")
     assert sim.fefo_violations == 1, "排序反了却没记违规，等于这个 KPI 是死的"
 
@@ -183,7 +183,7 @@ def test_expired_lot_is_written_off_and_removed(tmp_path):
     ])
     sim._inv_expire_sweep(50.0)
 
-    assert [l["lot_id"] for l in sim.lots[(sku, loc)]] == ["LOT-FRESH"]
+    assert [loc_["lot_id"] for loc_ in sim.lots[(sku, loc)]] == ["LOT-FRESH"]
     assert sim.inv[sku][loc] == pytest.approx(6.0)
     assert sim.lot_expired_units == pytest.approx(6.0)
     ev = [e for e in events_of(sim) if e["type"] == "STOCK_EXPIRED"][-1]
@@ -233,7 +233,7 @@ def test_internal_move_keeps_expiry(tmp_path):
     """内部移库不许重新给保质期：那是"越搬越新鲜"的假账。"""
     sim = make_sim(tmp_path)
     sku, loc = first_two_lot_location(sim)
-    dst = next((l for l in sim.inv_sku[sku]["pick_face"] if l != loc), None)
+    dst = next((loc_ for loc_ in sim.inv_sku[sku]["pick_face"] if loc_ != loc), None)
     if dst is None:
         pytest.skip("该 SKU 没有另一个拣选面")
     plant(sim, sku, loc, [{"lot_id": "LOT-MOVE", "qty": 9.0, "t_in": 0.0,
@@ -258,7 +258,7 @@ def test_snapshot_roundtrip_keeps_lots(tmp_path):
     snap = sim.snapshot()
     assert snap["schema_version"] == "4.0"
     assert snap["inventory"]["lots"], "快照里没有批次明细"
-    before = {k: [dict(l) for l in v] for k, v in sim.lots.items()}
+    before = {k: [dict(loc_) for loc_ in v] for k, v in sim.lots.items()}
     sim.log.close()
 
     spec = (jload(ROOT / "config" / "sim_spec.json"), jload(ROOT / "config" / "fleet_spec.json"),
@@ -266,7 +266,7 @@ def test_snapshot_roundtrip_keeps_lots(tmp_path):
             jload(ROOT / "data" / "nav_grid.json"), jload(ROOT / "data" / "config.json"))
     restored = se.Simulation.restore(snap, ROOT / "config" / "scenarios" / "baseline.json",
                                      *spec, out_dir=tmp_path / "run")
-    after = {k: [dict(l) for l in v] for k, v in restored.lots.items()}
+    after = {k: [dict(loc_) for loc_ in v] for k, v in restored.lots.items()}
     assert after == before, "读档后批次明细变了"
     assert restored._inv_lot_check() == []
     restored.log.close()

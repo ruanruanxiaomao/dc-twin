@@ -250,15 +250,15 @@ def test_ast_expansion_changes_pitch_not_location_count():
     on["warehouses"][0]["racks"][0].setdefault("rack", {})["equipment_type"] = "forklift_vna"
     off_lay = sl.expand(copy.deepcopy(base))
     on_lay = sl.expand(on)
-    n_off = sum(1 for w in off_lay["warehouses"] for l in w["locations"])
-    n_on = sum(1 for w in on_lay["warehouses"] for l in w["locations"])
+    n_off = sum(1 for w in off_lay["warehouses"] for loc_ in w["locations"])
+    n_on = sum(1 for w in on_lay["warehouses"] for loc_ in w["locations"])
     assert n_off == n_on
-    z_off = sorted(round(l["access_point"][1], 4)
-                   for w in off_lay["warehouses"] for l in w["locations"]
-                   if (l.get("rack_id") or "").startswith("RACK-W"))
-    z_on = sorted(round(l["access_point"][1], 4)
-                  for w in on_lay["warehouses"] for l in w["locations"]
-                  if (l.get("rack_id") or "").startswith("RACK-W"))
+    z_off = sorted(round(loc_["access_point"][1], 4)
+                   for w in off_lay["warehouses"] for loc_ in w["locations"]
+                   if (loc_.get("rack_id") or "").startswith("RACK-W"))
+    z_on = sorted(round(loc_["access_point"][1], 4)
+                  for w in on_lay["warehouses"] for loc_ in w["locations"]
+                  if (loc_.get("rack_id") or "").startswith("RACK-W"))
     assert z_off != z_on, "开启了 AST 耦合，货架行距却没变——耦合没生效"
 
 

@@ -83,37 +83,37 @@ def _spec_with(rack_type, zone_index=0):
 
 
 def _locs(layout):
-    return [l for w in layout["warehouses"] for l in w["locations"]]
+    return [loc_ for w in layout["warehouses"] for loc_ in w["locations"]]
 
 
 def test_default_layout_has_no_cells():
     """默认必须一个 cell 都没有：这是"默认字节不变"的物理体现。"""
     layout = sl.expand(jload(ROOT / "config" / "layout_spec.json"))
-    assert sum(1 for l in _locs(layout) if "cell_id" in l) == 0
+    assert sum(1 for loc_ in _locs(layout) if "cell_id" in loc_) == 0
 
 
 def test_declaring_rack_type_expands_depth_slots():
     base = len(_locs(sl.expand(jload(ROOT / "config" / "layout_spec.json"))))
     layout = sl.expand(_spec_with("double_deep"))
     locs = _locs(layout)
-    cells = {l["cell_id"] for l in locs if "cell_id" in l}
+    cells = {loc_["cell_id"] for loc_ in locs if "cell_id" in loc_}
     assert cells, "声明了 rack_type 却没有任何货道"
     assert len(locs) > base, "双深应当比单深多出库位"
-    depths = {l["depth_index"] for l in locs if "cell_id" in l}
+    depths = {loc_["depth_index"] for loc_ in locs if "cell_id" in loc_}
     assert depths == {0, 1}, "双深的 depth_index 应为 {0,1}"
-    for l in locs:
-        if "cell_id" in l:
-            assert l["rack_type"] == "double_deep"
-            assert l["access_mechanism"] == "deep_front_back"
-            assert l["n_depth"] == 2
+    for loc_ in locs:
+        if "cell_id" in loc_:
+            assert loc_["rack_type"] == "double_deep"
+            assert loc_["access_mechanism"] == "deep_front_back"
+            assert loc_["n_depth"] == 2
 
 
 def test_aisle_depth_uses_explicit_lane_depth():
     spec = _spec_with("drive_in")
     spec["warehouses"][0]["racks"][0]["lane_depth"] = 5
     layout = sl.expand(spec)
-    locs = [l for l in _locs(layout) if l.get("cell_id")]
-    assert max(l["depth_index"] for l in locs) == 4   # 5 个深位 → 0..4
+    locs = [loc_ for loc_ in _locs(layout) if loc_.get("cell_id")]
+    assert max(loc_["depth_index"] for loc_ in locs) == 4   # 5 个深位 → 0..4
 
 
 # ---------------------------------------------------------------- 3) 引擎接线
@@ -122,7 +122,7 @@ def _deep_layout(mechanism="deep_front_back", depth=2):
     layout = copy.deepcopy(jload(ROOT / "data" / "layout.json"))
     n = 0
     for w in layout["warehouses"]:
-        shelves = [l for l in w["locations"] if l["kind"] == "SHELF"]
+        shelves = [loc_ for loc_ in w["locations"] if loc_["kind"] == "SHELF"]
         for i in range(0, len(shelves) - depth + 1, depth):
             cell = "C-%s-%04d" % (w["id"], n)
             n += 1
@@ -166,7 +166,7 @@ def test_rear_slot_pick_is_blocked_and_redirected(tmp_path):
     # 找一个两深位都有货的货道
     cell = None
     for cid, c in sim.rack_cells.items():
-        if len(c["locs"]) == 2 and all(sim._loc_qty(l) > 0 for l in c["locs"]):
+        if len(c["locs"]) == 2 and all(sim._loc_qty(loc_) > 0 for loc_ in c["locs"]):
             cell = c
             break
     if cell is None:
@@ -239,31 +239,3 @@ def test_snapshot_keeps_rack_counters(tmp_path):
     assert restored.rack_conflict_n == 2
     restored.log.close()
 
-
-def test_snapshot_keeps_rack_counters(tmp_path):
-    """R2 计数器必须进快照，否则续玩会从 0 重新计数（收检指出的潜伏 bug）。"""
-    layout = _deep_layout()
-    sim = _sim(tmp_path, layout)
-    sim.step()
-    sim.rack_blocked_n = 7
-    sim.rack_reshuffle_n = 3
-    sim.rack_conflict_n = 2
-    snap = sim.snapshot()
-    sim.log.close()
-    # 3.1（R2 计数器）→ 4.0（R3 逐车 model_id）；旧档一律显式拒绝（D2）
-    assert snap["schema_version"] == "4.0", "加了计数器就该升版（D2：旧档显式拒绝）"
-    c = snap["counters"]
-    assert (c["rack_blocked_n"], c["rack_reshuffle_n"], c["rack_conflict_n"]) == (7, 3, 2)
-
-    restored = se.Simulation.restore(
-        snap, ROOT / "config" / "scenarios" / "baseline.json",
-        jload(ROOT / "config" / "sim_spec.json"),
-        jload(ROOT / "config" / "fleet_spec.json"),
-        jload(ROOT / "config" / "demand_spec.json"),
-        layout, jload(ROOT / "data" / "nav_grid.json"),
-        jload(ROOT / "data" / "config.json"),
-        out_dir=tmp_path / "run")
-    assert restored.rack_blocked_n == 7
-    assert restored.rack_reshuffle_n == 3
-    assert restored.rack_conflict_n == 2
-    restored.log.close()

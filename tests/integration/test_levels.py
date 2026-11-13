@@ -146,7 +146,6 @@ def test_meta_progress_keeps_best_result(tmp_path):
 
 # ------------------------------------------------------------------ 指标解析
 def test_unknown_metric_is_rejected_not_ignored():
-    sim = None
     with pytest.raises(gl.LevelError, match="未知指标"):
         gl.metric_value(type("S", (), {"metrics": {"metrics": {}}, "economy": None})(),
                         "no_such_metric")

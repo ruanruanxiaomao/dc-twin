@@ -16,7 +16,6 @@ ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(ROOT / "tests"))
 
-import check_typed_variant as ctv   # noqa: E402
 import _subproc                    # noqa: E402
 
 
