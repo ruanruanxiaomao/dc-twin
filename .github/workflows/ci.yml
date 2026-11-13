@@ -101,7 +101,7 @@ jobs:
           python scripts/check_webapp.py --self-test
           python scripts/check_webapp.py
 
-      - name: Refactor chain (13 gates: R0-R8 + R5 policy)
+      - name: "Refactor chain (13 gates, R0-R8 + R5 policy)"
         # 这条链此前**只在本机跑**：CI 从 lint 起步就没绿过，所以 R8 系列的门
         # 在 CI 上从未执行。它同时生成 out/ 下 pytest 需要的下游产物
         # （out/exp/area、asset_*_report 等）——那些是 gitignore 的，干净检出时没有。
