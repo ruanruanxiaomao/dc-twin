@@ -78,7 +78,8 @@ def refactor_facts():
            "cv_styles": 0, "sr_kinds": 0, "eq_bodies": 0, "var_gate": None,
            "area_base_cols": 0, "area_big_cols": 0, "area_gate": None,
            "area_before": 0, "area_after": 0, "area_loc": 0, "area_loc_gain": 0,
-           "area_shift": 0}
+           "area_shift": 0, "area_site": 0, "area_site_base": 0,
+           "area_fwd": 0, "area_fwd_base": 0, "area_deliver": None}
     try:
         rack = json.load(open(os.path.join(CONFIG, 'rack_spec.json'), encoding='utf-8'))
         out["rack_types"] = len(rack.get('types') or {})
@@ -190,6 +191,12 @@ def refactor_facts():
         out["area_loc"] = sd.get('locations') or 0
         out["area_loc_gain"] = (sd.get('locations') or 0) - (sd.get('base_locations') or 0)
         out["area_shift"] = (sd.get('band_shifts') or [0])[0]
+        dv = (ap.get('gates', {}).get('AREA_DELIVER_OK', {}) or {}).get('detail') or {}
+        out["area_deliver"] = (ap.get('gates', {}).get('AREA_DELIVER_OK', {}) or {}).get('ok')
+        out["area_site"] = dv.get('site_depth') or 0
+        out["area_site_base"] = dv.get('base_site_depth') or 0
+        out["area_fwd"] = (dv.get('forward_z') or [0])[0]
+        out["area_fwd_base"] = (dv.get('base_forward_z') or [0])[0]
     except Exception:                       # noqa: BLE001
         pass
     for name in ("unit_load_spec", "rack_spec", "equipment_spec", "capacity_spec"):
@@ -374,6 +381,11 @@ def main():
     neg_total = sum(x.get('total', 0) for x in (neg, neg_spec, neg_scen))
     neg_pass = sum(x.get('passed', 0) for x in (neg, neg_spec, neg_scen))
     Ls = L['summary']
+    # 分仓拆开写：全站 196 与 W 仓 160 都是真数，混着写就会被读成“同一个数”。
+    _main = L['warehouses'][0] if L['warehouses'] else {'racks': []}
+    why_n = len(_main.get('racks') or [])
+    _fwd = [len(w.get('racks') or []) for w in L['warehouses'][1:]]
+    wf_n = _fwd[0] if _fwd and len(set(_fwd)) == 1 else "/".join(str(x) for x in _fwd) or "0"
     home_n = sum(1 for w in L['warehouses'] for l in w['locations']
                  if l['kind'] == 'HOME')
     ts = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -397,8 +409,11 @@ def main():
                      '每项带 definition/formula/source'
          % (len(scenario_specs), len(run_dirs), len(analytic_keys), len(tick_keys),
             len(analytic_keys | tick_keys))),
-        ('布局', '%d 仓 / %d 货架 / %d 库位（%d SHELF + %d HOME）/ %d 月台 / %d 站 / %d AGV'
-         % (Ls['warehouses'], Ls['racks'], Ls['locations'],
+        # 口径必须写在行里：196 架是**4 仓合计**（W 160 + F1/F2/F3 各 12），
+        # 只盯 W 仓会读成 160，两边数字都“对”却指的不是一件事。
+        ('布局', '%d 仓合计 / %d 货架（W %s + 前置仓各 %s）/ %d 库位（%d SHELF + %d HOME）'
+                ' / %d 月台 / %d 站 / %d AGV'
+         % (Ls['warehouses'], Ls['racks'], why_n, wf_n, Ls['locations'],
             Ls['shelf_locations'], home_n,
             Ls['docks'], Ls['stations'], Ls['robots'])),
         ('布局审计', 'issues=%s warnings=%s verdict=%s'
@@ -502,7 +517,7 @@ def main():
             inv.get('stockout', 'n/a'), inv.get('expired_units', 'n/a'),
             inv.get('expired_value', 'n/a'), inv.get('open_lots', 'n/a'),
             inv.get('fefo_violations', 'n/a'))),
-        ('重构层（R0–R5 + R8.1–R8.7）', '四份 spec（%s/4）+ schema（%s/4）：货架 %s 类（按存取机理）、设备 %s 类；'
+        ('重构层（R0–R5 + R8.1–R8.8）', '四份 spec（%s/4）+ schema（%s/4）：货架 %s 类（按存取机理）、设备 %s 类；'
                           '车型库 %s 个（默认部署 %s）；集装单元 %s 个 SKU（托盘 %s / 料箱 %s，'
                           '最高载荷利用率 %s%%）；当前布局货道 %s 个（默认 0 = 未启用深位）；'
                           'AST 耦合开关 %s（默认关）；`capacity_model.py` / 单元层 / 货架机理 / '
@@ -539,18 +554,21 @@ def main():
          % (ref['glb_bytes'], ref['glb_saved'], ref['glb_sha'] or 'n/a',
             ref['glb_geom'] or 'n/a', ref['masters_placed'],
             "、".join(ref['masters_unplaced']) or "无")),
-        ('分型与面积（R8.5–R8.7）', '输送台面 %s 型（带式/辊道/重力/积放）、分拣末端 %s 型'
+        ('分型与面积（R8.5–R8.8）', '输送台面 %s 型（带式/辊道/重力/积放）、分拣末端 %s 型'
                           '（斜滑道/交叉带/滑块/摆轮/窄带/翻板/播种墙）、无母版车体 %s 个'
                           '（穿梭车/CTU/码垛臂），三组几何两两不同（Blender 探针按坐标比，'
                           '不是按数量比）；面积参数化：货架格 %s→%s 列随厂房尺寸重算，'
                           '缩到装不下被 L2/L3/L6 拒绝（verdict=%s）；'
                           'D10b 求解器把"填满进深"从 %s 处冲突降到 %s 处：功能带随后墙平移 '
-                          '%s m，货架只排到功能带前沿，库位 %s→%s（+%s）；'
-                          '残留 1 条 L6 已归因（场外叉车/卡车未随室内重排，属 R8.8）'
+                          '%s m，货架只排到功能带前沿，库位 %s→%s（+%s）；R8.8 整场重排后'
+                          '**可交付**（0 issue、exit 0、写盘成功）：site 进深 %s→%s、'
+                          '北侧前置仓 z %s→%s、场外叉车/卡车随之北移，不再被新墙圈进室内'
          % (ref['cv_styles'], ref['sr_kinds'], ref['eq_bodies'],
             ref['area_base_cols'], ref['area_big_cols'], ref['area_gate'] or 'n/a',
             ref['area_before'], ref['area_after'], ref['area_shift'],
-            ref['area_loc'] - ref['area_loc_gain'], ref['area_loc'], ref['area_loc_gain'])),
+            ref['area_loc'] - ref['area_loc_gain'], ref['area_loc'], ref['area_loc_gain'],
+            ref['area_site_base'], ref['area_site'],
+            ref['area_fwd_base'], ref['area_fwd'])),
         ('分档验收', 'data tier %s/%s PASS；pytest -m "not blender" 与 CI 矩阵见 '
                      '`.github/workflows/ci.yml`'
          % (vdata.get('passed'), vdata.get('total'))),

@@ -148,18 +148,75 @@ def check_fill(rc, layout, report, base_layout):
                           "base": base_loc}, problems
 
 
-#: 求解后允许残留的 issue 上限。不是"容忍越界"，而是**已知且已归因**的冲突：
-#: 场外叉车/卡车（scene 级绝对坐标）在厂房扩张后被圈进室内，压在货架访问点上。
-#: 它们不随室内功能带移动——那是装备层重排（R8.8）。数量一旦超过这个数，说明
-#: 新问题出现了，门必须变红。
-SOLVE_RESIDUAL_MAX = 6
+#: 求解后允许残留的 issue 上限。R8.8 之后是 **0**：整场（北侧前置仓、场地道路、
+#: 装卸位、叉车位）随建筑一起北移，放大布局不再有任何结构性冲突。
+#:
+#: 这个数曾经是 6，因为当时只重排了室内功能带，室外装备停在旧位置被圈进屋里。
+#: 把它收回 0 才是"面积真的能交付"的证据；留着 6 等于给同一类问题永久开一道口子。
+SOLVE_RESIDUAL_MAX = 0
+
+
+def _agv_radius(spec):
+    a = spec["defaults"]["agv"]
+    return (a["length"] ** 2 / 4 + a["width"] ** 2 / 4) ** 0.5 + a["safety_margin"]
+
+
+def _scene_equipment(spec):
+    """取 scene 级装备（叉车/卡车）。它们不在 spec 里，是全局配置。"""
+    try:
+        import scene_config
+        c = scene_config.load()["scene"]
+    except Exception:                                            # noqa: BLE001
+        return []
+    fp = c.get("vehicle_footprint_m") or {}
+    out = []
+    for kind, key in (("forklift", "forklifts"), ("truck", "trucks")):
+        fw, fd = fp.get(kind, [2.0, 1.0])
+        for i, pt in enumerate(c.get(key) or [], 1):
+            out.append({"id": "%s_%02d" % (kind.upper(), i), "kind": kind,
+                        "x": float(pt[0]), "z": float(pt[1]),
+                        "half": (fw / 2.0, fd / 2.0)})
+    return out
+
+
+def _loc_access_point(layout, loc_id):
+    for w in (layout or {}).get("warehouses") or []:
+        for l in w.get("locations") or []:
+            if l.get("id") == loc_id:
+                return l.get("access_point")
+        for ch in w.get("charging_stations") or []:
+            if ch.get("id") == loc_id:
+                return ch.get("access_point")
+    return None
 
 
 def _explain_residual(issue, layout, spec):
-    """给每条残留写归因。归因写不出来 = 这不是已知问题 = 门该红。"""
+    """给残留写**因果**归因：该访问点是否真的落在室外装备的膨胀范围内。
+
+    旧版是子串匹配（message 含 SHELF/CHG 就归因"室外装备"），那是个掩蔽口——
+    任何新的 SHELF/CHG L6 都会被同一条通道吞掉，门等于没在看。现在要求：
+    1. issue 必须能定位到一个真实的访问点；
+    2. 该点必须真的落在某台叉车/卡车的 footprint + AGV 半径内；
+    3. 归因文案里要带**具体设备 id 与坐标**，人可复核。
+    三条缺一条就返回 None，由 check_solve 判红。
+    """
     msg = issue.get("message") or ""
-    if "SHELF" in msg or "CHG" in msg:
-        return ("场外叉车/卡车未随功能带后移，扩张后被圈进室内（装备层重排属 R8.8）")
+    lid = msg.split()[0] if msg else ""
+    ap = _loc_access_point(layout, lid)
+    if not ap:
+        return None
+    try:
+        r = _agv_radius(spec or jload(CONFIG / "layout_spec.json"))
+    except Exception:                                            # noqa: BLE001
+        return None
+    for eq in _scene_equipment(spec or jload(CONFIG / "layout_spec.json")):
+        hx, hz = eq["half"]
+        x0, z0 = eq["x"] - hx - r, eq["z"] - hz - r
+        x1, z1 = eq["x"] + hx + r, eq["z"] + hz + r
+        if x0 <= float(ap[0]) <= x1 and z0 <= float(ap[1]) <= z1:
+            return ("%s 的访问点 (%.1f, %.1f) 落在室外装备 %s (%.1f, %.1f) 的膨胀范围内"
+                    "——装备层未重排，属 R8.8"
+                    % (lid, ap[0], ap[1], eq["id"], eq["x"], eq["z"]))
     return None
 
 
@@ -213,6 +270,42 @@ def check_solve(rc, layout, report, base_layout, spec=None):
                           "band_shifts": [round(x, 2) for x in shifts if x]}, problems
 
 
+def check_deliver(rc, layout, report, base_layout):
+    """放大后的布局必须**能真的交付**：0 issue、exit 0、写盘成功、场地跟着长大。
+
+    这是 R8.8 的验收条件，也是"面积→库容"这句话的兑现口径。之前 AREA_SOLVE_OK
+    只证明"算得出来"（1022→1），但那份布局被校验拒绝、写不进 data/——数字漂亮、
+    交付不了。现在要求整份布局可落盘。
+    """
+    problems = []
+    issues = (report or {}).get("issues") or []
+    if issues:
+        problems.append("仍有 %d 条 issue（要求 0）：%s"
+                        % (len(issues), (issues[0].get("message") or "")[:50]))
+    if rc != 0:
+        problems.append("校验仍拒绝（退出码 %s）——布局写不进 data/" % rc)
+    if layout is None:
+        problems.append("没有产出布局")
+        return False, {"issues": len(issues)}, problems
+    base_loc = base_layout["summary"]["locations"] if base_layout else 0
+    loc = layout["summary"]["locations"]
+    if loc <= base_loc:
+        problems.append("库位没有增加（%s → %s）" % (base_loc, loc))
+    # 场地必须跟着长大：建筑北移而 site 不动，等于把停车场埋进屋里
+    base_depth = (base_layout or {}).get("size", {}).get("depth") or 0
+    depth = (layout.get("size") or {}).get("depth") or 0
+    if depth < base_depth:
+        problems.append("site 进深没跟着长（%s → %s）" % (base_depth, depth))
+    fwd = [w["origin"][1] for w in layout["warehouses"][1:]]
+    base_fwd = [w["origin"][1] for w in (base_layout or {}).get("warehouses", [])[1:]]
+    if fwd and base_fwd and fwd[0] <= base_fwd[0]:
+        problems.append("北侧前置仓没有北移（z %s → %s）——新墙会把它们圈进 W 里"
+                        % (base_fwd[0], fwd[0]))
+    return not problems, {"issues": 0, "locations": loc, "base_locations": base_loc,
+                          "site_depth": depth, "base_site_depth": base_depth,
+                          "forward_z": fwd[:3], "base_forward_z": base_fwd[:3]}, problems
+
+
 def check_shrink(rc, report):
     problems = []
     issues = report.get("issues") or []
@@ -260,8 +353,19 @@ def main(argv=None):
         no_gain = copy.deepcopy(fake_layout)
         no_gain["summary"]["locations"] = base["summary"]["locations"]
         ok_no_gain, _, _ = check_solve(0, no_gain, {"issues": []}, base)
+        # 归因必须是因果的：随便编一条"离装备很远"的 SHELF L6，子串匹配会放行，
+        # 因果判定必须判红——这是防掩蔽口的关键反例。
+        if fill:
+            far_id = next((l["id"] for w in fill["warehouses"]
+                           for l in w.get("locations") or []), None)
+            fake_issue = {"issues": [{"rule": "L6", "message": "%s AP not walkable" % far_id}]}
+            ok_causal, _, _ = check_solve(0, fill, fake_issue, base, spec)
+        # 交付门反例：拿"被拒的那份"喂进去必须红
+        ok_deliver, _, _ = check_deliver(1, base, {"issues": [{"rule": "L6",
+                                                               "message": "x"}]}, base)
         good = ((not ok_self) and (not ok_shrink) and (not ok_fill)
                 and (not ok_solve) and (not ok_bad_rules) and (not ok_no_gain)
+                and (not ok_causal) and (not ok_deliver)
                 and rc0 == 0 and rc1 == 0)
         print("AREA_SELF_TEST %s" % ("PASS" if good else "FAIL"))
         print("  no_change_detected  %s" % ("ok" if not ok_self else "MISSED"))
@@ -270,12 +374,16 @@ def main(argv=None):
         print("  solve_without_shift %s" % ("ok" if not ok_solve else "MISSED"))
         print("  solve_l3_not_cleared %s" % ("ok" if not ok_bad_rules else "MISSED"))
         print("  solve_no_capacity   %s" % ("ok" if not ok_no_gain else "MISSED"))
+        print("  deliver_rejected    %s" % ("ok" if not ok_deliver else "MISSED"))
+        print("  residual_attribution_causal %s"
+              % ("ok" if not ok_causal else "MISSED"))
         return 0 if good else 1
 
     gates, failed = {}, []
     for name, fn in (("AREA_PARAM_OK", lambda: check_param(base, big)),
                      ("AREA_FILL_OK", lambda: check_fill(rc3, fill, rep3, base)),
                      ("AREA_SOLVE_OK", lambda: check_solve(rc3, fill, rep3, base, spec)),
+                     ("AREA_DELIVER_OK", lambda: check_deliver(rc3, fill, rep3, base)),
                      ("AREA_SHRINK_NEG", lambda: check_shrink(rc2, rep2))):
         try:
             ok, detail, problems = fn()

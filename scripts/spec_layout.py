@@ -246,6 +246,7 @@ def expand(spec, fleet_counts=None):
     d_dock = defaults['dock']
     rng = random.Random(spec['site'].get('seed', 0))
     warehouses = []
+    site_shift = 0.0        # 建筑向北生长时，整场（前置仓/场地/室外装备）一起北移的量
 
     for wh in spec['warehouses']:
         ox, oz = wh['origin']
@@ -254,6 +255,30 @@ def expand(spec, fleet_counts=None):
         # shift=+14，PACK/SORT/充电位一起后移，货架区才吃得下新增的进深。
         if (spec.get('options') or {}).get('area_reflow'):
             wh, area_rec = layout_solver.shift_band(wh, float(wh['size']['depth']))
+            sh = float(area_rec.get('shift') or 0.0)
+            if sh > 1e-9 and not site_shift:
+                # 建筑向北长了 sh 米。**不是只改室内**：北侧的前置仓、场外道路/装卸位/
+                # 叉车位都在同一根 z 轴上，它们必须一起北移，否则新墙会把停车场
+                # 圈进屋里（R8.7 的 1 条残留就是这么来的：卡车停在 z=82，新墙到 84）。
+                # 移位后 site 由 max_z+4 自动长大，不必手改 site.size。
+                site_shift = sh
+                old_north = wh['origin'][1] + wh['size']['depth'] - sh
+                for other in spec['warehouses']:
+                    if other is wh:
+                        continue
+                    if float(other['origin'][1]) >= old_north - 1e-6:
+                        other['origin'][1] = round(float(other['origin'][1]) + sh, 6)
+                yard = (spec['site'].get('yard') or {})
+                for key in ('roads', 'trucks', 'forklifts'):
+                    rows = yard.get(key) or []
+                    for r in rows:
+                        if len(r) == 4:            # 道路矩形 x0,z0,x1,z1
+                            if float(r[1]) >= old_north - 1e-6:
+                                r[1] = round(float(r[1]) + sh, 6)
+                                r[3] = round(float(r[3]) + sh, 6)
+                        elif len(r) == 2:          # 点位 x,z
+                            if float(r[1]) >= old_north - 1e-6:
+                                r[1] = round(float(r[1]) + sh, 6)
 
         W, D, H = (wh['size']['width'], wh['size']['depth'], wh['size']['height'])
         zones = []
@@ -549,6 +574,7 @@ def expand(spec, fleet_counts=None):
         'name': CFG['project'], 'units': 'm', 'coord': CFG['coord'],
         'seed': spec['site'].get('seed', 0), 'mode': CFG['mode'],
         'size': size, 'warehouses': warehouses,
+        **({'scene': _scene_override(site_shift)} if site_shift else {}),
         'summary': {
             'warehouses': len(warehouses),
             'racks': sum(len(w['racks']) for w in warehouses),
@@ -572,6 +598,16 @@ def expand(spec, fleet_counts=None):
     return layout
 
 
+def _scene_override(shift):
+    """室外装备（叉车/卡车）北移后的位置。只覆盖坐标，footprint 仍取 CFG。"""
+    sc = CFG['scene']
+    out = {'yard_shift': round(float(shift), 6)}
+    for key in ('forklifts', 'trucks'):
+        out[key] = [[p[0], round(float(p[1]) + float(shift), 6)]
+                    for p in (sc.get(key) or [])]
+    return out
+
+
 # ---------------------------------------------------------------- L2–L12
 def build_grid(layout, radius, cell=0.5):
     """独立复算 0.5 m 栅格，不依赖 data/nav_grid.json（避免自证循环）。"""
@@ -592,7 +628,8 @@ def build_grid(layout, radius, cell=0.5):
             for a, b in zip(cv['path'], cv['path'][1:]):
                 solids.append((cv['id'], [min(a[0], b[0]) - 0.5, min(a[1], b[1]) - 0.5,
                                           max(a[0], b[0]) + 0.5, max(a[1], b[1]) + 0.5]))
-    sc = CFG['scene']
+    sc = dict(CFG['scene'])
+    sc.update(layout.get('scene') or {})   # 面积重排后室外装备的新位置（默认无覆盖）
     fw, fd = sc['vehicle_footprint_m']['forklift']
     tw, td = sc['vehicle_footprint_m']['truck']
     for i, (x, z) in enumerate(sc['forklifts'], 1):
