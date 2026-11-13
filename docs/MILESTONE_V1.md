@@ -57,7 +57,24 @@
 8. 编辑器前端接 typed 关卡 spec（`console` 仍读出厂布局）
 9. 分型常量单一真相源（`SORTER_KINDS` / `CONVEYOR_STYLES` 进 `asset_spec`，避免 `cross_belt` 这类笔误）
 
-## 六、怎么复核这份冻结
+## 六、已知例外（不隐瞒）
+
+全量 `pytest` 里固定有 **2 条**契约测试会红：
+
+```
+tests/contract/test_report_contracts.py::test_every_report_has_a_valid_sidecar
+tests/contract/test_report_contracts.py::test_manifest_artifact_hashes_match_disk
+```
+
+原因不是产物错，是**顺序**：`tests/acceptance/test_validate.py` 会重跑
+`tests/run_all_negative.py`，其中 `check_asset_dispatch --probe` 重写了
+`out/asset_dispatch_report.json`（内容依赖当场探针），而 manifest 是跑门之前钉的。
+
+判定：**已知 pin**。`python scripts/manifest.py` 重钉后两条立刻绿（本轮复验 2 passed）。
+已记入 v1.1 backlog 第 10 条（把 `--probe` 的报告写到 `out/exp/`，别覆盖主报告）。
+除这两条外，全量 **379 绿 + 1 skip**。
+
+## 七、怎么复核这份冻结
 
 ```bash
 python scripts/check_milestone.py            # 三锚 + 计数 + 链步数 + backlog

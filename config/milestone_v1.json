@@ -45,6 +45,7 @@
     "报童离散分布（泊松/经验分布需分位表，现只支持 normal/uniform）",
     "7 型分拣同场（功能带放不下 7 个站，几何差异现由 R8.2 探针承担）",
     "编辑器前端接 typed 关卡 spec（现 console 仍读出厂布局）",
-    "分型常量的单一真相源（SORTER_KINDS/CONVEYOR_STYLES 应进 asset_spec，避免 cross_belt 这类笔误）"
+    "分型常量的单一真相源（SORTER_KINDS/CONVEYOR_STYLES 应进 asset_spec，避免 cross_belt 这类笔误）",
+    "check_asset_dispatch --probe 的报告写到 out/exp/，别覆盖主报告（现会让全量 pytest 里 2 条 sidecar/manifest 契约假红）"
   ]
 }
