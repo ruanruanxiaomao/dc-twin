@@ -83,6 +83,8 @@ def refactor_facts():
            "bays_gate": None, "bays_east_gain": 0, "bays_west_delta": 0,
            "bays_narrow": 0, "bays_wide": 0, "bays_spawn_x": 0,
            "bays_loc_base": 0, "bays_loc": 0,
+           "reg_gate": None, "reg_kinds": 0, "reg_racks": 0, "reg_solids": 0,
+           "reg_l2l3": 0, "reg_nav": 0, "reg_phys": 0, "reg_logic": 0,
            "asm_gate": None, "asm_token": None, "asm_areas": 0}
     try:
         rack = json.load(open(os.path.join(CONFIG, 'rack_spec.json'), encoding='utf-8'))
@@ -213,6 +215,22 @@ def refactor_facts():
         out["bays_spawn_x"] = ((bd.get('spawn_x') or {}).get('wide') or [0])[-1]
         out["bays_loc_base"] = (bd.get('locations') or {}).get('narrow') or 0
         out["bays_loc"] = (bd.get('locations') or {}).get('wide') or 0
+    except Exception:                       # noqa: BLE001
+        pass
+    try:
+        rg = json.load(open(os.path.join(OUT, 'registry_report.json'), encoding='utf-8'))
+        out["reg_gate"] = rg.get('verdict')
+        cov = (rg.get('gates', {}).get('REGISTRY_COVERAGE_OK', {}) or {}).get('detail') or {}
+        out["reg_kinds"] = len(cov.get('kinds') or {})
+        par = (rg.get('gates', {}).get('REGISTRY_RECT_PARITY_OK', {}) or {}).get('detail') or {}
+        out["reg_racks"] = par.get('racks') or 0
+        out["reg_solids"] = par.get('solids') or 0
+        sc = (rg.get('gates', {}).get('REGISTRY_SCOPE_OK', {}) or {}).get('detail') or {}
+        out["reg_l2l3"] = len(sc.get('l2l3') or [])
+        out["reg_nav"] = len(sc.get('nav') or [])
+        ar = (rg.get('gates', {}).get('REGISTRY_AREAS_OK', {}) or {}).get('detail') or {}
+        out["reg_phys"] = ar.get('physical') or 0
+        out["reg_logic"] = ar.get('logical') or 0
     except Exception:                       # noqa: BLE001
         pass
     try:
@@ -541,7 +559,7 @@ def main():
             inv.get('stockout', 'n/a'), inv.get('expired_units', 'n/a'),
             inv.get('expired_value', 'n/a'), inv.get('open_lots', 'n/a'),
             inv.get('fefo_violations', 'n/a'))),
-        ('重构层（R0–R5 + R8.1–R8.10）', '四份 spec（%s/4）+ schema（%s/4）：货架 %s 类（按存取机理）、设备 %s 类；'
+        ('重构层（R0–R5 + R8.1–R8.11）', '四份 spec（%s/4）+ schema（%s/4）：货架 %s 类（按存取机理）、设备 %s 类；'
                           '车型库 %s 个（默认部署 %s）；集装单元 %s 个 SKU（托盘 %s / 料箱 %s，'
                           '最高载荷利用率 %s%%）；当前布局货道 %s 个（默认 0 = 未启用深位）；'
                           'AST 耦合开关 %s（默认关）；`capacity_model.py` / 单元层 / 货架机理 / '
@@ -558,7 +576,7 @@ def main():
                           'R8.3 带机理整场：%s 类机理入场景 / fallback=%s / 锚点=counts+GLB 结构指纹'
                           '（GLB 字节不可复现，ADR-12）；'
                           '门：`dc run --scope refactor`（R0 口径 + R1 单元 + R2 货架 + R3 设备 '
-                          '+ R4 库容 + R5 密度 + R8.1 资产目录 + R8.2 派发 + R8.9 提交事务，10 步）'
+                          '+ R4 库容 + R5 密度 + R8.1 资产目录 + R8.2 派发 + R8.9 提交事务 + R8.11 登记册，11 步）'
          % (ref['specs'], ref['schemas'], ref['rack_types'], ref['equipment_types'],
             ref['models'], "、".join(ref['deployed']) or "n/a", ref['ul_skus'],
             ref['ul_pallet'], ref['ul_tote'],
@@ -609,6 +627,15 @@ def main():
                           '当成宽度红利；默认 `reflow_bays` 缺省关，layout 仍逐字节不变'
          % (ref['bays_east_gain'], ref['bays_west_delta'], ref['bays_spawn_x'],
             ref['bays_loc_base'], ref['bays_loc'], ref['bays_gate'] or 'n/a')),
+        ('实体登记册（R8.11）', '%s 类实体（货架/月台/站/功能区/充电位/障碍/输送线/待命位/室外装备）'
+                          '登记成唯一清单，每类显式写"谁消费它"；L2/L3 取 %s 类、导航取 %s 类，'
+                          '差异（输送线只挡不撞）写在册子里而不是散在两处手写清单；'
+                          '几何与 spec_layout 逐架比对 %s 货架 / %s 实体（同序），'
+                          '物理区 %s / 逻辑区 %s（逻辑区不许带 rect）；verdict=%s；'
+                          '自检 5 反例（未登记键/孤儿类/消费者笔误/放宽集合/物理区缺 rect）'
+         % (ref['reg_kinds'], ref['reg_l2l3'], ref['reg_nav'], ref['reg_racks'],
+            ref['reg_solids'], ref['reg_phys'], ref['reg_logic'],
+            ref['reg_gate'] or 'n/a')),
         ('分档验收', 'data tier %s/%s PASS；pytest -m "not blender" 与 CI 矩阵见 '
                      '`.github/workflows/ci.yml`'
          % (vdata.get('passed'), vdata.get('total'))),

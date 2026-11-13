@@ -23,6 +23,7 @@ import math
 import os
 import random
 import shutil
+import solid_registry
 import sys
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -371,9 +372,7 @@ def expand(spec, fleet_counts=None):
                             # 待命位是 x 方向的硬障碍：它们是 AGV 的发车点，
                             # 货架排上去等于把车"停在货架里"（L6 只报 AP 不可达，
                             # 归因要写清是哪个 spawn 挡的）。
-                            blockers=[{'x': float(p[0]), 'id': 'spawn_%02d' % (i + 1)}
-                                      for i, p in enumerate(
-                                          (wh.get('spawns') or {}).get('points') or [])])
+                            blockers=solid_registry.spawn_points(wh))
                         w.setdefault('area_solve_bays', []).append({
                             'zone': group.get('zone'), 'bays_declared': int(bays),
                             'bays_derived': int(binfo['bays']),
@@ -644,26 +643,13 @@ def build_grid(layout, radius, cell=0.5):
     cells = bytearray(cols * rows)
     solids = []
     for w in layout['warehouses']:
-        solids += [(rk['id'], rect_of_rack(rk)) for rk in w['racks']]
-        solids += [(d['id'], list(d['rect'])) for d in w['docks']]
-        solids += [(s['id'], list(s['rect'])) for s in w['stations']]
-        for ch in w['charging_stations']:
-            x, _, z = ch['position']
-            solids.append((ch['id'], [x - 0.8, z - 0.4, x + 0.8, z + 0.4]))
-        for ob in w['obstacles']:
-            solids.append((ob['id'], list(ob['rect'])))
-        for cv in w['conveyors']:
-            for a, b in zip(cv['path'], cv['path'][1:]):
-                solids.append((cv['id'], [min(a[0], b[0]) - 0.5, min(a[1], b[1]) - 0.5,
-                                          max(a[0], b[0]) + 0.5, max(a[1], b[1]) + 0.5]))
+        # R8.11：从实体登记册取（顺序 rack→dock→station→charger→obstacle→conveyor
+        # 与历史一致，所以替换后导航网格逐字节不变）。
+        solids += [(sid, r) for sid, _k, r in
+                   solid_registry.layout_solids(w, solid_registry.NAV_KINDS)]
     sc = dict(CFG['scene'])
     sc.update(layout.get('scene') or {})   # 面积重排后室外装备的新位置（默认无覆盖）
-    fw, fd = sc['vehicle_footprint_m']['forklift']
-    tw, td = sc['vehicle_footprint_m']['truck']
-    for i, (x, z) in enumerate(sc['forklifts'], 1):
-        solids.append(('FORKLIFT_%02d' % i, [x - fw / 2, z - fd / 2, x + fw / 2, z + fd / 2]))
-    for i, (x, z) in enumerate(sc['trucks'], 1):
-        solids.append(('TRUCK_%02d' % i, [x - tw / 2, z - td / 2, x + tw / 2, z + td / 2]))
+    solids += [(sid, r) for sid, _k, r in solid_registry.outdoor_solids(sc)]
     for _, r in solids:
         x0, z0, x1, z1 = [r[0] - radius, r[1] - radius, r[2] + radius, r[3] + radius]
         c0, c1 = max(0, math.floor(x0 / cell)), min(cols, math.ceil(x1 / cell))
@@ -699,13 +685,11 @@ def validate(layout, spec):
         W, D = w['size']['width'], w['size']['depth']
         if W <= 0 or D <= 0:
             issues.append(('L12', '%s size must be > 0' % w['id']))
-        rects = [(rk['id'], rect_of_rack(rk)) for rk in w['racks']]
-        rects += [(d['id'], list(d['rect'])) for d in w['docks']]
-        rects += [(s['id'], list(s['rect'])) for s in w['stations']]
-        for ch in w['charging_stations']:
-            x, _, z = ch['position']
-            rects.append((ch['id'], [x - 0.8, z - 0.4, x + 0.8, z + 0.4]))
-        rects += [(o['id'], list(o['rect'])) for o in w['obstacles']]
+        # R8.11：L2/L3 的对象集也从登记册取——与上面的导航烘焙是**同一份现实、
+        # 不同语义子集**。输送线故意不在 L2/L3（只走导航），这条差异现在写在
+        # solid_registry.KINDS 的 note 里，而不是散落在两处手写清单里。
+        rects = [(sid, r) for sid, _k, r in
+                 solid_registry.layout_solids(w, solid_registry.L2L3_KINDS)]
         # L2 footprint
         for sid, r in rects:
             if r[0] < ox - EPS or r[1] < oz - EPS or r[2] > ox + W + EPS or r[3] > oz + D + EPS:
