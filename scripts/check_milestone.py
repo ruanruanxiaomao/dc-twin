@@ -32,11 +32,20 @@ def jload(p):
     return json.loads(Path(p).read_text(encoding="utf-8"))
 
 
+#: 这两份锚是 **Blender 产物**（gitignore，需 --scope full 才生成）。CI 上没有
+#: Blender（一帧 smoke 是 manual-only），缺失只说明"没跑 Blender"，不是默认产物被改。
+#: 显式跳过并写进 detail，既不判红、也不假装验过。
+BLENDER_ANCHORS = ("out/build_report.json", "out/dc_preview.glb")
+
+
 def check_anchors(freeze):
-    problems, detail = [], {}
+    problems, detail, skipped = [], {}, []
     for rel, want in (freeze.get("anchors") or {}).items():
         p = ROOT / rel
         if not p.exists():
+            if rel in BLENDER_ANCHORS:
+                skipped.append(rel)
+                continue
             problems.append("%s 缺失（先跑 --scope full 构建）" % rel)
             continue
         b = p.read_bytes()
@@ -48,22 +57,35 @@ def check_anchors(freeze):
         if want.get("bytes") is not None and len(b) != int(want["bytes"]):
             problems.append("%s 的字节数变了：%d（冻结 %d）"
                             % (rel, len(b), int(want["bytes"])))
+    if skipped:
+        detail["skipped_no_blender"] = skipped
     return not problems, detail, problems
 
 
-def check_counts(freeze):
-    problems, detail = [], {}
+def check_counts(freeze, report=None):
+    """布局侧计数（racks/locations/warehouses）必验；对象/网格/材质来自
+    Blender 的 build_report.json，CI 无该产物时只跳过这三项，不判红。"""
+    problems, detail, skipped = [], {}, []
     want = freeze.get("counts") or {}
     lay = jload(DATA / "layout.json")
-    rep = jload(OUT / "build_report.json")
+    if report is None:
+        rp = OUT / "build_report.json"
+        report = jload(rp) if rp.exists() else {}
     got = {
-        "objects": rep.get("objects"), "meshes": rep.get("meshes"),
-        "materials": rep.get("materials"),
         "racks": lay["summary"]["racks"], "locations": lay["summary"]["locations"],
         "warehouses": lay["summary"]["warehouses"],
     }
+    for k in ("objects", "meshes", "materials"):
+        if k in report:
+            got[k] = report.get(k)
+        else:
+            skipped.append(k)
     detail.update(got)
+    if skipped:
+        detail["skipped_no_blender"] = skipped
     for k, v in want.items():
+        if k not in got:            # 跳过项不参与比对（已在 detail 里写明）
+            continue
         if got.get(k) != v:
             problems.append("计数 %s 变了：%r（冻结 %r）" % (k, got.get(k), v))
     return not problems, detail, problems

@@ -142,6 +142,15 @@ def test_fleet_spec_over_capacity_is_rejected():
 
 
 # ------------------------------------------------------------------ A/B reports
+#: A/B 报告由 scripts/validate_sim.py 生成（它会额外跑两轮仿真），CI 不跑它。
+#: out/ 是 gitignore 的产物，干净检出时不存在——缺产物就跳过，与本仓
+#: test_glb_canonical / test_asset_dispatch 同一惯例，而不是让 CI 报一个假红。
+_AB_REPORTS = [ROOT / "out" / "sim_validation.json", ROOT / "out" / "pnl_validation.json"]
+_needs_ab = pytest.mark.skipif(not all(p.exists() for p in _AB_REPORTS),
+                               reason="需要先跑 scripts/validate_sim.py 生成 A/B 报告")
+
+
+@_needs_ab
 def test_sim_and_pnl_validation_reports_pass():
     s = jload(ROOT / "out" / "sim_validation.json")
     p = jload(ROOT / "out" / "pnl_validation.json")
@@ -151,6 +160,7 @@ def test_sim_and_pnl_validation_reports_pass():
     assert all(c["status"] == "PASS" for c in p["negative_tests"])
 
 
+@_needs_ab
 @pytest.mark.parametrize("report", ["sim_validation.json", "pnl_validation.json"])
 def test_report_has_no_failed_checks(report):
     d = jload(ROOT / "out" / report)

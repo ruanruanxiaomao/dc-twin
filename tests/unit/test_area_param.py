@@ -10,6 +10,8 @@
 import sys
 from pathlib import Path
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -17,6 +19,17 @@ sys.path.insert(0, str(ROOT / "tests"))
 
 import check_area_param as cap   # noqa: E402
 import _subproc                  # noqa: E402
+
+#: 门把中间布局写在 out/exp/area/，而 out/ 是 gitignore 的——CI 干净检出时不存在。
+#: 过去靠"同一文件里前一个用例先跑过门"来兜底，那是隐性顺序依赖：单跑某个用例、
+#: 或换个收集顺序就 FileNotFound。这里显式自给，不赌顺序。
+_AREA_DIR = ROOT / "out" / "exp" / "area"
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _area_products():
+    if not (_AREA_DIR / "bays_wide_layout.json").exists():
+        _subproc.run(["scripts/check_area_param.py", "--quiet"], cwd=str(ROOT))
 
 
 def test_area_gate_passes():

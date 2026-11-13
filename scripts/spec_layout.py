@@ -783,6 +783,21 @@ def validate(layout, spec):
 
 
 # ---------------------------------------------------------------- main
+def _rel_to_root(path):
+    """报告里写相对路径，但**跨盘时退回绝对路径**。
+
+    Windows 上 `os.path.relpath("C:\\tmp\\x.json", "D:\\a\\repo")` 直接抛
+    `ValueError: path is on mount 'C:', start on mount 'D:'`。CI 的 Windows runner
+    仓库在 D:，pytest 的 tmp 在 C:，于是 assembly 调 spec_layout 时校验器
+    "异常退出(1)"——看起来像校验器坏了，实际只是路径不在同一盘。
+    同盘时返回值与原来逐字一致。
+    """
+    try:
+        return os.path.relpath(path, ROOT).replace('\\', '/')
+    except ValueError:
+        return str(path).replace('\\', '/')
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--spec', default=os.path.join(ROOT, 'config', 'layout_spec.json'))
@@ -817,7 +832,7 @@ def main():
         # L1 失败也必须留下可追溯的报告，不能只打印一句就退出
         os.makedirs(OUT, exist_ok=True)
         fail_report = {
-            'spec': os.path.relpath(args.spec, ROOT).replace('\\', '/'),
+            'spec': _rel_to_root(args.spec),
             'verdict': 'FAIL',
             'issues': [{'rule': k, 'message': m} for k, m in schema_issues],
             'warnings': [], 'mutex_groups': [],
@@ -842,7 +857,7 @@ def main():
     sha = hashlib.sha256(payload.encode('utf-8')).hexdigest()
     doors = sum(len(d.get('doors', [])) for w in layout['warehouses'] for d in w['docks'])
     report = {
-        'spec': os.path.relpath(args.spec, ROOT).replace('\\', '/'),
+        'spec': _rel_to_root(args.spec),
         'spec_sha256': hashlib.sha256(open(args.spec, 'rb').read()).hexdigest(),
         'fleet_spec_checked': fleet_counts is not None,
         'fleet_deployment': layout.get('fleet_deployment'),

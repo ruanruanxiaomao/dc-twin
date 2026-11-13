@@ -12,6 +12,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(ROOT / "tests"))
@@ -66,6 +68,11 @@ def test_factory_layout_has_no_typed_keys():
         assert all(not st.get("sorter") for st in w.get("stations") or [])
 
 
+_PROBES = [ROOT / "out" / "rack_mesh_probe.json", ROOT / "out" / "variant_probe.json"]
+
+
+@pytest.mark.skipif(not all(p.exists() for p in _PROBES),
+                    reason="探针是 Blender 手动产物（gitignore），CI 无 Blender")
 def test_probe_covers_nine_racks_and_four_conveyors():
     r = _jload(ROOT / "out" / "rack_mesh_probe.json")
     v = _jload(ROOT / "out" / "variant_probe.json")
