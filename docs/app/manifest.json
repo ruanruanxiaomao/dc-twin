@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
   "kind": "webapp_snapshot",
-  "generated_at": "2026-11-13T10:41:54+00:00",
-  "commit": "ee74b49",
+  "generated_at": "2026-11-13T12:16:30+00:00",
+  "commit": "55e3af4",
   "glb": "out/dc_preview.glb",
   "api": {
-    "bootstrap": 224427,
+    "bootstrap": 226174,
     "paths": 189961,
     "scenarios": 4735,
     "pnl": 309,
@@ -33,8 +33,8 @@
       "sha256": "ac5bb7febd4773c28854f66a4c22f8eb7faa067aa319038aca37dbb66792cab8"
     },
     "api/bootstrap.json": {
-      "bytes": 224427,
-      "sha256": "5e57ada5c65d09cecf88ceaf0a0803f598c8ad45aab58f38ea81b94dd5bce7c1"
+      "bytes": 226174,
+      "sha256": "4c4bd97da98a496af1dfdd573d38bb3084ec3ec5967fe719244d026fb369b10f"
     },
     "api/cost-spec.json": {
       "bytes": 1950,
@@ -77,20 +77,20 @@
       "sha256": "c5df0e92f49fb8deb88fae5ea03e42174dbd33d2ccedf263a94678889f2cf5fc"
     },
     "app.js": {
-      "bytes": 48286,
-      "sha256": "5dd418c46cb7386b251fb0416919ada1b80b662cb21f63a2a470621b799109c8"
+      "bytes": 49391,
+      "sha256": "0473ce7728f623666ae18b7a2689c0597a4430d217b45093abda84f23b6f83a1"
     },
     "areas.js": {
-      "bytes": 16004,
-      "sha256": "9c2d5a6425f6d865274258241e104ddf32f21b793d15c2206ff276aca9f307cf"
+      "bytes": 21083,
+      "sha256": "5b1eba3df9f5c2c321835e0211d3a7cb8fe5848f2104d5c0dfab8f2d799241b0"
     },
     "game.js": {
       "bytes": 14887,
       "sha256": "042f027015ab65c2e56aabada612afb575cd61ecd0f41b9ceed7762d31651a17"
     },
     "index.html": {
-      "bytes": 12375,
-      "sha256": "a17cd558a9deb9e23dc62b16549b49a9e0d25003ca12fd449df9609225fd792b"
+      "bytes": 12797,
+      "sha256": "e66bccb16d26795995a518c00a993f017cc323aa1822fbabbb278cdb9c5dbf29"
     },
     "ops.js": {
       "bytes": 32380,
@@ -101,8 +101,8 @@
       "sha256": "a5e908727c2aa094128c45ebaf3504336bdbb933f4c5505a92cdb26f2f215900"
     },
     "snapshot.js": {
-      "bytes": 3595,
-      "sha256": "1b185ad0f1cf5dc86594e90eeb40318f44a768b65ceee69e134984712b7cc725"
+      "bytes": 3637,
+      "sha256": "21493a0e64d024f8b67dd9c188cbc9295d6a40a64399b14d4696dcca97bef654"
     },
     "style.css": {
       "bytes": 39253,
@@ -131,7 +131,7 @@
   },
   "counts": {
     "files": 27,
-    "bytes": 3172326
+    "bytes": 3180721
   },
   "note": "静态快照：/api/* 已冻结为 api/*.json，POST 一律拒绝"
 }

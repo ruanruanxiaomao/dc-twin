@@ -79,7 +79,8 @@ def refactor_facts():
            "area_base_cols": 0, "area_big_cols": 0, "area_gate": None,
            "area_before": 0, "area_after": 0, "area_loc": 0, "area_loc_gain": 0,
            "area_shift": 0, "area_site": 0, "area_site_base": 0,
-           "area_fwd": 0, "area_fwd_base": 0, "area_deliver": None}
+           "area_fwd": 0, "area_fwd_base": 0, "area_deliver": None,
+           "asm_gate": None, "asm_token": None, "asm_areas": 0}
     try:
         rack = json.load(open(os.path.join(CONFIG, 'rack_spec.json'), encoding='utf-8'))
         out["rack_types"] = len(rack.get('types') or {})
@@ -197,6 +198,14 @@ def refactor_facts():
         out["area_site_base"] = dv.get('base_site_depth') or 0
         out["area_fwd"] = (dv.get('forward_z') or [0])[0]
         out["area_fwd_base"] = (dv.get('base_forward_z') or [0])[0]
+    except Exception:                       # noqa: BLE001
+        pass
+    try:
+        ar2 = json.load(open(os.path.join(OUT, 'assembly_report.json'), encoding='utf-8'))
+        out["asm_gate"] = ar2.get('verdict')
+        dv2 = ar2.get('detail') or {}
+        out["asm_token"] = ((dv2.get('validate') or {}).get('token') or '')[:12] or None
+        out["asm_areas"] = ((dv2.get('written') or {}).get('areas') or 0)
     except Exception:                       # noqa: BLE001
         pass
     for name in ("unit_load_spec", "rack_spec", "equipment_spec", "capacity_spec"):
@@ -517,7 +526,7 @@ def main():
             inv.get('stockout', 'n/a'), inv.get('expired_units', 'n/a'),
             inv.get('expired_value', 'n/a'), inv.get('open_lots', 'n/a'),
             inv.get('fefo_violations', 'n/a'))),
-        ('重构层（R0–R5 + R8.1–R8.8）', '四份 spec（%s/4）+ schema（%s/4）：货架 %s 类（按存取机理）、设备 %s 类；'
+        ('重构层（R0–R5 + R8.1–R8.9）', '四份 spec（%s/4）+ schema（%s/4）：货架 %s 类（按存取机理）、设备 %s 类；'
                           '车型库 %s 个（默认部署 %s）；集装单元 %s 个 SKU（托盘 %s / 料箱 %s，'
                           '最高载荷利用率 %s%%）；当前布局货道 %s 个（默认 0 = 未启用深位）；'
                           'AST 耦合开关 %s（默认关）；`capacity_model.py` / 单元层 / 货架机理 / '
@@ -569,6 +578,13 @@ def main():
             ref['area_loc'] - ref['area_loc_gain'], ref['area_loc'], ref['area_loc_gain'],
             ref['area_site_base'], ref['area_site'],
             ref['area_fwd_base'], ref['area_fwd'])),
+        ('交互重摆（R8.9 / D10a+D12）', '拖动只改内存，落盘要过三道闸：'
+                          '无令牌 NEED_VALIDATE / 令牌不符 STALE_PLAN / 几何不过 GEOMETRY_INVALID；'
+                          '拒绝对目标文件做前后哈希比对（盘上没新东西才算真拒绝）；'
+                          '提交成功后对写出的 spec 再校验一遍。verdict=%s、草稿令牌 %s、'
+                          '落盘 %s 个功能区；门同时跑 spec_layout(L2–L6) 与 spec_areas(L23–L26)'
+                          '——只跑前者时 areas 完全没有防线（第一版就被门抓到）'
+         % (ref['asm_gate'] or 'n/a', ref['asm_token'] or 'n/a', ref['asm_areas'])),
         ('分档验收', 'data tier %s/%s PASS；pytest -m "not blender" 与 CI 矩阵见 '
                      '`.github/workflows/ci.yml`'
          % (vdata.get('passed'), vdata.get('total'))),

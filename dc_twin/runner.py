@@ -115,6 +115,7 @@ REFACTOR_CHAIN = [
     ("scripts/check_asset_consistency.py", ("--quiet",), "python"),  # R8.1 3D 资产目录一致性
     ("scripts/check_asset_dispatch.py", ("--quiet",), "python"),     # R8.2 货架派发 + 几何分型
     ("scripts/check_area_param.py", ("--quiet",), "python"),         # R8.6 厂房面积参数化 + 越界拒绝
+    ("scripts/check_assembly.py", ("--quiet",), "python"),           # R8.9 草稿→校验→显式提交（D12）
 ]
 
 SCOPES = {

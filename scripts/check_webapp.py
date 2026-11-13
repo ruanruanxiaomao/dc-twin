@@ -33,7 +33,7 @@ GLB = ROOT / "out" / "dc_preview.glb"
 RUNTIME_ONLY = {"/api/job", "/api/scenario/get", "/api/run", "/api/cancel",
                 "/api/config", "/api/scenario/save", "/api/scenario/delete",
                 "/api/scenario/run", "/api/scenario/dry-run", "/api/scenario/validate",
-                "/api/areas/plan", "/api/areas/apply"}
+                "/api/areas/plan", "/api/areas/apply", "/api/areas/commit"}
 
 
 def sha(p: Path) -> str:

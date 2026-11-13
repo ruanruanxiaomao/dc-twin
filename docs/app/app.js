@@ -592,11 +592,27 @@ function bindCanvas() {
   }, { passive: false });
 
   cv.addEventListener('mousedown', (e) => {
+    // 自定义扩仓模式：先问功能区要不要接这次按下。接了就**不**平移画布——
+    // 同一块画布上两种拖拽（拖世界 / 拖区），谁先命中谁拿走，否则用户一拖区图就跟着跑。
+    const r0 = cv.getBoundingClientRect();
+    const wx = (e.clientX - r0.left - S.view.ox) / S.view.scale;
+    const wz = (e.clientY - r0.top - S.view.oy) / S.view.scale;
+    if (typeof areasBeginDrag === 'function' && areasBeginDrag(wx, wz)) {
+      S.dragArea = true;
+      cv.classList.add('dragging');
+      return;
+    }
     S.drag = { x: e.clientX, y: e.clientY, ox: S.view.ox, oy: S.view.oy, moved: 0 };
     cv.classList.add('dragging');
   });
 
   window.addEventListener('mousemove', (e) => {
+    if (S.dragArea) {
+      const r0 = cv.getBoundingClientRect();
+      areasDragTo((e.clientX - r0.left - S.view.ox) / S.view.scale,
+                  (e.clientY - r0.top - S.view.oy) / S.view.scale);
+      return;
+    }
     if (!S.drag) return;
     const dx = e.clientX - S.drag.x, dy = e.clientY - S.drag.y;
     S.drag.moved = Math.max(S.drag.moved, Math.abs(dx) + Math.abs(dy));
@@ -606,6 +622,12 @@ function bindCanvas() {
   });
 
   window.addEventListener('mouseup', (e) => {
+    if (S.dragArea) {
+      S.dragArea = false;
+      cv.classList.remove('dragging');
+      areasEndDrag();
+      return;
+    }
     if (!S.drag) return;
     const wasClick = S.drag.moved < 4;
     S.drag = null;
@@ -638,6 +660,9 @@ function bindCanvas() {
   $('btnAreaAll').addEventListener('click', () => areasToggleAll(true));
   $('btnAreaNone').addEventListener('click', () => areasToggleAll(false));
   $('btnAreaApply').addEventListener('click', areasApply);
+  $('btnAreaReset').addEventListener('click', areasResetMoves);
+  $('btnAreaValidate').addEventListener('click', areasValidate);
+  $('btnAreaCommit').addEventListener('click', areasCommit);
   $('chkAreas3d').addEventListener('change', (e) => {
     if (typeof A !== 'undefined') A.visible3d = e.target.checked;
     if (viewer) viewer.setAreasVisible(e.target.checked);

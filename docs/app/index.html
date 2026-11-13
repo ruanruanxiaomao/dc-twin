@@ -234,8 +234,15 @@
         </div>
 
         <div id="areaCustom" hidden>
-          <div class="pane-sub">勾选要放进 W 仓北侧作业带的功能区模板，实时算深度/占地/产能</div>
+          <div class="pane-sub">勾选模板后，可在 2D 沙盘里直接拖动功能区；
+            拖动只是草稿，通过校验后才会写入磁盘（D12）</div>
           <div class="area-sum" id="areaSum"></div>
+          <div class="draft-bar" id="areaDraft">
+            <span class="muted">草稿：未改动</span>
+            <button class="btn mini" id="btnAreaReset">重置位移</button>
+            <button class="btn mini" id="btnAreaValidate">校验草稿</button>
+            <button class="btn primary" id="btnAreaCommit" disabled>提交布局</button>
+          </div>
           <div class="row-actions sticky-actions">
             <button class="btn mini" id="btnAreaPresetMin">最小集</button>
             <button class="btn mini" id="btnAreaPresetEcom">电商标准</button>

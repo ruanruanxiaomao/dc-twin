@@ -516,8 +516,19 @@ def build_areas_catalog():
     }
 
 
-def plan_areas(enabled, target_depth=None):
-    """纯计算：给定选中的模板，算出排布、占地与所需深度（不写任何文件）。"""
+def plan_areas(enabled, target_depth=None, moves=None):
+    """纯计算：给定选中的模板 + 用户拖拽位移，算出排布、占地与所需深度（不写盘）。
+
+    `moves` 是 `{template_id: [dx, dz]}`。**排布算法仍然由 pack 给出**，位移只是覆盖，
+    所以"用户没拖过的区"与原来逐字节一致——这是默认态不动的前提。
+
+    返回里带 `token`：它是"这份草稿"的指纹，提交时必须原样带回（D12 的显式提交）。
+    """
+    import assembly
+    try:
+        doc = assembly.plan(enabled, moves or {})
+    except assembly.CommitRejected as e:
+        return {"ok": False, "error": e.detail, "code": e.code, "placed": []}
     eng = _variant_engine()
     catalog, _raw = eng.load_catalog()
     base = eng.jload(eng.BASE_SPEC)
@@ -528,18 +539,15 @@ def plan_areas(enabled, target_depth=None):
     if wh is None:
         return {"ok": False, "error": "基础 spec 里没有 W 仓"}
 
-    base_depth = float(wh["size"]["depth"])
+    base_depth = float(doc["base_depth"])
     x_margin = float(place.get("x_margin_m", 4.0))
-    gap = float(place.get("gap_m", 2.0))
     offset = float(place.get("band_start_offset_m", 2.0))
     north_aisle = float(exp.get("north_aisle_m", 2.0))
     target = float(target_depth) if target_depth else base_depth + 18
 
-    picked = [catalog[k] for k in enabled if k in catalog]
-    items = sorted(picked, key=lambda t: -t["priority"])
-    band_z0 = base_depth + offset
-    placed, depth_used = eng.pack(items, (x_margin, band_z0, wh["size"]["width"] - x_margin),
-                                  x_margin, gap)
+    placed = doc["placed"]
+    depth_used = doc["depth_used"]
+    band_z0 = doc["band_z0"]
     need = base_depth + offset + depth_used + north_aisle
     others = [float(w["origin"][1]) for w in base["warehouses"] if w["id"] != "W"]
     limit = (min(others) - 2.0) if others else None
@@ -569,6 +577,10 @@ def plan_areas(enabled, target_depth=None):
                                         (r["rect"][3] - r["rect"][1]) for r in rows), 1),
                    "throughput_per_h": round(sum(r["throughput_per_h"] or 0
                                                  for r in rows), 1)},
+        # D12：草稿指纹。提交时原样带回，服务端重算比对——对不上就说明"校验的是 A、
+        # 提交的是 B"，直接拒。
+        "token": assembly.token(doc),
+        "moves": doc["moves"],
     }
 
 
@@ -878,8 +890,11 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def send_error_json(self, msg, code=400):
-        self.send_json({"ok": False, "error": msg}, code)
+    def send_error_json(self, msg, code=400, extra=None):
+        body = {"ok": False, "error": msg}
+        if extra:
+            body.update(extra)
+        self.send_json(body, code)
 
     def send_file(self, path: Path, cache="no-cache"):
         if not path.exists() or not path.is_file():
@@ -1056,7 +1071,20 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send_json(patch_cost_spec(payload.get("patch")))
             if path == "/api/areas/plan":
                 return self.send_json(plan_areas(payload.get("enabled") or [],
-                                                 payload.get("target_depth")))
+                                                 payload.get("target_depth"),
+                                                 payload.get("moves") or {}))
+            if path == "/api/areas/commit":
+                # D12：只有带令牌、令牌未过期、几何 0 issue 才落盘；否则 4xx + 原因。
+                import assembly
+                try:
+                    r = assembly.commit(payload.get("enabled") or [],
+                                        payload.get("moves") or {},
+                                        payload.get("token"))
+                except assembly.CommitRejected as e:
+                    return self.send_error_json(e.detail, 409,
+                                                extra={"code": e.code,
+                                                       "issues": e.issues})
+                return self.send_json(r)
             if path == "/api/areas/apply":
                 return self.send_json(apply_areas(payload.get("enabled") or []))
             if path == "/api/scenario/validate":

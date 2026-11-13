@@ -83,7 +83,8 @@ SHIM = r"""/* 静态快照垫片：把 /api/* 与 /out/* 重定向到同目录�
       if (path === '/api/job') return json({ status: 'idle', lines: [], next: 0 });
       if (path === '/api/scenario/get')
         return json({ ok: false, static: true, error: '静态快照不含可编辑场景' });
-      if (path === '/api/areas/plan' || path === '/api/areas/apply')
+      if (path === '/api/areas/plan' || path === '/api/areas/apply'
+          || path === '/api/areas/commit')
         return json({ ok: false, static: true,
                       error: '静态快照不能改布局，请在本地应用里生成扩仓变体' });
       return json({ ok: false, static: true, error: 'no snapshot for ' + path });

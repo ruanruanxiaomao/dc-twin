@@ -35,6 +35,9 @@ const A = {
   show: true,
   visible3d: true,
   busy: false,
+  // D10a/D12 草稿：位移只活在内存里，服务端回一个 token，提交时必须原样带回。
+  // 拖动过程中**不写任何文件**——这是"拖完直接落盘"和"显式提交"的分界线。
+  draft: { moves: {}, token: null, ok: null, issues: 0, drag: null, dirty: false },
 };
 
 const areaColor = (k) => KIND_COLOR[k] || '#94a3b8';
@@ -78,6 +81,31 @@ function areasDraw2d(ctx) {
       ctx.fillRect(px + pw / 2 - w / 2 - 3, py + ph / 2 - 7, w + 6, 14);
       ctx.fillStyle = c;
       ctx.fillText(label, px + pw / 2, py + ph / 2);
+    }
+  }
+
+  // 草稿叠加：拖动时同时画"原位置虚影"和"现位置实线"，否则用户看不出挪了多远
+  if (A.mode === 'custom' && A.plan && A.plan.placed) {
+    for (const p of A.plan.placed) {
+      if (!A.draft.moves[p.template] && !(A.draft.drag && A.draft.drag.tpl === p.template)) {
+        continue;
+      }
+      const r = p.rect;
+      const px = X(r[0]), py = Y(r[1]), pw = L(r[2] - r[0]), ph = L(r[3] - r[1]);
+      ctx.globalAlpha = 0.85;
+      ctx.strokeStyle = '#111827';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(px + 0.5, py + 0.5, pw - 1, ph - 1);
+      ctx.globalAlpha = 1;
+      const r0 = (A.draft.drag && A.draft.drag.rect0) || null;
+      if (r0 && A.draft.drag.tpl === p.template) {
+        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = '#9ca3af';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(X(r0[0]) + 0.5, Y(r0[1]) + 0.5,
+                       L(r0[2] - r0[0]) - 1, L(r0[3] - r0[1]) - 1);
+        ctx.setLineDash([]);
+      }
     }
   }
 
@@ -302,6 +330,7 @@ async function areasOpenCustom() {
     A.enabled = new Set(sel.length ? sel : (A.catalog.presets.ecommerce || []));
   }
   areasRenderTemplates();
+  areasRenderDraft();
   await areasPlan();
 }
 
@@ -338,7 +367,11 @@ function areasPlan() {
   planTimer = setTimeout(async () => {
     const enabled = [...A.enabled];
     try {
-      A.plan = await apiPost('/api/areas/plan', { enabled });
+      A.plan = await apiPost('/api/areas/plan',
+                             { enabled, moves: A.draft.moves });
+      A.draft.token = A.plan.token || null;
+      A.draft.ok = !!A.plan.ok;
+      A.draft.issues = (A.plan.placed && A.plan.ok) ? 0 : 1;
     } catch (e) {
       $('areaSum').innerHTML = '<span class="bad">计算失败：' + esc(e.message) + '</span>';
       return;
@@ -367,6 +400,113 @@ function areasRenderSum() {
     <div class="sum-row"><span>作业带</span>
       <span class="muted">x ${num(p.band.x0)}–${num(p.band.x1)} m · z 从 ${num(p.band.z0)} m 起</span></div>
     ${p.ok ? '' : '<div class="warn">放不下：先取消一两个区，或把前置仓整体北移（计划书 §12.6）</div>'}`;
+}
+
+// ---------------------------------------------------------------- 拖拽（D10a）
+
+function _rectHas(r, wx, wz) {
+  return r && wx >= r[0] && wx <= r[2] && wz >= r[1] && wz <= r[3];
+}
+
+function areasBeginDrag(wx, wz) {
+  if (A.mode !== 'custom' || !A.plan || !A.plan.placed) return false;
+  const hit = (A.plan.placed || []).find((p) => _rectHas(p.rect, wx, wz));
+  if (!hit) return false;
+  A.draft.drag = {
+    tpl: hit.template, wx, wz,
+    base: (A.draft.moves[hit.template] || [0, 0]).slice(),
+    rect0: hit.rect.slice(),     // 原矩形：拖动时画成虚影，用户知道从哪儿来
+    item: hit,
+  };
+  return true;
+}
+
+function areasDragTo(wx, wz) {
+  const d = A.draft.drag;
+  if (!d) return;
+  const dx = +(d.base[0] + (wx - d.wx)).toFixed(2);
+  const dz = +(d.base[1] + (wz - d.wz)).toFixed(2);
+  A.draft.moves[d.tpl] = [dx, dz];
+  // 先本地跟手（不等服务端），松手后再以服务端结果为准
+  d.item.rect = [d.rect0[0] + dx, d.rect0[1] + dz,
+                 d.rect0[2] + dx, d.rect0[3] + dz];
+  A.draft.dirty = true;
+  A.draft.token = null;          // 位移一变，旧令牌立即作废（D12）
+  areasRenderDraft();
+  S.dirty = true;
+}
+
+function areasEndDrag() {
+  const d = A.draft.drag;
+  A.draft.drag = null;
+  if (!d) return;
+  if (!A.draft.dirty) { S.dirty = true; return; }
+  A.draft.dirty = false;
+  areasPlan();                   // 松手才向服务端要权威矩形与 token
+}
+
+function areasResetMoves() {
+  A.draft.moves = {};
+  A.draft.token = null;
+  A.plan = null;
+  areasPlan();
+  areasRenderDraft();
+}
+
+function areasRenderDraft() {
+  const el = $('areaDraft');
+  if (!el) return;
+  const n = Object.keys(A.draft.moves).length;
+  const tok = A.draft.token;
+  const span = el.querySelector('span');
+  const btn = $('btnAreaCommit');
+  if (span) {
+    span.textContent = n
+      ? (tok ? `草稿：已挪 ${n} 个区 · 已校验（${tok}）` : `草稿：已挪 ${n} 个区 · 未校验`)
+      : '草稿：未改动';
+    span.className = n && !tok ? 'bad' : 'muted';
+  }
+  if (btn) btn.disabled = !(tok && A.draft.ok);
+}
+
+async function areasValidate() {
+  const btn = $('btnAreaValidate');
+  btn.disabled = true;
+  $('areaLog').textContent = '校验中（布局 L2–L6 + 功能区 L23–L26）…';
+  try {
+    const r = await apiPost('/api/areas/plan',
+                            { enabled: [...A.enabled], moves: A.draft.moves });
+    A.draft.token = r.token || null;
+    A.draft.ok = !!r.ok;
+    A.draft.issues = (r.issues || []).length;
+    $('areaLog').textContent = r.ok
+      ? '校验通过：0 issue，令牌 ' + A.draft.token + '\n>> 现在可以「提交布局」'
+      : '校验未通过：' + (r.error || (r.issues || []).length + ' 条 issue') +
+        '\n>> 拖回去或点「重置位移」';
+  } catch (e) {
+    $('areaLog').textContent = '校验失败：' + e.message;
+  } finally {
+    btn.disabled = false;
+    areasRenderDraft();
+  }
+}
+
+async function areasCommit() {
+  const btn = $('btnAreaCommit');
+  btn.disabled = true;
+  $('areaLog').textContent = '提交中…';
+  try {
+    const r = await apiPost('/api/areas/commit',
+                            { enabled: [...A.enabled], moves: A.draft.moves,
+                              token: A.draft.token });
+    $('areaLog').textContent = '已提交：' + (r.spec || '') +
+      '\n>> 草稿已落盘，可继续拖动再提交';
+  } catch (e) {
+    // 409 带 code：说明是哪道闸拦下的，别把四种拒绝糊成一句话
+    $('areaLog').textContent = '提交被拒：' + e.message;
+  } finally {
+    areasRenderDraft();
+  }
 }
 
 async function areasApply() {
