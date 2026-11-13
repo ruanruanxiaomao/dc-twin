@@ -1,18 +1,18 @@
 """Behavioural acceptance: the validator must be able to fail, not just claim it."""
 import json
-import subprocess
 import sys
 from pathlib import Path
 
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "tests"))
+import _subproc  # noqa: E402  统一把子进程/父进程的编码钉成 UTF-8
 
 
 @pytest.mark.acceptance
 def test_data_tier_exits_zero():
-    r = subprocess.run([sys.executable, "scripts/validate_data.py"],
-                       cwd=ROOT, capture_output=True, text=True)
+    r = _subproc.run(["scripts/validate_data.py"], cwd=ROOT)
     assert r.returncode == 0, r.stdout[-1200:] + r.stderr[-400:]
 
 
@@ -21,8 +21,7 @@ def test_data_tier_exits_zero():
 @pytest.mark.skipif(not (ROOT / "out" / "distribution_center.blend").exists(),
                     reason="full A1-A40 needs the Blender artifacts")
 def test_full_acceptance_40_checks():
-    r = subprocess.run([sys.executable, "scripts/validate.py", "--json"],
-                       cwd=ROOT, capture_output=True, text=True)
+    r = _subproc.run(["scripts/validate.py", "--json"], cwd=ROOT)
     assert r.returncode == 0, r.stdout[-1200:] + r.stderr[-400:]
     d = json.loads(r.stdout)
     assert d["total"] == 40 and d["passed"] == 40

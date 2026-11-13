@@ -209,3 +209,59 @@ def test_fifo_rack_has_no_conflict(tmp_path):
     sim.run()
     assert sim.rack_conflict_n == 0
     assert not [e for e in _events(sim) if e["type"] == "FIFO_LIFO_CONFLICT"]
+
+
+def test_snapshot_keeps_rack_counters(tmp_path):
+    """R2 计数器必须进快照，否则续玩会从 0 重新计数（收检指出的潜伏 bug）。"""
+    layout = _deep_layout()
+    sim = _sim(tmp_path, layout)
+    sim.step()
+    sim.rack_blocked_n = 7
+    sim.rack_reshuffle_n = 3
+    sim.rack_conflict_n = 2
+    snap = sim.snapshot()
+    sim.log.close()
+    assert snap["schema_version"] == "3.1", "加了计数器就该升版（D2：旧档显式拒绝）"
+    c = snap["counters"]
+    assert (c["rack_blocked_n"], c["rack_reshuffle_n"], c["rack_conflict_n"]) == (7, 3, 2)
+
+    restored = se.Simulation.restore(
+        snap, ROOT / "config" / "scenarios" / "baseline.json",
+        jload(ROOT / "config" / "sim_spec.json"),
+        jload(ROOT / "config" / "fleet_spec.json"),
+        jload(ROOT / "config" / "demand_spec.json"),
+        layout, jload(ROOT / "data" / "nav_grid.json"),
+        jload(ROOT / "data" / "config.json"),
+        out_dir=tmp_path / "run")
+    assert restored.rack_blocked_n == 7
+    assert restored.rack_reshuffle_n == 3
+    assert restored.rack_conflict_n == 2
+    restored.log.close()
+
+
+def test_snapshot_keeps_rack_counters(tmp_path):
+    """R2 计数器必须进快照，否则续玩会从 0 重新计数（收检指出的潜伏 bug）。"""
+    layout = _deep_layout()
+    sim = _sim(tmp_path, layout)
+    sim.step()
+    sim.rack_blocked_n = 7
+    sim.rack_reshuffle_n = 3
+    sim.rack_conflict_n = 2
+    snap = sim.snapshot()
+    sim.log.close()
+    assert snap["schema_version"] == "3.1", "加了计数器就该升版（D2：旧档显式拒绝）"
+    c = snap["counters"]
+    assert (c["rack_blocked_n"], c["rack_reshuffle_n"], c["rack_conflict_n"]) == (7, 3, 2)
+
+    restored = se.Simulation.restore(
+        snap, ROOT / "config" / "scenarios" / "baseline.json",
+        jload(ROOT / "config" / "sim_spec.json"),
+        jload(ROOT / "config" / "fleet_spec.json"),
+        jload(ROOT / "config" / "demand_spec.json"),
+        layout, jload(ROOT / "data" / "nav_grid.json"),
+        jload(ROOT / "data" / "config.json"),
+        out_dir=tmp_path / "run")
+    assert restored.rack_blocked_n == 7
+    assert restored.rack_reshuffle_n == 3
+    assert restored.rack_conflict_n == 2
+    restored.log.close()

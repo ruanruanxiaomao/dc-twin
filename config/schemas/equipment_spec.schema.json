@@ -39,6 +39,7 @@
         "formula": {"type": "string"},
         "clearance": {"type": "number", "minimum": 0},
         "note": {"type": "string"},
+        "enabled_by": {"type": "string"},
         "level": {"enum": ["standard", "typical", "assumption", "placeholder", "gap"]}
       }
     },

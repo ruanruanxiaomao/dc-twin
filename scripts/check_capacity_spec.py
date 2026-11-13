@@ -94,6 +94,11 @@ def check_semantics():
     if tm.get("height_check") != "all_types":
         problems.append("B3 被改回只查叉车（堆垛机高层不可达会漏报）")
 
+    # D5：AST 耦合默认必须关闭。这条容易被"顺手打开看看效果"改掉，
+    # 而它一开就会重算导航 grid、破金标准，所以要有一道门盯着。
+    if equip.get("ast_drives_aisle_width") is not False:
+        problems.append("AST 耦合默认被打开（ast_drives_aisle_width 应为 false，D5）")
+
     cap = jload(CONFIG / "capacity_spec.json")
     if cap["load_rate_divisor"] != 2 or cap["distance_factor_power"] != 1:
         problems.append("capacity_spec 的 B1/B2 开关不是修正值")

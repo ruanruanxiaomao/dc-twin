@@ -2765,7 +2765,7 @@ class Simulation:
     # `_state()` 是给 KPI 对账用的**终态摘要**，故意保持原样不动（A 系列验收依赖它）。
     # 下面是另一个东西：可恢复的全量状态。字段必须穷举——少一块，续跑要几十个 tick
     # 之后才会"莫名偏了"，那时候已经查不出是哪块缺了。
-    SNAPSHOT_SCHEMA = "3.0"
+    SNAPSHOT_SCHEMA = "3.1"
 
     def _lots_by_sku_loc(self):
         out = {}
@@ -2829,7 +2829,11 @@ class Simulation:
         counters = {k: getattr(self, k) for k in (
             "yield_n", "detour_n", "jam_clear_n", "max_queue_depth",
             "sep_violations", "reservation_double", "min_pair_m", "max_blocked_s",
-            "energy_guard_n", "reservation_double")}
+            "energy_guard_n", "reservation_double",
+            # R2 的三个计数器必须一起存档：它们是 KPI（挡位/重排/冲突），
+            # 漏存的话续玩会从 0 重新计数，报表少一截却看不出来——
+            # 与 `charger_id` 漏存是同一类 bug（那个是状态错，这个是计数错）。
+            "rack_blocked_n", "rack_reshuffle_n", "rack_conflict_n")}
         counters["min_pair_m"] = (None if self.min_pair_m == float("inf")
                                   else self.min_pair_m)
         return {
@@ -2963,7 +2967,8 @@ class Simulation:
 
         c = snap["counters"]
         for k in ("yield_n", "detour_n", "jam_clear_n", "max_queue_depth",
-                  "sep_violations", "reservation_double", "energy_guard_n"):
+                  "sep_violations", "reservation_double", "energy_guard_n",
+                  "rack_blocked_n", "rack_reshuffle_n", "rack_conflict_n"):
             setattr(sim, k, int(c.get(k, 0)))
         sim.min_pair_m = (float("inf") if c.get("min_pair_m") is None
                           else float(c["min_pair_m"]))

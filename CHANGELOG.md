@@ -4,6 +4,41 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] — 收检回修：编码可移植性 / 快照计数器 / AST 默认值
+
+Three defects found by the independent acceptance inspection, all fixed with tests.
+
+### Fixed
+
+- **`tests/acceptance/test_validate.py` failed on non-UTF-8 locales.** `subprocess.run`
+  with `text=True` but no `encoding` decodes with the host locale; the child emits UTF-8,
+  so the reader thread raised `UnicodeDecodeError: 'gbk' codec ...`, `stdout` became
+  `None`, and the failure surfaced as `json.loads(None)` — looking like a broken
+  validator while `validate.py` itself was 40/40. Both sides are now pinned via
+  `tests/_subproc.py` (`PYTHONUTF8=1` + `PYTHONIOENCODING=utf-8` for the child,
+  `encoding="utf-8", errors="replace"` for the parent), and the other subprocess call
+  sites got the explicit encoding too. Verified by running the suite with
+  `PYTHONUTF8`/`PYTHONIOENCODING` **unset**, which is how the inspection reproduced it.
+- **R2 counters were missing from the snapshot.** `rack_blocked_n`, `rack_reshuffle_n`
+  and `rack_conflict_n` feed KPIs but were neither saved nor restored, so resuming an
+  enabled deep-rack game restarted them at 0. They are now in `counters` + `restore`, and
+  `SNAPSHOT_SCHEMA` is bumped **3.0 → 3.1** so old saves are rejected rather than silently
+  zeroed (D2). Same class of bug as the missing `charger_id`, except that was state and
+  this is a count.
+- **`equipment_spec.ast_drives_aisle_width` defaulted to `true`**, contradicting D5. R3
+  reading that key as a feature switch would have enabled AST coupling by default,
+  recomputed the nav grid and broken the golden. It is now `false` with
+  `enabled_by: "level_or_scenario_only"`, and `check_capacity_spec.py` fails if anyone
+  flips it back.
+
+### Verified
+
+| Check | Evidence |
+|---|---|
+| Encoding portability | `env -u PYTHONUTF8 -u PYTHONIOENCODING pytest tests/acceptance/test_validate.py` → 3 passed |
+| Snapshot counters | new test: counters survive save→restore; schema 3.1 |
+| AST default | gate asserts `ast_drives_aisle_width is False` |
+
 ## [Unreleased] — R2 货架存取层（G1 核心，默认关闭）
 
 Racks now have mechanics: a cell can be several slots deep, the rear slot is blocked by

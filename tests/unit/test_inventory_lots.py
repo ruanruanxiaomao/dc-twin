@@ -256,7 +256,7 @@ def test_snapshot_roundtrip_keeps_lots(tmp_path):
         if sim.step():
             break
     snap = sim.snapshot()
-    assert snap["schema_version"] == "3.0"
+    assert snap["schema_version"] == "3.1"
     assert snap["inventory"]["lots"], "快照里没有批次明细"
     before = {k: [dict(l) for l in v] for k, v in sim.lots.items()}
     sim.log.close()
