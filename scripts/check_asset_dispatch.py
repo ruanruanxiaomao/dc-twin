@@ -315,6 +315,8 @@ def run_typed_build():
     summ = jload(TYPED_DIR / "scene" / "typed_summary.json")
     glb = TYPED_DIR / "scene" / "dc_preview.glb"
     summ["glb_structure"] = glb_structure_digest(glb)
+    import hashlib as _h
+    summ["glb_sha256"] = _h.sha256(glb.read_bytes()).hexdigest()
     summ["glb_bytes"] = glb.stat().st_size
     summ["layout_sha256"] = sha
     summ["groups"] = groups
@@ -368,7 +370,27 @@ def _anchors(summ):
         "glb_nodes": (summ.get("glb") or {}).get("nodes"),
         "glb_meshes": (summ.get("glb") or {}).get("meshes"),
         "layout_sha256": summ.get("layout_sha256"),
+        "master_props": summ.get("master_props") or {},
+        "master_props_unplaced": summ.get("master_props_unplaced") or [],
+        "glb_sha256": summ.get("glb_sha256"),
     }
+
+
+REQUIRED_MASTERS = ("asset_scanner_arch", "asset_forklift_loaded",
+                    "asset_amr_cart", "asset_stacker_crane")
+
+
+def check_masters(summ):
+    """闲置母版必须真的**摆进场景**，不是只出现在 asset_meshes 里。"""
+    problems = []
+    placed = summ.get("master_props") or {}
+    for n in REQUIRED_MASTERS:
+        if not placed.get(n):
+            problems.append("%s 没摆进场景（只在 asset_meshes 里不算接入）" % n)
+    unplaced = set(summ.get("master_props_unplaced") or [])
+    if "asset_gantry_crane" not in unplaced:
+        problems.append("龙门吊没有落脚点（这套布局无堆场），应显式记为未摆放而不是随便摆")
+    return not problems, {"placed": placed, "unplaced": sorted(unplaced)}, problems
 
 
 def compare_anchor(summ, golden):
@@ -378,10 +400,11 @@ def compare_anchor(summ, golden):
     want = golden.get("anchors") or {}
     for k in ("dispatch", "fallback", "typed_racks", "pallets_built",
               "objects", "meshes", "glb_structure",
-              "glb_nodes", "glb_meshes", "layout_sha256"):
+              "glb_nodes", "glb_meshes", "layout_sha256",
+              "master_props", "master_props_unplaced", "glb_sha256"):
         if got.get(k) != want.get(k):
             problems.append("%s 变了：%r → %r" % (k, want.get(k), got.get(k)))
-    return not problems, {"comparison": "counts + glb_structure(量化/排序无关)", "checked": len(want)}, problems
+    return not problems, {"comparison": "counts + glb_sha256(已规整) + structure", "checked": len(want)}, problems
 
 
 # ---------------------------------------------------------------- self test
@@ -437,6 +460,17 @@ def self_test():
     cases.append(("anchor_count_drift", not compare_anchor(bad, gold)[0]))
     bad = copy.deepcopy(fake); bad["glb_structure"] = "y"
     cases.append(("anchor_glb_drift", not compare_anchor(bad, gold)[0]))
+
+    # 4c 母版：漏摆一个必须被抓
+    summ = {"master_props": {n: 1 for n in REQUIRED_MASTERS},
+            "master_props_unplaced": ["asset_gantry_crane"]}
+    cases.append(("masters_ok", check_masters(summ)[0]))
+    miss = {"master_props": {"asset_scanner_arch": 1},
+            "master_props_unplaced": ["asset_gantry_crane"]}
+    cases.append(("master_missing", not check_masters(miss)[0]))
+    sneaky = {"master_props": {n: 1 for n in REQUIRED_MASTERS},
+              "master_props_unplaced": []}
+    cases.append(("gantry_sneaked_in", not check_masters(sneaky)[0]))
 
     # 5 设备开关被打开
     s = copy.deepcopy(spec)
@@ -526,6 +560,14 @@ def main(argv=None):
                 ok, detail, problems = False, {}, [
                     "没有 tests/golden/typed_3d.json（确认结果符合预期后加 --freeze 冻结一次）"]
             gates["TYPED_BUILD_OK"] = {"ok": ok, "detail": detail, "problems": problems}
+            mok, mdetail, mproblems = check_masters(summ)
+            gates["IDLE_MASTER_WIRED_OK"] = {"ok": mok, "detail": mdetail,
+                                             "problems": mproblems}
+            if not mok:
+                failed.append("IDLE_MASTER_WIRED_OK")
+            if not a.quiet:
+                print("%-26s %s%s" % ("IDLE_MASTER_WIRED_OK", "PASS" if mok else "FAIL",
+                                      "" if mok else "  -> " + "; ".join(mproblems[:2])))
             if not ok:
                 failed.append("TYPED_BUILD_OK")
             if not a.quiet:

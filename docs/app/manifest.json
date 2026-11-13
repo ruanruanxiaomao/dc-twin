@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
   "kind": "webapp_snapshot",
-  "generated_at": "2026-11-12T05:20:45+00:00",
-  "commit": "156fe4d",
+  "generated_at": "2026-11-13T10:41:54+00:00",
+  "commit": "ee74b49",
   "glb": "out/dc_preview.glb",
   "api": {
-    "bootstrap": 220818,
+    "bootstrap": 224427,
     "paths": 189961,
     "scenarios": 4735,
     "pnl": 309,
@@ -13,8 +13,8 @@
     "schema": 1596,
     "cost-spec": 1950,
     "scenario/template": 652,
-    "status": 16509,
-    "kpi": 14170,
+    "status": 16797,
+    "kpi": 16420,
     "areas": 10639,
     "areas/catalog": 3507,
     "areas/variant": 10390
@@ -33,16 +33,16 @@
       "sha256": "ac5bb7febd4773c28854f66a4c22f8eb7faa067aa319038aca37dbb66792cab8"
     },
     "api/bootstrap.json": {
-      "bytes": 220818,
-      "sha256": "5eb97129062af13de0e8663a38761eea1dc27ed0d5ae878366097615d69744ad"
+      "bytes": 224427,
+      "sha256": "5e57ada5c65d09cecf88ceaf0a0803f598c8ad45aab58f38ea81b94dd5bce7c1"
     },
     "api/cost-spec.json": {
       "bytes": 1950,
       "sha256": "ce6694c23eb109a17ee3b0396731e5a6962be51344635b41684d829fe66cbf2b"
     },
     "api/kpi.json": {
-      "bytes": 14170,
-      "sha256": "bec2c71de8080f0797887a944f487ff37888734d71fdca0d73fb8d059976b65c"
+      "bytes": 16420,
+      "sha256": "79bbe0ce0180b5c01e1ccb4fd16c7bcfd8f8e45bb93c17c8435223b999bdbf83"
     },
     "api/ledger.json": {
       "bytes": 47,
@@ -53,12 +53,12 @@
       "sha256": "18ae982358843659bbce69e5e30b769def90451ed841f44d7cb0c8c4e167c1a8"
     },
     "api/plan.html": {
-      "bytes": 369266,
-      "sha256": "8a1f8c2bc075607e5b4327afcf752b834dda845a13232cfa7a3014f91f243b52"
+      "bytes": 130823,
+      "sha256": "65fac23588455fd5f6e07480a681f99e4e6248969494387f3cc37309e7d92da6"
     },
     "api/pnl.json": {
       "bytes": 309,
-      "sha256": "6c81e8cfd55264a7c17a8e9e8dd94d45a521122be8bd11dc837d8fade60e4603"
+      "sha256": "1973b8c36c4f07f6999aeaa389729be7e58f097eb8ee9bc1d6e59fb032a442ee"
     },
     "api/scenario/template.json": {
       "bytes": 652,
@@ -73,36 +73,40 @@
       "sha256": "7aa4be2e3e9e2d729b2f629dd8754bc9fb0a7e82575844772edeab9dac5fc46c"
     },
     "api/status.json": {
-      "bytes": 16509,
-      "sha256": "a592a949736a72455ea064b9def60914bd0b0e16861bef6775d9a8dcefbdb7f5"
+      "bytes": 16797,
+      "sha256": "c5df0e92f49fb8deb88fae5ea03e42174dbd33d2ccedf263a94678889f2cf5fc"
     },
     "app.js": {
-      "bytes": 47084,
-      "sha256": "34540761d0ac575dc566cea8bea413a0f58e51e45dcb41e6872e4ce69d53d5c3"
+      "bytes": 48286,
+      "sha256": "5dd418c46cb7386b251fb0416919ada1b80b662cb21f63a2a470621b799109c8"
     },
     "areas.js": {
       "bytes": 16004,
       "sha256": "9c2d5a6425f6d865274258241e104ddf32f21b793d15c2206ff276aca9f307cf"
     },
+    "game.js": {
+      "bytes": 14887,
+      "sha256": "042f027015ab65c2e56aabada612afb575cd61ecd0f41b9ceed7762d31651a17"
+    },
     "index.html": {
-      "bytes": 12184,
-      "sha256": "f7d0270ca4836b2109025da9e8c5896b8d3b9e637cabe56bad0f292ce1263751"
+      "bytes": 12375,
+      "sha256": "a17cd558a9deb9e23dc62b16549b49a9e0d25003ca12fd449df9609225fd792b"
     },
     "ops.js": {
       "bytes": 32380,
       "sha256": "c6efefa23aa17159f6933e31afcea6aff28e73df5982aaf5528828133cface45"
     },
     "out/dc_preview.glb": {
-      "bytes": 1213660,
-      "sha256": "9ecfe23cc758d03083910264fa8260fc5b608f2f9300b1c5943a7930cb6be388"
+      "bytes": 929260,
+      "sha256": "a5e908727c2aa094128c45ebaf3504336bdbb933f4c5505a92cdb26f2f215900"
     },
     "snapshot.js": {
       "bytes": 3595,
       "sha256": "1b185ad0f1cf5dc86594e90eeb40318f44a768b65ceee69e134984712b7cc725"
     },
     "style.css": {
-      "bytes": 35850,
-      "sha256": "3a1a8a09379a48cfe7c1395355cce32bfefa1e11a1d12bfc907a1c6f065d03d6"
+      "bytes": 39253,
+      "sha256": "213bf14487013944498c679a765dfa1bc36bd0de1b42e408797ab06b0c416b4a"
     },
     "vendor/addons/controls/OrbitControls.js": {
       "bytes": 29868,
@@ -126,8 +130,8 @@
     }
   },
   "counts": {
-    "files": 26,
-    "bytes": 3669339
+    "files": 27,
+    "bytes": 3172326
   },
   "note": "静态快照：/api/* 已冻结为 api/*.json，POST 一律拒绝"
 }

@@ -1097,3 +1097,55 @@ body { font-size: 12.5px; letter-spacing: .01em; }
 /* 空态与提示 */
 .detail .empty { border-radius: 10px; background: var(--panel-2); }
 .toast { border-radius: 10px; box-shadow: var(--sh-2); }
+
+/* ---------------------------------------------------------------- 游戏页（P2-2）
+ * 直播 HUD：数字用等宽字形（tabular-nums），否则每秒刷新时宽度跳动会闪。
+ * 红涨绿跌不适用于这里——这是经营指标，负利润用红、正利润用绿是财务惯例。
+ */
+.g-toolbar { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
+.g-toolbar button, .g-actions button, .g-level button {
+  height: 26px; padding: 0 10px; border-radius: 7px;
+  border: 1px solid var(--line); background: var(--panel); cursor: pointer;
+}
+.g-speeds { display: inline-flex; gap: 3px; }
+.g-speeds button { height: 24px; min-width: 34px; }
+.g-speeds button.on { background: var(--accent, #2f6fd0); color: #fff; border-color: transparent; }
+.g-clock { font: 600 13px/1.4 ui-monospace, "Cascadia Mono", Consolas, monospace;
+  color: var(--ink-2, #4a5568); padding: 2px 0 6px; }
+.g-hud { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.g-card { border: 1px solid var(--line); border-radius: 9px; padding: 7px 9px; background: var(--panel); }
+.g-card .g-k { font-size: 11px; color: var(--muted, #7b8794); }
+.g-card .g-v { font: 600 14px/1.5 ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-variant-numeric: tabular-nums; }
+.g-card.good .g-v { color: #1f7a45; }
+.g-card.bad .g-v { color: #b23b3b; }
+.g-sec-title { margin: 12px 0 5px; font-weight: 600; font-size: 12.5px; color: var(--ink-2, #4a5568); }
+.g-obj { display: flex; gap: 6px; align-items: center; font-size: 12.5px; padding: 2px 0; }
+.g-dot { width: 7px; height: 7px; border-radius: 50%; background: #c3cbd6; flex: 0 0 auto; }
+.g-dot.primary { background: #2f6fd0; }
+.g-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 12.5px; }
+.g-actions label { display: inline-flex; gap: 4px; align-items: center; }
+.g-actions select, .g-actions input { height: 26px; border-radius: 7px;
+  border: 1px solid var(--line); background: var(--panel); padding: 0 6px; }
+.g-actions input[type="number"] { width: 74px; }
+.g-fleet { margin-top: 8px; font-size: 12px; color: var(--ink-2, #4a5568); }
+.g-warn { display: none; border-radius: 8px; padding: 6px 9px; font-size: 12.5px;
+  background: #fdecec; color: #9d2b2b; border: 1px solid #f5c9c9; }
+.g-warn.on { display: block; }
+.g-result { display: none; margin-top: 8px; border-radius: 9px; padding: 8px 10px;
+  font-size: 13px; font-weight: 600; background: #eaf6ee; color: #1f7a45;
+  border: 1px solid #cbe8d6; }
+.g-result.on { display: block; }
+.g-level { border: 1px solid var(--line); border-radius: 9px; padding: 8px 10px;
+  margin-bottom: 6px; background: var(--panel); }
+.g-level.locked { opacity: .62; }
+.g-level-head { display: flex; justify-content: space-between; align-items: center; }
+.g-level-name { font-weight: 600; font-size: 12.5px; }
+.g-level-stars { color: #d69e2e; letter-spacing: 1px; }
+.g-level-lock { font-size: 12px; color: var(--muted, #7b8794); margin-top: 4px; }
+.g-empty { font-size: 12.5px; color: var(--muted, #7b8794); padding: 8px 0; }
+.g-toast { position: fixed; right: 22px; bottom: 74px; z-index: 40;
+  padding: 8px 13px; border-radius: 9px; background: #1f2937; color: #fff;
+  font-size: 12.5px; opacity: 0; transform: translateY(8px);
+  transition: opacity .18s, transform .18s; pointer-events: none; }
+.g-toast.on { opacity: 1; transform: translateY(0); }

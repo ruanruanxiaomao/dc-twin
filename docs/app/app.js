@@ -693,6 +693,12 @@ let viewer = null;
 let viewerTask = null;
 
 const sampler = (id, t) => {
+  // 直播模式：位置来自服务端实时快照（DC_LIVE 由 game.js 提供）。
+  // 渲染层完全不用改——这正是当初把采样做成注入式的收益。
+  if (window.DC_LIVE && window.DC_LIVE.active()) {
+    const p = window.DC_LIVE.pos(id, t);
+    if (p) return p;
+  }
   const a = S.byId[id];
   return a ? sampleAgent(a, t) : null;
 };
@@ -790,6 +796,13 @@ function bindView3d() {
 // ------------------------------------------------------------------ 时间轴
 
 function setPlaying(on) {
+  // 直播模式：播放键控制的是**服务端**暂停，不是本地插值动画
+  if (window.DC_LIVE && window.DC_LIVE.active()) {
+    S.playing = on;
+    $('btnPlay').textContent = on ? '❚❚' : '▶';
+    window.DC_LIVE.setPaused(!on);
+    return;
+  }
   S.playing = on;
   $('btnPlay').textContent = on ? '❚❚' : '▶';
   if (on && S.t >= S.tEnd - 1e-6) { S.t = 0; syncTimeline(); }
@@ -820,6 +833,8 @@ function bindTimeline() {
       S.speed = sp;
       [...box.children].forEach((c) => c.classList.remove('on'));
       b.classList.add('on');
+      // 直播模式：倍速发给服务端（0.25/0.5 不被引擎接受，按 1 处理）
+      if (window.DC_LIVE && window.DC_LIVE.active()) window.DC_LIVE.setSpeed(sp);
     });
     box.appendChild(b);
   }
@@ -1364,7 +1379,15 @@ function tick(ts) {
   const dt = lastTs ? (ts - lastTs) / 1000 : 0;
   lastTs = ts;
 
-  if (S.playing && S.tEnd > 0) {
+  // 直播模式：时间轴跟随服务端 t_s（本地不推进、不自增），回放模式照旧
+  if (window.DC_LIVE && window.DC_LIVE.active()) {
+    const lt = window.DC_LIVE.time();
+    const hz = window.DC_LIVE.horizon();
+    if (hz && Math.abs(hz - S.tEnd) > 1e-6) { S.tEnd = hz; }   // 时间轴按整局时长铺满
+    if (lt !== null && lt !== undefined) {
+      if (Math.abs(lt - S.t) > 1e-6) { S.t = lt; S.dirty = true; syncTimeline(); }
+    }
+  } else if (S.playing && S.tEnd > 0) {
     S.t += Math.min(dt, 0.25) * S.speed;
     if (S.t >= S.tEnd) { S.t = S.tEnd; setPlaying(false); }
     syncTimeline();

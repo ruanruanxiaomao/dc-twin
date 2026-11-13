@@ -610,6 +610,60 @@ def build_vehicles(assets):
             COUNTS['yard_trucks'] = COUNTS.get('yard_trucks', 0) + 1
 
 
+def build_master_props(assets):
+    """R8.4：把闲置母版**摆进场景**（只在 asset_spec.activate.equipment_dispatch 打开时）。
+
+    R8.2 只做到"接进构建"（母版被 extract、出现在 build_report.asset_meshes 里），
+    但场景里看不到它们——那仍然是一种"报告里有、现场没有"。这里给定具体的落脚点：
+
+    * 扫描门：跨在第一道入库门内侧（标识识别发生在门口，不是园区里随便一处）；
+    * 带载叉车：挨着现有叉车停，作为作业态；
+    * 料箱车（asset_amr_cart）：停在第一个站台的取货点旁；
+    * 堆垛机：立在 W 前两组货架的巷道里（有货架才有堆垛机）。
+
+    **龙门吊故意不摆**：它属于堆场跨位吊装，这套布局没有集装箱堆场，摆哪儿都是布景。
+    宁可留一条"未摆放"的记录，也不假装接好了。
+    """
+    spec = asset_spec()
+    if spec is None or not (spec.get("activate") or {}).get("equipment_dispatch"):
+        return
+    c = collection('MASTERS')
+    placed = {}
+
+    def put(node, name, x, z, rz=0.0, zz=0.05):
+        mesh = assets.get(node)
+        if not mesh:
+            return
+        o = bpy.data.objects.new(name, mesh)
+        c.objects.link(o)
+        o.location = (x, z, zz)
+        o.rotation_euler[2] = rz
+        placed[node] = placed.get(node, 0) + 1
+
+    wh = LAYOUT['warehouses'][0]
+    docks = wh.get('docks') or []
+    doors = (docks[0].get('doors') or []) if docks else []
+    if doors:
+        dx, dz = doors[0]['center']
+        put('asset_scanner_arch', 'SCANNER_ARCH_01', dx, dz + 1.2, 0.0)
+    sc = CFG['scene']
+    if sc.get('forklifts'):
+        fx, fz = sc['forklifts'][0]
+        put('asset_forklift_loaded', 'FORKLIFT_LOADED_01', fx + 3.0, fz, math.pi)
+    stations = wh.get('stations') or []
+    if stations:
+        sx, sz = stations[0]['access_point']
+        put('asset_amr_cart', 'AMR_CART_01', sx + 1.5, sz, 0.0)
+    racks = wh.get('racks') or []
+    for i, rk in enumerate(racks[:2], 1):
+        x, _h, z = rk['position']
+        rl, _rh, rd = rk['size']
+        put('asset_stacker_crane', 'STACKER_%02d' % i, x + rl / 2, z + rd + 0.7)
+    COUNTS['master_props'] = placed
+    COUNTS['master_props_unplaced'] = sorted(
+        n for n in ('asset_gantry_crane',) if assets.get(n))
+
+
 def build_route_lines():
     """把 paths.jsonl 的轨迹画成贴地带状网格——路径信息完全来自数据，不硬编码。"""
     by = {}
@@ -1123,6 +1177,7 @@ def main():
     import site_detail
     site_detail.build(sys.modules[__name__])
     build_racks_and_cargo(assets)
+    build_master_props(assets)
     build_docks_conveyors(assets)
     import zone_detail
     zone_detail.build(sys.modules[__name__])

@@ -34,6 +34,16 @@ def main():
     layout_path, out_dir = argv[0], argv[1]
     os.makedirs(out_dir, exist_ok=True)
 
+    # 带机理的整场 = R8 的"全开"形态：货架按机理建 + 闲置母版接线并摆放。
+    # 用一份 activate 全开的 asset_spec 覆盖，默认产物不受影响（DC_ASSET_SPEC 只影响本进程）。
+    spec_path = os.path.join(ROOT, 'config', 'asset_spec.json')
+    spec = json.load(open(spec_path, encoding='utf-8'))
+    spec.setdefault('activate', {})['equipment_dispatch'] = True
+    spec_override = os.path.join(out_dir, 'asset_spec_full.json')
+    with open(spec_override, 'w', encoding='utf-8') as f:
+        json.dump(spec, f, ensure_ascii=False, indent=2)
+    os.environ['DC_ASSET_SPEC'] = spec_override
+
     layout = json.load(open(layout_path, encoding='utf-8'))
     typed = sum(1 for w in layout['warehouses'] for r in w['racks'] if r.get('rack_type'))
     if not typed:
@@ -64,6 +74,8 @@ def main():
         'objects': len(bpy.data.objects),
         'meshes': len(bpy.data.meshes),
         'asset_meshes': sorted(rep.get('asset_meshes') or []),
+        'master_props': counts.get('master_props') or {},
+        'master_props_unplaced': counts.get('master_props_unplaced') or [],
         'glb': json.load(open(os.path.join(out_dir, 'glb_report.json'), encoding='utf-8')),
     }
     with open(os.path.join(out_dir, 'typed_summary.json'), 'w', encoding='utf-8') as f:

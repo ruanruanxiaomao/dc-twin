@@ -72,7 +72,9 @@ def refactor_facts():
            "asset_rack": 0, "asset_equip": 0, "asset_glb_roots": 0,
            "asset_pending": 0, "asset_gate": None,
            "disp_distinct": 0, "disp_types": 0, "disp_geoms": 0, "disp_gate": None,
-           "typed_mech": 0, "typed_fallback": None}
+           "typed_mech": 0, "typed_fallback": None,
+           "glb_bytes": 0, "glb_sha": None, "glb_geom": None, "glb_canon": False,
+           "glb_saved": 0, "masters_placed": 0, "masters_unplaced": []}
     try:
         rack = json.load(open(os.path.join(CONFIG, 'rack_spec.json'), encoding='utf-8'))
         out["rack_types"] = len(rack.get('types') or {})
@@ -150,11 +152,19 @@ def refactor_facts():
         out["disp_types"] = dd.get('types') or 0
         pr = (ar.get('gates', {}).get('RACK_MESH_PROBE_OK', {}) or {}).get('detail') or {}
         out["disp_geoms"] = pr.get('distinct_geoms') or 0
+        gr = json.load(open(os.path.join(OUT, 'glb_report.json'), encoding='utf-8'))
+        out["glb_bytes"] = gr.get('bytes')
+        out["glb_sha"] = (gr.get('sha256') or '')[:12]
+        out["glb_geom"] = (gr.get('geometry_signature') or '')[:12]
+        out["glb_canon"] = bool(gr.get('canonical'))
+        out["glb_saved"] = gr.get('canonicalized_bytes') or 0
         ts = os.path.join(OUT, 'exp', 'typed', 'scene', 'typed_summary.json')
         if os.path.exists(ts):
             t = json.load(open(ts, encoding='utf-8'))
             out["typed_mech"] = len(t.get('dispatch') or {})
             out["typed_fallback"] = t.get('fallback')
+            out["masters_placed"] = len(t.get('master_props') or {})
+            out["masters_unplaced"] = t.get('master_props_unplaced') or []
     except Exception:                       # noqa: BLE001
         pass
     for name in ("unit_load_spec", "rack_spec", "equipment_spec", "capacity_spec"):
@@ -497,6 +507,13 @@ def main():
             ref['asset_pending'], ref['asset_gate'] or 'n/a',
             ref['disp_distinct'], ref['disp_types'], ref['disp_geoms'],
             ref['disp_gate'] or 'n/a', ref['typed_mech'], ref['typed_fallback'])),
+        ('3D 产线（R8.4）', 'GLB 字节已规整：%s 字节（原始体积里剔掉未引用数据/合并重复 accessor，'
+                          '省 %s 字节），sha256=%s…、几何签名=%s…；**同一场景两次导出逐字节相同**；'
+                          '闲置母版摆进场景 %s 类（扫描门/带载叉车/料箱车/堆垛机×2），'
+                          '未摆放 %s（无堆场，显式记账）'
+         % (ref['glb_bytes'], ref['glb_saved'], ref['glb_sha'] or 'n/a',
+            ref['glb_geom'] or 'n/a', ref['masters_placed'],
+            "、".join(ref['masters_unplaced']) or "无")),
         ('分档验收', 'data tier %s/%s PASS；pytest -m "not blender" 与 CI 矩阵见 '
                      '`.github/workflows/ci.yml`'
          % (vdata.get('passed'), vdata.get('total'))),

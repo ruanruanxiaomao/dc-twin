@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "kind": "typed_3d_golden",
-  "note": "带 rack_type 的整场：counts + GLB 哈希双锚。默认构建的锚点不在这里。",
+  "note": "带 rack_type 的整场：counts + GLB 结构指纹双锚（字节哈希不可复现，见 ADR-12）。默认构建的锚点不在这里。",
   "anchors": {
     "dispatch": {
       "double_deep": 40,
@@ -15,11 +15,21 @@
     "fallback": 0,
     "typed_racks": 196,
     "pallets_built": 240,
-    "objects": 2346,
-    "meshes": 394,
-    "glb_structure": "359b82ed2018949b0c79a4888cbc6dde38ac317e0a1d415a5224c3374b82f89c",
-    "glb_nodes": 2284,
-    "glb_meshes": 391,
-    "layout_sha256": "0ea8b2ed47b93134163fa4e9e2cdfa5ead099c0d0bf680e5a518cebdb63119a2"
+    "objects": 2351,
+    "meshes": 399,
+    "glb_structure": "2c285fd79c46fe766e1ec4bdded27c055b3be4235676b14565691d21d8fb542e",
+    "glb_nodes": 2289,
+    "glb_meshes": 395,
+    "layout_sha256": "0ea8b2ed47b93134163fa4e9e2cdfa5ead099c0d0bf680e5a518cebdb63119a2",
+    "master_props": {
+      "asset_scanner_arch": 1,
+      "asset_forklift_loaded": 1,
+      "asset_amr_cart": 1,
+      "asset_stacker_crane": 2
+    },
+    "master_props_unplaced": [
+      "asset_gantry_crane"
+    ],
+    "glb_sha256": "ccd0cc10fdda6802d9264401a628681df6fc66c32876b3bfbffc6bb66318ca05"
   }
 }
