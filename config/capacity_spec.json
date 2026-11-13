@@ -84,5 +84,18 @@
   },
   "cross_validation": {
     "sim_vs_analytical_tolerance_pct": 15
+  },
+  "handling": {
+    "station_s": 45.0,
+    "dwell_s": 2.0,
+    "level": "assumption",
+    "source": "fleet_spec.station_service.service_time_s = 45（取/放各一次）；sim_spec.agv.dwell_pick_s = 2.0（取、放各一次）",
+    "note": "解析层原先只算行走，于是「一单」比仿真快四倍。这里把作业时间显式写出来，而不是靠调速度把数字凑上去。"
+  },
+  "travel_policy": {
+    "legs": 3,
+    "return_to_home": true,
+    "level": "assumption",
+    "note": "引擎每单完成回本位（RETURNING），所以一单 = 空驶取货 + 载货送达 + 空驶回位三段。解析层按同一作业策略计，否则两边的「一单」根本不是一件事。"
   }
 }

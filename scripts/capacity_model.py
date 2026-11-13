@@ -194,8 +194,12 @@ def capacity_per_hour(composite_s):
 
 
 def aisle_capacity(devices):
-    """巷道总能力 C_a = Σ_e Q_m^(e)·n_e。devices = [{q_per_h, count}, ...]。"""
-    return round(sum(float(d["q_per_h"]) * int(d["count"]) for d in devices), 6)
+    """巷道总能力 C_a = Σ_e Q_m^(e)·n_e。devices = [{q_per_h, count}, ...]。
+
+    `count` 允许小数：车队是按货位份额摊到巷道的，W 的 12 台摊到 16 条巷道
+    就是每巷 0.75 台。用 int() 截断会让主仓能力变成 0，而总能力仍然非零。
+    """
+    return round(sum(float(d["q_per_h"]) * float(d["count"]) for d in devices), 6)
 
 
 # ---------------------------------------------------------------- C.7 负荷
@@ -302,33 +306,123 @@ def cross_validate(throughput_sim, q_stable, tolerance_pct):
 
 # ---------------------------------------------------------------- 汇总（R4 才接主链）
 
-def build_report(layout, rack_spec, equipment_spec, capacity_spec):
-    """按巷道算一遍。**纯函数**：不改 layout、不写文件、不碰时钟。"""
+def aisles_from_layout(layout):
+    """真实布局 → 巷道行（R4 修的第一处：原实现遍历 zones[].racks，而真实布局里
+    货架挂在 warehouse.racks 上、zones 只有多边形，于是解析层算出 0 条巷道）。
+
+    一"行"= 同仓同区同 z 的货架序列。巷道长 = 这一行首尾端点间距（含货架本体）。
+    货位 = 架数 × 层数 × 2（spec_layout 给每个货架两侧各生成一排货位）。
+    """
+    out = []
+    for wh in layout.get("warehouses", []):
+        rows = {}
+        for rk in wh.get("racks", []):
+            key = (str(rk.get("zone") or "-"), round(float(rk["position"][2]), 3))
+            rows.setdefault(key, []).append(rk)
+        for key in sorted(rows, key=lambda k: (k[0], k[1])):
+            rs = rows[key]
+            xs = [float(x["position"][0]) for x in rs]
+            width = float(rs[0]["size"][0])
+            levels = int(rs[0].get("levels") or 1)
+            out.append({
+                "id": "%s/%s/z%.1f" % (wh.get("id"), key[0], key[1]),
+                "warehouse": wh.get("id"), "zone": key[0],
+                "length": round(max(xs) + width - min(xs), 3),
+                "racks": len(rs), "levels": levels,
+                "faces": 2,
+                "slots": len(rs) * levels * 2,
+            })
+    return out
+
+
+def device_cycle_s(length, etype, equipment_spec, capacity_spec):
+    """一台设备在该巷道完成一单的周期（秒）。**与仿真同一作业策略**。
+
+    段数来自 `travel_policy.legs`（引擎每单回本位，所以是 3 段），作业时间来自
+    `handling`（取/放各一次站台作业 + 各一次停靠）。把这两项显式写进配置、而不是
+    留在代码里调常数——否则"解析比仿真快四倍"会被当成公式精度问题，实际上是
+    少算了整整两段行程和两次作业。
+    """
+    row = (equipment_spec.get("types") or {}).get(etype)
+    if row is None:
+        raise ValueError("未知设备类型：%r" % (etype,))
+    v = float(row.get("speed_mps") or 0.0)
+    if v <= 0:
+        return None                      # 堆垛机/输送机不是按 m/s 走，另算
+    h = capacity_spec["handling"]
+    pol = capacity_spec["travel_policy"]
+    d_bar = avg_travel_distance(float(length),
+                                float(capacity_spec["demand"].get("distFactor", 1.0)))
+    travel = int(pol["legs"]) * d_bar / v
+    # 取一次、放一次：站台作业算两遍。只算一遍会让周期少 45 s（约 35%），
+    # 而那个偏差会被误读成"解析模型比仿真乐观"。
+    return round(travel + 2.0 * float(h["station_s"]) + 2.0 * float(h["dwell_s"]), 3)
+
+
+def assign_devices(aisles, fleet, equipment_spec, capacity_spec):
+    """把车队按**货位份额**摊到各巷道，返回 aisle_id -> [{type, count, q_per_h}]。
+
+    为什么按份额而不是"每巷道都放整套车队"：后者会把总能力按巷道数放大一遍，
+    负荷率永远小于 1，瓶颈永远不出现——那等于把解析层变成一句安慰话。
+    """
+    if not fleet:
+        return {}
+    models = {m.get("id"): m for m in fleet.get("models", [])}
+    per_wh = {}
+    for dep in fleet.get("deployment", []):
+        m = models.get(dep.get("model"))
+        if not m or not m.get("equipment_type"):
+            continue
+        et = m["equipment_type"]
+        bucket = per_wh.setdefault(dep.get("warehouse"), {})
+        bucket[et] = bucket.get(et, 0) + int(dep.get("count", 0))
+
+    by_wh = {}
+    for a in aisles:
+        by_wh.setdefault(a["warehouse"], []).append(a)
+
+    out = {}
+    for wid, rows in by_wh.items():
+        total = sum(r["slots"] for r in rows) or 1
+        mix = per_wh.get(wid) or {}
+        for a in rows:
+            share = a["slots"] / float(total)
+            devs = []
+            for et in sorted(mix):
+                cnt = mix[et] * share
+                if cnt <= 1e-9:
+                    continue
+                t = device_cycle_s(a["length"], et, equipment_spec, capacity_spec)
+                if not t:
+                    continue
+                devs.append({"type": et, "count": round(cnt, 6),
+                             "cycle_s": t, "q_per_h": round(3600.0 / t, 3)})
+            out[a["id"]] = devs
+    return out
+
+
+def build_report(layout, rack_spec, equipment_spec, capacity_spec, fleet=None):
+    """按巷道算一遍。**纯函数**：不改 layout、不写文件、不碰时钟。
+
+    R4：巷道改为从真实布局取（`aisles_from_layout`），设备改为从车队部署摊
+    （`assign_devices`）。此前两者都是空的，于是每条巷道能力=0、负荷=0、
+    瓶颈永不出现——报告看着"全绿"，其实什么都没算。
+    """
     cap = capacity_spec
     g = cap["cell_geometry"]
     geo = cell_geometry(g)
     n_slots = unit_capacity(g, g.get("levels_left", 4), g.get("levels_right", 4))
-    pitch = geo["pitch"]
 
-    aisles = []
-    for wh in layout.get("warehouses", []):
-        for zone in wh.get("zones", []):
-            for rack in zone.get("racks", []):
-                bays = int(rack.get("bays", 0))
-                units = [{"pitch": pitch, "slots": n_slots["slots"]} for _ in range(max(1, bays // 2))]
-                agg = aisle_aggregate(units)
-                aisles.append({"id": "%s/%s/%s" % (wh.get("id"), zone.get("id"), rack.get("id")),
-                               "warehouse": wh.get("id"),
-                               "length": agg["length"], "slots": agg["slots"],
-                               "devices": [], "height_warn": None, "overload_warn": None})
+    aisles = aisles_from_layout(layout)
+    devices = assign_devices(aisles, fleet, equipment_spec, cap)
 
-    # 任务分摊（C.4 均匀模式）
     total_slots_nominal = sum(a["slots"] for a in aisles)
     in_total, out_total = cap["demand"]["inPerHr"], cap["demand"]["outPerHr"]
     need = target_slots(cap["demand_plan"]["units"], cap["demand_plan"]["occupancy"],
                         cap["demand_plan"].get("targetSlots", 0))
-
     eff_rules = cap.get("effective_capacity") or {}
+    avail = float(cap.get("availability_factor", 1.0))
+
     total_eff = 0.0
     for a in aisles:
         share = (a["slots"] / total_slots_nominal) if total_slots_nominal else 0.0
@@ -340,20 +434,26 @@ def build_report(layout, rack_spec, equipment_spec, capacity_spec):
             eff_rules.get("frozen", 0), eff_rules.get("maintenance", 0),
             eff_rules.get("disabled", 0))
         total_eff += a["effective_slots"]
-        a["capacity"] = aisle_capacity(a["devices"])
-        a["load"] = (load_rate(a["task_in"], a["task_out"], a["capacity"])
+        a["devices"] = devices.get(a["id"], [])
+        # 可用率要乘进去：解析层的"理论能力"不能当"能用能力"报出去
+        a["capacity"] = round(aisle_capacity(a["devices"]) * avail, 6)
+        a["load"] = (round(load_rate(a["task_in"], a["task_out"], a["capacity"]), 6)
                      if a["capacity"] > 0 else 0.0)
         a["bottleneck"] = bool(a["load"] > 1.0)
+        a["no_equipment"] = not a["devices"]
 
+    cap_total = round(sum(a["capacity"] for a in aisles), 6)
     rep = {"schema_version": "1.0", "kind": "capacity_report",
            "cell": geo, "unit": n_slots,
            "totalSlots": total_slots_nominal,
            "totalEffective": round(total_eff, 6),
            "needed": need,
-           "totalCapacity": round(sum(a["capacity"] for a in aisles), 6),
-           "totalLoad": (round(global_load(in_total, out_total,
-                                           sum(a["capacity"] for a in aisles)), 6)
-                         if aisles and sum(a["capacity"] for a in aisles) > 0 else 0.0),
+           "totalCapacity": cap_total,
+           "availability_factor": avail,
+           "handling": dict(cap["handling"]),
+           "travel_policy": dict(cap["travel_policy"]),
+           "totalLoad": (round(global_load(in_total, out_total, cap_total), 6)
+                         if cap_total > 0 else 0.0),
            "aisles": aisles}
     rep["warnings"] = alerts(aisles, rep["totalEffective"], need, cap)
     return rep

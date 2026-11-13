@@ -4,6 +4,62 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] — R4 解析库容接主链（含 AST 密度缺口的如实记录）
+
+The analytic capacity layer had never actually run on real data. It walked
+`zones[].racks` while the layout puts racks on `warehouse.racks`, so it found **0 aisles**,
+reported 0 capacity and still raised no warnings: a report that is clean because it
+computed nothing. Devices were hard-coded to `[]` on top of that.
+
+### Added
+
+- **`aisles_from_layout()`** — racks grouped into rows per warehouse/zone; length from the
+  row's end points; slots = racks × levels × 2 faces. Real data: 22 rows, 1496 slots.
+- **`assign_devices()`** — the fleet is apportioned to aisles **by slot share** (W's 12
+  vehicles over 16 rows = 0.75 per row). Giving every aisle the whole fleet would scale
+  total capacity by the number of aisles and make bottlenecks impossible.
+- **`capacity_spec.handling` / `travel_policy`** — station time and the three-leg policy
+  are now explicit config with a source, instead of constants hidden in code.
+- **`scripts/check_capacity_cross.py`** (`CROSS_VALIDATE_OK`, `dc run --scope refactor`
+  4 → 5 steps): compares **capacity** (orders/h per vehicle) against the simulation's
+  measured `TASK_ASSIGNED → TASK_COMPLETED` cycle, 15% tolerance from `capacity_spec`.
+- `out/capacity_report.json` + `out/capacity_cross_report.json`.
+
+### Measured (reproducible: `python scripts/check_capacity_cross.py`)
+
+| Quantity | Value |
+|---|---|
+| Analytic cycle | 129.4 s/order |
+| Simulated cycle | 148.7 s/order |
+| Analytic capacity | 523.2 orders/h |
+| Simulated capacity | 508.4 orders/h |
+| **Deviation** | **2.9%** (tolerance 15%) |
+
+The 19.3 s residual is queueing, which the analytic layer does not model — the direction
+(analytic slightly optimistic) is structural, not a parameter error. Peak is recorded but
+**not gated**: it is congestion/deadline-limited, so the gap is a paradigm difference.
+
+### Fixed
+
+- **0 aisles on real data** (`zones[].racks` vs `warehouse.racks`).
+- **Fractional device counts were truncated**: `int(0.75)` made the main warehouse's
+  capacity 0 while the total stayed positive (F warehouses had 1.5 → 1). Totals looked
+  fine; one warehouse was silently empty.
+- **A cycle was missing two legs and one handling step**: 84.4 s vs 148.7 s measured,
+  which reads like "the analytic model is optimistic" but was simple under-counting.
+
+### Recorded, not fixed: AST is density-neutral
+
+R3's AST coupling changes aisle **pitch**, not the number of rack **rows** (`rows` is a
+fixed integer in the layout spec). So `off_locations == on_locations == 392`: a narrower
+aisle does not buy slots, and the plan's "same footprint, higher density" is **not
+delivered**. Buying a VNA buys aisle width, not capacity.
+
+Deliberately not folded into R4: changing row counts changes slot counts → pick
+distribution → the golden breaks and needs an independent refreeze plus
+`REFLOW_BOUNDARY_NEG`. It is R5, and the gate/test name now say `pitch, not location
+count` so the limitation cannot be mistaken for completion.
+
 ## [Unreleased] — R3 设备类型层（车型 / AST 耦合 / 按车型采购）
 
 The engine had exactly one vehicle: `fleet["models"][0]` was read once and every robot

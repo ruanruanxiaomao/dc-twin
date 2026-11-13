@@ -49,3 +49,4 @@ contradict the engine. They are recorded here because the *reasons* outlive the 
 | [REFACTOR-05](ADR-REFACTOR-05.md) | Every new mechanism is config-gated off by default; one behaviour change = one refreeze | Racks (v4) and equipment (v5) must refreeze separately, never together |
 | [REFACTOR-06](ADR-REFACTOR-06.md) | Rack mechanics wired into the **pick** path only, behind an explicit `rack_type` | Putaway/aisle-open/shuttle times stay analytic; LIFO rack + FEFO is counted, not forbidden |
 | [REFACTOR-07](ADR-REFACTOR-07.md) | Vehicles are first-class: per-robot `model_id`, AST per rack group, `BUY_EQUIPMENT` | No v4 refreeze — default fleet is single-model and the golden stayed byte-identical |
+| [REFACTOR-08](ADR-REFACTOR-08.md) | Analytic capacity reads the real layout and the deployed fleet; cross-validates **cycle time**, not throughput | AST is density-neutral: buying VNA buys aisle width, not slots — that is R5, with its own refreeze |

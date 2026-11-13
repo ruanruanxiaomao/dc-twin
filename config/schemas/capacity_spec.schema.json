@@ -4,7 +4,7 @@
   "type": "object",
   "required": ["schema_version", "kind", "cell_geometry", "demand_plan", "demand",
                "load_rate_divisor", "distance_factor_power", "availability_factor",
-               "alerts", "cross_validation"],
+               "alerts", "cross_validation", "handling", "travel_policy"],
   "additionalProperties": false,
   "properties": {
     "schema_version": {"const": "1.0"},
@@ -73,6 +73,29 @@
     "alerts": {
       "type": "object",
       "additionalProperties": {"type": "boolean"}
+    },
+    "handling": {
+      "type": "object",
+      "required": ["station_s", "dwell_s"],
+      "additionalProperties": false,
+      "properties": {
+        "station_s": {"type": "number", "minimum": 0},
+        "dwell_s": {"type": "number", "minimum": 0},
+        "level": {"enum": ["standard", "typical", "assumption", "placeholder", "gap"]},
+        "source": {"type": "string"},
+        "note": {"type": "string"}
+      }
+    },
+    "travel_policy": {
+      "type": "object",
+      "required": ["legs"],
+      "additionalProperties": false,
+      "properties": {
+        "legs": {"type": "integer", "minimum": 2, "maximum": 3},
+        "return_to_home": {"type": "boolean"},
+        "level": {"enum": ["standard", "typical", "assumption", "placeholder", "gap"]},
+        "note": {"type": "string"}
+      }
     },
     "cross_validation": {
       "type": "object",

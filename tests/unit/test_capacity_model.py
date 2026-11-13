@@ -198,8 +198,10 @@ def test_alerts_respect_switches():
 
 
 def test_build_report_is_pure_and_reports_zero_capacity_defensively():
-    layout = {"warehouses": [{"id": "W", "zones": [{"id": "Z", "racks": [
-        {"id": "R1", "bays": 20}]}]}]}
+    # 货架挂在 warehouse.racks 上（R4 之前这里写成 zones[].racks，解析层于是永远 0 巷道）
+    racks = [{"id": "R%d" % i, "zone": "A", "position": [3.6 * i, 0, 0],
+              "size": [3.0, 6.0, 1.2], "levels": 4} for i in range(10)]
+    layout = {"warehouses": [{"id": "W", "racks": racks}]}
     cap = jload(ROOT / "config" / "capacity_spec.json")
     rack = jload(ROOT / "config" / "rack_spec.json")
     equip = jload(ROOT / "config" / "equipment_spec.json")
@@ -207,7 +209,7 @@ def test_build_report_is_pure_and_reports_zero_capacity_defensively():
 
     rep = cm.build_report(layout, rack, equip, cap)
     assert json.dumps([layout, cap], sort_keys=True) == before, "build_report 不许改输入"
-    assert rep["totalSlots"] == 10 * 8           # bays//2 个单元 × 8 货位
+    assert rep["totalSlots"] == 10 * 4 * 2        # 10 架 × 4 层 × 两面
     assert rep["needed"] == 706
     # 没有设备 → 不算负荷（除零要能挡住），并且必须报 no_equipment
     assert rep["totalLoad"] == 0.0
